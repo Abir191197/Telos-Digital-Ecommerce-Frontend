@@ -98,18 +98,47 @@ interface HeroBannerProps {
 }
 
 export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+  // Infinite carousel with prepended clone of last and appended clone of first
+  const extendedSlides = React.useMemo(() => {
+    return [
+      { ...SLIDES[SLIDES.length - 1], id: `${SLIDES[SLIDES.length - 1].id}-clone-start` },
+      ...SLIDES,
+      { ...SLIDES[0], id: `${SLIDES[0].id}-clone-end` },
+    ];
+  }, []);
+
+  const [currentIndex, setCurrentIndex] = React.useState(1); // 1 = first real slide
+  const [withTransition, setWithTransition] = React.useState(true);
   const [isPaused, setIsPaused] = React.useState(false);
+  const isTransitioning = React.useRef(false);
   const touchStartX = React.useRef(0);
   const touchEndX = React.useRef(0);
 
   const nextSlide = React.useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
+    if (isTransitioning.current) return;
+    isTransitioning.current = true;
+    setWithTransition(true);
+    setCurrentIndex((prev) => prev + 1);
   }, []);
 
   const prevSlide = React.useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
+    if (isTransitioning.current) return;
+    isTransitioning.current = true;
+    setWithTransition(true);
+    setCurrentIndex((prev) => prev - 1);
   }, []);
+
+  const handleTransitionEnd = () => {
+    isTransitioning.current = false;
+    // Seamless infinite reset without transition
+    if (currentIndex === extendedSlides.length - 1) {
+      setWithTransition(false);
+      setCurrentIndex(1);
+    } else if (currentIndex === 0) {
+      setWithTransition(false);
+      setCurrentIndex(extendedSlides.length - 2);
+    }
+  };
 
   React.useEffect(() => {
     if (isPaused) return;
@@ -134,6 +163,14 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
     touchEndX.current = 0;
   };
 
+  // Map extended index to original slide index for progress dots
+  const activeRealIndex =
+    currentIndex === 0
+      ? SLIDES.length - 1
+      : currentIndex === extendedSlides.length - 1
+      ? 0
+      : currentIndex - 1;
+
   return (
     <div
       role="region"
@@ -147,27 +184,49 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
     >
       {/* Slides viewport */}
       <div
-        className="flex transition-transform duration-500 ease-out will-change-transform"
+        onTransitionEnd={handleTransitionEnd}
+        className={cn(
+          "flex w-full will-change-transform",
+          withTransition ? "transition-transform duration-500 ease-out" : "transition-none"
+        )}
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {SLIDES.map((slide) => {
+        {extendedSlides.map((slide) => {
           const BadgeIcon = slide.badgeIcon;
           return (
             <div
               key={slide.id}
               className={cn(
-                "relative min-w-full flex-shrink-0 bg-gradient-to-br py-10 sm:py-14 lg:py-16 transition-colors",
+                "relative w-full min-w-full flex-[0_0_100%] bg-gradient-to-br py-12 sm:py-16 lg:py-20 min-h-[380px] xs:min-h-[420px] sm:min-h-0 flex flex-col justify-center transition-colors overflow-hidden",
                 slide.lightBg,
                 slide.darkBg
               )}
             >
+              {/* Mobile Subtle Background Image Layer */}
+              <div
+                aria-hidden="true"
+                className="lg:hidden absolute inset-0 pointer-events-none overflow-hidden select-none"
+              >
+                <div className="absolute -right-8 top-1/2 -translate-y-1/2 w-64 xs:w-72 aspect-square opacity-15 dark:opacity-10">
+                  <Image
+                    src={slide.imageSrc}
+                    alt=""
+                    fill
+                    sizes="280px"
+                    className="object-contain"
+                  />
+                </div>
+                {/* Soft gradient mask ensuring text always reads clean */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+              </div>
+
               {/* Centered container */}
-              <div className="container">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                  {/* Left: Text & CTA */}
-                  <div className="lg:col-span-7 relative z-10 space-y-4 sm:space-y-6">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/80 px-3.5 py-1 text-xs font-semibold tracking-wide text-foreground shadow-xs backdrop-blur-md">
+              <div className="container relative z-10 px-4 sm:px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                  {/* Left-Aligned Text & CTA */}
+                  <div className="lg:col-span-7 relative z-10 w-full text-left space-y-4 sm:space-y-5 max-w-lg lg:max-w-none">
+                    <div className="flex flex-wrap items-center justify-start gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/90 px-3 py-1 text-xs font-semibold tracking-wide text-foreground shadow-xs backdrop-blur-md">
                         {BadgeIcon && (
                           <BadgeIcon className="h-3.5 w-3.5 text-amber-500" />
                         )}
@@ -178,11 +237,11 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                       </span>
                     </div>
 
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] text-foreground">
-                      {slide.title}{" "}
+                    <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.25] text-foreground">
+                      <span className="block">{slide.title}</span>
                       <span
                         className={cn(
-                          "bg-gradient-to-r bg-clip-text text-transparent",
+                          "block mt-1 bg-gradient-to-r bg-clip-text text-transparent",
                           slide.accentColor
                         )}
                       >
@@ -190,14 +249,14 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                       </span>
                     </h1>
 
-                    <p className="text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
+                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed max-w-md lg:max-w-xl">
                       {slide.subtitle}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center justify-start gap-3 pt-2">
                       <Link
                         href={slide.ctaLink}
-                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-zinc-950 shadow-sm transition-all hover:bg-amber-400 hover:scale-105 active:scale-95"
+                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-xs sm:text-sm font-bold text-zinc-950 shadow-sm transition-all hover:bg-amber-400 active:scale-95"
                       >
                         <span>{slide.ctaText}</span>
                         <ArrowRight className="h-4 w-4" />
@@ -206,7 +265,7 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                       {slide.secondaryCtaText && slide.secondaryCtaLink && (
                         <Link
                           href={slide.secondaryCtaLink}
-                          className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted hover:border-border"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background/90 px-4 py-3 text-xs sm:text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted hover:border-border"
                         >
                           <span>{slide.secondaryCtaText}</span>
                         </Link>
@@ -214,15 +273,15 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                     </div>
                   </div>
 
-                  {/* Right: Floating Transparent Hero Product Visual */}
-                  <div className="lg:col-span-5 flex items-center justify-center relative">
-                    <div className="relative w-full max-w-[360px] sm:max-w-[440px] aspect-square">
+                  {/* Desktop Right Product Visual (hidden on mobile, uses background layer instead) */}
+                  <div className="hidden lg:flex lg:col-span-5 items-center justify-center relative w-full">
+                    <div className="relative w-full max-w-[440px] aspect-square">
                       <Image
                         src={slide.imageSrc}
                         alt={slide.imageAlt}
                         fill
                         priority
-                        sizes="(max-width: 768px) 100vw, 440px"
+                        sizes="440px"
                         className="object-contain transition-transform duration-700 hover:scale-105"
                       />
                     </div>
@@ -234,40 +293,43 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
         })}
       </div>
 
-      {/* Manual Navigation Arrows */}
+      {/* Manual Navigation Arrows - hidden on tiny mobile, visible sm+ */}
       <button
         type="button"
         onClick={prevSlide}
         aria-label="Previous slide"
-        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground shadow-md backdrop-blur-md transition-all hover:bg-background hover:scale-110 active:scale-95"
+        className="hidden sm:flex absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground shadow-md backdrop-blur-md transition-all hover:bg-background hover:scale-105 active:scale-95"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
       </button>
 
       <button
         type="button"
         onClick={nextSlide}
         aria-label="Next slide"
-        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground shadow-md backdrop-blur-md transition-all hover:bg-background hover:scale-110 active:scale-95"
+        className="hidden sm:flex absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground shadow-md backdrop-blur-md transition-all hover:bg-background hover:scale-105 active:scale-95"
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
       </button>
 
       {/* Progress Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-md">
+      <div className="absolute bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 rounded-full border border-border/70 bg-background/80 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-sm backdrop-blur-md">
         {SLIDES.map((slide, idx) => {
-          const isActive = idx === currentIndex;
+          const isActive = idx === activeRealIndex;
           return (
             <button
               key={slide.id}
               type="button"
-              onClick={() => setCurrentIndex(idx)}
+              onClick={() => {
+                setWithTransition(true);
+                setCurrentIndex(idx + 1);
+              }}
               aria-label={`Go to slide ${idx + 1}`}
               className={cn(
-                "h-2 rounded-full transition-all duration-300",
+                "h-1.5 sm:h-2 rounded-full transition-all duration-300",
                 isActive
-                  ? "w-7 bg-amber-500"
-                  : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+                  ? "w-5 sm:w-7 bg-amber-500"
+                  : "w-1.5 sm:w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
               )}
             />
           );
