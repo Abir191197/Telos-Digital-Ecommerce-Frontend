@@ -219,7 +219,7 @@ export function Header() {
           <Link
             href={ROUTES.HOME}
             aria-label="Wishlist"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
           >
             <Heart className="h-5 w-5" />
             <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs">
@@ -230,7 +230,7 @@ export function Header() {
           <Link
             href={ROUTES.HOME}
             aria-label="Shopping Cart"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
           >
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs">
@@ -242,7 +242,7 @@ export function Header() {
 
           <Link
             href={ROUTES.LOGIN}
-            className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
           >
             <User className="h-4 w-4" />
             <span>Sign In</span>
@@ -250,8 +250,35 @@ export function Header() {
         </div>
       </div>
 
+      {/* ── Mobile Always-Visible Search Bar ── */}
+      <div className="md:hidden px-4 pb-3">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="relative flex w-full items-center"
+          role="search"
+        >
+          <Search className="absolute left-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search products, brands & categories..."
+            aria-label="Search catalog"
+            className="h-10 w-full rounded-full border border-border/80 bg-muted/40 pl-10 pr-12 text-sm text-foreground placeholder:text-muted-foreground/80 shadow-xs transition-all focus:border-amber-500 focus:bg-background focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+          />
+          <button
+            type="submit"
+            aria-label="Submit search"
+            className="absolute right-1 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs transition-all hover:bg-amber-600 active:scale-95"
+          >
+            <Search className="h-3.5 w-3.5" />
+          </button>
+        </form>
+      </div>
+
       {/* ── Row 3: Navigation Bar (Home, Expanded Categories, Quick Links, Flash Deals) ── */}
-      <div className="border-t border-border/60 bg-muted/20">
+      {/* Hidden on mobile: Home and Categories are in bottom navigation */}
+      <div className="hidden md:block border-t border-border/60 bg-muted/20">
         <div className="container flex h-12 items-center justify-between gap-4">
             {/* Categories & Quick Highlights Container with Seamless Hover Mega Menu */}
             <div
