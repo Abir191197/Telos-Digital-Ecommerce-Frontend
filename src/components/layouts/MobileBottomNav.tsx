@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { useCartStore, useWishlistStore } from "@/stores";
+import { useCartStore, useWishlistStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +23,11 @@ export function MobileBottomNav() {
   const rawCartCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
   const rawWishlistCount = useWishlistStore((state) => state.items.length);
+  const authUser = useAuthStore((state) => state.user);
 
   const cartCount = mounted ? rawCartCount : 0;
   const wishlistCount = mounted ? rawWishlistCount : 0;
+  const user = mounted ? authUser : null;
 
   return (
     <nav
@@ -102,7 +104,7 @@ export function MobileBottomNav() {
 
         {/* 5. Account */}
         <Link
-          href={ROUTES.PROFILE}
+          href={user ? ROUTES.PROFILE : ROUTES.LOGIN}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
             pathname.startsWith(ROUTES.PROFILE) || pathname === ROUTES.LOGIN
@@ -110,8 +112,16 @@ export function MobileBottomNav() {
               : "text-muted-foreground hover:text-foreground font-medium"
           )}
         >
-          <User className="h-5 w-5" />
-          <span className="text-[11px] tracking-tight">Account</span>
+          {user ? (
+            <div className="relative h-5 w-5 overflow-hidden rounded-full border border-amber-500/70">
+              <User className="h-full w-full p-0.5 text-amber-600" />
+            </div>
+          ) : (
+            <User className="h-5 w-5" />
+          )}
+          <span className="text-[11px] tracking-tight">
+            {user ? user.name.split(" ")[0] : "Account"}
+          </span>
         </Link>
       </div>
       {/* iOS Safe Area spacing */}

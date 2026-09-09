@@ -1,22 +1,12 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { CustomerAccountHub } from "@/components/account";
 
 export const metadata: Metadata = {
-  title: "Profile",
+  title: "My Account & Orders | Telos Cart",
+  description: "View order history, track live shipments, and manage delivery addresses.",
 };
 
 export default function ProfilePage() {
-  return (
-    <div className="container py-10">
-      <PageHeader
-        title="Profile"
-        description="Manage your profile settings."
-      />
-      <div className="rounded-lg border bg-card p-8 text-card-foreground">
-        <p className="text-sm text-muted-foreground">
-          Profile page content will be implemented here.
-        </p>
-      </div>
-    </div>
-  );
+  return <CustomerAccountHub />;
 }
+

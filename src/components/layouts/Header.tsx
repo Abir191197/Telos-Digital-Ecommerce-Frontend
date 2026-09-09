@@ -47,7 +47,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { useCartStore, useWishlistStore } from "@/stores";
+import { useCartStore, useWishlistStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { Logo, ThemeToggle } from "@/components/common";
 import { cn } from "@/lib/utils";
@@ -100,13 +100,15 @@ export function Header() {
   );
   const categoriesRef = React.useRef<HTMLDivElement>(null);
 
-  // Cart & Wishlist live state
+  // Auth, Cart & Wishlist live state
   const rawCartCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
   const rawWishlistCount = useWishlistStore((state) => state.items.length);
+  const authUser = useAuthStore((state) => state.user);
 
   const cartCount = mounted ? rawCartCount : 0;
   const wishlistCount = mounted ? rawWishlistCount : 0;
+  const user = mounted ? authUser : null;
 
   // Close dropdown on outside click
   React.useEffect(() => {
@@ -255,13 +257,29 @@ export function Header() {
 
           <ThemeToggle />
 
-          <Link
-            href={ROUTES.LOGIN}
-            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
-          >
-            <User className="h-4 w-4" />
-            <span>Sign In</span>
-          </Link>
+          {user ? (
+            <Link
+              href={ROUTES.PROFILE}
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-amber-500/20 transition-colors"
+            >
+              <div className="relative h-6 w-6 overflow-hidden rounded-full border border-amber-500/50">
+                {user.avatar ? (
+                  <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                ) : (
+                  <User className="h-full w-full p-0.5 text-amber-600" />
+                )}
+              </div>
+              <span className="hidden sm:inline max-w-[100px] truncate">{user.name.split(" ")[0]}</span>
+            </Link>
+          ) : (
+            <Link
+              href={ROUTES.LOGIN}
+              className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
+            >
+              <User className="h-4 w-4" />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </div>
 
