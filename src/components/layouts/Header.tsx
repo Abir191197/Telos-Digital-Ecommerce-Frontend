@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Phone,
@@ -15,53 +16,86 @@ import {
   ChevronDown,
   LayoutGrid,
   Flame,
-  Laptop,
-  Sparkles,
   ArrowRight,
+  Sparkles,
+  Smartphone,
+  Laptop,
+  Gamepad2,
+  Headphones,
+  Watch,
+  Camera,
+  Cpu,
+  Tv,
+  Home as HomeIcon,
+  Shirt,
+  Footprints,
+  Sparkle,
+  Gem,
+  ShieldCheck,
+  Wifi,
+  Printer,
+  Dumbbell,
+  Car,
+  BookOpen,
+  Luggage,
+  Baby,
+  Glasses,
+  UtensilsCrossed,
+  Dog,
+  Grid,
+  ShoppingBag,
+  CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { Logo, ThemeToggle } from "@/components/common";
 import { cn } from "@/lib/utils";
+import { categories, products } from "@/data";
+import type { Category } from "@/types/ecommerce.types";
 
-// ── Categories definition ─────────────────────────────────
-const ALL_CATEGORIES = [
-  {
-    title: "Electronics & Gadgets",
-    icon: Laptop,
-    href: `${ROUTES.HOME}?category=electronics`,
-    items: ["Smartphones & Tablets", "Laptops & Desktops", "Audio & Headphones", "Smart Wearables"],
-  },
-  {
-    title: "Fashion & Lifestyle",
-    icon: Sparkles,
-    href: `${ROUTES.HOME}?category=fashion`,
-    items: ["Men's Wear", "Women's Fashion", "Watches & Jewelry", "Bags & Footwear"],
-  },
-  {
-    title: "Home & Living",
-    icon: LayoutGrid,
-    href: `${ROUTES.HOME}?category=home`,
-    items: ["Home Decor", "Kitchen & Dining", "Smart Appliances", "Furniture"],
-  },
-  {
-    title: "Digital Products & Software",
-    icon: Flame,
-    href: `${ROUTES.HOME}?category=digital`,
-    items: ["UI Kits & Templates", "E-Books & Courses", "SaaS Subscriptions", "Digital Art"],
-  },
-];
+// Map category icons to Lucide icons
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Smartphone,
+  Laptop,
+  Gamepad2,
+  Headphones,
+  Watch,
+  Camera,
+  Cpu,
+  Tv,
+  Home: HomeIcon,
+  Shirt,
+  Sparkles,
+  Footprints,
+  Sparkle,
+  Gem,
+  ShieldCheck,
+  Wifi,
+  Printer,
+  Dumbbell,
+  Car,
+  BookOpen,
+  Luggage,
+  Baby,
+  Glasses,
+  UtensilsCrossed,
+  Dog,
+};
 
+// 4 Quick Highlight Categories for Row 3
 const QUICK_CATEGORIES = [
-  { label: "Electronics", href: `${ROUTES.HOME}?category=electronics`, badge: "Popular" },
-  { label: "Fashion", href: `${ROUTES.HOME}?category=fashion` },
-  { label: "Home Appliances", href: `${ROUTES.HOME}?category=home` },
-  { label: "Digital Assets", href: `${ROUTES.HOME}?category=digital`, badge: "New" },
+  { label: "Smartphones", slug: "smartphones-tablets", href: ROUTES.CATEGORY_DETAIL("smartphones-tablets"), badge: "Hot" },
+  { label: "Laptops", slug: "laptops-macbooks", href: ROUTES.CATEGORY_DETAIL("laptops-macbooks"), badge: "Popular" },
+  { label: "Gaming Gear", slug: "gaming-gear-consoles", href: ROUTES.CATEGORY_DETAIL("gaming-gear-consoles") },
+  { label: "Audio & Wearables", slug: "audio-headphones", href: ROUTES.CATEGORY_DETAIL("audio-headphones") },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categoriesOpen, setCategoriesOpen] = React.useState(false);
+  const [activeCategorySlug, setActiveCategorySlug] = React.useState<string>(
+    categories[0]?.slug || "smartphones-tablets"
+  );
   const categoriesRef = React.useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -82,6 +116,16 @@ export function Header() {
     e.preventDefault();
     if (!searchQuery.trim()) return;
   };
+
+  // Find active category & sample products for the image preview
+  const activeCategory = React.useMemo(() => {
+    return categories.find((c) => c.slug === activeCategorySlug) || categories[0];
+  }, [activeCategorySlug]);
+
+  const activeCategoryProducts = React.useMemo(() => {
+    if (!activeCategory) return [];
+    return products.filter((p) => p.categorySlug === activeCategory.slug).slice(0, 6);
+  }, [activeCategory]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md transition-colors shadow-xs">
@@ -108,59 +152,54 @@ export function Header() {
             </span>
             <span className="truncate text-zinc-200">
               Free delivery on orders over ৳2,000 | Use code{" "}
-              <strong className="font-semibold text-amber-400">
+              <strong className="text-amber-400 font-mono tracking-wider underline underline-offset-2">
                 TELOS20
               </strong>{" "}
-              for 20% off
+              for 20% OFF
             </span>
           </div>
 
-          {/* Right: Quick Links (Track Order, About Us) */}
-          <div className="flex items-center gap-3 sm:gap-5 shrink-0 text-xs sm:text-sm">
+          {/* Right: Quick Links */}
+          <div className="flex items-center gap-4 text-xs font-medium text-zinc-300">
             <Link
               href={ROUTES.TRACKING}
-              className="flex items-center gap-1.5 text-zinc-200 hover:text-amber-300 transition-colors font-medium"
+              className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
             >
-              <Truck className="h-3.5 w-3.5 text-amber-400/90" />
-              <span>Track Order</span>
+              <Truck className="h-3.5 w-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Track Order</span>
             </Link>
-            <span className="h-3.5 w-px bg-zinc-700" aria-hidden="true" />
+            <span className="h-3 w-px bg-zinc-800" />
             <Link
               href={ROUTES.ABOUT}
-              className="flex items-center gap-1.5 text-zinc-200 hover:text-amber-300 transition-colors font-medium"
+              className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
             >
-              <Info className="h-3.5 w-3.5 text-amber-400/90" />
-              <span>About Us</span>
+              <Info className="h-3.5 w-3.5 text-amber-400" />
+              <span className="hidden sm:inline">About Us</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* ── Row 2: Main Branding, Centered Search & E-Commerce Utilities ── */}
-      <div className="container flex h-18 items-center justify-between gap-4 sm:gap-6 py-2">
+      {/* ── Row 2: Main Header Bar (Logo, Large Search, Cart, Wishlist, Theme) ── */}
+      <div className="container flex h-18 items-center justify-between gap-4 sm:gap-8">
         {/* Brand Logo */}
-        <div className="flex shrink-0 items-center">
-          <Link href={ROUTES.HOME} className="group flex items-center">
-            <Logo size={36} />
-          </Link>
-        </div>
+        <Link href={ROUTES.HOME} className="flex items-center gap-2">
+          <Logo size={36} />
+        </Link>
 
-        {/* Center: Prominent Search Box */}
-        <div className="flex flex-1 items-center justify-center max-w-2xl px-1 sm:px-4">
+        {/* Big Search Bar */}
+        <div className="hidden md:flex flex-1 max-w-2xl mx-auto">
           <form
             onSubmit={handleSearchSubmit}
+            className="relative flex w-full items-center"
             role="search"
-            className="group relative flex w-full items-center"
           >
-            <div className="pointer-events-none absolute left-4 flex items-center text-muted-foreground transition-colors group-focus-within:text-amber-500">
-              <Search className="h-4.5 w-4.5" />
-            </div>
-
+            <Search className="absolute left-3.5 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products, brands, digital assets..."
+              placeholder="Search 250+ products, gadgets, fashion & brands..."
               aria-label="Search catalog"
               className="h-11 w-full rounded-full border border-border/70 bg-muted/30 pl-11 pr-14 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/80 shadow-xs transition-all duration-200 hover:border-border hover:bg-muted/50 focus:border-amber-500 focus:bg-background focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
             />
@@ -211,113 +250,271 @@ export function Header() {
         </div>
       </div>
 
-      {/* ── Row 3: Navigation Bar (Home, Expandable Categories, 3-4 Featured Categories) ── */}
+      {/* ── Row 3: Navigation Bar (Home, Expanded Categories, Quick Links, Flash Deals) ── */}
       <div className="border-t border-border/60 bg-muted/20">
         <div className="container flex h-12 items-center justify-between gap-4">
-          <div className="flex items-center gap-3 sm:gap-6">
-            {/* All Categories Dropdown (Hover + Click) */}
+            {/* Categories & Quick Highlights Container with Seamless Hover Mega Menu */}
             <div
               ref={categoriesRef}
-              className="relative"
-              onMouseEnter={() => setCategoriesOpen(true)}
+              className="relative flex items-center gap-1 sm:gap-2"
               onMouseLeave={() => setCategoriesOpen(false)}
             >
+              {/* Primary Categories Button (Click toggles, Hover opens) */}
               <button
                 type="button"
                 onClick={() => setCategoriesOpen((prev) => !prev)}
+                onMouseEnter={() => {
+                  setCategoriesOpen(true);
+                  setActiveCategorySlug("smartphones-tablets");
+                }}
                 aria-expanded={categoriesOpen}
                 className={cn(
-                  "flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-all hover:bg-amber-600 focus-visible:outline-none",
+                  "flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-all hover:bg-amber-600 focus-visible:outline-none cursor-pointer",
                   categoriesOpen && "bg-amber-600 ring-2 ring-amber-500/20"
                 )}
               >
-                <LayoutGrid className="h-4 w-4" />
-                <span>All Categories</span>
+                <LayoutGrid className="h-4 w-4 shrink-0" />
+                <span>Categories</span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform duration-200",
+                    "h-4 w-4 shrink-0 transition-transform duration-200",
                     categoriesOpen && "rotate-180"
                   )}
                 />
               </button>
 
-              {/* Mega / Expandable Categories Menu */}
-              {categoriesOpen && (
-                <div className="absolute left-0 top-full pt-1.5 z-50 w-80 sm:w-96">
-                  <div className="rounded-xl border border-border/80 bg-popover p-2.5 text-popover-foreground shadow-xl backdrop-blur-lg animate-fade-in">
-                    <div className="space-y-1.5">
-                      {ALL_CATEGORIES.map((cat) => (
-                        <div
-                          key={cat.title}
-                          className="group/item rounded-lg p-2.5 transition-colors hover:bg-muted/70"
+              {/* Home Navigation */}
+              <Link
+                href={ROUTES.HOME}
+                className={cn(
+                  "px-2.5 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
+                  pathname === ROUTES.HOME
+                    ? "font-bold text-amber-600 dark:text-amber-400"
+                    : "text-muted-foreground"
+                )}
+              >
+                Home
+              </Link>
+
+              {/* Quick Categories with Interactive Hover Mega Card Trigger */}
+              <div className="hidden sm:flex items-center gap-1.5">
+                {QUICK_CATEGORIES.map((cat) => {
+                  const isCatActive = categoriesOpen && activeCategorySlug === cat.slug;
+                  return (
+                    <Link
+                      key={cat.label}
+                      href={cat.href}
+                      onMouseEnter={() => {
+                        setActiveCategorySlug(cat.slug);
+                        setCategoriesOpen(true);
+                      }}
+                      onClick={() => setCategoriesOpen(false)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all",
+                        isCatActive
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      )}
+                    >
+                      <span>{cat.label}</span>
+                      {cat.badge && (
+                        <span
+                          className={cn(
+                            "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-tight",
+                            cat.badge === "Hot"
+                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          )}
                         >
-                          <Link
-                            href={cat.href}
-                            onClick={() => setCategoriesOpen(false)}
-                            className="flex items-center justify-between font-semibold text-sm text-foreground"
-                          >
-                            <span className="flex items-center gap-2.5">
-                              <cat.icon className="h-4.5 w-4.5 text-amber-500 shrink-0" />
-                              {cat.title}
-                            </span>
-                            <ArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover/item:opacity-100 text-muted-foreground" />
-                          </Link>
-                          <div className="mt-2 pl-7 flex flex-wrap gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
-                            {cat.items.slice(0, 3).map((sub) => (
-                              <span
-                                key={sub}
-                                className="hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer transition-colors"
+                          {cat.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* ── Rich Expanded Categories Mega Menu ── */}
+              {categoriesOpen && (
+                <div className="absolute left-0 top-full pt-2 z-50 w-[min(96vw,1200px)] animate-fade-in">
+                  <div className="overflow-hidden rounded-2xl border border-border/80 bg-popover/98 text-popover-foreground shadow-2xl backdrop-blur-xl transition-all">
+                    <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border/60">
+                      {/* Left Column: Categories List with Icons & Item Counts (4 cols) */}
+                      <div className="md:col-span-4 max-h-[480px] overflow-y-auto p-2.5 scrollbar-thin scrollbar-thumb-muted-foreground/20">
+                        <div className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Browse Categories ({categories.length})
+                        </div>
+                        <div className="space-y-1 mt-1">
+                          {categories.map((cat) => {
+                            const IconComponent =
+                              (cat.icon && CATEGORY_ICON_MAP[cat.icon]) || LayoutGrid;
+                            const isActive = cat.slug === activeCategorySlug;
+
+                            return (
+                              <Link
+                                key={cat.id}
+                                href={ROUTES.CATEGORY_DETAIL(cat.slug)}
+                                onMouseEnter={() => setActiveCategorySlug(cat.slug)}
+                                onClick={() => setCategoriesOpen(false)}
+                                className={cn(
+                                  "group flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-all",
+                                  isActive
+                                    ? "bg-amber-500 text-white font-semibold shadow-xs"
+                                    : "text-foreground hover:bg-muted/70"
+                                )}
                               >
-                                {sub}
-                              </span>
-                            ))}
+                                <span className="flex items-center gap-2.5 truncate">
+                                  <IconComponent
+                                    className={cn(
+                                      "h-4 w-4 shrink-0 transition-colors",
+                                      isActive
+                                        ? "text-white"
+                                        : "text-amber-500 group-hover:scale-110"
+                                    )}
+                                  />
+                                  <span className="truncate">{cat.name}</span>
+                                </span>
+                                <span
+                                  className={cn(
+                                    "ml-2 text-xs font-medium rounded-full px-1.5 py-0.5 shrink-0",
+                                    isActive
+                                      ? "bg-white/20 text-white"
+                                      : "bg-muted text-muted-foreground group-hover:text-foreground"
+                                  )}
+                                >
+                                  {cat.itemCount}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right Column: Active Category Details, Subcategories & Products with Images (8 cols) */}
+                      <div className="md:col-span-8 p-5 md:p-6 flex flex-col justify-between bg-muted/10">
+                        <div>
+                          {/* Active Category Header */}
+                          <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3.5">
+                            <div>
+                              <div className="flex items-center gap-2.5">
+                                <h3 className="text-lg font-bold text-foreground">
+                                  {activeCategory?.name}
+                                </h3>
+                                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                  {activeCategory?.itemCount} Products
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                                {activeCategory?.description}
+                              </p>
+                            </div>
+
+                            <Link
+                              href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
+                              onClick={() => setCategoriesOpen(false)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 hover:bg-amber-500 hover:text-white dark:text-amber-400 transition-all shrink-0"
+                            >
+                              <span>Explore Category</span>
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </Link>
+                          </div>
+
+                          {/* Subcategories Pills */}
+                          <div className="mt-3.5">
+                            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                              Popular Subcategories
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {activeCategory?.subcategories.map((sub) => (
+                                <Link
+                                  key={sub.id}
+                                  href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
+                                  onClick={() => setCategoriesOpen(false)}
+                                  className="rounded-lg border border-border/70 bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:border-amber-500 hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Category Products with Real Images (6 items, 3 cols sm / 6 cols lg) */}
+                          <div className="mt-4">
+                            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                              Featured in {activeCategory?.name}
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                              {activeCategoryProducts.map((prod) => (
+                                <Link
+                                  key={prod.id}
+                                  href={`/?product=${prod.slug}`}
+                                  onClick={() => setCategoriesOpen(false)}
+                                  className="group flex flex-col rounded-xl border border-border/60 bg-background p-2 transition-all hover:border-amber-500/60 hover:shadow-md"
+                                >
+                                  <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted/30">
+                                    <Image
+                                      src={prod.thumbnail}
+                                      alt={prod.name}
+                                      fill
+                                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 15vw"
+                                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                    {prod.discountPercentage && prod.discountPercentage > 0 ? (
+                                      <span className="absolute top-1 left-1 rounded bg-rose-600 px-1 py-0.2 text-[9px] font-bold text-white shadow-xs">
+                                        -{prod.discountPercentage}%
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  <h4 className="mt-1.5 text-xs font-semibold text-foreground line-clamp-1 group-hover:text-amber-600 transition-colors">
+                                    {prod.name}
+                                  </h4>
+                                  <div className="mt-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                                    ৳{prod.price.toLocaleString()}
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      ))}
+
+                        {/* ── Bottom Strip: Card to Visit All Products + View All Categories Button ── */}
+                        <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+                          {/* Card to Visit All Products */}
+                          <Link
+                            href={ROUTES.CATEGORIES}
+                            onClick={() => setCategoriesOpen(false)}
+                            className="group flex w-full sm:w-auto items-center gap-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-2.5 hover:border-amber-500 hover:from-amber-500/20 transition-all"
+                          >
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-xs">
+                              <ShoppingBag className="h-4.5 w-4.5" />
+                            </div>
+                            <div className="flex-1 pr-2">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-foreground group-hover:text-amber-600 transition-colors">
+                                <span>Explore All 250+ Products</span>
+                                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                              </div>
+                              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                                Complete catalog with instant BD delivery
+                              </p>
+                            </div>
+                          </Link>
+
+                          {/* View All Categories Button */}
+                          <Link
+                            href={ROUTES.CATEGORIES}
+                            onClick={() => setCategoriesOpen(false)}
+                            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-border/80 bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs hover:border-amber-500 hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 transition-all shrink-0"
+                          >
+                            <Grid className="h-3.5 w-3.5 text-amber-500" />
+                            <span>View All Categories</span>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-
-            {/* Home Navigation */}
-            <Link
-              href={ROUTES.HOME}
-              className={cn(
-                "px-2.5 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
-                pathname === ROUTES.HOME
-                  ? "font-bold text-amber-600 dark:text-amber-400"
-                  : "text-muted-foreground"
-              )}
-            >
-              Home
-            </Link>
-
-            {/* 3-4 Quick Categories */}
-            <div className="hidden sm:flex items-center gap-2">
-              {QUICK_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.label}
-                  href={cat.href}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-                >
-                  <span>{cat.label}</span>
-                  {cat.badge && (
-                    <span
-                      className={cn(
-                        "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-tight",
-                        cat.badge === "Popular"
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      )}
-                    >
-                      {cat.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
 
           {/* Right link in nav row */}
           <div className="hidden lg:flex items-center gap-4 text-sm font-semibold text-muted-foreground">

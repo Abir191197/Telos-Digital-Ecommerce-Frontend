@@ -3,6 +3,8 @@
 export const ROUTES = {
   // Public
   HOME: "/",
+  CATEGORIES: "/categories",
+  CATEGORY_DETAIL: (slug: string) => `/categories/${slug}`,
   ABOUT: "/about",
   SERVICES: "/services",
   PRICING: "/pricing",
@@ -29,6 +31,7 @@ export const ROUTES = {
 
 export const PUBLIC_ROUTES = [
   ROUTES.HOME,
+  ROUTES.CATEGORIES,
   ROUTES.ABOUT,
   ROUTES.SERVICES,
   ROUTES.PRICING,

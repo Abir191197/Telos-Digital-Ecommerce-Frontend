@@ -21,4 +21,5 @@ export {
 export { Logo } from "./Logo";
 export { ThemeToggle } from "./ThemeToggle";
 export { PaymentMethodsGrid } from "./PaymentMethodsGrid";
+export { ProductCard } from "./ProductCard";
 

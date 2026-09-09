@@ -38,7 +38,8 @@
         "slug": "cases-screen-guards",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-laptops",
@@ -79,7 +80,8 @@
         "slug": "hubs-laptop-stands",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-gaming",
@@ -120,7 +122,8 @@
         "slug": "gaming-chairs-desks",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-audio",
@@ -161,7 +164,8 @@
         "slug": "dacs-amplifiers",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-wearables",
@@ -196,7 +200,8 @@
         "slug": "straps-protection",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-cameras",
@@ -237,7 +242,8 @@
         "slug": "studio-lighting-mics",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-pc-components",
@@ -284,7 +290,8 @@
         "slug": "psu-cooling",
         "itemCount": 1
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-tv-home-theater",
@@ -319,7 +326,8 @@
         "slug": "wall-mounts-cables",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-home-appliances",
@@ -360,7 +368,8 @@
         "slug": "vacuums",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-men-fashion",
@@ -401,7 +410,8 @@
         "slug": "blazers-suits",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-women-fashion",
@@ -442,7 +452,8 @@
         "slug": "western-tops-dresses",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-footwear",
@@ -483,7 +494,8 @@
         "slug": "heels-flats",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-beauty-skincare",
@@ -524,7 +536,8 @@
         "slug": "cosmetics-makeup",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-watches-jewelry",
@@ -565,7 +578,8 @@
         "slug": "rings-bands",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-smart-home",
@@ -600,7 +614,8 @@
         "slug": "smart-plugs-sensors",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-networking",
@@ -635,7 +650,8 @@
         "slug": "switches-lan",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-office-productivity",
@@ -670,7 +686,8 @@
         "slug": "document-scanners",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-fitness-sports",
@@ -705,7 +722,8 @@
         "slug": "sports-gear",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-automotive-accessories",
@@ -740,7 +758,8 @@
         "slug": "helmets-gloves",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-books-stationery",
@@ -775,7 +794,8 @@
         "slug": "art-markers-sketchbooks",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-travel-luggage",
@@ -810,7 +830,8 @@
         "slug": "travel-pillows",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-kids-toys",
@@ -845,7 +866,8 @@
         "slug": "board-games-puzzles",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-eyewear-sunglasses",
@@ -880,7 +902,8 @@
         "slug": "sports-sunglasses",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-kitchen-dining",
@@ -915,7 +938,8 @@
         "slug": "specialty-pour-over-coffee",
         "itemCount": 2
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1584990347449-a09c9586bc79?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "cat-pet-supplies",
@@ -944,6 +968,7 @@
         "slug": "smart-pet-feeders",
         "itemCount": 3
       }
-    ]
+    ],
+    "image": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80"
   }
 ]

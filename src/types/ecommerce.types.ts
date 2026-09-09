@@ -6,6 +6,7 @@ export interface Category {
   name: string;
   description: string;
   icon?: string;
+  image?: string;
   itemCount: number;
   featured: boolean;
   subcategories: Subcategory[];
