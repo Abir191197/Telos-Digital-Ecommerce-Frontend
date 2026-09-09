@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Telos Digital Ecommerce Frontend",
-    template: "%s | Telos Digital Ecommerce Frontend",
+    default: "Telos Cart",
+    template: "%s | Telos Cart",
   },
   description:
-    "Next-generation digital e-commerce storefront for Telos Digital.",
+    "Next-generation digital e-commerce storefront for Telos Cart.",
 };
 
 export default function RootLayout({

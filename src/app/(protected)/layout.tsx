@@ -5,6 +5,7 @@
 
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layouts/Sidebar";
+import { ThemeToggle } from "@/components/common";
 import { useSidebarStore } from "@/stores/sidebar.store";
 
 // TODO: Implement AuthGuard — redirect to /login if not authenticated
@@ -36,14 +37,19 @@ export default function ProtectedLayout({
               {/* Breadcrumbs will go here */}
             </h2>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {/* Notification bell, user menu will go here */}
             <div className="h-8 w-8 rounded-full bg-muted" />
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

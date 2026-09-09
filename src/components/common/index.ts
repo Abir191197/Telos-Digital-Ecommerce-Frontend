@@ -17,3 +17,7 @@ export {
   TableCell,
   TableCaption,
 } from "./Table";
+
+export { Logo } from "./Logo";
+export { ThemeToggle } from "./ThemeToggle";
+

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Border Gradient: Telos Amber-Gold to Deep Charcoal -->
+    <linearGradient id="telosBorder" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="50%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#141312" />
+    </linearGradient>
+
+    <!-- Golden-to-White Core Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="45%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+
+    <!-- Subtle Amber Glow Filter -->
+    <filter id="amberGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#f59e0b" flood-opacity="0.38" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Squircle with Gradient Border -->
+  <rect x="16" y="16" width="480" height="480" rx="136" fill="url(#telosBorder)" />
+
+  <!-- Inner Dark Shell matching Telos #141312 -->
+  <rect x="30" y="30" width="452" height="452" rx="124" fill="#141312" />
+
+  <!-- Monogram T + E-Commerce Cart Dynamic Geometry -->
+  <g filter="url(#amberGlow)">
+    <!-- Top Bar of T (Architectural Telos Beam) -->
+    <path
+      d="M136 142 H376 V202 H136 Z"
+      fill="url(#goldGradient)"
+    />
+
+    <!-- Stem of T / Vertical Backbone -->
+    <path
+      d="M224 202 H288 V326 H224 Z"
+      fill="url(#goldGradient)"
+    />
+
+    <!-- Cart Basket Base Curve connecting with T stem -->
+    <path
+      d="M168 214 L196 326 C199 338 210 348 224 348 H344 C358 348 368 338 372 324 L396 238 H174"
+      fill="none"
+      stroke="url(#goldGradient)"
+      stroke-width="26"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Cart Wheel Left -->
+    <circle cx="236" cy="388" r="22" fill="url(#goldGradient)" />
+
+    <!-- Cart Wheel Right -->
+    <circle cx="332" cy="388" r="22" fill="url(#goldGradient)" />
+  </g>
+</svg>

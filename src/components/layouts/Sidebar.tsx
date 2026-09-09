@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { ROUTES } from "@/constants";
+import { Logo } from "@/components/common";
 import {
   LayoutDashboard,
   Users,
@@ -40,16 +41,9 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href={ROUTES.DASHBOARD} className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-            PT
-          </div>
-          {isOpen && (
-            <span className="font-semibold text-sidebar-foreground">
-              Telos Digital
-            </span>
-          )}
+      <div className="flex h-16 items-center border-b px-4">
+        <Link href={ROUTES.DASHBOARD} className="flex items-center gap-2 group overflow-hidden">
+          <Logo size={32} showText={isOpen} />
         </Link>
       </div>
 

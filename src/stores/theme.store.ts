@@ -16,11 +16,11 @@ type ThemeStore = ThemeState & ThemeActions;
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: "system",
+      theme: "light",
       setTheme: (theme) => set({ theme }),
     }),
     {
-      name: "paytrack-theme",
+      name: "telos-theme",
     }
   )
 );
