@@ -33,10 +33,12 @@ src/
 │   ├── globals.css       # Tailwind v4 import & theme variables
 │   └── layout.tsx        # Root HTML layout with providers
 │
-├── components/           # Reusable UI & Layout Components (NO Domain Business Logic)
-│   ├── common/           # Atomic UI primitives (Button, Input, Table, Loader, EmptyState)
-│   ├── layouts/          # Shell components (Header, Footer, Sidebar)
-│   └── shared/           # Cross-cutting layout blocks (PageHeader, SectionTitle)
+├── components/           # UI Components Organized by Domain & Lifetime
+│   ├── common/           # Atomic UI primitives (Button, Input, Table, ProductCard, Logo)
+│   ├── layouts/          # Shell layout components (Header, Footer, Sidebar, MobileBottomNav)
+│   ├── shared/           # True multi-page reusable widgets ONLY (PageHeader, SectionTitle, Breadcrumbs)
+│   ├── home/             # Dedicated home page sections (HeroBanner, QuickCategoryBar, FlashDealsSection, etc.)
+│   └── <page-or-domain>/ # ANY dedicated page components MUST live in their own dedicated folder (e.g., categories/, product-detail/)
 │
 ├── features/             # Feature-Driven Business Modules (THE REAL UI & LOGIC)
 │   ├── auth/             # Auth forms, cards, and session hooks
@@ -91,6 +93,7 @@ Use this quick-reference table whenever adding new functionality:
 | **New Form**              | `src/features/<domain>/components/<Domain>Form.tsx`  | Use `react-hook-form` connected with a Zod schema from `src/validations/`.                                                                      |
 | **Client UI State**       | `src/stores/<name>.store.ts`                         | Use Zustand `create()`. Good for sidebars, active filters, open dialogs, and theme state.                                                       |
 | **New Atomic UI Element** | `src/components/common/`                             | Build reusable elements (e.g., Badge, Modal shell, Dropdown) using pure React + Tailwind (no Radix UI). Export in `components/common/index.ts`. |
+| **Dedicated Page Component** | `src/components/<page-name>/` (e.g. `components/home/`, `components/categories/`) | **NEVER dump dedicated page sections into `components/shared/`**. Create a dedicated subfolder matching the page name with its own `index.ts`. Only place elements in `components/shared/` if used on 2+ independent pages. |
 | **Route Links & URLs**    | `src/constants/routes.ts`                            | Always use `ROUTES.<PATH>` instead of hardcoding raw strings.                                                                                   |
 | **Global Styles**         | `src/app/globals.css`                                | Update CSS variables or theme tokens.                                                                                                           |
 
