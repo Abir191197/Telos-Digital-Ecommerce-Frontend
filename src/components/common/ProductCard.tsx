@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
+import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -33,6 +34,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
     setIsWishlisted((prev) => !prev);
   };
 
+  const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);
+
   return (
     <div
       className={cn(
@@ -42,7 +45,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     >
       {/* Top Media Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-t-2xl bg-muted/40">
-        <Link href={`/?product=${product.slug}`} className="block h-full w-full">
+        <Link href={productUrl} className="block h-full w-full">
           <Image
             src={product.thumbnail}
             alt={product.name}
@@ -96,7 +99,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Title */}
         <Link
-          href={`/?product=${product.slug}`}
+          href={productUrl}
           className="mt-1 font-semibold text-sm text-foreground line-clamp-2 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
         >
           {product.name}
