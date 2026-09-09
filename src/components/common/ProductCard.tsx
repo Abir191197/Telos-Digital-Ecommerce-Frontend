@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
 import { ROUTES } from "@/constants";
+import { useCartStore, useWishlistStore } from "@/stores";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -20,18 +21,22 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = React.useState(false);
+  const addItem = useCartStore((state) => state.addItem);
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
+  const isWishlisted = useWishlistStore((state) => state.isInWishlist(product.id));
+
   const [isAdding, setIsAdding] = React.useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdding(true);
-    setTimeout(() => setIsAdding(false), 800);
+    addItem(product, 1);
+    setTimeout(() => setIsAdding(false), 600);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsWishlisted((prev) => !prev);
+    toggleWishlist(product);
   };
 
   const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);

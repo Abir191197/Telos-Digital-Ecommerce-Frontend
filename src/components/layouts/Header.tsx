@@ -47,6 +47,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
+import { useCartStore, useWishlistStore } from "@/stores";
 import { Logo, ThemeToggle } from "@/components/common";
 import { cn } from "@/lib/utils";
 import { categories, products } from "@/data";
@@ -85,7 +86,6 @@ const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string
 const QUICK_CATEGORIES = [
   { label: "Smartphones", slug: "smartphones-tablets", href: ROUTES.CATEGORY_DETAIL("smartphones-tablets"), badge: "Hot" },
   { label: "Laptops", slug: "laptops-macbooks", href: ROUTES.CATEGORY_DETAIL("laptops-macbooks"), badge: "Popular" },
-  { label: "Gaming Gear", slug: "gaming-gear-consoles", href: ROUTES.CATEGORY_DETAIL("gaming-gear-consoles") },
   { label: "Audio & Wearables", slug: "audio-headphones", href: ROUTES.CATEGORY_DETAIL("audio-headphones") },
 ];
 
@@ -97,6 +97,11 @@ export function Header() {
     categories[0]?.slug || "smartphones-tablets"
   );
   const categoriesRef = React.useRef<HTMLDivElement>(null);
+
+  // Cart & Wishlist live state
+  const cartCount = useCartStore((state) => state.getItemCount());
+  const openCart = useCartStore((state) => state.openCart);
+  const wishlistCount = useWishlistStore((state) => state.items.length);
 
   // Close dropdown on outside click
   React.useEffect(() => {
@@ -222,21 +227,26 @@ export function Header() {
             className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
           >
             <Heart className="h-5 w-5" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs">
-              0
-            </span>
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
+                {wishlistCount}
+              </span>
+            )}
           </Link>
 
-          <Link
-            href={ROUTES.HOME}
+          <button
+            type="button"
+            onClick={openCart}
             aria-label="Shopping Cart"
-            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
           >
             <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs">
-              0
-            </span>
-          </Link>
+            {cartCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
+                {cartCount}
+              </span>
+            )}
+          </button>
 
           <ThemeToggle />
 

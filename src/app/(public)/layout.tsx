@@ -2,6 +2,7 @@
 import { Header } from "@/components/layouts/Header";
 import { Footer } from "@/components/layouts/Footer";
 import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
+import { CartDrawer } from "@/components/cart";
 
 export default function PublicLayout({
   children,
@@ -14,6 +15,7 @@ export default function PublicLayout({
       <main className="flex-1">{children}</main>
       <Footer />
       <MobileBottomNav />
+      <CartDrawer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Product } from "@/types/ecommerce.types";
 import { ProductCard } from "@/components/common";
 import { SupportAndHelpstrip } from "@/components/shared";
 import { ROUTES } from "@/constants";
+import { useCartStore, useWishlistStore } from "@/stores";
 import { cn } from "@/lib/utils";
 import {
   Star,
@@ -43,9 +44,13 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
     product.variants?.[0]?.id
   );
 
+  // Store hooks
+  const addItem = useCartStore((state) => state.addItem);
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
+  const isWishlisted = useWishlistStore((state) => state.isInWishlist(product.id));
+
   // Quantity state
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
 
@@ -55,7 +60,12 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
 
   const handleAddToCart = () => {
     setIsAdding(true);
+    addItem(product, quantity, selectedVariant);
     setTimeout(() => setIsAdding(false), 900);
+  };
+
+  const handleToggleWishlist = () => {
+    toggleWishlist(product);
   };
 
   const handleShare = () => {
@@ -148,7 +158,7 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsWishlisted((prev) => !prev)}
+                  onClick={handleToggleWishlist}
                   aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                   className={cn(
                     "flex h-9 w-9 items-center justify-center rounded-full bg-background/85 backdrop-blur-md shadow-sm transition-all",
