@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { useCartStore, useWishlistStore } from "@/stores";
+import { useMounted } from "@/hooks";
 import { Logo, ThemeToggle } from "@/components/common";
 import { cn } from "@/lib/utils";
 import { categories, products } from "@/data";
@@ -91,6 +92,7 @@ const QUICK_CATEGORIES = [
 
 export function Header() {
   const pathname = usePathname();
+  const mounted = useMounted();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categoriesOpen, setCategoriesOpen] = React.useState(false);
   const [activeCategorySlug, setActiveCategorySlug] = React.useState<string>(
@@ -99,9 +101,12 @@ export function Header() {
   const categoriesRef = React.useRef<HTMLDivElement>(null);
 
   // Cart & Wishlist live state
-  const cartCount = useCartStore((state) => state.getItemCount());
+  const rawCartCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
-  const wishlistCount = useWishlistStore((state) => state.items.length);
+  const rawWishlistCount = useWishlistStore((state) => state.items.length);
+
+  const cartCount = mounted ? rawCartCount : 0;
+  const wishlistCount = mounted ? rawWishlistCount : 0;
 
   // Close dropdown on outside click
   React.useEffect(() => {

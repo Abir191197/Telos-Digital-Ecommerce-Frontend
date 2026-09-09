@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/stores";
+import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 import {
@@ -90,23 +91,24 @@ export function CartDrawer() {
     }
   };
 
-  if (!isOpen) return null;
+  const mounted = useMounted();
+  if (!mounted || !isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop overlay */}
+      {/* Backdrop overlay (leaves bottom nav free) */}
       <div
         aria-hidden="true"
         onClick={closeCart}
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"
+        className="fixed inset-0 bottom-16 md:bottom-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"
       />
 
-      {/* Slide-over panel (Right desktop / Bottom mobile) */}
+      {/* Slide-over panel (Right desktop / Bottom mobile above nav) */}
       <aside
         role="dialog"
         aria-modal="true"
         aria-label="Shopping Cart"
-        className="relative z-10 flex h-full w-full max-w-md flex-col bg-background text-foreground shadow-2xl transition-transform animate-in slide-in-from-right duration-300 sm:border-l sm:border-border/80"
+        className="relative z-10 flex h-[calc(100%-4rem)] md:h-full w-full max-w-md flex-col bg-background text-foreground shadow-2xl transition-transform animate-in slide-in-from-right duration-300 sm:border-l sm:border-border/80"
       >
         {/* ── Drawer Header ── */}
         <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
