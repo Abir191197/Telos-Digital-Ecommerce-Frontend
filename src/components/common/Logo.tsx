@@ -4,9 +4,15 @@ interface LogoProps {
   className?: string;
   size?: number;
   showText?: boolean;
+  textColor?: string;
 }
 
-export function Logo({ className = "", size = 34, showText = true }: LogoProps) {
+export function Logo({
+  className = "",
+  size = 34,
+  showText = true,
+  textColor,
+}: LogoProps) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       {/* Telos Gold Gradient Squircle Icon */}
@@ -49,8 +55,12 @@ export function Logo({ className = "", size = 34, showText = true }: LogoProps) 
 
       {/* Brand Name Typography matching mother concern Telos Digital */}
       {showText && (
-        <span className="text-lg font-bold tracking-tight text-foreground flex items-center gap-1.5 font-sans">
-          TELOS <span className="text-amber-600 font-semibold text-base tracking-normal">CART</span>
+        <span
+          className={`text-lg font-bold tracking-tight flex items-center gap-1.5 font-sans ${
+            textColor || "text-foreground"
+          }`}
+        >
+          TELOS <span className="text-amber-500 font-semibold text-base tracking-normal">CART</span>
         </span>
       )}
     </div>
