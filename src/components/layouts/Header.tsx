@@ -28,10 +28,14 @@ import {
   Info,
   Laptop,
   LayoutGrid,
+  LogOut,
   Luggage,
+  MapPin,
+  Package,
   Phone,
   Printer,
   Search,
+  Settings,
   ShieldCheck,
   Shirt,
   ShoppingBag,
@@ -110,16 +114,26 @@ export function Header() {
   const mounted = useMounted();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categoriesOpen, setCategoriesOpen] = React.useState(false);
+  const [profileOpen, setProfileOpen] = React.useState(false);
   const [activeCategorySlug, setActiveCategorySlug] = React.useState<string>(
     categories[0]?.slug || "smartphones-tablets",
   );
   const categoriesRef = React.useRef<HTMLDivElement>(null);
+  const profileRef = React.useRef<HTMLDivElement>(null);
 
   // Auth, Cart & Wishlist live state
   const rawCartCount = useCartStore((state) => state.getItemCount());
   const openCart = useCartStore((state) => state.openCart);
   const rawWishlistCount = useWishlistStore((state) => state.items.length);
   const authUser = useAuthStore((state) => state.user);
+  const storeLogout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    storeLogout();
+    setProfileOpen(false);
+  };
 
   const cartCount = mounted ? rawCartCount : 0;
   const wishlistCount = mounted ? rawWishlistCount : 0;
@@ -133,6 +147,12 @@ export function Header() {
         !categoriesRef.current.contains(e.target as Node)
       ) {
         setCategoriesOpen(false);
+      }
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
+        setProfileOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -272,25 +292,126 @@ export function Header() {
           <ThemeToggle />
 
           {user ? (
-            <Link
-              href={ROUTES.PROFILE}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-amber-500/20 transition-colors">
-              <div className="relative h-6 w-6 overflow-hidden rounded-full border border-amber-500/50">
-                {user.avatar ? (
-                  <Image
-                    src={user.avatar}
-                    alt={user.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <User className="h-full w-full p-0.5 text-amber-600" />
-                )}
-              </div>
-              <span className="hidden sm:inline max-w-[100px] truncate">
-                {user.name.split(" ")[0]}
-              </span>
-            </Link>
+            <div ref={profileRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((prev) => !prev)}
+                aria-expanded={profileOpen}
+                aria-haspopup="true"
+                aria-label="User account menu"
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-amber-500/20 transition-all cursor-pointer",
+                  profileOpen && "ring-2 ring-amber-500/40 bg-amber-500/20"
+                )}>
+                <div className="relative h-6 w-6 overflow-hidden rounded-full border border-amber-500/50">
+                  {user.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt={user.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <User className="h-full w-full p-0.5 text-amber-600" />
+                  )}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate font-semibold">
+                  {user.name.split(" ")[0]}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                    profileOpen && "rotate-180 text-amber-500"
+                  )}
+                />
+              </button>
+
+              {/* ── Profile Dropdown Menu ── */}
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2.5 w-64 origin-top-right rounded-2xl border border-border/80 bg-popover/98 p-2 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 z-50">
+                  {/* User Summary Header */}
+                  <div className="px-3 py-2.5 border-b border-border/60 bg-muted/30 rounded-xl mb-1.5">
+                    <p className="text-xs font-bold text-foreground truncate">
+                      {user.name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {user.email}
+                    </p>
+                    {user.phone && (
+                      <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400 mt-0.5">
+                        {user.phone}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Menu Links */}
+                  <div className="space-y-0.5 text-xs font-medium">
+                    <Link
+                      href={ROUTES.ACCOUNT}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <LayoutGrid className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>My Account Hub</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.PROFILE}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <User className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>My Profile</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.ACCOUNT}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <span className="flex items-center gap-2.5">
+                        <Package className="h-4 w-4 text-amber-500 shrink-0" />
+                        <span>Orders & Tracking</span>
+                      </span>
+                      <span className="text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">
+                        Live
+                      </span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.ACCOUNT}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <MapPin className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>Saved Addresses</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.WISHLIST}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <span className="flex items-center gap-2.5">
+                        <Heart className="h-4 w-4 text-rose-500 shrink-0" />
+                        <span>Wishlist</span>
+                      </span>
+                      {wishlistCount > 0 && (
+                        <span className="text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded-full">
+                          {wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+
+                  {/* Divider & Logout */}
+                  <div className="pt-1.5 mt-1 border-t border-border/60">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer">
+                      <LogOut className="h-4 w-4 shrink-0" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <Link
               href={ROUTES.LOGIN}
@@ -557,7 +678,7 @@ export function Header() {
                       <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                         {/* Card to Visit All Products */}
                         <Link
-                          href={ROUTES.CATEGORIES}
+                          href={ROUTES.PRODUCTS}
                           onClick={() => setCategoriesOpen(false)}
                           className="group flex w-full sm:w-auto items-center gap-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-2.5 hover:border-amber-500 hover:from-amber-500/20 transition-all">
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-xs">
