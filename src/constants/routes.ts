@@ -15,6 +15,9 @@ export const ROUTES = {
   TERMS: "/terms-and-conditions",
   CHECKOUT: "/checkout",
   CHECKOUT_SUCCESS: "/checkout/success",
+  TRACK_ORDER: "/track-order",
+  WISHLIST: "/wishlist",
+  ACCOUNT: "/account",
 
   // Auth
   LOGIN: "/login",
@@ -30,6 +33,7 @@ export const ROUTES = {
   REPORTS: "/reports",
   NOTIFICATIONS: "/notifications",
   PROFILE: "/profile",
+  ACCOUNT_HUB: "/account",
   SETTINGS: "/settings",
 } as const;
 
@@ -45,6 +49,8 @@ export const PUBLIC_ROUTES = [
   ROUTES.TERMS,
   ROUTES.CHECKOUT,
   ROUTES.CHECKOUT_SUCCESS,
+  ROUTES.TRACK_ORDER,
+  ROUTES.WISHLIST,
 ] as const;
 
 export const AUTH_ROUTES = [
@@ -62,5 +68,6 @@ export const PROTECTED_ROUTES = [
   ROUTES.REPORTS,
   ROUTES.NOTIFICATIONS,
   ROUTES.PROFILE,
+  ROUTES.ACCOUNT_HUB,
   ROUTES.SETTINGS,
 ] as const;
