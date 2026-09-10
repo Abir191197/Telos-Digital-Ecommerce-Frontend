@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/tracking",
+        destination: "/track-order",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

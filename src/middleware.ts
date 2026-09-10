@@ -10,7 +10,6 @@ const protectedPaths = [
   "/dashboard",
   "/clients",
   "/payments",
-  "/tracking",
   "/reports",
   "/notifications",
   "/profile",

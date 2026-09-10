@@ -16,6 +16,7 @@ export const ROUTES = {
   CHECKOUT: "/checkout",
   CHECKOUT_SUCCESS: "/checkout/success",
   TRACK_ORDER: "/track-order",
+  TRACKING: "/track-order",
   WISHLIST: "/wishlist",
   ACCOUNT: "/account",
 
@@ -29,7 +30,6 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   CLIENTS: "/clients",
   PAYMENTS: "/payments",
-  TRACKING: "/tracking",
   REPORTS: "/reports",
   NOTIFICATIONS: "/notifications",
   PROFILE: "/profile",
@@ -64,7 +64,6 @@ export const PROTECTED_ROUTES = [
   ROUTES.DASHBOARD,
   ROUTES.CLIENTS,
   ROUTES.PAYMENTS,
-  ROUTES.TRACKING,
   ROUTES.REPORTS,
   ROUTES.NOTIFICATIONS,
   ROUTES.PROFILE,
