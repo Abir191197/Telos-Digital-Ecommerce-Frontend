@@ -27,6 +27,7 @@ import {
   Home as HomeIcon,
   Info,
   Laptop,
+  LayoutDashboard,
   LayoutGrid,
   LogOut,
   Luggage,
@@ -346,6 +347,20 @@ export function Header() {
 
                   {/* Menu Links */}
                   <div className="space-y-0.5 text-xs font-medium">
+                    <Link
+                      href={ROUTES.DASHBOARD}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-bold"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <LayoutDashboard className="h-4 w-4 text-amber-500 shrink-0" />
+                        <span>Admin Dashboard</span>
+                      </span>
+                      <span className="text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">
+                        Portal
+                      </span>
+                    </Link>
+
                     <Link
                       href={ROUTES.ACCOUNT}
                       onClick={() => setProfileOpen(false)}

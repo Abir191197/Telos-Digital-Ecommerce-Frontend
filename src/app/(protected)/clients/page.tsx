@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { AdminCustomersView } from "@/components/admin";
 
 export const metadata: Metadata = {
-  title: "Clients",
+  title: "Customers Directory | Admin Portal",
+  description: "View customer accounts, lifetime value, and order history.",
 };
 
-export default function ClientsPage() {
-  return (
-    <div className="container py-10">
-      <PageHeader
-        title="Clients"
-        description="Manage your client accounts."
-      />
-      <div className="rounded-lg border bg-card p-8 text-card-foreground">
-        <p className="text-sm text-muted-foreground">
-          Clients page content will be implemented here.
-        </p>
-      </div>
-    </div>
-  );
+export default function AdminClientsPage() {
+  return <AdminCustomersView />;
 }

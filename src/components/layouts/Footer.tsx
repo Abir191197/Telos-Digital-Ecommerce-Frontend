@@ -60,6 +60,7 @@ const COMPANY_LINKS = [
   { label: "About Telos Cart", href: ROUTES.ABOUT },
   { label: "Contact & Support", href: ROUTES.CONTACT },
   { label: "Track Your Order", href: ROUTES.TRACK_ORDER },
+  { label: "Merchant & Admin Portal", href: ROUTES.DASHBOARD },
   { label: "Privacy Policy", href: ROUTES.PRIVACY_POLICY },
   { label: "Terms & Conditions", href: ROUTES.TERMS },
 ];

@@ -15,6 +15,8 @@ import {
   Sparkles,
   UserCheck,
   CheckCircle2,
+  LayoutDashboard,
+  User,
 } from "lucide-react";
 
 export function LoginForm() {
@@ -41,16 +43,26 @@ export function LoginForm() {
     }, 600);
   };
 
-  const handleQuickDemoLogin = () => {
+  const handleQuickDemoCustomer = () => {
     setIsLoading(true);
     setDemoLoaded(true);
     setTimeout(() => {
       loginAsDemo();
-      // Set mock token cookie for edge middleware compatibility
       document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
       setIsLoading(false);
-      router.push(ROUTES.PROFILE);
-    }, 500);
+      router.push(ROUTES.ACCOUNT);
+    }, 400);
+  };
+
+  const handleQuickDemoAdmin = () => {
+    setIsLoading(true);
+    setDemoLoaded(true);
+    setTimeout(() => {
+      loginAsDemo();
+      document.cookie = "accessToken=mock-admin-jwt-token; path=/; max-age=86400; SameSite=Lax";
+      setIsLoading(false);
+      router.push(ROUTES.DASHBOARD);
+    }, 400);
   };
 
   return (
@@ -63,43 +75,48 @@ export function LoginForm() {
             <UserCheck className="h-6 w-6" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-            Customer Sign In
+            Sign In to Telos Cart
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Sign in to access your orders, track shipments & saved addresses
+            Sign in as a customer to track orders or as store admin to manage shop
           </p>
         </div>
 
-        {/* One-Tap Demo Login Banner */}
-        <div className="mb-6 p-4 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent space-y-2.5">
+        {/* Two Separate 1-Tap Demo Buttons */}
+        <div className="mb-6 p-4 rounded-3xl border border-border/80 bg-muted/20 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              1-Tap Demo Customer
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              1-Tap Instant Demo Access
             </span>
             <span className="text-[10px] font-semibold text-muted-foreground">
-              Dhaka, Bangladesh
+              No password needed
             </span>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Test full order history & tracking without registration. Auto-loads:{" "}
-            <strong className="text-foreground">Rahim Ahmed</strong> (+880 1712-345678).
-          </p>
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-2.5 text-xs font-bold shadow-xs transition-all active:scale-98 cursor-pointer disabled:opacity-50"
-          >
-            {isLoading && demoLoaded ? (
-              <span>Signing In as Demo...</span>
-            ) : (
-              <>
-                <span>Sign In as Demo Customer</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </>
-            )}
-          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* Demo Customer Button */}
+            <button
+              type="button"
+              onClick={handleQuickDemoCustomer}
+              disabled={isLoading}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white py-3 px-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <User className="h-3.5 w-3.5 shrink-0" />
+              <span>Demo Customer</span>
+            </button>
+
+            {/* Demo Admin Button */}
+            <button
+              type="button"
+              onClick={handleQuickDemoAdmin}
+              disabled={isLoading}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-foreground text-background hover:opacity-90 py-3 px-3 text-xs font-bold shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <LayoutDashboard className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+              <span>Demo Admin</span>
+            </button>
+          </div>
         </div>
 
         <div className="relative my-6 text-center">

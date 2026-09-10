@@ -9,15 +9,20 @@ interface ThemeState {
 
 interface ThemeActions {
   setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
 }
 
 type ThemeStore = ThemeState & ThemeActions;
 
 export const useThemeStore = create<ThemeStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       theme: "light",
       setTheme: (theme) => set({ theme }),
+      toggleTheme: () => {
+        const next = get().theme === "dark" ? "light" : "dark";
+        set({ theme: next });
+      },
     }),
     {
       name: "telos-theme",
