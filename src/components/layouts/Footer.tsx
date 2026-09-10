@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Headphones,
   CreditCard,
-  ArrowRight,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { Logo, PaymentMethodsGrid } from "@/components/common";
@@ -39,27 +38,30 @@ const TRUST_PILLARS = [
 ];
 
 const SHOP_LINKS = [
-  { label: "Electronics & Gadgets", href: `${ROUTES.HOME}?category=electronics` },
-  { label: "Fashion & Lifestyle", href: `${ROUTES.HOME}?category=fashion` },
-  { label: "Home Appliances", href: `${ROUTES.HOME}?category=home` },
-  { label: "Digital Assets & Software", href: `${ROUTES.HOME}?category=digital` },
-  { label: "Flash Deals & Offers", href: `${ROUTES.HOME}?filter=deals` },
+  { label: "All Products", href: ROUTES.PRODUCTS },
+  { label: "Smartphones & Tablets", href: ROUTES.CATEGORY_DETAIL("smartphones-tablets") },
+  { label: "Laptops & MacBooks", href: ROUTES.CATEGORY_DETAIL("laptops-macbooks") },
+  { label: "Gaming Gear & Consoles", href: ROUTES.CATEGORY_DETAIL("gaming-gear-consoles") },
+  { label: "Audio & Headphones", href: ROUTES.CATEGORY_DETAIL("audio-headphones") },
+  { label: "Smartwatches & Wearables", href: ROUTES.CATEGORY_DETAIL("smartwatches-wearables") },
+  { label: "Browse All Categories", href: ROUTES.CATEGORIES },
 ];
 
-const CUSTOMER_SERVICE_LINKS = [
-  { label: "Track Your Order", href: ROUTES.TRACKING },
-  { label: "Returns & Refund Policy", href: ROUTES.TERMS },
-  { label: "Shipping Information", href: ROUTES.TERMS },
-  { label: "Payment Methods (bKash/Nagad/Cards)", href: ROUTES.SERVICES },
+const CUSTOMER_CARE_LINKS = [
+  { label: "Live Order Tracking", href: ROUTES.TRACK_ORDER },
   { label: "Help & FAQ Center", href: ROUTES.CONTACT },
+  { label: "Returns & Refund Policy", href: ROUTES.TERMS },
+  { label: "Shipping & Delivery Terms", href: ROUTES.TERMS },
+  { label: "My Wishlist", href: ROUTES.WISHLIST },
+  { label: "Account Overview", href: ROUTES.ACCOUNT },
 ];
 
 const COMPANY_LINKS = [
   { label: "About Telos Cart", href: ROUTES.ABOUT },
-  { label: "Contact Us", href: ROUTES.CONTACT },
+  { label: "Contact & Support", href: ROUTES.CONTACT },
+  { label: "Track Your Order", href: ROUTES.TRACK_ORDER },
   { label: "Privacy Policy", href: ROUTES.PRIVACY_POLICY },
   { label: "Terms & Conditions", href: ROUTES.TERMS },
-  { label: "Affiliate & Merchant Program", href: ROUTES.SERVICES },
 ];
 
 export function Footer() {
@@ -72,7 +74,7 @@ export function Footer() {
             {TRUST_PILLARS.map((item) => (
               <div
                 key={item.title}
-                className="flex items-center gap-4 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4 transition-colors hover:border-amber-500/40"
+                className="flex items-center gap-4 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4 transition-all duration-200 hover:border-amber-500/40 hover:bg-zinc-900/80"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
                   <item.icon className="h-6 w-6" />
@@ -87,26 +89,30 @@ export function Footer() {
         </div>
       </div>
 
-      {/* ── Main Extended Footer Content: Exactly 4 Equal Columns ── */}
+      {/* ── Main Extended Footer Content: Exactly 4 Balanced Columns ── */}
       <div className="container py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-8">
-          {/* Column 1: Brand & Contact Info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          {/* Column 1: Brand & About Us Blurb */}
           <div className="space-y-4">
             <Link href={ROUTES.HOME} className="inline-block">
               <Logo size={36} textColor="text-white" />
             </Link>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-              Telos Cart is Bangladesh's next-generation digital & retail commerce platform, offering authentic products, lightning-fast delivery, and guaranteed customer satisfaction.
+              Telos Cart is Bangladesh's next-generation digital & retail commerce platform, offering authentic tech gear, nationwide verified shipping, and guaranteed customer satisfaction.
             </p>
 
-            <div className="space-y-2 text-sm text-zinc-300 pt-2">
+            <div className="space-y-2.5 text-sm text-zinc-300 pt-1">
               <div className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 text-amber-400 shrink-0" />
-                <span>+880 1700-000000 (Hotline)</span>
+                <a href="tel:+8801700000000" className="hover:text-amber-400 transition-colors">
+                  +880 1700-000000 (Hotline 9 AM - 10 PM)
+                </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-amber-400 shrink-0" />
-                <span>support@teloscart.com</span>
+                <a href="mailto:support@teloscart.com" className="hover:text-amber-400 transition-colors">
+                  support@teloscart.com
+                </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <MapPin className="h-4 w-4 text-amber-400 shrink-0" />
@@ -115,7 +121,7 @@ export function Footer() {
             </div>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-3 pt-3">
+            <div className="flex items-center gap-2.5 pt-2">
               <a
                 href="https://facebook.com"
                 target="_blank"
@@ -155,7 +161,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Categories */}
+          {/* Column 2: Popular Categories */}
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-100">
               Popular Categories
@@ -180,7 +186,7 @@ export function Footer() {
               Customer Care
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm">
-              {CUSTOMER_SERVICE_LINKS.map((link) => (
+              {CUSTOMER_CARE_LINKS.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -193,10 +199,29 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Payment Methods (Replaces Stay Connected) */}
-          <div className="lg:col-span-1">
-            <PaymentMethodsGrid />
+          {/* Column 4: Company & Info */}
+          <div>
+            <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-100">
+              Company & Info
+            </h4>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {COMPANY_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-zinc-400 hover:text-amber-400 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
+
+        {/* Horizontal Payment Methods Bar */}
+        <div className="mt-12 pt-8 border-t border-zinc-800/80">
+          <PaymentMethodsGrid horizontal />
         </div>
       </div>
 
@@ -207,7 +232,15 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Telos Cart. All rights reserved. A Telos Digital initiative.
           </p>
 
-          <div className="flex items-center gap-4 text-zinc-400">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-zinc-400">
+            <Link href={ROUTES.ABOUT} className="hover:text-amber-400 transition-colors">
+              About Us
+            </Link>
+            <span className="h-3 w-px bg-zinc-800" />
+            <Link href={ROUTES.CONTACT} className="hover:text-amber-400 transition-colors">
+              Contact Us
+            </Link>
+            <span className="h-3 w-px bg-zinc-800" />
             <Link href={ROUTES.PRIVACY_POLICY} className="hover:text-amber-400 transition-colors">
               Privacy Policy
             </Link>
