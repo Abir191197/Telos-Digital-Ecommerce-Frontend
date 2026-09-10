@@ -45,7 +45,11 @@ import {
   Plus,
   CheckCircle2,
   Flame,
+  History,
+  Trash2,
 } from "lucide-react";
+import { useRecentlyViewedStore } from "@/stores";
+import { useMounted } from "@/hooks";
 
 interface CategoriesViewProps {
   categories: Category[];
@@ -104,6 +108,11 @@ const INITIAL_BATCH_SIZE = 10;
 const BATCH_INCREMENT = 10;
 
 export function CategoriesView({ categories, popularProducts }: CategoriesViewProps) {
+  const mounted = useMounted();
+  const rawRecentlyViewed = useRecentlyViewedStore((state) => state.items);
+  const clearRecentlyViewed = useRecentlyViewedStore((state) => state.clearAll);
+  const recentlyViewed = mounted ? rawRecentlyViewed : [];
+
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH_SIZE);
   const gridSectionRef = React.useRef<HTMLElement>(null);
@@ -373,6 +382,50 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {popularProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 4.5. Recently Viewed Products Section ── */}
+      {recentlyViewed.length > 0 && (
+        <section aria-label="Recently Viewed Products" className="container px-3 sm:px-6 pt-6">
+          <div className="rounded-2xl border border-border/70 bg-gradient-to-br from-muted/40 via-card to-card p-4 sm:p-6 shadow-xs">
+            <div className="flex flex-row items-center justify-between gap-3 mb-5 border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <History className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg sm:text-2xl font-black tracking-tight text-foreground">
+                      Recently Viewed
+                    </h2>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                      {recentlyViewed.length}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">
+                    Pick up right where you left off in your shopping session
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={clearRecentlyViewed}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer px-2.5 py-1 rounded-lg hover:bg-rose-500/10"
+                title="Clear recently viewed history"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline">Clear History</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+              {recentlyViewed.slice(0, 6).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

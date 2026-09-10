@@ -13,6 +13,7 @@ import {
 import type { Product } from "@/types/ecommerce.types";
 import { ROUTES } from "@/constants";
 import { useCartStore, useWishlistStore } from "@/stores";
+import { useMounted } from "@/hooks";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -21,9 +22,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const mounted = useMounted();
   const addItem = useCartStore((state) => state.addItem);
   const toggleWishlist = useWishlistStore((state) => state.toggleItem);
-  const isWishlisted = useWishlistStore((state) => state.isInWishlist(product.id));
+  const isInWishlistStore = useWishlistStore((state) => state.isInWishlist(product.id));
+  const isWishlisted = mounted ? isInWishlistStore : false;
 
   const [isAdding, setIsAdding] = React.useState(false);
 

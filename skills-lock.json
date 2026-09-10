@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "antigravity-design-expert": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/antigravity-design-expert/SKILL.md",
+      "computedHash": "fdbd35507e9a3b909a32c32e244d5a11802064b55c8fbd5a43251016e67fc6d1"
+    },
+    "ui-animation": {
+      "source": "mblode/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui-animation/SKILL.md",
+      "computedHash": "75f2c6e538226d10ce75ddbb42bab0e56f051e8d8719c47cd6d5ab0c38d9e8af"
+    }
+  }
+}
