@@ -19,6 +19,7 @@ import { PaymentStep } from "./PaymentStep";
 import { OrderSummarySticky } from "./OrderSummarySticky";
 import { ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { OtpVerificationModal } from "@/components/auth/OtpVerificationModal";
 
 export function CheckoutView() {
   const router = useRouter();
@@ -38,6 +39,9 @@ export function CheckoutView() {
 
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [pendingCheckoutValues, setPendingCheckoutValues] =
+    useState<CheckoutFormValues | null>(null);
 
   // Setup React Hook Form with Zod
   const form = useForm<CheckoutFormValues>({
@@ -100,8 +104,13 @@ export function CheckoutView() {
     }
   };
 
-  // Final submit handler
+  // Final submit handler triggers SMS OTP verification for Bangladeshi orders
   const onSubmit = async (values: CheckoutFormValues) => {
+    setPendingCheckoutValues(values);
+    setShowOtpModal(true);
+  };
+
+  const finalizeOrderPlacement = async (values: CheckoutFormValues) => {
     setIsSubmitting(true);
 
     try {
@@ -262,6 +271,19 @@ export function CheckoutView() {
           </form>
         </div>
       </main>
+
+      {/* ── SMS OTP Verification Modal ── */}
+      <OtpVerificationModal
+        phone={pendingCheckoutValues?.phone || form.getValues("phone")}
+        isOpen={showOtpModal}
+        onClose={() => setShowOtpModal(false)}
+        onVerified={() => {
+          if (pendingCheckoutValues) {
+            finalizeOrderPlacement(pendingCheckoutValues);
+          }
+        }}
+        purpose="Verify phone number to confirm your order and courier dispatch"
+      />
     </div>
   );
 }

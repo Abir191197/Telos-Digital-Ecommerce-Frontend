@@ -77,27 +77,31 @@ export const useCartStore = create<CartStore>()(
       addItem: (product, quantity = 1, variant) => {
         const lineItemId = variant ? `${product.id}-${variant.id}` : product.id;
         const unitPrice = variant ? variant.price : product.price;
-        const currentItems = get().items;
+        const maxStock = product.stock || 0;
+        if (maxStock <= 0) return;
 
+        const currentItems = get().items;
         const existingIndex = currentItems.findIndex((item) => item.id === lineItemId);
 
         if (existingIndex > -1) {
           const updatedItems = [...currentItems];
-          const newQuantity = updatedItems[existingIndex].quantity + quantity;
+          const currentQty = updatedItems[existingIndex].quantity;
+          const cappedQty = Math.min(maxStock, currentQty + quantity);
           updatedItems[existingIndex] = {
             ...updatedItems[existingIndex],
-            quantity: newQuantity,
-            subtotal: newQuantity * unitPrice,
+            quantity: cappedQty,
+            subtotal: cappedQty * unitPrice,
           };
           set({ items: updatedItems, isOpen: true });
         } else {
+          const cappedQty = Math.min(maxStock, quantity);
           const newItem: CartItem = {
             id: lineItemId,
             product,
             variant,
-            quantity,
+            quantity: cappedQty,
             unitPrice,
-            subtotal: quantity * unitPrice,
+            subtotal: cappedQty * unitPrice,
             addedAt: new Date().toISOString(),
           };
           set({ items: [newItem, ...currentItems], isOpen: true });
@@ -117,15 +121,16 @@ export const useCartStore = create<CartStore>()(
         }
 
         set((state) => ({
-          items: state.items.map((item) =>
-            item.id === itemId
-              ? {
-                  ...item,
-                  quantity,
-                  subtotal: quantity * item.unitPrice,
-                }
-              : item
-          ),
+          items: state.items.map((item) => {
+            if (item.id !== itemId) return item;
+            const maxStock = item.product.stock || 1;
+            const finalQty = Math.min(maxStock, quantity);
+            return {
+              ...item,
+              quantity: finalQty,
+              subtotal: finalQty * item.unitPrice,
+            };
+          }),
         }));
       },
 

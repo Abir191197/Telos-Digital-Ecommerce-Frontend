@@ -21,6 +21,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InvoiceModal } from "@/components/account";
 
 // Minimal lightweight confetti generator without external heavy libraries
 function ConfettiEffect() {
@@ -68,6 +69,7 @@ export default function CheckoutSuccessPage() {
   const { orders } = useAuthStore();
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   useEffect(() => {
     // 1. Try finding in store
@@ -214,11 +216,11 @@ export default function CheckoutSuccessPage() {
               {/* Action Buttons */}
               <button
                 type="button"
-                onClick={handlePrintInvoice}
+                onClick={() => setShowInvoiceModal(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border/80 bg-background hover:bg-muted text-xs font-bold text-foreground transition-all cursor-pointer"
               >
                 <Printer className="h-3.5 w-3.5" />
-                <span>Print / Download Invoice</span>
+                <span>View & Print Tax Invoice</span>
               </button>
             </div>
 
@@ -299,6 +301,15 @@ export default function CheckoutSuccessPage() {
           </Link>
         </div>
       </div>
+
+      {/* ── Printable Tax Invoice Modal ── */}
+      {showInvoiceModal && order && (
+        <InvoiceModal
+          order={order}
+          isOpen={showInvoiceModal}
+          onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
     </div>
   );
 }

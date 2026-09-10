@@ -27,6 +27,7 @@ interface AuthActions {
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
   addOrder: (order: Order) => void;
+  cancelOrder: (orderId: string, reason?: string) => void;
   logout: () => void;
 }
 
@@ -163,6 +164,16 @@ export const useAuthStore = create<AuthStore>()(
       addOrder: (newOrder) => {
         set((state) => ({
           orders: [newOrder, ...state.orders],
+        }));
+      },
+
+      cancelOrder: (orderId, _reason) => {
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === orderId || o.orderNumber === orderId
+              ? { ...o, status: "cancelled" }
+              : o
+          ),
         }));
       },
 

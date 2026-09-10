@@ -234,7 +234,7 @@ export function CartDrawer() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                        className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform cursor-pointer"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
@@ -243,8 +243,14 @@ export function CartDrawer() {
                       </span>
                       <button
                         type="button"
+                        disabled={item.quantity >= item.product.stock}
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                        className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-transform cursor-pointer"
+                        title={
+                          item.quantity >= item.product.stock
+                            ? `Only ${item.product.stock} units in stock`
+                            : undefined
+                        }
                       >
                         <Plus className="h-3 w-3" />
                       </button>

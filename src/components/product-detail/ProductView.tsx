@@ -29,8 +29,10 @@ import {
   Clock,
   History,
   Trash2,
+  BellRing,
 } from "lucide-react";
 import { useMounted } from "@/hooks";
+import { NotifyStockModal } from "./NotifyStockModal";
 
 interface ProductViewProps {
   product: Product;
@@ -74,6 +76,7 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
+  const [showNotifyStock, setShowNotifyStock] = useState(false);
 
   // Price calculation
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId);
@@ -352,37 +355,58 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                       type="button"
                       disabled={quantity >= product.stock}
                       onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                      className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 cursor-pointer"
+                      className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
                   </div>
+                  {product.stock > 0 && quantity >= product.stock && (
+                    <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg">
+                      Max stock ({product.stock}) reached
+                    </span>
+                  )}
                 </div>
 
                 {/* Primary Action Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className={cn(
-                      "flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-bold shadow-md transition-all active:scale-98 cursor-pointer",
-                      isAdding
-                        ? "bg-emerald-600 text-white"
-                        : "bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20"
-                    )}
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    <span>{isAdding ? "Added to Cart!" : "Add to Cart"}</span>
-                  </button>
+                {product.stock <= 0 ? (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowNotifyStock(true)}
+                      className="w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 cursor-pointer"
+                    >
+                      <BellRing className="h-4 w-4" />
+                      <span>Notify Me When In Stock</span>
+                    </button>
+                    <p className="text-center text-[11px] text-muted-foreground mt-1.5">
+                      Get an instant SMS or Email notification when fresh stock arrives.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      className={cn(
+                        "flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-bold shadow-md transition-all active:scale-98 cursor-pointer",
+                        isAdding
+                          ? "bg-emerald-600 text-white"
+                          : "bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20"
+                      )}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>{isAdding ? "Added to Cart!" : "Add to Cart"}</span>
+                    </button>
 
-                  <Link
-                    href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}
-                    className="flex h-12 items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 text-sm font-bold shadow-md transition-all active:scale-98"
-                  >
-                    <Zap className="h-4 w-4 fill-current" />
-                    <span>Buy Now (Instant)</span>
-                  </Link>
-                </div>
+                    <Link
+                      href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}
+                      className="flex h-12 items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 text-sm font-bold shadow-md transition-all active:scale-98"
+                    >
+                      <Zap className="h-4 w-4 fill-current" />
+                      <span>Buy Now (Instant)</span>
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Delivery & Warranty Guarantees Strip */}
@@ -568,6 +592,14 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
           <SupportAndHelpstrip />
         </section>
       </div>
+
+      {/* ── Notify Me When In Stock Modal ── */}
+      <NotifyStockModal
+        productName={product.name}
+        productSlug={product.slug}
+        isOpen={showNotifyStock}
+        onClose={() => setShowNotifyStock(false)}
+      />
     </div>
   );
 }

@@ -10,6 +10,10 @@ import { cn } from "@/lib/utils";
 import {
   CustomerSidebar,
 } from "./CustomerSidebar";
+import { CancelOrderModal } from "./CancelOrderModal";
+import { ReturnRequestModal, type ReturnTicketData } from "./ReturnRequestModal";
+import { WriteReviewModal } from "./WriteReviewModal";
+import { InvoiceModal } from "./InvoiceModal";
 import {
   INITIAL_REVIEWS,
   ACCOUNT_NAV_GROUPS,
@@ -41,12 +45,13 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
-import type { OrderStatus, Address } from "@/types/order.types";
+import type { OrderStatus, Address, Order } from "@/types/order.types";
 
 export function CustomerAccountHub() {
   const mounted = useMounted();
   const user = useAuthStore((state) => state.user);
   const orders = useAuthStore((state) => state.orders);
+  const cancelOrder = useAuthStore((state) => state.cancelOrder);
   const updateUser = useAuthStore((state) => state.updateUser);
   const storeLogout = useAuthStore((state) => state.logout);
   const addAddress = useAuthStore((state) => state.addAddress);
@@ -59,6 +64,19 @@ export function CustomerAccountHub() {
 
   const [activeTab, setActiveTab] = useState<AccountTabKey>("overview");
   const [orderFilter, setOrderFilter] = useState<"all" | OrderStatus>("all");
+
+  // Modal states for customer actions
+  const [cancelModalOrder, setCancelModalOrder] = useState<Order | null>(null);
+  const [returnModalOrder, setReturnModalOrder] = useState<Order | null>(null);
+  const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
+  const [reviewWriteItem, setReviewWriteItem] = useState<{
+    productId: string;
+    productName: string;
+    productThumbnail: string;
+  } | null>(null);
+
+  // Return tickets local state
+  const [returnTickets, setReturnTickets] = useState<ReturnTicketData[]>([]);
 
   // Reviews state
   const [reviews, setReviews] = useState<CustomerReview[]>(INITIAL_REVIEWS);
@@ -202,6 +220,20 @@ export function CustomerAccountHub() {
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-700 dark:text-amber-400 uppercase">
             <Truck className="h-3 w-3" />
             In Transit
+          </span>
+        );
+      case "cancelled":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-rose-700 dark:text-rose-400 uppercase">
+            <AlertCircle className="h-3 w-3" />
+            Cancelled
+          </span>
+        );
+      case "pending":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/15 border border-purple-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-purple-700 dark:text-purple-400 uppercase">
+            <Clock className="h-3 w-3" />
+            Pending Verification
           </span>
         );
       case "processing":
@@ -850,21 +882,78 @@ export function CustomerAccountHub() {
                       ))}
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 border-t border-border/50 text-xs">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Truck className="h-3.5 w-3.5 text-amber-500" />
-                        <span>
-                          Tracking:{" "}
-                          <strong className="font-mono text-foreground">
-                            {order.trackingNumber}
-                          </strong>{" "}
-                          via {order.courierName}
+                    {/* Footer & Action Buttons */}
+                    <div className="flex flex-col gap-3 pt-3 border-t border-border/50 text-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <Truck className="h-3.5 w-3.5 text-amber-500" />
+                          <span>
+                            Tracking:{" "}
+                            <strong className="font-mono text-foreground">
+                              {order.trackingNumber}
+                            </strong>{" "}
+                            via {order.courierName}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-emerald-600">
+                          {order.estimatedDelivery}
                         </span>
                       </div>
-                      <span className="text-[11px] font-semibold text-emerald-600">
-                        {order.estimatedDelivery}
-                      </span>
+
+                      {/* Interactive Customer Actions */}
+                      <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-border/40">
+                        {/* Print / Download invoice */}
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceModalOrder(order)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background hover:bg-muted text-xs font-bold text-foreground transition-all cursor-pointer"
+                        >
+                          <CreditCard className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>Download Invoice</span>
+                        </button>
+
+                        {/* Cancel order if pending or processing */}
+                        {(order.status === "pending" || order.status === "processing") && (
+                          <button
+                            type="button"
+                            onClick={() => setCancelModalOrder(order)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-bold text-rose-600 dark:text-rose-400 transition-all cursor-pointer"
+                          >
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            <span>Cancel Order</span>
+                          </button>
+                        )}
+
+                        {/* 7-Day Return / Replacement if delivered */}
+                        {order.status === "delivered" && (
+                          <button
+                            type="button"
+                            onClick={() => setReturnModalOrder(order)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 transition-all cursor-pointer"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            <span>Request Return / Exchange</span>
+                          </button>
+                        )}
+
+                        {/* Write Review if delivered */}
+                        {order.status === "delivered" && order.items[0] && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setReviewWriteItem({
+                                productId: order.items[0].productId,
+                                productName: order.items[0].productName,
+                                productThumbnail: order.items[0].productThumbnail,
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                          >
+                            <Star className="h-3.5 w-3.5 fill-current" />
+                            <span>Write Review</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
@@ -943,25 +1032,92 @@ export function CustomerAccountHub() {
 
           {/* ══════════════ 6. RETURNS & REFUNDS TAB ══════════════ */}
           {activeTab === "returns" && (
-            <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-4 text-center">
-              <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
-                <RotateCcw className="h-6 w-6" />
-              </div>
-              <h3 className="text-base font-bold text-foreground">
-                No Return Requests Active
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                All Telos Cart items come with a 7-day hassle-free replacement warranty for defective electronics and return policy.
-              </p>
-              <div className="pt-2">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Returns & Replacements
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    7-day hassle-free replacement warranty for defective electronics.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setActiveTab("orders")}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 text-white px-4 py-2 text-xs font-bold cursor-pointer hover:bg-amber-600 transition-all"
+                  className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
                 >
-                  <span>Select Order to Return</span>
+                  Create Return
                 </button>
               </div>
+
+              {returnTickets.length === 0 ? (
+                <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-3 text-center">
+                  <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+                    <RotateCcw className="h-6 w-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground">
+                    No Active Return Requests
+                  </h4>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    To request an exchange or refund, go to "My Orders" tab and select "Request Return / Exchange" on any delivered order.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {returnTickets.map((ticket, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-border/80 bg-card p-4.5 space-y-3 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-foreground">
+                            Ticket #{ticket.orderNumber}-RET{idx + 1}
+                          </span>
+                          <span className="text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">
+                            Under Review
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold capitalize text-amber-600 dark:text-amber-400">
+                          {ticket.resolutionType} Request
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
+                          <Image
+                            src={ticket.productThumbnail}
+                            alt={ticket.productName}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1 text-xs">
+                          <p className="font-bold text-foreground truncate">
+                            {ticket.productName}
+                          </p>
+                          <p className="text-muted-foreground mt-0.5">
+                            Reason: {ticket.reason}
+                          </p>
+                          {ticket.conditionNotes && (
+                            <p className="text-muted-foreground italic mt-0.5">
+                              "{ticket.conditionNotes}"
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                        <span>Courier Pickup: Steadfast Courier (Next 24 Hours)</span>
+                        <span className="font-semibold text-emerald-600">
+                          QC Agent Assigned
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1298,6 +1454,68 @@ export function CustomerAccountHub() {
           )}
         </main>
       </div>
+
+      {/* ── Cancel Order Modal ── */}
+      {cancelModalOrder && (
+        <CancelOrderModal
+          orderNumber={cancelModalOrder.orderNumber}
+          isOpen={Boolean(cancelModalOrder)}
+          onClose={() => setCancelModalOrder(null)}
+          onConfirmCancel={(orderNumber, reason) => {
+            cancelOrder(orderNumber, reason);
+            setCancelModalOrder(null);
+          }}
+        />
+      )}
+
+      {/* ── Return & Replacement Request Modal ── */}
+      {returnModalOrder && (
+        <ReturnRequestModal
+          order={returnModalOrder}
+          isOpen={Boolean(returnModalOrder)}
+          onClose={() => setReturnModalOrder(null)}
+          onSubmitReturn={(ticket) => {
+            setReturnTickets((prev) => [ticket, ...prev]);
+            setActiveTab("returns");
+          }}
+        />
+      )}
+
+      {/* ── Write Review Modal ── */}
+      {reviewWriteItem && (
+        <WriteReviewModal
+          item={reviewWriteItem}
+          isOpen={Boolean(reviewWriteItem)}
+          onClose={() => setReviewWriteItem(null)}
+          onSubmitReview={(newRev) => {
+            setReviews((prev) => [
+              {
+                id: `rev-${Date.now()}`,
+                productId: newRev.productId,
+                productName: newRev.productName,
+                productThumbnail: newRev.productThumbnail,
+                rating: newRev.rating,
+                date: "Just now",
+                comment: newRev.comment,
+                verifiedPurchase: true,
+                status: "published",
+              },
+              ...prev,
+            ]);
+            setReviewWriteItem(null);
+            setActiveTab("reviews");
+          }}
+        />
+      )}
+
+      {/* ── Tax Invoice & Print Modal ── */}
+      {invoiceModalOrder && (
+        <InvoiceModal
+          order={invoiceModalOrder}
+          isOpen={Boolean(invoiceModalOrder)}
+          onClose={() => setInvoiceModalOrder(null)}
+        />
+      )}
     </div>
   );
 }
