@@ -34,7 +34,7 @@ export interface Order {
   status: OrderStatus;
   items: OrderItem[];
   shippingAddress: Address;
-  paymentMethod: "cod" | "bkash" | "nagad" | "card";
+  paymentMethod: "cod" | "bkash" | "nagad" | "upay" | "card";
   paymentStatus: "paid" | "unpaid";
   subtotal: number;
   deliveryFee: number;

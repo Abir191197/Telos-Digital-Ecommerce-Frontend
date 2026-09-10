@@ -13,6 +13,8 @@ export const ROUTES = {
   CONTACT: "/contact",
   PRIVACY_POLICY: "/privacy-policy",
   TERMS: "/terms-and-conditions",
+  CHECKOUT: "/checkout",
+  CHECKOUT_SUCCESS: "/checkout/success",
 
   // Auth
   LOGIN: "/login",
@@ -34,12 +36,15 @@ export const ROUTES = {
 export const PUBLIC_ROUTES = [
   ROUTES.HOME,
   ROUTES.CATEGORIES,
+  ROUTES.PRODUCTS,
   ROUTES.ABOUT,
   ROUTES.SERVICES,
   ROUTES.PRICING,
   ROUTES.CONTACT,
   ROUTES.PRIVACY_POLICY,
   ROUTES.TERMS,
+  ROUTES.CHECKOUT,
+  ROUTES.CHECKOUT_SUCCESS,
 ] as const;
 
 export const AUTH_ROUTES = [
