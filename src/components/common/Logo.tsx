@@ -28,27 +28,56 @@ export function Logo({
             className="h-full w-full"
           >
             <defs>
-              <linearGradient id="logoTGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="logoCartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#fde68a" />
-                <stop offset="45%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#ffffff" />
+                <stop offset="50%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#d97706" />
               </linearGradient>
             </defs>
-            {/* Top Bar of T */}
-            <rect x="136" y="142" width="240" height="60" rx="6" fill="url(#logoTGrad)" />
-            {/* T Stem */}
-            <rect x="224" y="202" width="64" height="124" fill="url(#logoTGrad)" />
-            {/* Cart Basket Contour */}
+
+            {/* Shopping Cart Handle, Arm & Basket Contour */}
             <path
-              d="M168 214 L196 326 C199 338 210 348 224 348 H344 C358 348 368 338 372 324 L396 238 H174"
-              stroke="url(#logoTGrad)"
+              d="M104 140 H164 L204 316 C208 332 222 344 238 344 H366 C382 344 396 332 400 316 L424 204 C426 194 418 184 408 184 H174"
+              stroke="url(#logoCartGrad)"
               strokeWidth="28"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+
+            {/* Inner Basket Accent Lines */}
+            <path
+              d="M214 244 H396"
+              stroke="url(#logoCartGrad)"
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeOpacity="0.75"
+            />
+            <path
+              d="M260 196 L244 332"
+              stroke="url(#logoCartGrad)"
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeOpacity="0.6"
+            />
+            <path
+              d="M328 196 L320 332"
+              stroke="url(#logoCartGrad)"
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeOpacity="0.6"
+            />
+
             {/* Cart Wheels */}
-            <circle cx="236" cy="388" r="22" fill="url(#logoTGrad)" />
-            <circle cx="332" cy="388" r="22" fill="url(#logoTGrad)" />
+            <circle cx="240" cy="404" r="28" fill="url(#logoCartGrad)" />
+            <circle cx="364" cy="404" r="28" fill="url(#logoCartGrad)" />
+            <circle cx="240" cy="404" r="12" fill="#141312" />
+            <circle cx="364" cy="404" r="12" fill="#141312" />
+
+            {/* Dynamic Sparkle Accent top right */}
+            <path
+              d="M366 100 L372 118 L390 124 L372 130 L366 148 L360 130 L342 124 L360 118 Z"
+              fill="url(#logoCartGrad)"
+            />
           </svg>
         </div>
       </div>

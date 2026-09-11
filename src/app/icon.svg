@@ -26,23 +26,11 @@
   <!-- Inner Dark Shell matching Telos #141312 -->
   <rect x="30" y="30" width="452" height="452" rx="124" fill="#141312" />
 
-  <!-- Monogram T + E-Commerce Cart Dynamic Geometry -->
+  <!-- Pure E-Commerce Shopping Cart Dynamic Geometry -->
   <g filter="url(#amberGlow)">
-    <!-- Top Bar of T (Architectural Telos Beam) -->
+    <!-- Cart Push Handle & Basket Profile -->
     <path
-      d="M136 142 H376 V202 H136 Z"
-      fill="url(#goldGradient)"
-    />
-
-    <!-- Stem of T / Vertical Backbone -->
-    <path
-      d="M224 202 H288 V326 H224 Z"
-      fill="url(#goldGradient)"
-    />
-
-    <!-- Cart Basket Base Curve connecting with T stem -->
-    <path
-      d="M168 214 L196 326 C199 338 210 348 224 348 H344 C358 348 368 338 372 324 L396 238 H174"
+      d="M104 140 H164 L204 316 C208 332 222 344 238 344 H366 C382 344 396 332 400 316 L424 204 C426 194 418 184 408 184 H174"
       fill="none"
       stroke="url(#goldGradient)"
       stroke-width="26"
@@ -50,10 +38,42 @@
       stroke-linejoin="round"
     />
 
-    <!-- Cart Wheel Left -->
-    <circle cx="236" cy="388" r="22" fill="url(#goldGradient)" />
+    <!-- Inner Basket Grid Ribs -->
+    <path
+      d="M214 244 H396"
+      fill="none"
+      stroke="url(#goldGradient)"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-opacity="0.8"
+    />
+    <path
+      d="M260 196 L244 332"
+      fill="none"
+      stroke="url(#goldGradient)"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-opacity="0.6"
+    />
+    <path
+      d="M328 196 L320 332"
+      fill="none"
+      stroke="url(#goldGradient)"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-opacity="0.6"
+    />
 
-    <!-- Cart Wheel Right -->
-    <circle cx="332" cy="388" r="22" fill="url(#goldGradient)" />
+    <!-- Cart Wheels -->
+    <circle cx="240" cy="404" r="26" fill="url(#goldGradient)" />
+    <circle cx="364" cy="404" r="26" fill="url(#goldGradient)" />
+    <circle cx="240" cy="404" r="11" fill="#141312" />
+    <circle cx="364" cy="404" r="11" fill="#141312" />
+
+    <!-- Sparkle Accent -->
+    <path
+      d="M366 100 L372 118 L390 124 L372 130 L366 148 L360 130 L342 124 L360 118 Z"
+      fill="url(#goldGradient)"
+    />
   </g>
 </svg>
