@@ -9,7 +9,7 @@ import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFiltersBar } from "./ActiveFiltersBar";
 import { CatalogHeader } from "./CatalogHeader";
 import { EmptyCatalogState } from "./CatalogStateViews";
-import { X, Plus, ChevronDown, CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { X, Plus, ChevronDown, ChevronLeft, ChevronRight, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CatalogViewProps {
@@ -37,7 +37,8 @@ export function CatalogView({
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "rating-desc" | "newest">("featured");
   const [viewMode, setViewMode] = useState<GridViewMode>("grid-4");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const catalogFeedRef = React.useRef<HTMLDivElement>(null);
 
   // Compute available brands & overall price bounds
   const availableBrands = useMemo(() => {
@@ -125,11 +126,50 @@ export function CatalogView({
     sortBy,
   ]);
 
-  const displayedProducts = useMemo(() => {
-    return filteredProducts.slice(0, visibleCount);
-  }, [filteredProducts, visibleCount]);
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (validCurrentPage - 1) * ITEMS_PER_PAGE;
 
-  const hasMore = visibleCount < filteredProducts.length;
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredProducts, startIndex]);
+
+  // Thematic pagination range generator with ellipsis
+  const paginationRange = useMemo(() => {
+    const delta = 1;
+    const range: (number | string)[] = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined = undefined;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= validCurrentPage - delta && i <= validCurrentPage + delta)) {
+        range.push(i);
+      }
+    }
+
+    for (const i of range) {
+      if (l !== undefined) {
+        if (typeof i === "number" && i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (typeof i === "number" && i - l !== 1) {
+          rangeWithDots.push("...");
+        }
+      }
+      rangeWithDots.push(i);
+      if (typeof i === "number") l = i;
+    }
+
+    return rangeWithDots;
+  }, [totalPages, validCurrentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    setCurrentPage(page);
+    if (catalogFeedRef.current) {
+      catalogFeedRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const hasActiveFilters =
     selectedBrands.length > 0 ||
@@ -139,18 +179,18 @@ export function CatalogView({
     inStockOnly ||
     onSaleOnly;
 
-  // Handlers
+  // Handlers (reset to page 1 on filter changes)
   const handleToggleBrand = (brand: string) => {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
-    setVisibleCount(ITEMS_PER_PAGE);
+    setCurrentPage(1);
   };
 
   const handlePriceChange = (min?: number, max?: number) => {
     setMinPrice(min);
     setMaxPrice(max);
-    setVisibleCount(ITEMS_PER_PAGE);
+    setCurrentPage(1);
   };
 
   const handleResetAll = () => {
@@ -160,7 +200,7 @@ export function CatalogView({
     setSelectedRating(undefined);
     setInStockOnly(false);
     setOnSaleOnly(false);
-    setVisibleCount(ITEMS_PER_PAGE);
+    setCurrentPage(1);
   };
 
   return (
@@ -194,17 +234,17 @@ export function CatalogView({
               selectedRating={selectedRating}
               onSelectRating={(r) => {
                 setSelectedRating(r);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               inStockOnly={inStockOnly}
               onToggleInStock={() => {
                 setInStockOnly((v) => !v);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               onSaleOnly={onSaleOnly}
               onToggleOnSale={() => {
                 setOnSaleOnly((v) => !v);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               onResetAll={handleResetAll}
               hasActiveFilters={hasActiveFilters}
@@ -213,7 +253,7 @@ export function CatalogView({
         </div>
 
         {/* Right Column: Catalog Feed */}
-        <div className="lg:col-span-9 space-y-5">
+        <div ref={catalogFeedRef} className="lg:col-span-9 space-y-5 scroll-mt-24">
           {/* Header Controls (Count, Sort, Grid toggles) */}
           <CatalogHeader
             totalCount={filteredProducts.length}
@@ -260,23 +300,86 @@ export function CatalogView({
             </div>
           )}
 
-          {/* Load More Progress Bar */}
-          {hasMore && (
-            <div className="mt-8 flex flex-col items-center justify-center text-center space-y-3 pt-4 border-t border-border/60">
-              <p className="text-xs text-muted-foreground">
-                Showing <strong className="text-foreground">{displayedProducts.length}</strong> of{" "}
-                <strong className="text-foreground">{filteredProducts.length}</strong> items
+          {/* Thematic Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border/60">
+              <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
+                Showing <strong className="text-foreground">{startIndex + 1}</strong>–
+                <strong className="text-foreground">
+                  {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)}
+                </strong>{" "}
+                of <strong className="text-foreground">{filteredProducts.length}</strong> products
               </p>
 
-              <button
-                type="button"
-                onClick={() => setVisibleCount((v) => v + ITEMS_PER_PAGE)}
-                className="inline-flex items-center gap-2 rounded-xl bg-card border border-border/90 hover:border-amber-500/70 hover:bg-amber-500/5 px-6 py-3 text-xs sm:text-sm font-bold text-foreground shadow-2xs transition-all active:scale-95 cursor-pointer"
-              >
-                <Plus className="h-4 w-4 text-amber-500" />
-                <span>Load More Products ({filteredProducts.length - displayedProducts.length} left)</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </button>
+              <nav aria-label="Catalog Pagination" className="flex items-center gap-1.5 order-1 sm:order-2">
+                {/* Previous Page Button */}
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  aria-label="Previous Page"
+                  className={cn(
+                    "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-xl border border-border/70 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95",
+                    currentPage === 1
+                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground border-transparent"
+                      : "bg-card text-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer shadow-2xs"
+                  )}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden xs:inline">Prev</span>
+                </button>
+
+                {/* Numbered Page Buttons */}
+                <div className="flex items-center gap-1">
+                  {paginationRange.map((page, idx) => {
+                    if (typeof page === "string") {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="flex h-9 w-9 items-center justify-center text-xs font-bold text-muted-foreground select-none"
+                        >
+                          •••
+                        </span>
+                      );
+                    }
+
+                    const isCurrent = page === currentPage;
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => handlePageChange(page)}
+                        aria-current={isCurrent ? "page" : undefined}
+                        className={cn(
+                          "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-150 active:scale-95 cursor-pointer",
+                          isCurrent
+                            ? "bg-amber-500 text-white shadow-md shadow-amber-500/25 ring-2 ring-amber-500/30"
+                            : "border border-border/60 bg-card text-muted-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-foreground shadow-2xs"
+                        )}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Page Button */}
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next Page"
+                  className={cn(
+                    "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-xl border border-border/70 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95",
+                    currentPage === totalPages
+                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground border-transparent"
+                      : "bg-card text-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer shadow-2xs"
+                  )}
+                >
+                  <span className="hidden xs:inline">Next</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </nav>
             </div>
           )}
         </div>
@@ -320,17 +423,17 @@ export function CatalogView({
               selectedRating={selectedRating}
               onSelectRating={(r) => {
                 setSelectedRating(r);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               inStockOnly={inStockOnly}
               onToggleInStock={() => {
                 setInStockOnly((v) => !v);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               onSaleOnly={onSaleOnly}
               onToggleOnSale={() => {
                 setOnSaleOnly((v) => !v);
-                setVisibleCount(ITEMS_PER_PAGE);
+                setCurrentPage(1);
               }}
               onResetAll={handleResetAll}
               hasActiveFilters={hasActiveFilters}
