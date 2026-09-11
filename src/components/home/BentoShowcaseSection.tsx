@@ -103,10 +103,10 @@ export function BentoShowcaseSection() {
 
         <Link
           href={ROUTES.CATEGORIES}
-          className="text-xs sm:text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 self-start sm:self-auto shrink-0 group"
         >
           <span>All 250+ Categories</span>
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
       </div>
 

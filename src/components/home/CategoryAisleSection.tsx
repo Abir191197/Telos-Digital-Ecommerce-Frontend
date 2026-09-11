@@ -78,10 +78,10 @@ export function CategoryAisleSection({
 
           <Link
             href={ROUTES.CATEGORY_DETAIL(category.slug)}
-            className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-amber-600 hover:text-amber-700 hover:underline shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 shrink-0 group"
           >
             <span>View All ({category.itemCount})</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>

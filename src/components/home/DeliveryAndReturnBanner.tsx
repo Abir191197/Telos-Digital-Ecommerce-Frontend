@@ -34,10 +34,10 @@ export function DeliveryAndReturnBanner() {
             </span>
             <Link
               href={ROUTES.TRACKING}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground hover:text-blue-600 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 hover:bg-blue-600 hover:text-white px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 dark:hover:text-white shadow-xs transition-all duration-200 group"
             >
               <span>Track Orders</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
           </div>
         </div>
@@ -67,10 +67,10 @@ export function DeliveryAndReturnBanner() {
             </span>
             <Link
               href={ROUTES.TERMS}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground hover:text-amber-600 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 group"
             >
               <span>Return Policy</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
           </div>
         </div>

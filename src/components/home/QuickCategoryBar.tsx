@@ -15,6 +15,7 @@ import {
   Shirt,
   Sparkles,
   LayoutGrid,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +28,11 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Tv,
   Home: HomeIcon,
   Shirt,
-  Sparkles,
+  Accessories: Sparkles,
 };
 
 export function QuickCategoryBar() {
+  // Take top 8 categories
   const topCategories = categories.slice(0, 8);
 
   return (
@@ -46,10 +48,10 @@ export function QuickCategoryBar() {
         </div>
         <Link
           href={ROUTES.CATEGORIES}
-          className="text-xs sm:text-sm font-semibold text-amber-600 hover:text-amber-700 hover:underline flex items-center gap-1"
+          className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 shrink-0 group"
         >
           <span>All Categories</span>
-          <span>&rarr;</span>
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
       </div>
 
