@@ -1,6 +1,7 @@
 import React from "react";
 import { ShieldCheck, Sparkles, CheckCircle2, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { m, type Variants } from "framer-motion";
 
 interface TrustGuaranteeCardsProps {
   className?: string;
@@ -69,6 +70,15 @@ const GUARANTEE_ITEMS: GuaranteeItem[] = [
   },
 ];
 
+const cardItemAnim: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: [0.21, 0.47, 0.32, 0.98] },
+  },
+};
+
 export function TrustGuaranteeCards({ className }: TrustGuaranteeCardsProps) {
   return (
     <section
@@ -76,11 +86,16 @@ export function TrustGuaranteeCards({ className }: TrustGuaranteeCardsProps) {
       className={cn("w-full", className)}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        {GUARANTEE_ITEMS.map((item) => {
+        {GUARANTEE_ITEMS.map((item, index) => {
           const Icon = item.icon;
           return (
-            <div
+            <m.div
               key={item.title}
+              variants={cardItemAnim}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ delay: index * 0.07 }}
               style={{ background: item.gradient }}
               className={cn(
                 "group relative flex items-start gap-4 rounded-3xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1.5 dark:shadow-black/60",
@@ -126,7 +141,7 @@ export function TrustGuaranteeCards({ className }: TrustGuaranteeCardsProps) {
                   ))}
                 </div>
               </div>
-            </div>
+            </m.div>
           );
         })}
       </div>
