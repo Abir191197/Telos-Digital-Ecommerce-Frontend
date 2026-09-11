@@ -380,8 +380,8 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              {popularProducts.slice(0, 4).map((product) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+              {popularProducts.slice(0, 5).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

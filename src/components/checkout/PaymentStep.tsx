@@ -14,6 +14,7 @@ import {
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/common";
 
 interface PaymentStepProps {
   form: UseFormReturn<CheckoutFormValues>;
@@ -254,18 +255,22 @@ export function PaymentStep({
 
         {/* Buttons (Back & Submit) */}
         <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="lg"
             onClick={onBack}
-            className="w-full sm:w-auto px-5 h-12 rounded-2xl border border-border/80 hover:bg-muted text-foreground text-xs sm:text-sm font-bold transition-all cursor-pointer"
+            className="w-full sm:w-auto"
           >
             ← Back to Delivery Address
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="submit"
+            variant="amber"
+            size="lg"
             disabled={isSubmitting}
-            className="w-full sm:w-auto px-8 h-12 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-lg shadow-amber-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto px-8"
           >
             {isSubmitting ? (
               <span>Placing Order...</span>
@@ -275,7 +280,7 @@ export function PaymentStep({
                 <span>Confirm & Place Order (৳{totalAmount.toLocaleString()})</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

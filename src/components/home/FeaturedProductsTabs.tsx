@@ -21,15 +21,15 @@ export function FeaturedProductsTabs() {
   const filteredProducts = React.useMemo(() => {
     switch (activeTab) {
       case "featured":
-        return products.filter((p) => p.isFeatured).slice(0, 8);
+        return products.filter((p) => p.isFeatured).slice(0, 10);
       case "trending":
-        return products.filter((p) => p.badge === "Trending" || p.badge === "Hot" || p.reviewCount > 15).slice(0, 8);
+        return products.filter((p) => p.badge === "Trending" || p.badge === "Hot" || p.reviewCount > 15).slice(0, 10);
       case "new":
-        return products.filter((p) => p.isNewArrival).slice(0, 8);
+        return products.filter((p) => p.isNewArrival).slice(0, 10);
       case "topRated":
-        return products.filter((p) => p.rating >= 4.5).slice(0, 8);
+        return products.filter((p) => p.rating >= 4.5).slice(0, 10);
       default:
-        return products.slice(0, 8);
+        return products.slice(0, 10);
     }
   }, [activeTab]);
 
@@ -70,8 +70,8 @@ export function FeaturedProductsTabs() {
         </div>
       </div>
 
-      {/* Product Grid: 2 cols on mobile, 4 cols on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      {/* Product Grid: 2 cols on mobile, 3 on md, 5 on xl desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

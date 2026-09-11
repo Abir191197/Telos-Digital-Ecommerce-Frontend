@@ -23,7 +23,7 @@ export function CategoryAisleSection({
   badgeColor = "bg-amber-500/10 text-amber-600 border-amber-500/20",
   title,
   subtitle,
-  limit = 4,
+  limit = 5,
 }: CategoryAisleSectionProps) {
   const category = categories.find((c) => c.slug === categorySlug);
 
@@ -86,8 +86,8 @@ export function CategoryAisleSection({
         </div>
       </div>
 
-      {/* Product Cards Grid: 2 cols on mobile, 4 cols on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      {/* Product Cards Grid: 2 cols on mobile, 3 on md, 5 cols on xl desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         {aisleProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

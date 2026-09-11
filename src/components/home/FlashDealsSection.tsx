@@ -36,7 +36,7 @@ export function FlashDealsSection() {
   const flashProducts = React.useMemo(() => {
     return products
       .filter((p) => p.isFlashDeal || (p.discountPercentage && p.discountPercentage >= 15))
-      .slice(0, 4);
+      .slice(0, 5);
   }, []);
 
   if (flashProducts.length === 0) return null;
@@ -87,8 +87,8 @@ export function FlashDealsSection() {
           </div>
         </div>
 
-        {/* 2-col on mobile, 4-col on desktop product cards */}
-        <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        {/* 2-col on mobile, 3-col on md, 5-col on xl desktop */}
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
           {flashProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

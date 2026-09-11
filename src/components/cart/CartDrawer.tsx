@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Sparkles,
 } from "lucide-react";
+import { Button } from "@/components/common";
 
 export function CartDrawer() {
   const {
@@ -176,13 +177,14 @@ export function CartDrawer() {
                   Looks like you haven&apos;t added any items to your shopping cart yet.
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="amber"
+                size="sm"
                 onClick={closeCart}
-                className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 Browse Catalog
-              </button>
+              </Button>
             </div>
           ) : (
             items.map((item) => (
@@ -366,14 +368,20 @@ export function CartDrawer() {
 
             {/* Checkout CTA */}
             <div className="space-y-2">
-              <Link
-                href="/checkout"
-                onClick={closeCart}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98"
+              <Button
+                asChild
+                variant="amber"
+                size="lg"
+                className="w-full"
               >
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+                <Link
+                  href="/checkout"
+                  onClick={closeCart}
+                >
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
 
               <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground pt-1">
                 <span className="flex items-center gap-1">

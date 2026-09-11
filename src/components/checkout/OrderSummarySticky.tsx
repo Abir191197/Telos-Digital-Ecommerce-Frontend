@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/common";
 
 interface OrderSummaryStickyProps {
   items: CartItem[];
@@ -147,14 +148,16 @@ export function OrderSummarySticky({
               placeholder="Promo Code (e.g. TELOS10)"
               value={couponInput}
               onChange={(e) => setCouponInput(e.target.value)}
-              className="h-10 flex-1 px-3 rounded-xl border border-border/80 bg-background text-xs uppercase font-mono tracking-wider focus:outline-none focus:border-amber-500"
+              className="h-10 flex-1 px-3 rounded-xl border border-border/80 bg-background text-xs uppercase font-mono tracking-wider focus:outline-none focus:border-primary"
             />
-            <button
+            <Button
               type="submit"
-              className="h-10 px-4 rounded-xl bg-muted hover:bg-amber-500 hover:text-white text-xs font-bold text-foreground transition-all cursor-pointer"
+              variant="amber"
+              size="sm"
+              className="h-10 px-4"
             >
               Apply
-            </button>
+            </Button>
           </form>
         )}
         {couponError && (

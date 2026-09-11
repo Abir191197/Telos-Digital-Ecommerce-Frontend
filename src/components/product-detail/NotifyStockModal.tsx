@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, BellRing, CheckCircle2, ShieldCheck, Mail, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/common";
 
 interface NotifyStockModalProps {
   productName: string;
@@ -138,20 +139,24 @@ export function NotifyStockModal({
               </div>
 
               <div className="flex items-center gap-2 pt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={handleClose}
-                  className="flex-1 py-2.5 rounded-xl border border-border/80 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  variant="amber"
+                  size="sm"
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+                  className="flex-1"
                 >
                   {isSubmitting ? "Saving..." : "Notify Me"}
-                </button>
+                </Button>
               </div>
             </form>
           </>

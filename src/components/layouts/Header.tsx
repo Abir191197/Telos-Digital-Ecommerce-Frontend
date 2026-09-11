@@ -51,6 +51,7 @@ import {
   UtensilsCrossed,
   Watch,
   Wifi,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -251,13 +252,25 @@ export function Header() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search 250+ authentic gadgets, laptops & electronics..."
               aria-label="Search catalog"
-              className="h-11 w-full rounded-full border border-border/80 bg-muted/40 pl-11 pr-14 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 shadow-xs transition-all duration-200 hover:border-amber-500/40 hover:bg-muted/60 focus:border-amber-500 focus:bg-background focus:ring-4 focus:ring-amber-500/15 focus:outline-none"
+              className="h-11 w-full rounded-full border border-border/80 bg-muted/40 pl-11 pr-24 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 shadow-xs transition-all duration-200 hover:border-amber-500/40 hover:bg-muted/60 focus:border-amber-500 focus:bg-background focus:ring-4 focus:ring-amber-500/15 focus:outline-none"
             />
+
+            {/* Thematic Clear Cross Button */}
+            {searchQuery.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search query"
+                className="absolute right-11 flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-amber-500/20 hover:text-amber-500 transition-all duration-150 active:scale-90 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5 stroke-[2.5]" />
+              </button>
+            )}
 
             <button
               type="submit"
               aria-label="Submit search"
-              className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-400 text-zinc-950 font-bold shadow-sm shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer">
+              className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold shadow-sm shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer">
               <Search className="h-4 w-4 stroke-[2.5]" />
             </button>
           </form>
@@ -301,10 +314,11 @@ export function Header() {
                 aria-haspopup="true"
                 aria-label="User account menu"
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-amber-500/20 transition-all cursor-pointer",
-                  profileOpen && "ring-2 ring-amber-500/40 bg-amber-500/20"
+                  "group flex items-center gap-2 rounded-full p-1 sm:pr-3 transition-all duration-200 cursor-pointer bg-card/60 hover:bg-card hover:shadow-md active:scale-98",
+                  profileOpen && "bg-card shadow-lg"
                 )}>
-                <div className="relative h-6 w-6 overflow-hidden rounded-full border border-amber-500/50">
+                {/* Minimalist Avatar or Monogram Disc */}
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 text-foreground font-bold text-xs shadow-inner overflow-hidden">
                   {user.avatar ? (
                     <Image
                       src={user.avatar}
@@ -313,25 +327,32 @@ export function Header() {
                       className="object-cover"
                     />
                   ) : (
-                    <User className="h-full w-full p-0.5 text-amber-600" />
+                    <span className="text-[11px] font-extrabold tracking-tight text-zinc-100 uppercase">
+                      {user.name ? user.name.slice(0, 2) : "U"}
+                    </span>
                   )}
+                  {/* Tiny Active Session Dot */}
+                  <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-emerald-500 ring-1.5 ring-background" />
                 </div>
-                <span className="hidden sm:inline max-w-[100px] truncate font-semibold">
+
+                {/* Minimalist Clean First Name */}
+                <span className="hidden sm:inline-block max-w-[90px] truncate text-xs font-semibold text-foreground/90 group-hover:text-foreground">
                   {user.name.split(" ")[0]}
                 </span>
+
                 <ChevronDown
                   className={cn(
-                    "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                    "hidden sm:block h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover:text-foreground",
                     profileOpen && "rotate-180 text-amber-500"
                   )}
                 />
               </button>
 
-              {/* ── Profile Dropdown Menu ── */}
+              {/* ── Profile Dropdown Menu (Borderless with luxury shadow) ── */}
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-2.5 w-64 origin-top-right rounded-2xl border border-border/80 bg-popover/98 p-2 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 z-50">
+                <div className="absolute right-0 top-full mt-2.5 w-64 origin-top-right rounded-3xl bg-popover/98 p-2 text-popover-foreground shadow-[0_20px_50px_-10px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.75)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 z-50">
                   {/* User Summary Header */}
-                  <div className="px-3 py-2.5 border-b border-border/60 bg-muted/30 rounded-xl mb-1.5">
+                  <div className="px-3 py-2.5 bg-muted/40 rounded-2xl mb-1.5">
                     <p className="text-xs font-bold text-foreground truncate">
                       {user.name}
                     </p>
@@ -346,27 +367,20 @@ export function Header() {
                   </div>
 
                   {/* Menu Links */}
-                  <div className="space-y-0.5 text-xs font-medium">
-                    <Link
-                      href={ROUTES.DASHBOARD}
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-bold"
-                    >
-                      <span className="flex items-center gap-2.5">
-                        <LayoutDashboard className="h-4 w-4 text-amber-500 shrink-0" />
-                        <span>Admin Dashboard</span>
-                      </span>
-                      <span className="text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">
-                        Portal
-                      </span>
-                    </Link>
+                  <div className="space-y-1 text-xs font-medium">
+                    {/* Customer Account Section */}
+                    <div className="px-2 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Customer Account
+                    </div>
 
                     <Link
                       href={ROUTES.ACCOUNT}
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
-                      <LayoutGrid className="h-4 w-4 text-amber-500 shrink-0" />
-                      <span>My Account Hub</span>
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                      <span className="flex items-center gap-2.5">
+                        <LayoutGrid className="h-4 w-4 text-amber-500 shrink-0" />
+                        <span className="font-semibold">My Account Hub</span>
+                      </span>
                     </Link>
 
                     <Link
@@ -412,6 +426,26 @@ export function Header() {
                         </span>
                       )}
                     </Link>
+
+                    {/* Merchant & Admin Portal Section (Separate & Distinct) */}
+                    <div className="pt-2 mt-1 border-t border-border/60">
+                      <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Staff & Administration
+                      </div>
+                      <Link
+                        href={ROUTES.DASHBOARD}
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-zinc-800/60 transition-colors font-semibold"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <LayoutDashboard className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span>Merchant Dashboard</span>
+                        </span>
+                        <span className="text-[10px] font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                          Admin
+                        </span>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* Divider & Logout */}
@@ -451,13 +485,23 @@ export function Header() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search products, brands & categories..."
             aria-label="Search catalog"
-            className="h-10 w-full rounded-full border border-border/80 bg-muted/40 pl-10 pr-12 text-sm text-foreground placeholder:text-muted-foreground/80 shadow-xs transition-all focus:border-amber-500 focus:bg-background focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+            className="h-10 w-full rounded-full border border-border/80 bg-muted/40 pl-10 pr-20 text-sm text-foreground placeholder:text-muted-foreground/80 shadow-xs transition-all focus:border-amber-500 focus:bg-background focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
           />
+          {searchQuery.trim().length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search query"
+              className="absolute right-10 flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-amber-500/20 hover:text-amber-500 transition-all duration-150 active:scale-90 cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5 stroke-[2.5]" />
+            </button>
+          )}
           <button
             type="submit"
             aria-label="Submit search"
-            className="absolute right-1 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs transition-all hover:bg-amber-600 active:scale-95">
-            <Search className="h-3.5 w-3.5" />
+            className="absolute right-1 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold shadow-xs transition-all hover:scale-105 active:scale-95">
+            <Search className="h-3.5 w-3.5 stroke-[2.5]" />
           </button>
         </form>
       </div>
@@ -471,7 +515,7 @@ export function Header() {
             ref={categoriesRef}
             className="relative flex items-center gap-1 sm:gap-2"
             onMouseLeave={() => setCategoriesOpen(false)}>
-            {/* Primary Categories Button (Click toggles, Hover opens) */}
+            {/* Primary Categories Button (Rich Golden Amber Pill) */}
             <button
               type="button"
               onClick={() => setCategoriesOpen((prev) => !prev)}
@@ -481,7 +525,7 @@ export function Header() {
               }}
               aria-expanded={categoriesOpen}
               className={cn(
-                "flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-bold text-zinc-950 shadow-md shadow-amber-500/20 transition-all hover:shadow-lg hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-98 focus-visible:outline-none cursor-pointer",
+                "flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 text-sm font-bold shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 active:scale-98 focus-visible:outline-none cursor-pointer transition-all",
                 categoriesOpen && "ring-2 ring-amber-400 shadow-amber-500/40",
               )}>
               <LayoutGrid className="h-4 w-4 shrink-0 stroke-[2.4]" />
@@ -600,87 +644,85 @@ export function Header() {
                       </div>
                     </div>
 
-                    {/* Right Column: Active Category Details, Subcategories & Products with Images (8 cols) */}
-                    <div className="md:col-span-8 p-5 md:p-6 flex flex-col justify-between bg-muted/10">
+                    {/* Middle Column: Active Category Details, Subcategories & Products with Images (6 cols) */}
+                    <div className="md:col-span-5 lg:col-span-5 p-5 flex flex-col justify-between bg-muted/10">
                       <div>
                         {/* Active Category Header */}
-                        <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3.5">
+                        <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                           <div>
-                            <div className="flex items-center gap-2.5">
-                              <h3 className="text-lg font-bold text-foreground">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base sm:text-lg font-bold text-foreground">
                                 {activeCategory?.name}
                               </h3>
-                              <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                                {activeCategory?.itemCount} Products
+                              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                {activeCategory?.itemCount}
                               </span>
                             </div>
-                            <p className="mt-1 text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                               {activeCategory?.description}
                             </p>
                           </div>
 
                           <Link
-                            href={ROUTES.CATEGORY_DETAIL(
-                              activeCategory?.slug || "",
-                            )}
+                            href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
                             onClick={() => setCategoriesOpen(false)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 hover:bg-amber-500 hover:text-white dark:text-amber-400 transition-all shrink-0">
-                            <span>Explore Category</span>
+                            className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0"
+                          >
+                            <span>View All</span>
                             <ArrowRight className="h-3.5 w-3.5" />
                           </Link>
                         </div>
 
                         {/* Subcategories Pills */}
-                        <div className="mt-3.5">
-                          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                        <div className="mt-3">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
                             Popular Subcategories
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            {activeCategory?.subcategories.map((sub) => (
+                          <div className="flex flex-wrap gap-1.5">
+                            {activeCategory?.subcategories.slice(0, 6).map((sub) => (
                               <Link
                                 key={sub.id}
-                                href={ROUTES.CATEGORY_DETAIL(
-                                  activeCategory?.slug || "",
-                                )}
+                                href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
                                 onClick={() => setCategoriesOpen(false)}
-                                className="rounded-lg border border-border/70 bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:border-amber-500 hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                                className="rounded-lg bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                              >
                                 {sub.name}
                               </Link>
                             ))}
                           </div>
                         </div>
 
-                        {/* Category Products with Real Images (6 items, 3 cols sm / 6 cols lg) */}
+                        {/* Category Products Quick Grid (4 items) */}
                         <div className="mt-4">
-                          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
                             Featured in {activeCategory?.name}
                           </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                            {activeCategoryProducts.map((prod) => (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            {activeCategoryProducts.slice(0, 4).map((prod) => (
                               <Link
                                 key={prod.id}
                                 href={ROUTES.PRODUCT_DETAIL(prod.slug)}
                                 onClick={() => setCategoriesOpen(false)}
-                                className="group flex flex-col rounded-xl border border-border/60 bg-background p-2 transition-all hover:border-amber-500/60 hover:shadow-md">
-                                <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted/30">
+                                className="group flex flex-col rounded-2xl bg-card p-2 shadow-xs transition-all hover:shadow-md hover:-translate-y-0.5"
+                              >
+                                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
                                   <Image
                                     src={prod.thumbnail}
                                     alt={prod.name}
                                     fill
-                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 15vw"
+                                    sizes="(max-width: 768px) 50vw, 15vw"
                                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                                   />
-                                  {prod.discountPercentage &&
-                                  prod.discountPercentage > 0 ? (
-                                    <span className="absolute top-1 left-1 rounded bg-rose-600 px-1 py-0.2 text-[9px] font-bold text-white shadow-xs">
+                                  {prod.discountPercentage && prod.discountPercentage > 0 ? (
+                                    <span className="absolute top-1 left-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[9px] font-bold text-white shadow-xs">
                                       -{prod.discountPercentage}%
                                     </span>
                                   ) : null}
                                 </div>
-                                <h4 className="mt-1.5 text-xs font-semibold text-foreground line-clamp-1 group-hover:text-amber-600 transition-colors">
+                                <h4 className="mt-1.5 text-xs font-semibold text-foreground line-clamp-1 group-hover:text-amber-500 transition-colors">
                                   {prod.name}
                                 </h4>
-                                <div className="mt-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                                <div className="mt-0.5 text-xs font-extrabold text-foreground">
                                   ৳{prod.price.toLocaleString()}
                                 </div>
                               </Link>
@@ -689,35 +731,51 @@ export function Header() {
                         </div>
                       </div>
 
-                      {/* ── Bottom Strip: Card to Visit All Products + View All Categories Button ── */}
-                      <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-                        {/* Card to Visit All Products */}
-                        <Link
-                          href={ROUTES.PRODUCTS}
-                          onClick={() => setCategoriesOpen(false)}
-                          className="group flex w-full sm:w-auto items-center gap-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-2.5 hover:border-amber-500 hover:from-amber-500/20 transition-all">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-xs">
-                            <ShoppingBag className="h-4.5 w-4.5" />
-                          </div>
-                          <div className="flex-1 pr-2">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground group-hover:text-amber-600 transition-colors">
-                              <span>Explore All 250+ Products</span>
-                              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                            </div>
-                            <p className="text-[11px] text-muted-foreground line-clamp-1">
-                              Complete catalog with instant BD delivery
-                            </p>
-                          </div>
-                        </Link>
-
-                        {/* View All Categories Button */}
+                      {/* Quick link below */}
+                      <div className="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between text-xs">
                         <Link
                           href={ROUTES.CATEGORIES}
                           onClick={() => setCategoriesOpen(false)}
-                          className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-border/80 bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs hover:border-amber-500 hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 transition-all shrink-0">
+                          className="text-muted-foreground hover:text-foreground font-semibold flex items-center gap-1.5 transition-colors"
+                        >
                           <Grid className="h-3.5 w-3.5 text-amber-500" />
-                          <span>View All Categories</span>
+                          <span>View All {categories.length} Categories</span>
                         </Link>
+                        <span className="text-muted-foreground/60 text-[11px]">Direct BD Stock</span>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Dedicated "Find Products Faster" Feature Card (Matching Reference Image) */}
+                    <div className="md:col-span-3 lg:col-span-3 p-4 flex flex-col justify-center bg-card">
+                      <div className="h-full flex flex-col justify-between rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-muted/30 p-5 shadow-xs transition-all hover:shadow-md">
+                        <div className="space-y-4">
+                          {/* Square Icon Container with subtle drop shadow */}
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-sm text-amber-500">
+                            <LayoutGrid className="h-6 w-6 stroke-[2.3]" />
+                          </div>
+
+                          {/* Bold Headline */}
+                          <div>
+                            <h4 className="text-xl font-black text-foreground tracking-tight leading-tight">
+                              Find products faster
+                            </h4>
+                            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                              Browse category pages with product filters, prices, brands, and faceted options.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Thematic Primary CTA Button (Rich Golden Amber Pill) */}
+                        <div className="pt-6">
+                          <Link
+                            href={ROUTES.PRODUCTS}
+                            onClick={() => setCategoriesOpen(false)}
+                            className="group flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-3 text-xs sm:text-sm font-extrabold shadow-md shadow-amber-500/25 transition-all hover:shadow-lg hover:shadow-amber-500/35 hover:-translate-y-0.5 active:scale-95"
+                          >
+                            <span>Browse Products</span>
+                            <ArrowRight className="h-4 w-4 stroke-[2.5] transition-transform duration-200 group-hover:translate-x-1" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

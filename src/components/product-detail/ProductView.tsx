@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/types/ecommerce.types";
-import { ProductCard } from "@/components/common";
+import { ProductCard, Button } from "@/components/common";
 import { SupportAndHelpstrip } from "@/components/shared";
 import { ROUTES } from "@/constants";
 import { useCartStore, useWishlistStore, useRecentlyViewedStore } from "@/stores";
@@ -370,41 +370,47 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                 {/* Primary Action Buttons */}
                 {product.stock <= 0 ? (
                   <div className="pt-2">
-                    <button
+                    <Button
                       type="button"
+                      variant="amber"
+                      size="lg"
                       onClick={() => setShowNotifyStock(true)}
-                      className="w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 cursor-pointer"
+                      className="w-full"
                     >
                       <BellRing className="h-4 w-4" />
                       <span>Notify Me When In Stock</span>
-                    </button>
+                    </Button>
                     <p className="text-center text-[11px] text-muted-foreground mt-1.5">
                       Get an instant SMS or Email notification when fresh stock arrives.
                     </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <button
+                    <Button
                       type="button"
+                      variant={isAdding ? "default" : "amber"}
+                      size="lg"
                       onClick={handleAddToCart}
                       className={cn(
-                        "flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-bold shadow-md transition-all active:scale-98 cursor-pointer",
-                        isAdding
-                          ? "bg-emerald-600 text-white"
-                          : "bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20"
+                        "w-full",
+                        isAdding && "bg-emerald-600 text-white hover:bg-emerald-700"
                       )}
                     >
                       <ShoppingCart className="h-4 w-4" />
                       <span>{isAdding ? "Added to Cart!" : "Add to Cart"}</span>
-                    </button>
+                    </Button>
 
-                    <Link
-                      href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}
-                      className="flex h-12 items-center justify-center gap-2 rounded-xl bg-foreground text-background hover:opacity-90 text-sm font-bold shadow-md transition-all active:scale-98"
+                    <Button
+                      asChild
+                      variant="default"
+                      size="lg"
+                      className="w-full"
                     >
-                      <Zap className="h-4 w-4 fill-current" />
-                      <span>Buy Now (Instant)</span>
-                    </Link>
+                      <Link href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}>
+                        <Zap className="h-4 w-4 fill-current" />
+                        <span>Buy Now (Instant)</span>
+                      </Link>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -535,8 +541,8 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-              {relatedProducts.slice(0, 4).map((p) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+              {relatedProducts.slice(0, 5).map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>

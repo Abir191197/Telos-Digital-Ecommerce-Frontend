@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/common";
 
 interface AddressStepProps {
   form: UseFormReturn<CheckoutFormValues>;
@@ -319,14 +320,16 @@ export function AddressStep({
 
         {/* Step 1 Action Button */}
         <div className="pt-2">
-          <button
+          <Button
             type="button"
+            variant="amber"
+            size="lg"
             onClick={onContinue}
-            className="w-full sm:w-auto px-8 h-12 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto"
           >
             <span>Continue to Payment Method</span>
             <Sparkles className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

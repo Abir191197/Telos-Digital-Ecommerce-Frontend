@@ -60,7 +60,7 @@ export default function HomePage() {
           badgeColor="bg-blue-500/10 text-blue-600 border-blue-500/20"
           title="Laptops, MacBooks & Ultrabooks"
           subtitle="Top performance laptops for creators, software developers, and professionals"
-          limit={4}
+          limit={5}
         />
 
         {/* ── Trust Advertising Banner 2: Express Delivery + 7-Day Easy Return Split Cards ── */}
@@ -76,7 +76,7 @@ export default function HomePage() {
           badgeColor="bg-purple-500/10 text-purple-600 border-purple-500/20"
           title="Audio, Headphones & TWS Earbuds"
           subtitle="Immerse in high-fidelity sound, noise cancelling headsets, and Bluetooth speakers"
-          limit={4}
+          limit={5}
         />
 
         {/* ── Trust Advertising Banner 3: Dedicated BD Hotline & Instant Help ── */}

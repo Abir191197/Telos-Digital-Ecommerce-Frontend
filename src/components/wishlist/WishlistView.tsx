@@ -17,6 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/common/Button";
 
 export function WishlistView() {
   const mounted = useMounted();
@@ -63,13 +64,17 @@ export function WishlistView() {
             Save items you love by tapping the heart icon on any smartphone, laptop, or gadget in our catalog.
           </p>
         </div>
-        <Link
-          href={ROUTES.PRODUCTS}
-          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all"
+        <Button
+          asChild
+          variant="amber"
+          size="lg"
+          className="shadow-sm"
         >
-          <ShoppingCart className="h-4 w-4" />
-          <span>Explore Verified Catalog</span>
-        </Link>
+          <Link href={ROUTES.PRODUCTS}>
+            <ShoppingCart className="h-4 w-4" />
+            <span>Explore Verified Catalog</span>
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -93,28 +98,31 @@ export function WishlistView() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={clearWishlist}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border/80 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-bold text-muted-foreground transition-all cursor-pointer"
+            className="text-muted-foreground hover:text-rose-600 hover:border-rose-500/30 hover:bg-rose-500/10"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Clear All</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="amber"
+            size="sm"
             onClick={handleAddAllToCart}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
           >
             <ShoppingCart className="h-4 w-4" />
             <span>Move All to Cart</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Grid of Wishlist Items */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
         {items.map((product) => {
           const isAdded = addedIds[product.id];
 
@@ -183,10 +191,10 @@ export function WishlistView() {
                     type="button"
                     onClick={() => handleMoveToCart(product)}
                     className={cn(
-                      "w-full h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs",
+                      "w-full h-10 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]",
                       isAdded
                         ? "bg-emerald-600 text-white"
-                        : "bg-foreground text-background hover:bg-amber-500 hover:text-white"
+                        : "bg-foreground text-background hover:bg-primary hover:text-primary-foreground"
                     )}
                   >
                     <ShoppingCart className="h-3.5 w-3.5" />

@@ -46,7 +46,7 @@ export function ShopByBudgetSection() {
   const activeTier = BUDGET_TIERS.find((t) => t.id === selectedTier) || BUDGET_TIERS[0];
 
   const filteredProducts = React.useMemo(() => {
-    return products.filter((p) => activeTier.filter(p.price)).slice(0, 8);
+    return products.filter((p) => activeTier.filter(p.price)).slice(0, 10);
   }, [activeTier]);
 
   return (
@@ -91,8 +91,8 @@ export function ShopByBudgetSection() {
         </div>
       </div>
 
-      {/* Products Grid: 2-col on mobile, 4-col on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      {/* Products Grid: 2-col on mobile, 3 on md, 5-col on xl desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
