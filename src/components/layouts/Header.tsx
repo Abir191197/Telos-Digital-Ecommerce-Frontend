@@ -249,16 +249,16 @@ export function Header() {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 250+ products, gadgets, fashion & brands..."
+              placeholder="Search 250+ authentic gadgets, laptops & electronics..."
               aria-label="Search catalog"
-              className="h-11 w-full rounded-full border border-border/70 bg-muted/30 pl-11 pr-14 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/80 shadow-xs transition-all duration-200 hover:border-border hover:bg-muted/50 focus:border-amber-500 focus:bg-background focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+              className="h-11 w-full rounded-full border border-border/80 bg-muted/40 pl-11 pr-14 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 shadow-xs transition-all duration-200 hover:border-amber-500/40 hover:bg-muted/60 focus:border-amber-500 focus:bg-background focus:ring-4 focus:ring-amber-500/15 focus:outline-none"
             />
 
             <button
               type="submit"
               aria-label="Submit search"
-              className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs transition-all hover:bg-amber-600 active:scale-95">
-              <Search className="h-4 w-4" />
+              className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-400 text-zinc-950 font-bold shadow-sm shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer">
+              <Search className="h-4 w-4 stroke-[2.5]" />
             </button>
           </form>
         </div>
@@ -481,14 +481,14 @@ export function Header() {
               }}
               aria-expanded={categoriesOpen}
               className={cn(
-                "flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-all hover:bg-amber-600 focus-visible:outline-none cursor-pointer",
-                categoriesOpen && "bg-amber-600 ring-2 ring-amber-500/20",
+                "flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-bold text-zinc-950 shadow-md shadow-amber-500/20 transition-all hover:shadow-lg hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-98 focus-visible:outline-none cursor-pointer",
+                categoriesOpen && "ring-2 ring-amber-400 shadow-amber-500/40",
               )}>
-              <LayoutGrid className="h-4 w-4 shrink-0" />
+              <LayoutGrid className="h-4 w-4 shrink-0 stroke-[2.4]" />
               <span>Categories</span>
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 shrink-0 transition-transform duration-200",
+                  "h-4 w-4 shrink-0 transition-transform duration-200 stroke-[2.4]",
                   categoriesOpen && "rotate-180",
                 )}
               />

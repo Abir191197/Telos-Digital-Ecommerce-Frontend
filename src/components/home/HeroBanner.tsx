@@ -256,16 +256,16 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                     <div className="flex flex-wrap items-center justify-start gap-3 pt-2">
                       <Link
                         href={slide.ctaLink}
-                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-xs sm:text-sm font-bold text-zinc-950 shadow-sm transition-all hover:bg-amber-400 active:scale-95"
+                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-6 py-3.5 text-xs sm:text-sm font-extrabold text-zinc-950 shadow-lg shadow-amber-500/25 transition-all hover:shadow-xl hover:shadow-amber-500/35 hover:-translate-y-0.5 active:scale-95"
                       >
                         <span>{slide.ctaText}</span>
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4 stroke-[2.5]" />
                       </Link>
 
                       {slide.secondaryCtaText && slide.secondaryCtaLink && (
                         <Link
                           href={slide.secondaryCtaLink}
-                          className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background/90 px-4 py-3 text-xs sm:text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted hover:border-border"
+                          className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md px-5 py-3.5 text-xs sm:text-sm font-semibold text-foreground transition-all hover:bg-card hover:border-amber-500/40 hover:-translate-y-0.5"
                         >
                           <span>{slide.secondaryCtaText}</span>
                         </Link>
