@@ -151,3 +151,27 @@
   }
 }
 
+@keyframes flameMotion {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4));
+  }
+  25% {
+    transform: scale(1.12) rotate(-6deg) translateY(-1px);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
+  }
+  50% {
+    transform: scale(1.05) rotate(4deg);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.7));
+  }
+  75% {
+    transform: scale(1.18) rotate(-3deg) translateY(-1px);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.9));
+  }
+}
+
+.animate-flame {
+  animation: flameMotion 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+

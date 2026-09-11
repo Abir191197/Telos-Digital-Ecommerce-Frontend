@@ -90,24 +90,27 @@ const CATEGORY_ICON_MAP: Record<
   Dog,
 };
 
-// 4 Quick Highlight Categories for Row 3
+// Quick Highlight Categories for Row 3 with icons
 const QUICK_CATEGORIES = [
   {
     label: "Smartphones",
     slug: "smartphones-tablets",
     href: ROUTES.CATEGORY_DETAIL("smartphones-tablets"),
+    icon: Smartphone,
     badge: "Hot",
   },
   {
     label: "Laptops",
     slug: "laptops-macbooks",
     href: ROUTES.CATEGORY_DETAIL("laptops-macbooks"),
+    icon: Laptop,
     badge: "Popular",
   },
   {
     label: "Audio & Wearables",
     slug: "audio-headphones",
     href: ROUTES.CATEGORY_DETAIL("audio-headphones"),
+    icon: Headphones,
   },
 ];
 
@@ -182,8 +185,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md transition-colors shadow-xs">
-      {/* ── Row 1: Top Bar (Dark Contrast, standard readable text) ── */}
-      <div className="border-b border-black/20 bg-zinc-950 text-xs text-zinc-300 dark:bg-black dark:border-zinc-800 transition-colors">
+      {/* ── Row 1: Top Bar (Thematic Deep Obsidian, Sharp Contrast) ── */}
+      <div className="border-b border-zinc-800 bg-[#0c0d0e] text-xs text-zinc-300 dark:bg-[#08090a] dark:border-zinc-800/80 transition-colors">
         <div className="container flex h-9 items-center justify-between gap-3 px-4 sm:px-6">
           {/* Left: BD Support / Hotline */}
           <div className="flex items-center gap-2 shrink-0 text-xs sm:text-sm">
@@ -515,7 +518,20 @@ export function Header() {
             ref={categoriesRef}
             className="relative flex items-center gap-1 sm:gap-2"
             onMouseLeave={() => setCategoriesOpen(false)}>
-            {/* Primary Categories Button (Rich Golden Amber Pill) */}
+            {/* Home Navigation (First Item) */}
+            <Link
+              href={ROUTES.HOME}
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted/60",
+                pathname === ROUTES.HOME
+                  ? "font-bold text-amber-600 dark:text-amber-400 bg-muted/40"
+                  : "text-muted-foreground hover:text-foreground",
+              )}>
+              <HomeIcon className={cn("h-4 w-4 shrink-0 stroke-[2.2]", pathname === ROUTES.HOME ? "text-amber-500" : "text-muted-foreground")} />
+              <span>Home</span>
+            </Link>
+
+            {/* Categories Button (Transparent / No Background) */}
             <button
               type="button"
               onClick={() => setCategoriesOpen((prev) => !prev)}
@@ -525,36 +541,25 @@ export function Header() {
               }}
               aria-expanded={categoriesOpen}
               className={cn(
-                "flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 py-2 text-sm font-bold shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 active:scale-98 focus-visible:outline-none cursor-pointer transition-all",
-                categoriesOpen && "ring-2 ring-amber-400 shadow-amber-500/40",
+                "flex items-center gap-2 rounded-xl bg-transparent hover:bg-muted/60 text-foreground px-3.5 py-2 text-sm font-semibold active:scale-98 focus-visible:outline-none cursor-pointer transition-all",
+                categoriesOpen && "bg-muted/80 text-amber-500",
               )}>
-              <LayoutGrid className="h-4 w-4 shrink-0 stroke-[2.4]" />
+              <LayoutGrid className="h-4 w-4 shrink-0 stroke-[2.2] text-amber-500" />
               <span>Categories</span>
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 shrink-0 transition-transform duration-200 stroke-[2.4]",
-                  categoriesOpen && "rotate-180",
+                  "h-4 w-4 shrink-0 transition-transform duration-200 stroke-[2.2] text-muted-foreground",
+                  categoriesOpen && "rotate-180 text-amber-500",
                 )}
               />
             </button>
 
-            {/* Home Navigation */}
-            <Link
-              href={ROUTES.HOME}
-              className={cn(
-                "px-2.5 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
-                pathname === ROUTES.HOME
-                  ? "font-bold text-amber-600 dark:text-amber-400"
-                  : "text-muted-foreground",
-              )}>
-              Home
-            </Link>
-
-            {/* Quick Categories with Interactive Hover Mega Card Trigger */}
+            {/* Quick Categories with Icons & Interactive Hover Mega Card Trigger */}
             <div className="hidden sm:flex items-center gap-1.5">
               {QUICK_CATEGORIES.map((cat) => {
                 const isCatActive =
                   categoriesOpen && activeCategorySlug === cat.slug;
+                const CatIcon = cat.icon;
                 return (
                   <Link
                     key={cat.label}
@@ -565,11 +570,12 @@ export function Header() {
                     }}
                     onClick={() => setCategoriesOpen(false)}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all",
+                      "flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all",
                       isCatActive
                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}>
+                    <CatIcon className={cn("h-4 w-4 shrink-0 stroke-[2.2]", isCatActive ? "text-amber-500" : "text-muted-foreground/80")} />
                     <span>{cat.label}</span>
                     {cat.badge && (
                       <span
@@ -788,9 +794,11 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-4 text-sm font-semibold text-muted-foreground">
             <Link
               href={`${ROUTES.HOME}?filter=deals`}
-              className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 hover:underline">
-              <Flame className="h-4 w-4 fill-amber-500/20" />
-              <span>Flash Deals</span>
+              className="group flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors">
+              <span className="inline-flex items-center justify-center">
+                <Flame className="h-4.5 w-4.5 fill-amber-500 text-amber-500 animate-flame transition-transform" />
+              </span>
+              <span className="group-hover:underline">Flash Deals</span>
             </Link>
           </div>
         </div>

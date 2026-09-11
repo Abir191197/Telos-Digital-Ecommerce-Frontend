@@ -27,6 +27,7 @@ export interface HeroSlide {
   secondaryCtaLink?: string;
   lightBg: string;
   darkBg: string;
+  glowColor: string;
   accentColor: string;
   tag: string;
   imageSrc: string;
@@ -46,9 +47,10 @@ const SLIDES: HeroSlide[] = [
     ctaLink: ROUTES.CATEGORY_DETAIL("gaming-gear-consoles"),
     secondaryCtaText: "Browse All Products",
     secondaryCtaLink: ROUTES.PRODUCTS,
-    lightBg: "from-rose-50/90 via-purple-50/30 to-background",
-    darkBg: "dark:from-zinc-950 dark:via-zinc-900 dark:to-rose-950/30",
-    accentColor: "from-rose-600 to-orange-500 dark:from-rose-400 dark:to-orange-400",
+    lightBg: "from-rose-200/90 via-purple-100 to-orange-100",
+    darkBg: "dark:from-[#2a0c1a] dark:via-[#1e0f33] dark:to-[#240b0b]",
+    glowColor: "bg-rose-500/30 dark:bg-rose-600/25",
+    accentColor: "from-rose-600 via-purple-600 to-orange-500 dark:from-rose-400 dark:via-purple-300 dark:to-orange-400",
     tag: "Hot Gaming Deals",
     imageSrc: "/images/hero/headset-mouse.png",
     imageAlt: "Pro Esports Gaming Headset and RGB Wireless Gaming Mouse",
@@ -65,9 +67,10 @@ const SLIDES: HeroSlide[] = [
     ctaLink: ROUTES.CATEGORY_DETAIL("smartphones-tablets"),
     secondaryCtaText: "Browse All Products",
     secondaryCtaLink: ROUTES.PRODUCTS,
-    lightBg: "from-amber-50/90 via-orange-50/40 to-background",
-    darkBg: "dark:from-zinc-950 dark:via-zinc-900 dark:to-amber-950/40",
-    accentColor: "from-amber-600 to-amber-500 dark:from-amber-400 dark:to-amber-500",
+    lightBg: "from-amber-200/90 via-orange-100 to-yellow-100",
+    darkBg: "dark:from-[#261705] dark:via-[#22140a] dark:to-[#2e1402]",
+    glowColor: "bg-amber-500/30 dark:bg-amber-600/25",
+    accentColor: "from-amber-600 via-orange-600 to-yellow-600 dark:from-amber-400 dark:via-orange-400 dark:to-yellow-300",
     tag: "Up to 35% OFF",
     imageSrc: "/images/hero/electronics.png",
     imageAlt: "Premium Laptop, Smartphone and Wireless Headphones",
@@ -84,9 +87,10 @@ const SLIDES: HeroSlide[] = [
     ctaLink: ROUTES.CATEGORY_DETAIL("smartwatches-wearables"),
     secondaryCtaText: "Browse All Products",
     secondaryCtaLink: ROUTES.PRODUCTS,
-    lightBg: "from-blue-50/90 via-cyan-50/40 to-background",
-    darkBg: "dark:from-zinc-950 dark:via-zinc-900 dark:to-blue-950/40",
-    accentColor: "from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400",
+    lightBg: "from-sky-200/90 via-blue-100 to-indigo-100",
+    darkBg: "dark:from-[#081d3d] dark:via-[#0e1d40] dark:to-[#17133d]",
+    glowColor: "bg-sky-500/30 dark:bg-sky-600/25",
+    accentColor: "from-sky-600 via-blue-600 to-indigo-600 dark:from-sky-400 dark:via-blue-300 dark:to-indigo-300",
     tag: "Free Shipping",
     imageSrc: "/images/hero/smartwatch.png",
     imageAlt: "Smartwatch with AMOLED display and wireless earbuds",
@@ -202,6 +206,12 @@ export function HeroBanner({ autoSwipeDurationMs = 2800 }: HeroBannerProps) {
                 slide.darkBg
               )}
             >
+              {/* Vivid Ambient Atmospheric Radial Glow Orbs */}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+                <div className={cn("absolute -top-24 left-1/4 h-80 w-80 sm:h-96 sm:w-96 rounded-full blur-3xl opacity-70", slide.glowColor)} />
+                <div className={cn("absolute -bottom-24 right-10 lg:right-1/4 h-72 w-72 sm:h-88 sm:w-88 rounded-full blur-3xl opacity-80", slide.glowColor)} />
+              </div>
+
               {/* Mobile Subtle Background Image Layer */}
               <div
                 aria-hidden="true"
