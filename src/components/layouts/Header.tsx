@@ -826,7 +826,7 @@ export function Header() {
           {/* Right link in nav row */}
           <div className="hidden lg:flex items-center gap-4 text-sm font-semibold text-muted-foreground">
             <Link
-              href={`${ROUTES.HOME}?filter=deals`}
+              href={ROUTES.FLASH_DEALS}
               className="group flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors">
               <span className="inline-flex items-center justify-center">
                 <Flame className="h-4.5 w-4.5 fill-amber-500 text-amber-500 animate-flame transition-transform" />

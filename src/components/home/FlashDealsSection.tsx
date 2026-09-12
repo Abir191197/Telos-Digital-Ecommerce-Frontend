@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Flame, Clock } from "lucide-react";
+import { Flame, Clock, ArrowRight } from "lucide-react";
+import { ROUTES } from "@/constants";
 import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { products } from "@/data";
 import { ProductCard } from "@/components/common";
@@ -99,25 +100,35 @@ export function FlashDealsSection() {
               </div>
             </div>
 
-            {/* Live Countdown Timer */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                <Clock className="h-3.5 w-3.5 text-amber-500" />
-                Ends In:
-              </span>
-              <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-foreground">
-                <span className="rounded-lg bg-background border border-border/80 px-2 py-1 shadow-xs">
-                  {String(timeLeft.hours).padStart(2, "0")}h
+            {/* Live Countdown Timer & View All Link */}
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 text-amber-500" />
+                  Ends In:
                 </span>
-                <span>:</span>
-                <span className="rounded-lg bg-background border border-border/80 px-2 py-1 shadow-xs">
-                  {String(timeLeft.minutes).padStart(2, "0")}m
-                </span>
-                <span>:</span>
-                <span className="rounded-lg bg-amber-500 text-zinc-950 px-2 py-1 shadow-xs font-black">
-                  {String(timeLeft.seconds).padStart(2, "0")}s
-                </span>
+                <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-foreground">
+                  <span className="rounded-lg bg-background border border-border/80 px-2 py-1 shadow-xs">
+                    {String(timeLeft.hours).padStart(2, "0")}h
+                  </span>
+                  <span>:</span>
+                  <span className="rounded-lg bg-background border border-border/80 px-2 py-1 shadow-xs">
+                    {String(timeLeft.minutes).padStart(2, "0")}m
+                  </span>
+                  <span>:</span>
+                  <span className="rounded-lg bg-amber-500 text-zinc-950 px-2 py-1 shadow-xs font-black">
+                    {String(timeLeft.seconds).padStart(2, "0")}s
+                  </span>
+                </div>
               </div>
+
+              <Link
+                href={ROUTES.FLASH_DEALS}
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs font-bold text-foreground transition-all group shrink-0"
+              >
+                <span>View All</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 text-amber-500" />
+              </Link>
             </div>
           </div>
 
