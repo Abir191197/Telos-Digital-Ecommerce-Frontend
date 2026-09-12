@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/types/ecommerce.types";
 import { ProductCard, Button } from "@/components/common";
-import { SupportAndHelpstrip } from "@/components/shared";
+import { SupportAndHelpstrip, TrustGuaranteeCards } from "@/components/shared";
 import { ROUTES } from "@/constants";
 import { useCartStore, useWishlistStore, useRecentlyViewedStore } from "@/stores";
 import { cn } from "@/lib/utils";
+import { LazyMotion, domAnimation, m, AnimatePresence, type Variants } from "framer-motion";
 import {
   Star,
   ShieldCheck,
@@ -38,6 +39,15 @@ interface ProductViewProps {
   product: Product;
   relatedProducts: Product[];
 }
+
+const sectionFadeUp: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 
 export function ProductView({ product, relatedProducts }: ProductViewProps) {
   // Image gallery state
@@ -105,348 +115,360 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
     : 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
-      {/* ── Breadcrumb Navigation ── */}
-      <nav aria-label="Breadcrumb" className="border-b border-border/60 bg-muted/20 py-3">
-        <div className="container px-3 sm:px-6">
-          <ol className="flex items-center gap-1.5 text-xs text-muted-foreground overflow-x-auto no-scrollbar whitespace-nowrap">
-            <li>
-              <Link href={ROUTES.HOME} className="hover:text-foreground transition-colors">
-                Home
-              </Link>
-            </li>
-            <ChevronRight className="h-3 w-3 shrink-0 text-border" />
-            <li>
-              <Link href={ROUTES.CATEGORIES} className="hover:text-foreground transition-colors">
-                Categories
-              </Link>
-            </li>
-            <ChevronRight className="h-3 w-3 shrink-0 text-border" />
-            <li>
-              <Link
-                href={ROUTES.CATEGORY_DETAIL(product.categorySlug)}
-                className="hover:text-foreground transition-colors"
-              >
-                {product.categoryName}
-              </Link>
-            </li>
-            <ChevronRight className="h-3 w-3 shrink-0 text-border" />
-            <li className="font-semibold text-foreground truncate max-w-[200px] sm:max-w-none">
-              {product.name}
-            </li>
-          </ol>
-        </div>
-      </nav>
-
-      {/* ── Main Product Stage ── */}
-      <div className="container px-3 sm:px-6 py-6 sm:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
-          {/* Left Column: Media Gallery (5 cols on lg) */}
-          <div className="lg:col-span-6 space-y-4">
-            {/* Main Stage Image */}
-            <div className="group relative aspect-square w-full overflow-hidden rounded-3xl border border-border/80 bg-card shadow-xs">
-              <Image
-                src={images[activeImageIndex] || product.thumbnail}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-
-              {/* Badges */}
-              <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                {product.discountPercentage && product.discountPercentage > 0 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-600 px-3 py-1 text-xs font-bold text-white shadow-md">
-                    <Zap className="h-3.5 w-3.5 fill-white" />
-                    Save {product.discountPercentage}%
-                  </span>
-                ) : null}
-                {product.badge && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    {product.badge}
-                  </span>
-                )}
-              </div>
-
-              {/* Wishlist & Share floating action pills */}
-              <div className="absolute top-3 right-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  aria-label="Share product"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-background/85 backdrop-blur-md text-muted-foreground shadow-sm hover:text-foreground hover:bg-background transition-all"
-                >
-                  <Share2 className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleToggleWishlist}
-                  aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-full bg-background/85 backdrop-blur-md shadow-sm transition-all",
-                    isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
-                  )}
-                >
-                  <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
-                </button>
-              </div>
-
-              {/* Share copied toast indicator */}
-              {showShareToast && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 text-background px-4 py-1.5 text-xs font-semibold shadow-lg">
-                  Link copied to clipboard!
-                </div>
-              )}
-            </div>
-
-            {/* Thumbnail Strip */}
-            {images.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
-                {images.map((img, idx) => (
-                  <button
-                    key={img + idx}
-                    type="button"
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={cn(
-                      "relative h-18 w-18 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer bg-muted/30",
-                      activeImageIndex === idx
-                        ? "border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
-                        : "border-border/70 hover:border-muted-foreground/40 opacity-70 hover:opacity-100"
-                    )}
-                  >
-                    <Image src={img} alt={`${product.name} thumb ${idx + 1}`} fill className="object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Authenticity trust badge below image */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/70 bg-card/60 text-xs">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                <span className="font-semibold text-foreground">100% Genuine BD Importer Stock</span>
-              </div>
-              <span className="text-muted-foreground">SKU: {product.sku}</span>
-            </div>
-          </div>
-
-          {/* Right Column: Buying Decision Hub (6 cols on lg) */}
-          <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
-            <div>
-              {/* Brand & Stock Pill */}
-              <div className="flex items-center justify-between gap-3">
-                <Link
-                  href={ROUTES.PRODUCTS}
-                  className="rounded-full bg-amber-500/10 border border-amber-500/25 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-600 hover:bg-amber-500/20 transition-colors"
-                >
-                  {product.brand} Official
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-screen bg-background text-foreground pb-20">
+        {/* ── Breadcrumb Navigation ── */}
+        <nav aria-label="Breadcrumb" className="border-b border-border/40 bg-muted/10 py-3">
+          <div className="container px-3 sm:px-6">
+            <ol className="flex items-center gap-1.5 text-xs text-muted-foreground overflow-x-auto no-scrollbar whitespace-nowrap">
+              <li>
+                <Link href={ROUTES.HOME} className="hover:text-foreground transition-colors">
+                  Home
                 </Link>
-
-                {product.inStock ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    In Stock ({product.stock} units available)
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-rose-600">Out of Stock</span>
-                )}
-              </div>
-
-              {/* Product Title */}
-              <h1 className="mt-3 text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight text-foreground">
+              </li>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
+              <li>
+                <Link href={ROUTES.CATEGORIES} className="hover:text-foreground transition-colors">
+                  Categories
+                </Link>
+              </li>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
+              <li>
+                <Link
+                  href={ROUTES.CATEGORY_DETAIL(product.categorySlug)}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {product.categoryName}
+                </Link>
+              </li>
+              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
+              <li className="font-semibold text-foreground truncate max-w-[200px] sm:max-w-none">
                 {product.name}
-              </h1>
+              </li>
+            </ol>
+          </div>
+        </nav>
 
-              {/* Rating & Short Review Summary */}
-              <div className="mt-3 flex items-center gap-3 text-xs sm:text-sm">
-                <div className="flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-600 font-bold">
-                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                  <span>{product.rating.toFixed(1)}</span>
-                </div>
-                <span className="text-muted-foreground font-medium">
-                  {product.reviewCount} customer reviews
-                </span>
-                <span className="text-border">|</span>
-                <span className="text-muted-foreground">
-                  Subcategory:{" "}
-                  <strong className="text-foreground">
-                    {product.specifications?.Subcategory || product.categoryName}
-                  </strong>
-                </span>
-              </div>
+        {/* ── Main Product Stage ── */}
+        <div className="container px-3 sm:px-6 py-6 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-14 items-start">
+            {/* Left Column: Media Stage (6 cols on lg, sticky) */}
+            <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
+              {/* Main Stage Image (Full-bleed cover, zero white space) */}
+              <div className="group relative aspect-square w-full overflow-hidden rounded-3xl">
+                <AnimatePresence mode="wait">
+                  <m.div
+                    key={activeImageIndex}
+                    initial={{ opacity: 0, scale: 1.02 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="relative h-full w-full"
+                  >
+                    <Image
+                      src={images[activeImageIndex] || product.thumbnail}
+                      alt={product.name}
+                      fill
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </m.div>
+                </AnimatePresence>
 
-              {/* Pricing Box */}
-              <div className="mt-5 p-4 rounded-2xl border border-border/80 bg-muted/30">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-black text-foreground">
-                    ৳{currentPrice.toLocaleString()}
-                  </span>
-                  {product.originalPrice && product.originalPrice > currentPrice && (
-                    <>
-                      <span className="text-base sm:text-lg text-muted-foreground line-through">
-                        ৳{product.originalPrice.toLocaleString()}
-                      </span>
-                      <span className="rounded-md bg-rose-600/10 text-rose-600 px-2 py-0.5 text-xs font-bold">
-                        Save ৳{discountAmount.toLocaleString()}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Inclusive of all VAT and official Bangladesh import duties.
-                </p>
-              </div>
-
-              {/* Short Description */}
-              <p className="mt-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                {product.shortDescription}
-              </p>
-
-              {/* Variant Selector (if variants exist) */}
-              {product.variants && product.variants.length > 0 && (
-                <div className="mt-6 space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Select Edition / Specification:
-                  </label>
-                  <div className="flex flex-wrap gap-2.5">
-                    {product.variants.map((v) => (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() => setSelectedVariantId(v.id)}
-                        className={cn(
-                          "rounded-xl border px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer",
-                          selectedVariantId === v.id
-                            ? "border-amber-500 bg-amber-500/10 text-amber-700 shadow-xs"
-                            : "border-border/80 bg-card text-foreground hover:border-border"
-                        )}
-                      >
-                        <span>{v.name}</span>
-                        {v.price !== product.price && (
-                          <span className="ml-1.5 text-[11px] text-muted-foreground">
-                            (৳{v.price.toLocaleString()})
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Quantity Stepper & CTA Buttons */}
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Quantity:
-                  </label>
-                  <div className="flex items-center rounded-xl border border-border/80 bg-card shadow-2xs">
-                    <button
-                      type="button"
-                      disabled={quantity <= 1}
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 cursor-pointer"
-                    >
-                      <Minus className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="w-10 text-center text-sm font-bold">{quantity}</span>
-                    <button
-                      type="button"
-                      disabled={quantity >= product.stock}
-                      onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                      className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  {product.stock > 0 && quantity >= product.stock && (
-                    <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg">
-                      Max stock ({product.stock}) reached
+                {/* Badges */}
+                <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10">
+                  {product.discountPercentage && product.discountPercentage > 0 ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-zinc-950 px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm">
+                      <Zap className="h-3 w-3 fill-zinc-950" />
+                      Save {product.discountPercentage}%
+                    </span>
+                  ) : null}
+                  {product.badge && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-900/80 dark:bg-white/90 text-white dark:text-zinc-900 backdrop-blur-md px-3 py-1 text-[11px] font-bold shadow-xs">
+                      <Sparkles className="h-3 w-3" />
+                      {product.badge}
                     </span>
                   )}
                 </div>
 
-                {/* Primary Action Buttons */}
-                {product.stock <= 0 ? (
-                  <div className="pt-2">
-                    <Button
-                      type="button"
-                      variant="amber"
-                      size="lg"
-                      onClick={() => setShowNotifyStock(true)}
-                      className="w-full"
-                    >
-                      <BellRing className="h-4 w-4" />
-                      <span>Notify Me When In Stock</span>
-                    </Button>
-                    <p className="text-center text-[11px] text-muted-foreground mt-1.5">
-                      Get an instant SMS or Email notification when fresh stock arrives.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <Button
-                      type="button"
-                      variant={isAdding ? "default" : "amber"}
-                      size="lg"
-                      onClick={handleAddToCart}
-                      className={cn(
-                        "w-full",
-                        isAdding && "bg-emerald-600 text-white hover:bg-emerald-700"
-                      )}
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>{isAdding ? "Added to Cart!" : "Add to Cart"}</span>
-                    </Button>
+                {/* Wishlist & Share floating action pills */}
+                <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10">
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    aria-label="Share product"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-muted-foreground shadow-xs hover:text-foreground hover:bg-background transition-all cursor-pointer"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleToggleWishlist}
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
+                      isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
+                    )}
+                  >
+                    <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
+                  </button>
+                </div>
 
-                    <Button
-                      asChild
-                      variant="default"
-                      size="lg"
-                      className="w-full"
-                    >
-                      <Link href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}>
-                        <Zap className="h-4 w-4 fill-current" />
-                        <span>Buy Now (Instant)</span>
-                      </Link>
-                    </Button>
+                {/* Share copied toast indicator */}
+                {showShareToast && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 text-background px-4 py-1.5 text-xs font-semibold shadow-lg z-20">
+                    Link copied to clipboard!
                   </div>
                 )}
               </div>
 
-              {/* Delivery & Warranty Guarantees Strip */}
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-4 border-t border-border/60">
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/40 text-xs">
-                  <Truck className="h-4 w-4 text-amber-500 shrink-0" />
-                  <div>
-                    <p className="font-bold text-foreground">Express 24-48h</p>
-                    <p className="text-[10px] text-muted-foreground">Dhaka & Nationwide</p>
+              {/* Thumbnail Strip */}
+              {images.length > 1 && (
+                <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+                  {images.map((img, idx) => (
+                    <button
+                      key={img + idx}
+                      type="button"
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={cn(
+                        "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer",
+                        activeImageIndex === idx
+                          ? "ring-2 ring-amber-500 shadow-sm"
+                          : "opacity-60 hover:opacity-100"
+                      )}
+                    >
+                      <Image src={img} alt={`${product.name} thumb ${idx + 1}`} fill className="object-cover object-center" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Buying Decision Hub (6 cols on lg) */}
+            <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+              <div>
+                {/* Brand & Stock Pill */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={ROUTES.PRODUCTS}
+                      className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wider hover:bg-amber-500 hover:text-zinc-950 transition-colors"
+                    >
+                      {product.brand} Official
+                    </Link>
+                    <span className="text-[11px] text-muted-foreground font-mono">SKU: {product.sku}</span>
                   </div>
+
+                  {product.inStock ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      In Stock ({product.stock} available)
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold text-rose-600">Out of Stock</span>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/40 text-xs">
-                  <RotateCcw className="h-4 w-4 text-blue-500 shrink-0" />
-                  <div>
-                    <p className="font-bold text-foreground">7 Days Return</p>
-                    <p className="text-[10px] text-muted-foreground">Doorstep exchange</p>
+                {/* Product Title */}
+                <h1 className="mt-3 text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight text-foreground leading-tight">
+                  {product.name}
+                </h1>
+
+                {/* Rating & Short Review Summary */}
+                <div className="mt-3 flex items-center gap-3 text-xs sm:text-sm">
+                  <div className="flex items-center gap-1 rounded-lg bg-amber-500/15 px-2 py-0.5 text-amber-700 dark:text-amber-400 font-bold">
+                    <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                    <span>{product.rating.toFixed(1)}</span>
                   </div>
+                  <span className="text-muted-foreground font-medium">
+                    {product.reviewCount} customer reviews
+                  </span>
+                  <span className="text-muted-foreground/30">•</span>
+                  <span className="text-muted-foreground">
+                    Aisle:{" "}
+                    <strong className="text-foreground font-semibold">
+                      {product.specifications?.Subcategory || product.categoryName}
+                    </strong>
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/40 text-xs">
-                  <Award className="h-4 w-4 text-purple-500 shrink-0" />
-                  <div>
-                    <p className="font-bold text-foreground">Official Warranty</p>
-                    <p className="text-[10px] text-muted-foreground">Brand service center</p>
+                {/* Clean Frameless Pricing Box */}
+                <div className="mt-5 p-5 rounded-3xl bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+                  <div className="flex flex-wrap items-baseline gap-3">
+                    <span className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+                      ৳{currentPrice.toLocaleString()}
+                    </span>
+                    {product.originalPrice && product.originalPrice > currentPrice && (
+                      <>
+                        <span className="text-base sm:text-lg text-muted-foreground line-through">
+                          ৳{product.originalPrice.toLocaleString()}
+                        </span>
+                        <span className="rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 px-2.5 py-0.5 text-xs font-bold">
+                          Save ৳{discountAmount.toLocaleString()}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Inclusive of VAT and official Bangladesh warranty. Free delivery in Dhaka metro.
+                  </p>
+                </div>
+
+                {/* Short Description */}
+                <p className="mt-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {product.shortDescription}
+                </p>
+
+                {/* Variant Selector (if variants exist) */}
+                {product.variants && product.variants.length > 0 && (
+                  <div className="mt-6 space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Select Edition / Specification:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.map((v) => (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => setSelectedVariantId(v.id)}
+                          className={cn(
+                            "rounded-2xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-2xs",
+                            selectedVariantId === v.id
+                              ? "bg-amber-500 text-zinc-950 font-bold shadow-md shadow-amber-500/20"
+                              : "bg-card text-foreground hover:bg-muted"
+                          )}
+                        >
+                          <span>{v.name}</span>
+                          {v.price !== product.price && (
+                            <span className="ml-1.5 text-[11px] opacity-75">
+                              (৳{v.price.toLocaleString()})
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity Stepper & CTA Buttons */}
+                <div className="mt-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Quantity:
+                    </label>
+                    <div className="flex items-center rounded-2xl bg-card shadow-2xs p-1">
+                      <button
+                        type="button"
+                        disabled={quantity <= 1}
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 cursor-pointer transition-colors"
+                      >
+                        <Minus className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="w-10 text-center text-sm font-black">{quantity}</span>
+                      <button
+                        type="button"
+                        disabled={quantity >= product.stock}
+                        onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {product.stock > 0 && quantity >= product.stock && (
+                      <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg">
+                        Max stock reached
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Primary Action Buttons */}
+                  {product.stock <= 0 ? (
+                    <div>
+                      <Button
+                        type="button"
+                        variant="amber"
+                        size="lg"
+                        onClick={() => setShowNotifyStock(true)}
+                        className="w-full rounded-2xl"
+                      >
+                        <BellRing className="h-4 w-4" />
+                        <span>Notify Me When In Stock</span>
+                      </Button>
+                      <p className="text-center text-[11px] text-muted-foreground mt-1.5">
+                        Get an instant SMS or Email notification when fresh stock arrives.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Button
+                        type="button"
+                        variant={isAdding ? "default" : "amber"}
+                        size="lg"
+                        onClick={handleAddToCart}
+                        className={cn(
+                          "w-full rounded-2xl font-bold shadow-md shadow-amber-500/20",
+                          isAdding && "bg-emerald-600 text-white hover:bg-emerald-700"
+                        )}
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>{isAdding ? "Added to Cart!" : "Add to Cart"}</span>
+                      </Button>
+
+                      <Button
+                        asChild
+                        variant="default"
+                        size="lg"
+                        className="w-full rounded-2xl font-bold shadow-md"
+                      >
+                        <Link href={`/checkout?directProduct=${product.slug}&qty=${quantity}`}>
+                          <Zap className="h-4 w-4 fill-current text-amber-400" />
+                          <span>Buy Now (Instant)</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Delivery & Warranty Guarantees Strip (Clean micro-pill row) */}
+                <div className="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t border-border/40">
+                  <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-card shadow-2xs">
+                    <Truck className="h-4 w-4 text-amber-500 shrink-0" />
+                    <div>
+                      <p className="font-bold text-xs text-foreground">Express 24-48h</p>
+                      <p className="text-[10px] text-muted-foreground">Dhaka & Nationwide</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-card shadow-2xs">
+                    <RotateCcw className="h-4 w-4 text-blue-500 shrink-0" />
+                    <div>
+                      <p className="font-bold text-xs text-foreground">7 Days Return</p>
+                      <p className="text-[10px] text-muted-foreground">Doorstep replacement</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-card shadow-2xs">
+                    <Award className="h-4 w-4 text-purple-500 shrink-0" />
+                    <div>
+                      <p className="font-bold text-xs text-foreground">Official Warranty</p>
+                      <p className="text-[10px] text-muted-foreground">Authorized service</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* ── Detailed Specifications & Description Tabs ── */}
-        <section className="mt-14 pt-10 border-t border-border/70 space-y-6">
+        <m.section
+          variants={sectionFadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          className="mt-14 pt-10 border-t border-border/70 space-y-6"
+        >
           <div className="space-y-1">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
               Technical Details
@@ -518,11 +540,17 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
               </div>
             </div>
           </div>
-        </section>
+        </m.section>
 
         {/* ── Related Products from Same Aisle ── */}
         {relatedProducts.length > 0 && (
-          <section className="mt-14 pt-10 border-t border-border/70 space-y-6">
+          <m.section
+            variants={sectionFadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="mt-14 pt-10 border-t border-border/70 space-y-6"
+          >
             <div className="flex items-end justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
@@ -546,24 +574,31 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
-          </section>
+          </m.section>
         )}
 
         {/* ── Recently Viewed Products Section ── */}
         {recentlyViewed.length > 0 && (
-          <section aria-label="Recently Viewed Products" className="mt-14 pt-10 border-t border-border/70 space-y-6">
-            <div className="rounded-2xl border border-border/70 bg-gradient-to-br from-muted/40 via-card to-card p-4 sm:p-6 shadow-xs">
+          <m.section
+            aria-label="Recently Viewed Products"
+            variants={sectionFadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="mt-14 pt-10 border-t border-border/70 space-y-6"
+          >
+            <div className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-card p-5 sm:p-7 shadow-xl shadow-amber-500/5 dark:shadow-2xl dark:shadow-black/60">
               <div className="flex flex-row items-center justify-between gap-3 mb-5 border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                    <History className="h-4.5 w-4.5" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs">
+                    <History className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg sm:text-2xl font-black tracking-tight text-foreground">
                         Recently Viewed
                       </h2>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                      <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400">
                         {recentlyViewed.length}
                       </span>
                     </div>
@@ -572,16 +607,6 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                     </p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={clearRecentlyViewed}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer px-2.5 py-1 rounded-lg hover:bg-rose-500/10"
-                  title="Clear recently viewed history"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  <span className="hidden xs:inline">Clear History</span>
-                </button>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
@@ -590,13 +615,31 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                 ))}
               </div>
             </div>
-          </section>
+          </m.section>
         )}
 
+        {/* ── High-Density BD Trust & Guarantee Cards Strip ── */}
+        <m.section
+          variants={sectionFadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          className="mt-14"
+        >
+          <TrustGuaranteeCards />
+        </m.section>
+
         {/* ── Customer Help & Dhaka Support Strip ── */}
-        <section className="mt-14">
+        <m.section
+          variants={sectionFadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          className="mt-10"
+        >
           <SupportAndHelpstrip />
-        </section>
+        </m.section>
+      </div>
       </div>
 
       {/* ── Notify Me When In Stock Modal ── */}
@@ -606,6 +649,6 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
         isOpen={showNotifyStock}
         onClose={() => setShowNotifyStock(false)}
       />
-    </div>
+    </LazyMotion>
   );
 }
