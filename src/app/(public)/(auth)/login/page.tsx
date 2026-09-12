@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[calc(100vh-14rem)] py-12 px-4 flex items-center justify-center">
+    <div className="min-h-[calc(100vh-14rem)] w-full">
       <LoginForm />
     </div>
   );

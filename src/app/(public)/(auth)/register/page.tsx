@@ -8,9 +8,8 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="container flex min-h-[calc(100vh-14rem)] items-center justify-center py-10 px-3 sm:px-6">
+    <div className="min-h-[calc(100vh-14rem)] w-full">
       <RegisterForm />
     </div>
   );
 }
-
