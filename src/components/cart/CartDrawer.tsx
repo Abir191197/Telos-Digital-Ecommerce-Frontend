@@ -181,33 +181,36 @@ export function CartDrawer() {
         </div>
 
         {/* ── Free Shipping Progress Bar ── */}
-        <div className="border-b border-border/60 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 px-5 py-3.5">
+        <div className="border-b border-border/60 bg-muted/20 px-5 py-3.5">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 font-semibold text-foreground">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
                 <Truck className="h-3.5 w-3.5" />
               </div>
               {freeShippingRemaining === 0 ? (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5" /> Free Express Delivery Unlocked!
-                </span>
+                <div className="flex items-center gap-1.5 font-bold text-foreground">
+                  <span className="text-xs">Free Delivery Qualified</span>
+                  <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.2 text-[10px] text-amber-600 dark:text-amber-400">
+                    ৳0 Delivery
+                  </span>
+                </div>
               ) : (
                 <span>
-                  Add <strong className="text-amber-500">৳{freeShippingRemaining.toLocaleString()}</strong> for Free Delivery
+                  Add <strong className="text-amber-500 font-bold">৳{freeShippingRemaining.toLocaleString()}</strong> for Free Delivery
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-black text-muted-foreground">
+            <span className="text-[11px] font-black tabular-nums text-foreground">
               {freeShippingProgress}%
             </span>
           </div>
 
-          <div className="mt-2.5 h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
+          <div className="mt-2.5 h-1.5 w-full rounded-full bg-muted/70 overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500 shadow-xs",
                 freeShippingRemaining === 0
-                  ? "bg-emerald-500"
+                  ? "bg-linear-to-r from-amber-500 via-amber-400 to-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
                   : "bg-linear-to-r from-amber-500 to-amber-400"
               )}
               style={{ width: `${freeShippingProgress}%` }}
@@ -447,35 +450,44 @@ export function CartDrawer() {
               </div>
             </div>
 
-            {/* Actions: Checkout + View Full Cart */}
+            {/* Actions: View Cart + Checkout (Horizontal Clean Layout) */}
             <div className="space-y-2 pt-1">
-              <Button
-                asChild
-                variant="amber"
-                size="lg"
-                className="w-full font-bold shadow-lg shadow-amber-500/20 active:scale-[0.99] transition-transform"
-              >
-                <Link
-                  href="/checkout"
-                  onClick={closeCart}
-                  className="flex items-center justify-center gap-2"
+              <div className="grid grid-cols-2 gap-2.5">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="default"
+                  className="rounded-xl font-bold border-border/80 hover:border-amber-500/40 hover:bg-amber-500/5 text-xs h-10 transition-colors"
                 >
-                  <span>Proceed to Checkout</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+                  <Link
+                    href={ROUTES.CART}
+                    onClick={closeCart}
+                    className="flex items-center justify-center gap-1.5"
+                  >
+                    <span>View Cart</span>
+                  </Link>
+                </Button>
 
-              <div className="flex items-center justify-between px-1">
-                <Link
-                  href="/cart"
-                  onClick={closeCart}
-                  className="text-xs font-semibold text-muted-foreground hover:text-amber-500 transition-colors"
+                <Button
+                  asChild
+                  variant="amber"
+                  size="default"
+                  className="rounded-xl font-bold text-xs h-10 shadow-md shadow-amber-500/20 active:scale-[0.98] transition-transform"
                 >
-                  View Full Cart & Details →
-                </Link>
-                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Official Guarantee
-                </span>
+                  <Link
+                    href={ROUTES.CHECKOUT}
+                    onClick={closeCart}
+                    className="flex items-center justify-center gap-1.5"
+                  >
+                    <span>Checkout</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground pt-0.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                <span>100% Genuine BD Warranty</span>
               </div>
 
               {/* Payment Methods Pill */}
