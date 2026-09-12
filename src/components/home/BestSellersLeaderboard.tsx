@@ -6,6 +6,30 @@ import Image from "next/image";
 import { Trophy, Star, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react";
 import { products } from "@/data";
 import { ROUTES } from "@/constants";
+import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+
+const leaderboardContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const leaderboardCardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 24,
+      stiffness: 280,
+    },
+  },
+};
 
 export function BestSellersLeaderboard() {
   // Top 4 best sellers ranked by reviews & rating
@@ -23,42 +47,56 @@ export function BestSellersLeaderboard() {
   ];
 
   return (
-    <section aria-label="Best Sellers Leaderboard" className="w-full">
-      <div className="flex items-end justify-between mb-5 sm:mb-6">
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-600 dark:text-amber-400">
-              <Trophy className="h-3 w-3" />
-              Customer Top Picks
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
-            Best Sellers Leaderboard
-          </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Most bought and highly-rated products across Bangladesh this week
-          </p>
-        </div>
-
-        <Link
-          href={ROUTES.PRODUCTS}
-          className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
+    <LazyMotion features={domAnimation}>
+      <section aria-label="Best Sellers Leaderboard" className="w-full">
+        <m.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-end justify-between mb-5 sm:mb-6"
         >
-          <span>View All</span>
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
-        </Link>
-      </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-600 dark:text-amber-400">
+                <Trophy className="h-3 w-3" />
+                Customer Top Picks
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+              Best Sellers Leaderboard
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Most bought and highly-rated products across Bangladesh this week
+            </p>
+          </div>
 
-      {/* Leaderboard: 2 cols on mobile, 4 cols on desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <Link
+            href={ROUTES.PRODUCTS}
+            className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
+          >
+            <span>View All</span>
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
+          </Link>
+        </m.div>
+
+        {/* Leaderboard: 2 cols on mobile, 4 cols on desktop */}
+        <m.div
+          variants={leaderboardContainerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
+        >
         {topRanked.map((product, idx) => {
           const medal = MEDAL_STYLES[idx] || MEDAL_STYLES[3];
           const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);
 
           return (
-            <div
+            <m.div
               key={product.id}
-              className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-all duration-300 hover:-translate-y-1"
+              variants={leaderboardCardVariants}
+              className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-shadow duration-300"
             >
               {/* Rank Header Badge */}
               <div className="flex items-center justify-between pb-3 border-b border-border/40">
@@ -125,11 +163,12 @@ export function BestSellersLeaderboard() {
                   <span>Buy</span>
                 </Link>
               </div>
-            </div>
+            </m.div>
           );
         })}
-      </div>
+      </m.div>
     </section>
-  );
+  </LazyMotion>
+);
 }
 

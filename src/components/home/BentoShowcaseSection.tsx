@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles, Layers, Flame, Zap } from "lucide-react";
+import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,30 @@ interface BentoItem {
   priceHint?: string;
   ctaText: string;
 }
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const tileVariants: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 24,
+      stiffness: 260,
+    },
+  },
+};
 
 const BENTO_ITEMS: BentoItem[] = [
   {
@@ -83,44 +108,52 @@ const BENTO_ITEMS: BentoItem[] = [
 
 export function BentoShowcaseSection() {
   return (
-    <section aria-label="Curated Lifestyle Collections" className="w-full">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-              Featured Collections & Lifestyle
-            </h2>
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              Hand-Picked
-            </span>
+    <LazyMotion features={domAnimation}>
+      <section aria-label="Curated Lifestyle Collections" className="w-full">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                Featured Collections & Lifestyle
+              </h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                <Sparkles className="h-3.5 w-3.5" />
+                Hand-Picked
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Dynamic curated hubs tailored for work, gaming, sound, and mobility
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Dynamic curated hubs tailored for work, gaming, sound, and mobility
-          </p>
+
+          <Link
+            href={ROUTES.CATEGORIES}
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 self-start sm:self-auto shrink-0 group"
+          >
+            <span>All 250+ Categories</span>
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
         </div>
 
-        <Link
-          href={ROUTES.CATEGORIES}
-          className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 self-start sm:self-auto shrink-0 group"
+        {/* Multi-Height & Multi-Weight Bento Grid (12 Columns) */}
+        <m.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.12 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5"
         >
-          <span>All 250+ Categories</span>
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-        </Link>
-      </div>
-
-      {/* Multi-Height & Multi-Weight Bento Grid (12 Columns) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5">
-        {BENTO_ITEMS.map((item, idx) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className={cn(
-              "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/60 bg-card p-5 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 dark:hover:shadow-black/60",
-              item.gridSpan
-            )}
-          >
+          {BENTO_ITEMS.map((item, idx) => (
+            <m.div
+              key={item.title}
+              variants={tileVariants}
+              className={cn("flex flex-col", item.gridSpan)}
+            >
+              <Link
+                href={item.href}
+                className="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-border/60 bg-card p-5 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 dark:hover:shadow-black/60"
+              >
             {/* Background Image with Cinematic Overlay */}
             <div className="absolute inset-0 z-0 overflow-hidden bg-muted/50">
               <Image
@@ -187,8 +220,10 @@ export function BentoShowcaseSection() {
               </div>
             </div>
           </Link>
-        ))}
-      </div>
-    </section>
-  );
+        </m.div>
+      ))}
+    </m.div>
+  </section>
+</LazyMotion>
+);
 }
