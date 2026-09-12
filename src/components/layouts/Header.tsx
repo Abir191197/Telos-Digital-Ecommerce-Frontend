@@ -282,7 +282,7 @@ export function Header() {
         {/* Right Utilities */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link
-            href={ROUTES.HOME}
+            href={ROUTES.WISHLIST}
             aria-label="Wishlist"
             className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
             <Heart className="h-5 w-5" />
