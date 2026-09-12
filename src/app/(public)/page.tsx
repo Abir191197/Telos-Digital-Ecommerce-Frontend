@@ -14,6 +14,7 @@ import {
   OfficialBrandsSection,
   SupportAndHelpstrip,
 } from "@/components/home";
+import { TrendingSearchesStrip } from "@/components/shared";
 
 export const metadata: Metadata = {
   title: "Telos Cart — Next-Gen Digital & Retail E-Commerce",
@@ -31,6 +32,9 @@ export default function HomePage() {
       <div className="container px-3 sm:px-6 pb-16 space-y-10 sm:space-y-14">
         {/* Quick Category Bar */}
         <QuickCategoryBar />
+
+        {/* Trending Searches & Aisles Strip */}
+        <TrendingSearchesStrip />
 
         {/* Flash Deals with Live Countdown */}
         <FlashDealsSection />

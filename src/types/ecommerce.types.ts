@@ -56,3 +56,13 @@ export interface Product {
   tags: string[];
   createdAt: string;
 }
+
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  tag: string;
+  icon: string;
+  color?: string;
+  featured?: boolean;
+}

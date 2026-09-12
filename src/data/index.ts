@@ -1,9 +1,11 @@
 import categoriesData from "./categories.json";
 import productsData from "./products.json";
-import type { Category, Product } from "@/types/ecommerce.types";
+import brandsData from "./brands.json";
+import type { Category, Product, Brand } from "@/types/ecommerce.types";
 
 export const categories: Category[] = categoriesData as unknown as Category[];
 export const products: Product[] = productsData as unknown as Product[];
+export const brands: Brand[] = brandsData as unknown as Brand[];
 
 // Helper query selectors for components & pages
 export function getProductBySlug(slug: string): Product | undefined {

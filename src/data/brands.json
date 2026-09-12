@@ -1,0 +1,74 @@
+[
+  {
+    "id": "brand-apple",
+    "name": "Apple",
+    "slug": "apple",
+    "tag": "Official Flagship",
+    "icon": "Apple",
+    "color": "#000000",
+    "featured": true
+  },
+  {
+    "id": "brand-samsung",
+    "name": "Samsung",
+    "slug": "samsung",
+    "tag": "Authorized Hub",
+    "icon": "Samsung",
+    "color": "#1428A0",
+    "featured": true
+  },
+  {
+    "id": "brand-google",
+    "name": "Google",
+    "slug": "google",
+    "tag": "Pixel Store",
+    "icon": "Google",
+    "color": "#4285F4",
+    "featured": true
+  },
+  {
+    "id": "brand-sony",
+    "name": "Sony",
+    "slug": "sony",
+    "tag": "Audio & Cinema",
+    "icon": "Sony",
+    "color": "#000000",
+    "featured": true
+  },
+  {
+    "id": "brand-oneplus",
+    "name": "OnePlus",
+    "slug": "oneplus",
+    "tag": "Official Outlet",
+    "icon": "OnePlus",
+    "color": "#EB0028",
+    "featured": true
+  },
+  {
+    "id": "brand-xiaomi",
+    "name": "Xiaomi",
+    "slug": "xiaomi",
+    "tag": "Smart Ecosystem",
+    "icon": "Xiaomi",
+    "color": "#FF6900",
+    "featured": true
+  },
+  {
+    "id": "brand-asus",
+    "name": "Asus",
+    "slug": "asus",
+    "tag": "ROG & Zenbook",
+    "icon": "Asus",
+    "color": "#00539B",
+    "featured": true
+  },
+  {
+    "id": "brand-anker",
+    "name": "Anker",
+    "slug": "anker",
+    "tag": "Power & Acoustics",
+    "icon": "Anker",
+    "color": "#00AEEF",
+    "featured": true
+  }
+]

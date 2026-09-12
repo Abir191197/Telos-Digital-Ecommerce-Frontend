@@ -213,7 +213,7 @@ export function QuickCategoryBar() {
               >
                 <Link
                   href={ROUTES.CATEGORY_DETAIL(cat.slug)}
-                  className="group relative flex flex-col items-center justify-between p-4 h-[160px] sm:h-[175px] rounded-3xl bg-secondary/40 hover:bg-secondary/70 transition-all duration-300 overflow-hidden text-center select-none"
+                  className="group relative flex flex-col items-center justify-between p-4 h-[160px] sm:h-[175px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-all duration-300 overflow-hidden text-center select-none"
                 >
                   {/* Subtle organic ambient backlight on hover - borderless design */}
                   <div

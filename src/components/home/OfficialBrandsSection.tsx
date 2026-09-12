@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { products } from "@/data";
+import { brands, products } from "@/data";
 import { ROUTES } from "@/constants";
 
 // High-precision minimalist vector brand marks
@@ -84,96 +84,101 @@ function AnkerLogo({ className }: { className?: string }) {
   );
 }
 
-interface BrandItem {
-  name: string;
-  slug: string;
-  tag: string;
-  LogoComponent: React.ComponentType<{ className?: string }>;
-}
-
-const BRAND_LIST: BrandItem[] = [
-  { name: "Apple", slug: "apple", tag: "Official Hub", LogoComponent: AppleLogo },
-  { name: "Samsung", slug: "samsung", tag: "Authorized", LogoComponent: SamsungLogo },
-  { name: "Google", slug: "google", tag: "Flagship Hub", LogoComponent: GoogleLogo },
-  { name: "Sony", slug: "sony", tag: "Audio & Optics", LogoComponent: SonyLogo },
-  { name: "OnePlus", slug: "oneplus", tag: "Official Store", LogoComponent: OnePlusLogo },
-  { name: "Xiaomi", slug: "xiaomi", tag: "Ecosystem", LogoComponent: XiaomiLogo },
-  { name: "Asus", slug: "asus", tag: "ROG & Zen", LogoComponent: AsusLogo },
-  { name: "Anker", slug: "anker", tag: "Power & Sound", LogoComponent: AnkerLogo },
-];
+const LOGO_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Apple: AppleLogo,
+  Samsung: SamsungLogo,
+  Google: GoogleLogo,
+  Sony: SonyLogo,
+  OnePlus: OnePlusLogo,
+  Xiaomi: XiaomiLogo,
+  Asus: AsusLogo,
+  Anker: AnkerLogo,
+};
 
 export function OfficialBrandsSection() {
-  // Duplicate array to achieve seamless infinite loop
-  const marqueeItems = [...BRAND_LIST, ...BRAND_LIST];
+  // Duplicate array for infinite seamless marquee
+  const marqueeItems = [...brands, ...brands];
 
   return (
     <section aria-label="Official Brand Stores" className="w-full overflow-hidden">
-      {/* Minimalist Section Header */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-5">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-500">
+              <Sparkles className="h-3 w-3" />
+              Direct Partnerships
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
             Official Brand Stores
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             Authorized Bangladesh warranty and certified dealer support
           </p>
         </div>
 
         <Link
           href={`${ROUTES.HOME}?brand=all`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 shrink-0 group"
+          className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
         >
           <span>All Brands</span>
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
         </Link>
       </div>
 
-      {/* Infinite Marquee Track with Left & Right Vignette Masks */}
+      {/* Infinite Marquee Track with Fade Masks */}
       <div className="relative w-full overflow-hidden py-1">
         {/* Left Fade Mask */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-8 sm:w-16 bg-gradient-to-r from-background to-transparent"
+          className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-background to-transparent"
         />
 
         {/* Right Fade Mask */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-8 sm:w-16 bg-gradient-to-l from-background to-transparent"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-background to-transparent"
         />
 
         {/* Scrolling Strip */}
         <div className="animate-marquee gap-3 sm:gap-4 select-none">
           {marqueeItems.map((brand, idx) => {
-            const Logo = brand.LogoComponent;
+            const Logo = LOGO_MAP[brand.icon] || AppleLogo;
             const matchingCount = products.filter(
               (p) => p.brand.toLowerCase() === brand.name.toLowerCase()
             ).length;
 
             return (
               <Link
-                key={`${brand.name}-${idx}`}
+                key={`${brand.id}-${idx}`}
                 href={`${ROUTES.HOME}?brand=${brand.slug}`}
-                className="group relative flex flex-col items-center justify-center w-[160px] sm:w-[190px] shrink-0 p-5 sm:p-6 rounded-2xl border border-white/80 bg-white/75 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_35px_rgba(245,158,11,0.15)] hover:border-amber-400/60 hover:-translate-y-1.5 transition-all duration-300 text-center dark:bg-zinc-900/70 dark:border-white/10"
+                className="group relative flex flex-col items-center justify-between w-[155px] sm:w-[180px] shrink-0 p-5 rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 text-center select-none overflow-hidden"
               >
-                {/* Subtle top light reflection sheen */}
+                {/* Ambient glow on hover - borderless design */}
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-90 pointer-events-none"
+                  className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-amber-500/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                 />
 
-                {/* Prominent Centered Vector Logo Mark */}
-                <div className="flex h-14 sm:h-16 w-full items-center justify-center text-zinc-800 dark:text-zinc-200 group-hover:text-black dark:group-hover:text-white transition-colors duration-200">
-                  <Logo className="h-9 sm:h-10 max-w-[120px] object-contain transition-transform duration-300 group-hover:scale-110" />
+                {/* Logo Capsule */}
+                <div className="relative z-10 flex h-16 w-full items-center justify-center text-foreground/80 group-hover:text-foreground transition-colors duration-200">
+                  <Logo className="h-9 sm:h-10 max-w-[120px] object-contain transition-transform duration-300 group-hover:scale-105" />
                 </div>
 
-                {/* Refined Brand Label & Subtle Count */}
-                <span className="mt-3 text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-amber-600 transition-colors truncate w-full tracking-tight">
-                  {brand.name}
-                </span>
-                <span className="mt-1 text-xs font-medium text-zinc-400 group-hover:text-zinc-500 transition-colors">
-                  {matchingCount > 0 ? `${matchingCount} products` : brand.tag}
-                </span>
+                {/* Brand Info */}
+                <div className="relative z-10 flex flex-col items-center gap-0.5 mt-2 w-full">
+                  <span className="text-sm font-bold text-foreground group-hover:text-foreground transition-colors truncate w-full tracking-tight">
+                    {brand.name}
+                  </span>
+                  <span className="text-[11px] font-medium text-muted-foreground/80">
+                    {matchingCount > 0 ? `${matchingCount} items` : brand.tag}
+                  </span>
+                </div>
               </Link>
             );
           })}
@@ -182,3 +187,4 @@ export function OfficialBrandsSection() {
     </section>
   );
 }
+

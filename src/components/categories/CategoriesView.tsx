@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Category, Product } from "@/types/ecommerce.types";
 import { ProductCard } from "@/components/common";
-import { SupportAndHelpstrip, TrustGuaranteeCards } from "@/components/shared";
+import { SupportAndHelpstrip, TrustGuaranteeCards, TrendingSearchesStrip } from "@/components/shared";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
@@ -192,39 +192,15 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
     <LazyMotion features={domAnimation}>
       <div className="space-y-10 sm:space-y-14">
         {/* ── 1. Trending Quick Subcategory Pills Reel ── */}
-        <m.section
+        <m.div
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
-          aria-label="Trending Subcategories"
           className="container px-3 sm:px-6"
         >
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15 text-amber-600">
-              <Flame className="h-3 w-3" />
-            </span>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Trending Searches & Aisles
-            </h2>
-          </div>
-
-          <div className="no-scrollbar -mx-3 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:px-0">
-            {TRENDING_SUBCATS.map((item) => (
-              <Link
-                key={item.name}
-                href={ROUTES.CATEGORY_DETAIL(item.slug)}
-                className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/80 bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-2xs transition-all duration-200 hover:border-amber-500/70 hover:bg-amber-500/5 hover:text-amber-600"
-              >
-                <Tag className="h-3 w-3 text-muted-foreground group-hover:text-amber-500" />
-                <span>{item.name}</span>
-                <span className="rounded-full bg-muted px-1.5 py-0.2 text-[9px] font-bold text-muted-foreground group-hover:bg-amber-500/20 group-hover:text-amber-700">
-                  {item.tag}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </m.section>
+          <TrendingSearchesStrip />
+        </m.div>
 
         {/* ── 2. Parent Group Filter Tabs (No redundancy with top search) ── */}
         <m.section
