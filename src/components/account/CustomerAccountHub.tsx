@@ -103,11 +103,14 @@ export function CustomerAccountHub() {
     tabParam && VALID_TABS.has(tabParam) ? tabParam : "overview";
 
   const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
+  // If URL has an explicit tab (or user clicks an item), show details on mobile; otherwise show menu
+  const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(Boolean(tabParam && VALID_TABS.has(tabParam)));
 
   // Sync tab from URL if user navigates via browser back/forward
   useEffect(() => {
     if (tabParam && VALID_TABS.has(tabParam) && tabParam !== activeTab) {
       setActiveTabState(tabParam);
+      setMobileSubScreen(true);
     }
   }, [tabParam, activeTab]);
 
@@ -115,11 +118,17 @@ export function CustomerAccountHub() {
   const handleSelectTab = useCallback(
     (tab: AccountTabKey) => {
       setActiveTabState(tab);
-      const url = tab === "overview" ? "/account" : `/account?tab=${tab}`;
+      setMobileSubScreen(true);
+      const url = tab === "overview" ? "/account?tab=overview" : `/account?tab=${tab}`;
       window.history.pushState(null, "", url);
     },
     []
   );
+
+  const handleBackToMobileMenu = useCallback(() => {
+    setMobileSubScreen(false);
+    window.history.pushState(null, "", "/account");
+  }, []);
 
   // Dynamic browser title
   useEffect(() => {
@@ -376,16 +385,16 @@ export function CustomerAccountHub() {
 
       {/* ── Mobile Account View (Appears on click of Account nav item, no menu toggle needed) ── */}
       <div className="lg:hidden space-y-4">
-        {/* If user selected a sub-tab on mobile, render back bar to return to Account Menu */}
-        {activeTab !== "overview" ? (
+        {/* If user clicked any tab item on mobile, render back bar to return to Account Menu */}
+        {mobileSubScreen ? (
           <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-card shadow-2xs">
             <button
               type="button"
-              onClick={() => handleSelectTab("overview")}
+              onClick={handleBackToMobileMenu}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
             >
               <ChevronRight className="h-4 w-4 rotate-180" />
-              <span>Back to Account</span>
+              <span>Back to Account Menu</span>
             </button>
             <span className="text-xs font-bold text-foreground">
               {TAB_TITLES[activeTab]?.split("|")[0]?.trim() || "Account"}
@@ -553,28 +562,53 @@ export function CustomerAccountHub() {
         <main
           className={cn(
             "flex-1 w-full min-w-0",
-            activeTab === "overview" && "hidden lg:block"
+            !mobileSubScreen && "hidden lg:block"
           )}
         >
-          {/* ══════════════ 1. OVERVIEW TAB (Clean, Thematic, No KPI Stats) ══════════════ */}
+          {/* ══════════════ 1. OVERVIEW TAB (Standard Ecommerce Hub) ══════════════ */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-
-              {/* Latest Order Tracking Stepper */}
+              {/* Top Hero Card: Latest Active Order with Real-Time Progress Stepper (Full Width Anchor) */}
               {orders[0] && (
-                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-4 shadow-xs">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-amber-500" />
-                      <h3 className="text-sm font-bold text-foreground">
-                        Recent Order: #{orders[0].orderNumber}
-                      </h3>
+                <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 space-y-4 shadow-xs hover:border-amber-500/30 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Package className="h-5 w-5 stroke-[2]" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-foreground">
+                            Latest Order: #{orders[0].orderNumber}
+                          </h3>
+                          <span className="hidden sm:inline-block text-xs text-muted-foreground">
+                            • {new Date(orders[0].createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {orders[0].items.length} item{orders[0].items.length > 1 ? "s" : ""} • Total: <strong className="text-foreground font-semibold">৳{orders[0].total.toLocaleString()}</strong>
+                        </p>
+                      </div>
                     </div>
-                    {getStatusBadge(orders[0].status)}
+                    <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                      {getStatusBadge(orders[0].status)}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab("tracking")}
+                        className="inline-flex items-center gap-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        <Truck className="h-3.5 w-3.5" />
+                        <span>Track Live</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Stepper Progress */}
-                  <div className="py-2">
+                  <div className="py-2 px-1">
                     <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground pb-2">
                       <span className="text-amber-600 dark:text-amber-400">Order Placed</span>
                       <span
@@ -604,9 +638,9 @@ export function CustomerAccountHub() {
                         Delivered
                       </span>
                     </div>
-                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
                       <div
-                        className="h-full bg-amber-500 transition-all duration-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500 rounded-full"
                         style={{
                           width:
                             orders[0].status === "delivered"
@@ -621,66 +655,206 @@ export function CustomerAccountHub() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-border/50 text-xs">
-                    <div>
-                      <span className="text-muted-foreground">Courier: </span>
-                      <strong className="text-foreground">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-border/50 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <span>Delivery Partner:</span>
+                      <strong className="text-foreground font-semibold">
                         {orders[0].courierName}
                       </strong>
-                      <span className="text-muted-foreground ml-2 font-mono">
-                        ({orders[0].trackingNumber})
+                      <span className="font-mono bg-muted/60 px-2 py-0.5 rounded-md text-[11px] text-foreground">
+                        {orders[0].trackingNumber}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-foreground">
-                        ৳{orders[0].total.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTab("tracking")}
-                        className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer"
-                      >
-                        <span>Track Live</span>
-                        <ChevronRight className="h-3 w-3" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTab("orders")}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer self-start sm:self-auto"
+                    >
+                      <span>View All Orders ({orders.length})</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* Default Delivery Address Snapshot */}
-              <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3 shadow-xs">
-                <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-amber-500" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      Primary Delivery Address
-                    </span>
+              {/* Profile Details Card on Mobile only (Desktop already has the top banner) */}
+              <div className="lg:hidden rounded-3xl border border-border/80 bg-card p-5 flex flex-col justify-between shadow-xs hover:border-amber-500/30 transition-colors">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Profile Details
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTab("profile")}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Edit</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectTab("addresses")}
-                    className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                  >
-                    Manage Addresses
-                  </button>
+
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-14 w-14 shrink-0 rounded-2xl border-2 border-amber-500/50 overflow-hidden bg-muted/40 flex items-center justify-center font-bold text-amber-600 text-lg shadow-xs">
+                      {user.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        user.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-sm font-bold text-foreground truncate">
+                          {user.name}
+                        </h4>
+                        <ShieldCheck className="h-4 w-4 text-amber-500 shrink-0" />
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {user.phone}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-foreground">
-                      {user.addresses[0]?.name || user.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {user.addresses[0]?.street}, {user.addresses[0]?.area},{" "}
-                      {user.addresses[0]?.city} - {user.addresses[0]?.postalCode}
-                    </p>
+
+                <div className="pt-4 mt-4 border-t border-border/50 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Account Status</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                    <Sparkles className="h-3 w-3" />
+                    Verified Shopper
+                  </span>
+                </div>
+              </div>
+
+              {/* 2-Column Responsive Grid on Large Screen: Primary Delivery Address + Saved Payment Methods */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* 1. Address Book Snapshot */}
+                <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-amber-500/30 transition-colors">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          <MapPin className="h-4 w-4" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Primary Delivery Address
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab("addresses")}
+                        className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                      >
+                        Manage
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-bold text-foreground">
+                          {user.addresses[0]?.name || user.name}
+                        </p>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                          {user.addresses[0]?.label || "Home"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {user.addresses[0]?.street}, {user.addresses[0]?.area},{" "}
+                        {user.addresses[0]?.city} - {user.addresses[0]?.postalCode}
+                      </p>
+                      <p className="text-xs font-mono text-muted-foreground">
+                        {user.addresses[0]?.phone || user.phone}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground shrink-0">
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2.5 py-1 font-semibold text-foreground">
+
+                  <div className="pt-4 mt-4 border-t border-border/50 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Courier Delivery Time</span>
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted/70 px-2.5 py-1 text-[11px] font-semibold text-foreground">
                       {user.addresses[0]?.zone === "inside-dhaka"
-                        ? "Inside Dhaka • Next Day"
+                        ? "Inside Dhaka • 24 Hours"
                         : "Outside Dhaka • 48 Hours"}
                     </span>
+                  </div>
+                </div>
+
+                {/* 2. Saved Payment Methods Snapshot */}
+                <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-amber-500/30 transition-colors">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          <CreditCard className="h-4 w-4" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Saved Payment Methods
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab("payments")}
+                        className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                      >
+                        Settings
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5 pt-0.5">
+                      <div className="flex items-center justify-between p-3 rounded-2xl border border-border/70 bg-muted/20">
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-pink-600 bg-pink-500/10 px-2 py-0.5 rounded-md">
+                              bKash Wallet
+                            </span>
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                              Linked
+                            </span>
+                          </div>
+                          <p className="text-xs font-mono font-bold text-foreground truncate">
+                            017***-**678
+                          </p>
+                        </div>
+                        <div className="h-6 w-6 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-600 shrink-0">
+                          <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 rounded-2xl border border-border/70 bg-muted/20">
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                              Cash on Delivery
+                            </span>
+                            <span className="text-[10px] font-bold text-amber-600">
+                              Active
+                            </span>
+                          </div>
+                          <p className="text-xs font-bold text-foreground truncate">
+                            Standard BD Parcel Option
+                          </p>
+                        </div>
+                        <div className="h-6 w-6 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-600 shrink-0">
+                          <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-border/50 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Default Checkout</span>
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">1-Tap Ready</span>
                   </div>
                 </div>
               </div>
