@@ -116,47 +116,45 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Rating & Reviews */}
-        <div className="mt-2 flex items-center gap-1.5 text-xs">
-          <div className="flex items-center text-amber-500">
+        <div className="mt-2 flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs">
+          <div className="flex items-center text-amber-500 shrink-0">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            <span className="ml-1 font-bold text-foreground text-xs">
+            <span className="ml-1 font-bold text-foreground text-[11px] sm:text-xs">
               {product.rating.toFixed(1)}
             </span>
           </div>
-          <span className="text-[11px] text-muted-foreground">({product.reviewCount})</span>
-          <span className="mx-1 text-muted/80">·</span>
-          <span className="flex items-center gap-0.5 text-[10px] text-emerald-500 font-semibold">
-            <ShieldCheck className="h-3 w-3" />
+          <span className="text-[10px] sm:text-[11px] text-muted-foreground shrink-0">({product.reviewCount})</span>
+          <span className="hidden xs:inline text-muted/80">·</span>
+          <span className="hidden xs:inline-flex items-center gap-0.5 text-[10px] text-emerald-500 font-semibold truncate">
+            <ShieldCheck className="h-3 w-3 shrink-0" />
             Genuine
           </span>
         </div>
 
         {/* Price & Add to Cart Footer */}
-        <div className="mt-auto pt-3.5 flex items-center justify-between gap-1.5 sm:gap-2">
-          <div className="min-w-0 flex-1 flex flex-col justify-center h-9">
-            <div className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate leading-tight">
+        <div className="mt-auto pt-3 flex items-center justify-between gap-1 sm:gap-2">
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            <div className="text-xs sm:text-base font-extrabold text-foreground tracking-tight truncate leading-tight">
               ৳{product.price.toLocaleString()}
             </div>
             {product.originalPrice && product.originalPrice > product.price ? (
-              <div className="text-[10px] sm:text-[11px] text-muted-foreground line-through truncate leading-none mt-0.5">
+              <div className="text-[9px] sm:text-[11px] text-muted-foreground line-through truncate leading-none mt-0.5">
                 ৳{product.originalPrice.toLocaleString()}
               </div>
-            ) : (
-              <div className="h-[14px] sm:h-[15px]" aria-hidden="true" />
-            )}
+            ) : null}
           </div>
 
           <button
             type="button"
             onClick={handleAddToCart}
             className={cn(
-              "shrink-0 flex h-8 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-4 text-[11px] sm:text-xs font-bold transition-all active:scale-95 cursor-pointer",
+              "shrink-0 flex h-7 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-4 text-[10px] sm:text-xs font-bold transition-all active:scale-95 cursor-pointer",
               isAdding
                 ? "bg-emerald-600 text-white"
                 : "bg-foreground text-background hover:opacity-90 hover:scale-105 shadow-sm"
             )}
           >
-            <ShoppingCart className="h-3.5 w-3.5 stroke-[2.3]" />
+            <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.3]" />
             <span>{isAdding ? "Added" : "Add"}</span>
           </button>
         </div>
