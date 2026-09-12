@@ -11,6 +11,7 @@ import { CatalogHeader } from "./CatalogHeader";
 import { EmptyCatalogState } from "./CatalogStateViews";
 import { X, Plus, ChevronDown, ChevronLeft, ChevronRight, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 
 interface CatalogViewProps {
   initialProducts: Product[];
@@ -21,6 +22,30 @@ interface CatalogViewProps {
 
 const ITEMS_PER_PAGE = 12;
 
+// Stable Framer Motion variants defined outside component for zero re-render overhead
+const catalogGridVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const catalogCardVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 24,
+      stiffness: 280,
+    },
+  },
+};
+
 export function CatalogView({
   initialProducts,
   category,
@@ -28,6 +53,7 @@ export function CatalogView({
   subtitle,
 }: CatalogViewProps) {
   // Filter state
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
@@ -63,6 +89,18 @@ export function CatalogView({
   // Filter and Sort Engine
   const filteredProducts = useMemo(() => {
     let list = [...initialProducts];
+
+    // 0. Keyword search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.brand.toLowerCase().includes(q) ||
+          p.categorySlug.toLowerCase().includes(q) ||
+          (p.shortDescription && p.shortDescription.toLowerCase().includes(q))
+      );
+    }
 
     // 1. Brands
     if (selectedBrands.length > 0) {
@@ -117,6 +155,7 @@ export function CatalogView({
     return list;
   }, [
     initialProducts,
+    searchQuery,
     selectedBrands,
     minPrice,
     maxPrice,
@@ -172,6 +211,7 @@ export function CatalogView({
   };
 
   const hasActiveFilters =
+    searchQuery.trim().length > 0 ||
     selectedBrands.length > 0 ||
     minPrice !== undefined ||
     maxPrice !== undefined ||
@@ -180,6 +220,11 @@ export function CatalogView({
     onSaleOnly;
 
   // Handlers (reset to page 1 on filter changes)
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  };
+
   const handleToggleBrand = (brand: string) => {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
@@ -194,6 +239,7 @@ export function CatalogView({
   };
 
   const handleResetAll = () => {
+    setSearchQuery("");
     setSelectedBrands([]);
     setMinPrice(undefined);
     setMaxPrice(undefined);
@@ -204,186 +250,200 @@ export function CatalogView({
   };
 
   return (
-    <div className="container px-3 sm:px-6 py-6 sm:py-10 space-y-8">
-      {/* ── Page Header / Intro ── */}
-      <div className="space-y-1.5 pb-2">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-          {title || (category ? category.name : "All Products")}
-        </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
-          {subtitle ||
-            (category
-              ? category.description
-              : "Discover official Bangladesh warranty devices, smartphones, computing workstations, audio, and authentic lifestyle tech.")}
-        </p>
-      </div>
+    <LazyMotion features={domAnimation}>
+      <div className="container px-3 sm:px-6 py-6 sm:py-10 space-y-8">
+        {/* ── Page Header / Intro ── */}
+        <m.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-1.5 pb-2"
+        >
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
+            {title || (category ? category.name : "All Products")}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
+            {subtitle ||
+              (category
+                ? category.description
+                : "Discover official Bangladesh warranty devices, smartphones, computing workstations, audio, and authentic lifestyle tech.")}
+          </p>
+        </m.div>
 
-      {/* ── Main Catalog Two-Column Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Faceted Filter Sidebar (Desktop) */}
-        <div className="hidden lg:block lg:col-span-3 sticky top-24">
-          <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-xs">
-            <FilterSidebar
-              availableBrands={availableBrands}
-              selectedBrands={selectedBrands}
-              onToggleBrand={handleToggleBrand}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              priceBounds={priceBounds}
-              onPriceChange={handlePriceChange}
-              selectedRating={selectedRating}
-              onSelectRating={(r) => {
-                setSelectedRating(r);
-                setCurrentPage(1);
-              }}
-              inStockOnly={inStockOnly}
-              onToggleInStock={() => {
-                setInStockOnly((v) => !v);
-                setCurrentPage(1);
-              }}
-              onSaleOnly={onSaleOnly}
-              onToggleOnSale={() => {
-                setOnSaleOnly((v) => !v);
-                setCurrentPage(1);
-              }}
-              onResetAll={handleResetAll}
+        {/* ── Main Catalog Two-Column Grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Faceted Filter Sidebar (Desktop) */}
+          <div className="hidden lg:block lg:col-span-3 sticky top-24">
+            <div className="rounded-3xl bg-card p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+              <FilterSidebar
+                availableBrands={availableBrands}
+                selectedBrands={selectedBrands}
+                onToggleBrand={handleToggleBrand}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                priceBounds={priceBounds}
+                onPriceChange={handlePriceChange}
+                selectedRating={selectedRating}
+                onSelectRating={(r) => {
+                  setSelectedRating(r);
+                  setCurrentPage(1);
+                }}
+                inStockOnly={inStockOnly}
+                onToggleInStock={() => {
+                  setInStockOnly((v) => !v);
+                  setCurrentPage(1);
+                }}
+                onSaleOnly={onSaleOnly}
+                onToggleOnSale={() => {
+                  setOnSaleOnly((v) => !v);
+                  setCurrentPage(1);
+                }}
+                onResetAll={handleResetAll}
+                hasActiveFilters={hasActiveFilters}
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Catalog Feed */}
+          <div ref={catalogFeedRef} className="lg:col-span-9 space-y-5 scroll-mt-24">
+            {/* Header Controls (Count, Sort, Grid toggles) */}
+            <CatalogHeader
+              totalCount={filteredProducts.length}
+              sortBy={sortBy}
+              onSortChange={(s) => setSortBy(s)}
+              viewMode={viewMode}
+              onViewModeChange={(mode) => setViewMode(mode)}
+              onOpenMobileFilters={() => setIsMobileFilterOpen(true)}
               hasActiveFilters={hasActiveFilters}
             />
+
+            {/* Dismissible Filter Chips Bar */}
+            <ActiveFiltersBar
+              searchQuery={searchQuery}
+              onClearSearch={() => handleSearchChange("")}
+              selectedBrands={selectedBrands}
+              onRemoveBrand={handleToggleBrand}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onClearPrice={() => handlePriceChange(undefined, undefined)}
+              selectedRating={selectedRating}
+              onClearRating={() => setSelectedRating(undefined)}
+              inStockOnly={inStockOnly}
+              onClearInStock={() => setInStockOnly(false)}
+              onSaleOnly={onSaleOnly}
+              onClearOnSale={() => setOnSaleOnly(false)}
+              onClearAll={handleResetAll}
+              totalFilteredCount={filteredProducts.length}
+            />
+
+            {/* Product Cards Feed or Empty State */}
+            {filteredProducts.length === 0 ? (
+              <EmptyCatalogState onResetFilters={handleResetAll} />
+            ) : (
+              <m.div
+                key={`${validCurrentPage}-${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
+                variants={catalogGridVariants}
+                initial="hidden"
+                animate="visible"
+                className={cn(
+                  "grid gap-3 sm:gap-5",
+                  viewMode === "grid-3"
+                    ? "grid-cols-2 md:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
+                )}
+              >
+                {displayedProducts.map((product) => (
+                  <m.div key={product.id} variants={catalogCardVariants}>
+                    <ProductCard product={product} />
+                  </m.div>
+                ))}
+              </m.div>
+            )}
+
+            {/* Thematic Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border/40">
+                <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
+                  Showing <strong className="text-foreground">{startIndex + 1}</strong>–
+                  <strong className="text-foreground">
+                    {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)}
+                  </strong>{" "}
+                  of <strong className="text-foreground">{filteredProducts.length}</strong> products
+                </p>
+
+                <nav aria-label="Catalog Pagination" className="flex items-center gap-1.5 order-1 sm:order-2">
+                  {/* Previous Page Button */}
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    aria-label="Previous Page"
+                    className={cn(
+                      "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-2xl px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95 shadow-2xs",
+                      currentPage === 1
+                        ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                        : "bg-card text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer"
+                    )}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden xs:inline">Prev</span>
+                  </button>
+
+                  {/* Numbered Page Buttons */}
+                  <div className="flex items-center gap-1">
+                    {paginationRange.map((page, idx) => {
+                      if (typeof page === "string") {
+                        return (
+                          <span
+                            key={`ellipsis-${idx}`}
+                            className="flex h-9 w-9 items-center justify-center text-xs font-bold text-muted-foreground select-none"
+                          >
+                            •••
+                          </span>
+                        );
+                      }
+
+                      const isCurrent = page === currentPage;
+                      return (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => handlePageChange(page)}
+                          aria-current={isCurrent ? "page" : undefined}
+                          className={cn(
+                            "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl text-xs sm:text-sm font-bold transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs",
+                            isCurrent
+                              ? "bg-amber-500 text-zinc-950 shadow-md shadow-amber-500/25 ring-2 ring-amber-500/30"
+                              : "bg-card text-muted-foreground hover:bg-amber-500/10 hover:text-foreground"
+                          )}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Next Page Button */}
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    aria-label="Next Page"
+                    className={cn(
+                      "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-2xl px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95 shadow-2xs",
+                      currentPage === totalPages
+                        ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                        : "bg-card text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer"
+                    )}
+                  >
+                    <span className="hidden xs:inline">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </nav>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Right Column: Catalog Feed */}
-        <div ref={catalogFeedRef} className="lg:col-span-9 space-y-5 scroll-mt-24">
-          {/* Header Controls (Count, Sort, Grid toggles) */}
-          <CatalogHeader
-            totalCount={filteredProducts.length}
-            sortBy={sortBy}
-            onSortChange={(s) => setSortBy(s)}
-            viewMode={viewMode}
-            onViewModeChange={(mode) => setViewMode(mode)}
-            onOpenMobileFilters={() => setIsMobileFilterOpen(true)}
-            hasActiveFilters={hasActiveFilters}
-          />
-
-          {/* Dismissible Filter Chips Bar */}
-          <ActiveFiltersBar
-            selectedBrands={selectedBrands}
-            onRemoveBrand={handleToggleBrand}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            onClearPrice={() => handlePriceChange(undefined, undefined)}
-            selectedRating={selectedRating}
-            onClearRating={() => setSelectedRating(undefined)}
-            inStockOnly={inStockOnly}
-            onClearInStock={() => setInStockOnly(false)}
-            onSaleOnly={onSaleOnly}
-            onClearOnSale={() => setOnSaleOnly(false)}
-            onClearAll={handleResetAll}
-            totalFilteredCount={filteredProducts.length}
-          />
-
-          {/* Product Cards Feed or Empty State */}
-          {filteredProducts.length === 0 ? (
-            <EmptyCatalogState onResetFilters={handleResetAll} />
-          ) : (
-            <div
-              className={cn(
-                "grid gap-3 sm:gap-5",
-                viewMode === "grid-3"
-                  ? "grid-cols-2 md:grid-cols-3"
-                  : "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-              )}
-            >
-              {displayedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-
-          {/* Thematic Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border/60">
-              <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
-                Showing <strong className="text-foreground">{startIndex + 1}</strong>–
-                <strong className="text-foreground">
-                  {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)}
-                </strong>{" "}
-                of <strong className="text-foreground">{filteredProducts.length}</strong> products
-              </p>
-
-              <nav aria-label="Catalog Pagination" className="flex items-center gap-1.5 order-1 sm:order-2">
-                {/* Previous Page Button */}
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  aria-label="Previous Page"
-                  className={cn(
-                    "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-xl border border-border/70 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95",
-                    currentPage === 1
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground border-transparent"
-                      : "bg-card text-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer shadow-2xs"
-                  )}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden xs:inline">Prev</span>
-                </button>
-
-                {/* Numbered Page Buttons */}
-                <div className="flex items-center gap-1">
-                  {paginationRange.map((page, idx) => {
-                    if (typeof page === "string") {
-                      return (
-                        <span
-                          key={`ellipsis-${idx}`}
-                          className="flex h-9 w-9 items-center justify-center text-xs font-bold text-muted-foreground select-none"
-                        >
-                          •••
-                        </span>
-                      );
-                    }
-
-                    const isCurrent = page === currentPage;
-                    return (
-                      <button
-                        key={page}
-                        type="button"
-                        onClick={() => handlePageChange(page)}
-                        aria-current={isCurrent ? "page" : undefined}
-                        className={cn(
-                          "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-150 active:scale-95 cursor-pointer",
-                          isCurrent
-                            ? "bg-amber-500 text-white shadow-md shadow-amber-500/25 ring-2 ring-amber-500/30"
-                            : "border border-border/60 bg-card text-muted-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-foreground shadow-2xs"
-                        )}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Next Page Button */}
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  aria-label="Next Page"
-                  className={cn(
-                    "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-xl border border-border/70 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95",
-                    currentPage === totalPages
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground border-transparent"
-                      : "bg-card text-foreground hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer shadow-2xs"
-                  )}
-                >
-                  <span className="hidden xs:inline">Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </nav>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* ── Mobile Filter Drawer Slide-over (z-50) ── */}
       {isMobileFilterOpen && (
@@ -439,11 +499,11 @@ export function CatalogView({
               hasActiveFilters={hasActiveFilters}
             />
 
-            <div className="mt-8 pt-4 border-t border-border/70">
+            <div className="mt-8 pt-4 border-t border-border/40">
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-3 text-xs font-bold shadow-md cursor-pointer"
+                className="w-full rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
               >
                 Apply Filters ({filteredProducts.length} results)
               </button>
@@ -457,5 +517,6 @@ export function CatalogView({
         <SupportAndHelpstrip />
       </section>
     </div>
-  );
+  </LazyMotion>
+);
 }

@@ -50,20 +50,20 @@ export function ActiveFiltersBar({
   if (!hasFilters) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 py-3 px-3.5 rounded-2xl border border-border/70 bg-card/60 text-xs">
+    <div className="flex flex-wrap items-center gap-2 py-3 px-4 rounded-2xl bg-card text-xs shadow-[0_2px_12px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]">
       <span className="font-bold text-muted-foreground uppercase tracking-wider text-[10px]">
-        Active ({totalFilteredCount} matching):
+        Active ({totalFilteredCount}):
       </span>
 
       {/* Search Query Chip */}
       {searchQuery && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-2xs">
           Query: &ldquo;{searchQuery}&rdquo;
           {onClearSearch && (
             <button
               type="button"
               onClick={onClearSearch}
-              className="hover:text-foreground cursor-pointer"
+              className="hover:text-foreground cursor-pointer ml-0.5"
             >
               <X className="h-3 w-3" />
             </button>
@@ -75,13 +75,13 @@ export function ActiveFiltersBar({
       {selectedBrands.map((b) => (
         <span
           key={b}
-          className="inline-flex items-center gap-1 rounded-full bg-muted/80 border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground"
+          className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-3 py-1 text-xs font-semibold text-foreground shadow-2xs"
         >
           {b}
           <button
             type="button"
             onClick={() => onRemoveBrand(b)}
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-muted-foreground hover:text-foreground cursor-pointer ml-0.5"
           >
             <X className="h-3 w-3" />
           </button>
@@ -90,7 +90,7 @@ export function ActiveFiltersBar({
 
       {/* Price Chip */}
       {(minPrice !== undefined || maxPrice !== undefined) && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-3 py-1 text-xs font-semibold text-foreground shadow-2xs">
           {minPrice !== undefined && maxPrice !== undefined
             ? `৳${minPrice.toLocaleString()} - ৳${maxPrice.toLocaleString()}`
             : minPrice !== undefined
@@ -99,7 +99,7 @@ export function ActiveFiltersBar({
           <button
             type="button"
             onClick={onClearPrice}
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-muted-foreground hover:text-foreground cursor-pointer ml-0.5"
           >
             <X className="h-3 w-3" />
           </button>
@@ -108,12 +108,12 @@ export function ActiveFiltersBar({
 
       {/* Rating Chip */}
       {selectedRating && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-3 py-1 text-xs font-semibold text-foreground shadow-2xs">
           {selectedRating}★ & above
           <button
             type="button"
             onClick={onClearRating}
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-muted-foreground hover:text-foreground cursor-pointer ml-0.5"
           >
             <X className="h-3 w-3" />
           </button>
@@ -122,12 +122,12 @@ export function ActiveFiltersBar({
 
       {/* In Stock Chip */}
       {inStockOnly && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 shadow-2xs">
           In Stock
           <button
             type="button"
             onClick={onClearInStock}
-            className="hover:text-emerald-900 cursor-pointer"
+            className="hover:text-foreground cursor-pointer ml-0.5"
           >
             <X className="h-3 w-3" />
           </button>
@@ -136,12 +136,12 @@ export function ActiveFiltersBar({
 
       {/* On Sale Chip */}
       {onSaleOnly && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 text-xs font-semibold text-rose-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-2xs">
           On Sale
           <button
             type="button"
             onClick={onClearOnSale}
-            className="hover:text-rose-900 cursor-pointer"
+            className="hover:text-foreground cursor-pointer ml-0.5"
           >
             <X className="h-3 w-3" />
           </button>
@@ -152,7 +152,7 @@ export function ActiveFiltersBar({
       <button
         type="button"
         onClick={onClearAll}
-        className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+        className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
       >
         <RotateCcw className="h-3 w-3" />
         <span>Clear All</span>

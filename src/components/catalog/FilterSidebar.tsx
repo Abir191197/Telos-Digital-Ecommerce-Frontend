@@ -65,7 +65,7 @@ export function FilterSidebar({
 
       {/* 1. Quick Stock & Sale Toggles */}
       <div className="space-y-2.5">
-        <label className="flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-card hover:bg-muted/40 transition-colors cursor-pointer text-xs font-semibold select-none">
+        <label className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all cursor-pointer text-xs font-semibold select-none shadow-2xs">
           <span className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             In Stock Only
@@ -78,22 +78,22 @@ export function FilterSidebar({
           />
         </label>
 
-        <label className="flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-card hover:bg-muted/40 transition-colors cursor-pointer text-xs font-semibold select-none">
-          <span className="flex items-center gap-2 text-rose-600">
-            <Zap className="h-3.5 w-3.5 fill-rose-600" />
+        <label className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all cursor-pointer text-xs font-semibold select-none shadow-2xs">
+          <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+            <Zap className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
             Discounted / On Sale
           </span>
           <input
             type="checkbox"
             checked={onSaleOnly}
             onChange={onToggleOnSale}
-            className="h-4 w-4 rounded accent-rose-600 cursor-pointer"
+            className="h-4 w-4 rounded accent-amber-500 cursor-pointer"
           />
         </label>
       </div>
 
       {/* 2. Price Range */}
-      <div className="space-y-3 pt-3 border-t border-border/60">
+      <div className="space-y-3 pt-3 border-t border-border/40">
         <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
           <span>Price Range (BDT)</span>
           <span className="text-[10px] font-normal text-muted-foreground">
@@ -104,7 +104,7 @@ export function FilterSidebar({
         {/* Min / Max direct inputs */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label className="text-[10px] text-muted-foreground">Min (৳)</label>
+            <label className="text-[10px] text-muted-foreground font-medium">Min (৳)</label>
             <input
               type="number"
               placeholder={priceBounds.min.toString()}
@@ -112,11 +112,11 @@ export function FilterSidebar({
               onChange={(e) =>
                 onPriceChange(e.target.value ? Number(e.target.value) : undefined, maxPrice)
               }
-              className="mt-1 h-8 w-full rounded-lg border border-border/80 bg-background px-2.5 text-xs font-semibold text-foreground focus:border-amber-500 focus:outline-none"
+              className="mt-1 h-8 w-full rounded-xl bg-background px-2.5 text-xs font-semibold text-foreground shadow-2xs focus:ring-2 focus:ring-amber-500/40 focus:outline-none"
             />
           </div>
           <div>
-            <label className="text-[10px] text-muted-foreground">Max (৳)</label>
+            <label className="text-[10px] text-muted-foreground font-medium">Max (৳)</label>
             <input
               type="number"
               placeholder={priceBounds.max.toString()}
@@ -124,7 +124,7 @@ export function FilterSidebar({
               onChange={(e) =>
                 onPriceChange(minPrice, e.target.value ? Number(e.target.value) : undefined)
               }
-              className="mt-1 h-8 w-full rounded-lg border border-border/80 bg-background px-2.5 text-xs font-semibold text-foreground focus:border-amber-500 focus:outline-none"
+              className="mt-1 h-8 w-full rounded-xl bg-background px-2.5 text-xs font-semibold text-foreground shadow-2xs focus:ring-2 focus:ring-amber-500/40 focus:outline-none"
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export function FilterSidebar({
               key={preset.label}
               type="button"
               onClick={() => onPriceChange(preset.min, preset.max)}
-              className="rounded-md bg-muted/60 hover:bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="rounded-lg bg-card hover:bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-all shadow-2xs cursor-pointer"
             >
               {preset.label}
             </button>
@@ -150,12 +150,12 @@ export function FilterSidebar({
 
       {/* 3. Brands Checklist */}
       {availableBrands.length > 0 && (
-        <div className="space-y-2.5 pt-3 border-t border-border/60">
+        <div className="space-y-2.5 pt-3 border-t border-border/40">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Brand
             </h4>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[10px] text-muted-foreground font-semibold">
               {availableBrands.length} brands
             </span>
           </div>
@@ -167,10 +167,10 @@ export function FilterSidebar({
                 <label
                   key={name}
                   className={cn(
-                    "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer select-none",
+                    "flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer select-none",
                     isChecked
-                      ? "bg-amber-500/10 text-amber-800 font-bold"
-                      : "hover:bg-muted/40 text-foreground"
+                      ? "bg-amber-500/15 text-amber-900 dark:text-amber-300 font-bold"
+                      : "hover:bg-muted/50 text-foreground"
                   )}
                 >
                   <div className="flex items-center gap-2 truncate">
@@ -193,7 +193,7 @@ export function FilterSidebar({
       )}
 
       {/* 4. Minimum Customer Rating */}
-      <div className="space-y-2 pt-3 border-t border-border/60">
+      <div className="space-y-2 pt-3 border-t border-border/40">
         <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Minimum Rating
         </h4>
@@ -206,10 +206,10 @@ export function FilterSidebar({
                 type="button"
                 onClick={() => onSelectRating(isSelected ? undefined : r)}
                 className={cn(
-                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer",
+                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer",
                   isSelected
-                    ? "bg-amber-500/15 text-amber-800 font-bold"
-                    : "hover:bg-muted/40 text-muted-foreground"
+                    ? "bg-amber-500/15 text-amber-900 dark:text-amber-300 font-bold shadow-2xs"
+                    : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
                 )}
               >
                 <div className="flex items-center gap-1.5">
@@ -219,14 +219,14 @@ export function FilterSidebar({
                         key={i}
                         className={cn(
                           "h-3.5 w-3.5",
-                          i < r ? "fill-amber-400 text-amber-400" : "text-border"
+                          i < r ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"
                         )}
                       />
                     ))}
                   </div>
                   <span>{r}★ & above</span>
                 </div>
-                {isSelected && <Check className="h-3.5 w-3.5 text-amber-600" />}
+                {isSelected && <Check className="h-3.5 w-3.5 text-amber-500" />}
               </button>
             );
           })}
