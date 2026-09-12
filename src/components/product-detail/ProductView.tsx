@@ -20,6 +20,7 @@ import {
   ShoppingCart,
   Zap,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Plus,
   Minus,
@@ -53,6 +54,42 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
   // Image gallery state
   const images = product.images && product.images.length > 0 ? product.images : [product.thumbnail];
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const touchStartXRef = React.useRef<number | null>(null);
+  const touchEndXRef = React.useRef<number | null>(null);
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.targetTouches[0].clientX;
+    touchEndXRef.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndXRef.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartXRef.current === null || touchEndXRef.current === null) return;
+    const diff = touchStartXRef.current - touchEndXRef.current;
+    const minSwipeDistance = 40;
+    if (diff > minSwipeDistance) {
+      // Swiped left -> next photo
+      handleNextImage();
+    } else if (diff < -minSwipeDistance) {
+      // Swiped right -> prev photo
+      handlePrevImage();
+    }
+    touchStartXRef.current = null;
+    touchEndXRef.current = null;
+  };
 
   // Variant selection state
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
@@ -155,21 +192,29 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
             {/* Left Column: Media Stage (6 cols on lg, sticky) */}
             <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
               {/* ── Mobile View: Swipeable Carousel Stage ── */}
-              <div className="block lg:hidden relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20">
+              <div
+                className="block lg:hidden relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20 select-none touch-pan-y"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 <m.div
                   key={activeImageIndex}
+                  initial={{ opacity: 0.8 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
                   drag={images.length > 1 ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
                   onDragEnd={(_, info) => {
                     const threshold = 40;
-                    if (info.offset.x < -threshold && activeImageIndex < images.length - 1) {
-                      setActiveImageIndex((prev) => prev + 1);
-                    } else if (info.offset.x > threshold && activeImageIndex > 0) {
-                      setActiveImageIndex((prev) => prev - 1);
+                    if (info.offset.x < -threshold) {
+                      handleNextImage();
+                    } else if (info.offset.x > threshold) {
+                      handlePrevImage();
                     }
                   }}
-                  className="relative h-full w-full touch-pan-y"
+                  className="relative h-full w-full"
                 >
                   <Image
                     src={images[activeImageIndex] || product.thumbnail}
@@ -180,6 +225,28 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                     className="object-cover object-center select-none pointer-events-none"
                   />
                 </m.div>
+
+                {/* Left/Right Carousel Nav Arrows on Mobile */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handlePrevImage}
+                      aria-label="Previous photo"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-all cursor-pointer"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextImage}
+                      aria-label="Next photo"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-all cursor-pointer"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
 
                 {/* Badges */}
                 <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10 pointer-events-none">
@@ -281,6 +348,28 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                     </m.div>
                   </AnimatePresence>
 
+                  {/* Desktop Prev / Next Carousel Arrow Buttons */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handlePrevImage}
+                        aria-label="Previous photo"
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-foreground shadow-md opacity-0 group-hover:opacity-100 hover:bg-background transition-all cursor-pointer"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextImage}
+                        aria-label="Next photo"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-foreground shadow-md opacity-0 group-hover:opacity-100 hover:bg-background transition-all cursor-pointer"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+
                   {/* Badges */}
                   <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10">
                     {product.discountPercentage && product.discountPercentage > 0 ? (
@@ -330,20 +419,26 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
 
                 {/* Thumbnail Strip */}
                 {images.length > 1 && (
-                  <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+                  <div className="flex items-center gap-3 overflow-x-auto no-scrollbar p-2">
                     {images.map((img, idx) => (
                       <button
                         key={img + idx}
                         type="button"
                         onClick={() => setActiveImageIndex(idx)}
                         className={cn(
-                          "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer",
+                          "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer border-2",
                           activeImageIndex === idx
-                            ? "ring-2 ring-amber-500 shadow-sm"
-                            : "opacity-60 hover:opacity-100"
+                            ? "border-amber-500 shadow-sm opacity-100 scale-105"
+                            : "border-transparent opacity-60 hover:opacity-100 hover:border-border/60"
                         )}
                       >
-                        <Image src={img} alt={`${product.name} thumb ${idx + 1}`} fill className="object-cover object-center" />
+                        <Image
+                          src={img}
+                          alt={`${product.name} thumb ${idx + 1}`}
+                          fill
+                          sizes="72px"
+                          className="object-cover object-center"
+                        />
                       </button>
                     ))}
                   </div>
