@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCategoryBySlug, getProductsByCategory, categories } from "@/data";
-import { CatalogView } from "@/components/catalog";
+import { CategoryDetailView } from "@/components/categories";
 import { ROUTES } from "@/constants";
-import { ChevronRight, ArrowLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -42,9 +42,14 @@ export default async function CategoryDetailPage({ params }: Props) {
 
   const categoryProducts = getProductsByCategory(category.slug);
 
+  // Get other sister/popular categories to display at bottom of page
+  const sisterCategories = categories
+    .filter((c) => c.slug !== category.slug)
+    .slice(0, 6);
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-16">
-      {/* ── Breadcrumb Bar ── */}
+      {/* ── Breadcrumb Navigation ── */}
       <div className="border-b border-border/60 bg-muted/20 py-3">
         <div className="container px-3 sm:px-6">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -61,10 +66,11 @@ export default async function CategoryDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── Rich Catalog View with Filters, Sort & Grid ── */}
-      <CatalogView
-        initialProducts={categoryProducts}
+      {/* ── Category Detail Rich Hub ── */}
+      <CategoryDetailView
         category={category}
+        initialProducts={categoryProducts}
+        sisterCategories={sisterCategories}
       />
     </div>
   );

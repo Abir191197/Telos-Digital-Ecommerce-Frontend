@@ -18,6 +18,8 @@ interface CatalogViewProps {
   category?: Category;
   title?: string;
   subtitle?: string;
+  showSupportStrip?: boolean;
+  showHeader?: boolean;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -51,6 +53,8 @@ export function CatalogView({
   category,
   title,
   subtitle,
+  showSupportStrip = true,
+  showHeader = true,
 }: CatalogViewProps) {
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -253,22 +257,24 @@ export function CatalogView({
     <LazyMotion features={domAnimation}>
       <div className="container px-3 sm:px-6 py-6 sm:py-10 space-y-8">
         {/* ── Page Header / Intro ── */}
-        <m.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-1.5 pb-2"
-        >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-            {title || (category ? category.name : "All Products")}
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
-            {subtitle ||
-              (category
-                ? category.description
-                : "Discover official Bangladesh warranty devices, smartphones, computing workstations, audio, and authentic lifestyle tech.")}
-          </p>
-        </m.div>
+        {showHeader && (
+          <m.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-1.5 pb-2"
+          >
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
+              {title || (category ? category.name : "All Products")}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
+              {subtitle ||
+                (category
+                  ? category.description
+                  : "Discover official Bangladesh warranty devices, smartphones, computing workstations, audio, and authentic lifestyle tech.")}
+            </p>
+          </m.div>
+        )}
 
         {/* ── Main Catalog Two-Column Grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -513,9 +519,11 @@ export function CatalogView({
       )}
 
       {/* ── Support & Guarantee Strip at Bottom ── */}
-      <section className="pt-6">
-        <SupportAndHelpstrip />
-      </section>
+      {showSupportStrip && (
+        <section className="pt-6">
+          <SupportAndHelpstrip />
+        </section>
+      )}
     </div>
   </LazyMotion>
 );
