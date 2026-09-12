@@ -99,8 +99,8 @@ export function CategoryDetailView({
   return (
     <LazyMotion features={domAnimation}>
       <div className="space-y-8 sm:space-y-12">
-        {/* ── 1. Thematic Hero Header Banner (Clean Editorial Storefront Design) ── */}
-        <section className="container px-3 sm:px-6 pt-4">
+        {/* ── 1. Thematic Hero Header Banner (Hidden on mobile, visible on sm+ screens) ── */}
+        <section className="hidden sm:block container px-3 sm:px-6 pt-4">
           <m.div
             variants={heroFadeUp}
             initial="hidden"

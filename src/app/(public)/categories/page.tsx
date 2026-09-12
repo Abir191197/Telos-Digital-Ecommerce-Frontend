@@ -19,8 +19,8 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
-      {/* ── Hero Banner Section ── */}
-      <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent py-10 md:py-14 mb-6 sm:mb-8">
+      {/* ── Hero Banner Section (Hidden on mobile, visible on sm+ screens) ── */}
+      <section className="hidden sm:block relative overflow-hidden border-b border-border/40 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent py-10 md:py-14 mb-6 sm:mb-8">
         <div
           aria-hidden="true"
           className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"
