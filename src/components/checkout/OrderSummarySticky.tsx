@@ -46,8 +46,8 @@ export function OrderSummarySticky({
   const [couponInput, setCouponInput] = useState("");
   const [couponSuccessMessage, setCouponSuccessMessage] = useState<string | null>(null);
 
-  const handleCouponSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCouponSubmit = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!couponInput.trim()) return;
     const ok = onApplyCoupon(couponInput.trim().toUpperCase());
     if (ok) {
@@ -86,17 +86,20 @@ export function OrderSummarySticky({
 
       {/* Item Previews (Collapsible) */}
       {isItemsExpanded && (
-        <div className="max-h-64 overflow-y-auto space-y-3 pr-1 divide-y divide-border/40">
+        <div className="max-h-64 overflow-y-auto space-y-3 pt-2 pb-1 px-1 -mx-1 divide-y divide-border/40">
           {items.map((item) => (
             <div key={item.id} className="pt-3 first:pt-0 flex items-center gap-3">
-              <div className="relative h-14 w-14 rounded-xl border border-border/70 overflow-hidden shrink-0 bg-muted/30">
-                <Image
-                  src={item.product.thumbnail}
-                  alt={item.product.name}
-                  fill
-                  className="object-cover"
-                />
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background">
+              {/* Thumbnail with unclipped quantity badge */}
+              <div className="relative shrink-0 my-1">
+                <div className="relative h-14 w-14 rounded-xl border border-border/70 overflow-hidden bg-muted/30">
+                  <Image
+                    src={item.product.thumbnail}
+                    alt={item.product.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="absolute -top-2 -right-2 z-10 flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-foreground text-[10px] font-black text-background ring-2 ring-card shadow-sm">
                   {item.quantity}
                 </span>
               </div>
@@ -118,12 +121,12 @@ export function OrderSummarySticky({
         </div>
       )}
 
-      {/* Promo Code Input */}
-      <div className="pt-1">
+      {/* Promo Code Collapsible Toggle */}
+      <div className="pt-1 border-t border-border/50">
         {appliedCoupon ? (
-          <div className="flex items-center justify-between p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs">
+          <div className="flex items-center justify-between p-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-xs">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-emerald-500" />
+              <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <span className="font-bold text-emerald-700 dark:text-emerald-400">
                   {appliedCoupon.code}
@@ -136,29 +139,46 @@ export function OrderSummarySticky({
             <button
               type="button"
               onClick={onRemoveCoupon}
-              className="p-1 text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer"
+              className="text-xs font-bold text-rose-500 hover:underline cursor-pointer"
             >
-              <X className="h-3.5 w-3.5" />
+              Remove
             </button>
           </div>
         ) : (
-          <form onSubmit={handleCouponSubmit} className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Promo Code (e.g. TELOS10)"
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              className="h-10 flex-1 px-3 rounded-xl border border-border/80 bg-background text-xs uppercase font-mono tracking-wider focus:outline-none focus:border-primary"
-            />
-            <Button
-              type="submit"
-              variant="amber"
-              size="sm"
-              className="h-10 px-4"
-            >
-              Apply
-            </Button>
-          </form>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Promo Code (e.g. TELOS10)"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCouponSubmit();
+                    }
+                  }}
+                  className="h-10 w-full pl-9 pr-3 rounded-xl border border-border/70 bg-background text-xs uppercase font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-amber-500/40 focus:border-amber-500"
+                />
+              </div>
+              <Button
+                type="button"
+                onClick={handleCouponSubmit}
+                variant="amber"
+                size="sm"
+                className="h-10 px-4 font-bold rounded-xl cursor-pointer"
+              >
+                Apply
+              </Button>
+            </div>
+            {couponSuccessMessage && (
+              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                {couponSuccessMessage}
+              </p>
+            )}
+          </div>
         )}
         {couponError && (
           <p className="text-[11px] font-medium text-rose-500 mt-1">
@@ -211,14 +231,19 @@ export function OrderSummarySticky({
           </div>
         )}
 
-        <div className="border-t border-border/60 pt-3 flex items-baseline justify-between text-sm">
-          <span className="font-black text-foreground">Total Payable</span>
+        <div className="border-t border-border/60 pt-3.5 flex items-baseline justify-between text-sm">
+          <div>
+            <span className="font-black text-base text-foreground">Total Payable</span>
+            <span className="block text-[11px] text-muted-foreground font-normal">
+              VAT & Official Invoicing included
+            </span>
+          </div>
           <div className="text-right">
-            <span className="text-xl font-black text-foreground">
+            <span className="text-2xl font-black text-foreground">
               ৳{total.toLocaleString()}
             </span>
-            <span className="block text-[10px] text-muted-foreground">
-              VAT & Taxes included
+            <span className="block text-[10px] font-bold text-amber-600 dark:text-amber-400">
+              {deliveryZone === "inside-dhaka" ? "Dhaka 24h Express" : "BD Nationwide"}
             </span>
           </div>
         </div>
@@ -228,11 +253,11 @@ export function OrderSummarySticky({
       <div className="pt-2 border-t border-border/60 space-y-2 text-[11px] text-muted-foreground">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
-          <span>100% Genuine Official BD Warranty Guaranteed</span>
+          <span>100% Genuine BD Official Warranty Guaranteed</span>
         </div>
         <div className="flex items-center gap-2">
           <RotateCcw className="h-4 w-4 text-amber-500 shrink-0" />
-          <span>7-Day Hassle Free Replacement Policy</span>
+          <span>7-Day Replacement Policy & Courier Inspection</span>
         </div>
       </div>
     </div>

@@ -82,12 +82,12 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
   ];
 
   return (
-    <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-7 shadow-xs space-y-6">
+    <div className="rounded-3xl border border-border/70 bg-card p-6 sm:p-8 shadow-sm space-y-7">
       {/* Top Banner: Status & Tracking Reference */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-black uppercase text-amber-600 bg-amber-500/10 px-2.5 py-0.5 rounded-full">
+            <span className="font-mono text-xs font-black uppercase text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
               #{order.orderNumber}
             </span>
             <span className="text-xs text-muted-foreground">•</span>
@@ -95,7 +95,7 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
               {new Date(order.createdAt).toLocaleDateString("en-BD", { dateStyle: "medium" })}
             </span>
           </div>
-          <h3 className="text-base sm:text-lg font-black text-foreground mt-1">
+          <h3 className="text-lg sm:text-xl font-black text-foreground mt-1 tracking-tight">
             {order.status === "delivered"
               ? "Package Delivered Successfully"
               : order.status === "shipped"
@@ -108,22 +108,22 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
 
         {/* Courier & Tracking Copy Pill */}
         {order.trackingNumber && (
-          <div className="flex items-center gap-2 bg-muted/40 p-2 sm:px-3 rounded-2xl border border-border/70 text-xs">
+          <div className="flex items-center gap-2.5 bg-muted/40 p-2 sm:px-3 rounded-2xl border border-border/70 text-xs self-start sm:self-auto">
             <div className="flex flex-col">
-              <span className="text-[10px] text-muted-foreground font-bold uppercase">
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                 {order.courierName || "Courier Parcel"}
               </span>
-              <span className="font-mono font-bold text-foreground">
+              <span className="font-mono font-black text-foreground text-xs sm:text-sm">
                 {order.trackingNumber}
               </span>
             </div>
             <button
               type="button"
               onClick={handleCopyTracking}
-              className="p-1.5 rounded-xl hover:bg-background text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              className="p-2 rounded-xl hover:bg-background text-muted-foreground hover:text-foreground transition-all cursor-pointer"
               title="Copy tracking number"
             >
-              {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-4 w-4 text-emerald-500 stroke-[3]" /> : <Copy className="h-4 w-4" />}
             </button>
           </div>
         )}
@@ -133,17 +133,17 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
       <div className="relative pt-2">
         <div className="space-y-6 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4">
           {milestones.map((milestone, idx) => {
-            const { isComplete, isCurrent, isCancelled } = getStepState(idx, order.status);
+            const { isComplete, isCurrent } = getStepState(idx, order.status);
             const Icon = milestone.icon;
 
             return (
-              <div key={milestone.title} className="relative flex sm:flex-col items-start gap-4 sm:gap-2">
+              <div key={milestone.title} className="relative flex sm:flex-col items-start gap-4 sm:gap-3">
                 {/* Horizontal connect line for desktop */}
                 {idx < milestones.length - 1 && (
                   <div
                     className={cn(
-                      "hidden sm:block absolute top-4 left-9 right-0 h-0.5 -z-0 transition-colors",
-                      isComplete ? "bg-emerald-500" : "bg-border/80"
+                      "hidden sm:block absolute top-5 left-10 right-0 h-0.5 -z-0 transition-colors",
+                      isComplete ? "bg-emerald-500" : "bg-border/70"
                     )}
                   />
                 )}
@@ -151,10 +151,10 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
                 {/* Step Circle Node */}
                 <div
                   className={cn(
-                    "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl font-bold text-xs shadow-xs transition-all",
-                    isComplete && "bg-emerald-500 text-white shadow-emerald-500/20",
-                    isCurrent && "bg-amber-500 text-white shadow-amber-500/20 ring-4 ring-amber-500/15",
-                    !isComplete && !isCurrent && "bg-muted text-muted-foreground border border-border"
+                    "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl font-bold text-xs shadow-xs transition-all",
+                    isComplete && "bg-emerald-500 text-white shadow-emerald-500/20 shadow-md",
+                    isCurrent && "bg-amber-500 text-zinc-950 font-black shadow-amber-500/25 shadow-lg ring-4 ring-amber-500/20",
+                    !isComplete && !isCurrent && "bg-muted text-muted-foreground border border-border/80"
                   )}
                 >
                   {isComplete ? <Check className="h-4 w-4 stroke-[3]" /> : <Icon className="h-4 w-4" />}
@@ -165,7 +165,7 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
                   <div className="flex items-center gap-2">
                     <h4
                       className={cn(
-                        "text-xs sm:text-sm font-bold tracking-tight",
+                        "text-xs sm:text-sm font-black tracking-tight",
                         isCurrent ? "text-amber-600 dark:text-amber-400" : isComplete ? "text-foreground" : "text-muted-foreground"
                       )}
                     >

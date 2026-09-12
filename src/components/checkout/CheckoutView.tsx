@@ -40,6 +40,7 @@ export function CheckoutView() {
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [pendingCheckoutValues, setPendingCheckoutValues] =
     useState<CheckoutFormValues | null>(null);
 
@@ -48,7 +49,7 @@ export function CheckoutView() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: user?.name || "",
-      phone: user?.phone || "+880 1",
+      phone: user?.phone ? user.phone.replace(/^\+880/, "") : "",
       email: user?.email || "",
       city: "Dhaka",
       zone: "inside-dhaka",
@@ -80,12 +81,15 @@ export function CheckoutView() {
 
   // Prepopulate form if user selects a saved address
   const handleSelectSavedAddress = (addr: Address) => {
-    setValue("fullName", addr.name);
-    setValue("phone", addr.phone);
-    setValue("city", addr.city);
-    setValue("zone", addr.zone);
-    setValue("street", addr.street);
-    if (addr.postalCode) setValue("postalCode", addr.postalCode);
+    setSelectedAddressId(addr.id);
+    setValue("fullName", addr.name, { shouldValidate: true, shouldDirty: true });
+    // Strip leading +880 or leading 0 so it aligns with fixed +880 badge
+    const cleanPhone = addr.phone.replace(/^\+880\s?/, "").replace(/^0/, "");
+    setValue("phone", cleanPhone, { shouldValidate: true, shouldDirty: true });
+    setValue("city", addr.city, { shouldValidate: true, shouldDirty: true });
+    setValue("zone", addr.zone, { shouldValidate: true, shouldDirty: true });
+    setValue("street", addr.street, { shouldValidate: true, shouldDirty: true });
+    if (addr.postalCode) setValue("postalCode", addr.postalCode, { shouldDirty: true });
   };
 
   // Step 1 -> Step 2 validation handler
@@ -238,6 +242,7 @@ export function CheckoutView() {
                   <AddressStep
                     form={form}
                     savedAddresses={user?.addresses || []}
+                    selectedAddressId={selectedAddressId}
                     onSelectSavedAddress={handleSelectSavedAddress}
                     onContinue={handleContinueToStep2}
                   />

@@ -10,11 +10,11 @@ export function CheckoutHeader() {
         {/* Brand & Back Button */}
         <div className="flex items-center gap-4">
           <Link
-            href={ROUTES.PRODUCTS}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            href={ROUTES.CART}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-amber-500 transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to Shop</span>
+            <span>Return to Cart</span>
           </Link>
 
           <div className="h-4 w-px bg-border/80 hidden sm:block" />
@@ -25,7 +25,7 @@ export function CheckoutHeader() {
             </div>
             <div className="flex flex-col">
               <span className="font-black text-sm tracking-tight text-foreground leading-none">
-                TELOS<span className="text-amber-500">CART</span>
+                TELOS<span className="text-amber-500">DIGITAL</span>
               </span>
               <span className="text-[10px] text-muted-foreground tracking-wider font-semibold">
                 SECURE CHECKOUT

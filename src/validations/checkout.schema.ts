@@ -25,8 +25,8 @@ export const BD_DISTRICTS = [
   "Tangail",
 ] as const;
 
-// Bangladesh phone number regex: accepts 01XXXXXXXXX or +8801XXXXXXXXX
-export const BD_PHONE_REGEX = /^(?:\+8801|01)[3-9]\d{8}$/;
+// Bangladesh phone number regex: accepts 1[3-9]\d{8}, 01[3-9]\d{8}, or +8801[3-9]\d{8}
+export const BD_PHONE_REGEX = /^(?:\+8801|01|1)[3-9]\d{8}$/;
 
 export const checkoutSchema = z.object({
   fullName: z
@@ -35,8 +35,8 @@ export const checkoutSchema = z.object({
     .max(80, "Full name is too long"),
   phone: z
     .string()
-    .min(11, "Enter valid 11-digit mobile number")
-    .regex(BD_PHONE_REGEX, "Enter valid Bangladesh mobile number (e.g. 01712345678 or +8801712345678)"),
+    .min(10, "Enter valid mobile number (e.g. 017XXXXXXXX)")
+    .regex(BD_PHONE_REGEX, "Enter valid Bangladesh mobile number (e.g. 01712345678)"),
   email: z
     .string()
     .email("Enter a valid email address")
