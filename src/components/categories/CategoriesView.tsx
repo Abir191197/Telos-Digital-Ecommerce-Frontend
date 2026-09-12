@@ -48,6 +48,7 @@ import {
   Flame,
   History,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { useRecentlyViewedStore } from "@/stores";
 import { useMounted } from "@/hooks";
@@ -182,24 +183,49 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
     setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
+  // Infinite scroll trigger sentinel ref
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // Sliced items for display
   const displayedCategories = useMemo(() => {
     return filteredCategories.slice(0, visibleCount);
   }, [filteredCategories, visibleCount]);
 
   const hasMore = visibleCount < filteredCategories.length;
-  const isExpanded = visibleCount > INITIAL_BATCH_SIZE;
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + BATCH_INCREMENT, filteredCategories.length));
-  };
+  // Infinite scroll trigger
+  React.useEffect(() => {
+    if (!hasMore) return;
 
-  const handleShowLess = () => {
-    setVisibleCount(INITIAL_BATCH_SIZE);
-    if (gridSectionRef.current) {
-      gridSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+    let isFetching = false;
+
+    const handleCheck = () => {
+      if (isFetching || !hasMore) return;
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+
+      const rect = sentinel.getBoundingClientRect();
+      // Trigger when user scrolls to within 180px of sentinel
+      if (rect.top <= window.innerHeight + 180) {
+        isFetching = true;
+        setIsLoadingMore(true);
+        setTimeout(() => {
+          setVisibleCount((prev) => Math.min(prev + BATCH_INCREMENT, filteredCategories.length));
+          setIsLoadingMore(false);
+          isFetching = false;
+        }, 650);
+      }
+    };
+
+    window.addEventListener("scroll", handleCheck, { passive: true });
+    window.addEventListener("resize", handleCheck, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleCheck);
+      window.removeEventListener("resize", handleCheck);
+    };
+  }, [hasMore, visibleCount, filteredCategories.length]);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -298,21 +324,21 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
               </button>
             </div>
           ) : (
-            <m.div
-              variants={categoryGridVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-40px" }}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5"
-            >
-              {displayedCategories.map((cat) => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5">
+              {displayedCategories.map((cat, idx) => {
                 const IconComponent =
                   (cat.icon && CATEGORY_ICON_MAP[cat.icon]) || LayoutGrid;
 
                 return (
                   <m.div
                     key={cat.id}
-                    variants={categoryCardVariants}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.35,
+                      delay: Math.min((idx % 10) * 0.03, 0.3),
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                     className="group relative flex flex-col justify-between overflow-hidden rounded-3xl bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.65)] transition-all duration-300 hover:-translate-y-1.5"
                   >
                     {/* Visual Category Cover Image / Banner */}
@@ -354,73 +380,51 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
 
                       <Link
                         href={ROUTES.CATEGORY_DETAIL(cat.slug)}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-zinc-950 dark:hover:text-zinc-950 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98]"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98] shadow-xs"
                       >
                         <span>Explore</span>
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-400" />
                       </Link>
                     </div>
                   </m.div>
                 );
               })}
-            </m.div>
+            </div>
           )}
 
-          {/* ── Progressive Batch "Load More" & "Show Less" Controls ── */}
-          <m.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="mt-12 flex flex-col items-center justify-center text-center"
-          >
-            {/* Minimal Elegant Progress Bar */}
-            <div className="flex flex-col items-center gap-2 mb-5">
-              <div className="w-48 sm:w-56 h-1 rounded-full bg-muted overflow-hidden">
+          {/* ── Loading Skeleton Preview while fetching next batch ── */}
+          {isLoadingMore && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-5 animate-pulse">
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div
-                  className="h-full bg-amber-500 transition-all duration-500 ease-out rounded-full shadow-sm shadow-amber-500/50"
-                  style={{
-                    width: `${(displayedCategories.length / filteredCategories.length) * 100}%`,
-                  }}
-                />
+                  key={`skeleton-${i}`}
+                  className="rounded-3xl bg-muted/40 border border-border/40 overflow-hidden h-64 flex flex-col justify-between p-4"
+                >
+                  <div className="h-32 rounded-2xl bg-muted/70 w-full" />
+                  <div className="space-y-2 mt-3">
+                    <div className="h-4 bg-muted/70 rounded-md w-3/4" />
+                    <div className="h-3 bg-muted/50 rounded-md w-1/3" />
+                  </div>
+                  <div className="h-8 rounded-xl bg-muted/60 mt-3" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── Infinite Scroll Sentinel & Status ── */}
+          <div ref={sentinelRef} className="mt-8 flex flex-col items-center justify-center text-center">
+            {hasMore ? (
+              <div className="flex items-center gap-2 py-3 px-5 rounded-full bg-card border border-border/70 shadow-xs text-xs font-semibold text-foreground">
+                <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+                <span>Loading next categories...</span>
               </div>
-              <p className="text-xs font-medium text-muted-foreground tracking-wide">
-                Showing <span className="text-foreground font-semibold">{displayedCategories.length}</span> of{" "}
-                <span className="text-foreground font-semibold">{filteredCategories.length}</span> categories
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={handleLoadMore}
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-500/15 hover:bg-amber-500 active:bg-amber-600 text-amber-700 dark:text-amber-300 hover:text-white active:text-white px-6 py-2.5 text-xs sm:text-sm font-bold tracking-wide shadow-xs transition-colors duration-150 active:scale-[0.98] cursor-pointer"
-                >
-                  <span>Load More</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              )}
-
-              {isExpanded && (
-                <button
-                  type="button"
-                  onClick={handleShowLess}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground px-4 py-2.5 text-xs sm:text-sm font-medium transition-colors active:scale-[0.98] cursor-pointer"
-                >
-                  <ChevronUp className="h-3.5 w-3.5" />
-                  <span>Show Less</span>
-                </button>
-              )}
-            </div>
-
-            {!hasMore && filteredCategories.length > INITIAL_BATCH_SIZE && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80 pt-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-amber-500" />
-                You have viewed all categories
-              </span>
-            )}
-          </m.div>
+            ) : filteredCategories.length > INITIAL_BATCH_SIZE ? (
+              <div className="flex items-center gap-1.5 py-4 text-xs font-medium text-muted-foreground/80">
+                <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                <span>All {filteredCategories.length} categories loaded</span>
+              </div>
+            ) : null}
+          </div>
         </section>
 
         {/* ── 4. "Most Popular Across Categories" Micro Product Rail ── */}

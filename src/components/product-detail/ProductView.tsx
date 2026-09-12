@@ -562,10 +562,10 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
               </div>
               <Link
                 href={ROUTES.CATEGORY_DETAIL(product.categorySlug)}
-                className="text-xs sm:text-sm font-bold text-amber-600 hover:underline flex items-center gap-1"
+                className="group inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-zinc-950 border border-amber-500/30 hover:border-amber-500 px-4 py-1.5 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md hover:shadow-amber-500/20 active:scale-95"
               >
-                <span>View Full Aisle</span>
-                <ChevronRight className="h-4 w-4" />
+                <span>View All</span>
+                <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
 
