@@ -47,7 +47,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <div
       className={cn(
-        "group relative flex flex-col rounded-3xl bg-card text-card-foreground p-2.5 transition-all duration-300 ease-out hover:-translate-y-1.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.7)]",
+        "group relative flex flex-col h-full rounded-3xl bg-card text-card-foreground p-2.5 transition-all duration-300 ease-out hover:-translate-y-1.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.12),0_2px_10px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65),0_2px_12px_-2px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.18)] dark:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.85)]",
         className
       )}
     >
@@ -105,13 +105,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </span>
         </div>
 
-        {/* Title */}
-        <Link
-          href={productUrl}
-          className="mt-1 font-semibold text-sm text-foreground line-clamp-2 hover:text-amber-500 transition-colors leading-snug"
-        >
-          {product.name}
-        </Link>
+        {/* Title: fixed 2-line height so 1-line or 2-line titles never alter card height */}
+        <div className="mt-1 h-10 flex items-start">
+          <Link
+            href={productUrl}
+            className="font-semibold text-sm text-foreground line-clamp-2 hover:text-amber-500 transition-colors leading-snug"
+          >
+            {product.name}
+          </Link>
+        </div>
 
         {/* Rating & Reviews */}
         <div className="mt-2 flex items-center gap-1.5 text-xs">
@@ -130,15 +132,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Price & Add to Cart Footer */}
-        <div className="mt-auto pt-3.5 flex items-center justify-between gap-2">
-          <div>
-            <div className="text-base font-extrabold text-foreground tracking-tight">
+        <div className="mt-auto pt-3.5 flex items-center justify-between gap-1.5 sm:gap-2">
+          <div className="min-w-0 flex-1 flex flex-col justify-center h-9">
+            <div className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate leading-tight">
               ৳{product.price.toLocaleString()}
             </div>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <div className="text-[11px] text-muted-foreground line-through">
+            {product.originalPrice && product.originalPrice > product.price ? (
+              <div className="text-[10px] sm:text-[11px] text-muted-foreground line-through truncate leading-none mt-0.5">
                 ৳{product.originalPrice.toLocaleString()}
               </div>
+            ) : (
+              <div className="h-[14px] sm:h-[15px]" aria-hidden="true" />
             )}
           </div>
 
@@ -146,7 +150,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             type="button"
             onClick={handleAddToCart}
             className={cn(
-              "flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-all active:scale-95 cursor-pointer",
+              "shrink-0 flex h-8 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-4 text-[11px] sm:text-xs font-bold transition-all active:scale-95 cursor-pointer",
               isAdding
                 ? "bg-emerald-600 text-white"
                 : "bg-foreground text-background hover:opacity-90 hover:scale-105 shadow-sm"
