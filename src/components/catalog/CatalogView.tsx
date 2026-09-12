@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Product, Category } from "@/types/ecommerce.types";
 import { GridViewMode } from "@/types/catalog.types";
 import { ProductCard } from "@/components/common";
@@ -56,9 +57,17 @@ export function CatalogView({
   showSupportStrip = true,
   showHeader = true,
 }: CatalogViewProps) {
+  const searchParams = useSearchParams();
+  const brandParam = searchParams.get("brand");
+
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(() => {
+    if (brandParam && brandParam !== "all") {
+      return [brandParam];
+    }
+    return [];
+  });
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [selectedRating, setSelectedRating] = useState<number | undefined>(undefined);
@@ -69,6 +78,17 @@ export function CatalogView({
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const catalogFeedRef = React.useRef<HTMLDivElement>(null);
+
+  // Sync if URL brand param changes
+  useEffect(() => {
+    if (brandParam && brandParam !== "all") {
+      setSelectedBrands([brandParam]);
+      setCurrentPage(1);
+    } else if (brandParam === "all") {
+      setSelectedBrands([]);
+      setCurrentPage(1);
+    }
+  }, [brandParam]);
 
   // Compute available brands & overall price bounds
   const availableBrands = useMemo(() => {

@@ -189,7 +189,7 @@ export function OfficialBrandsSection() {
         </div>
 
         <Link
-          href={`${ROUTES.HOME}?brand=all`}
+          href={ROUTES.PRODUCTS}
           className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group">
           <span>All Brands</span>
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
@@ -221,7 +221,7 @@ export function OfficialBrandsSection() {
             return (
               <Link
                 key={`${brand.id}-${idx}`}
-                href={`${ROUTES.HOME}?brand=${brand.slug}`}
+                href={`${ROUTES.PRODUCTS}?brand=${encodeURIComponent(brand.name)}`}
                 className="group relative flex flex-col items-center justify-between w-[155px] sm:w-[180px] shrink-0 p-5 rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 text-center select-none overflow-hidden">
                 {/* Ambient glow on hover - borderless design */}
                 <div

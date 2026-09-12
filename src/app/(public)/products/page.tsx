@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { products } from "@/data";
 import { CatalogView } from "@/components/catalog";
 import { ROUTES } from "@/constants";
@@ -28,11 +29,13 @@ export default function ProductsPage() {
       </div>
 
       {/* ── Main Catalog View ── */}
-      <CatalogView
-        initialProducts={products}
-        title="Complete Product Catalog"
-        subtitle="Explore over 250+ verified authentic tech devices, smartphones, computing workstations, audio gear, and lifestyle products with official Bangladesh warranty."
-      />
+      <Suspense fallback={<div className="container px-3 sm:px-6 py-10 min-h-[400px]" />}>
+        <CatalogView
+          initialProducts={products}
+          title="Complete Product Catalog"
+          subtitle="Explore over 250+ verified authentic tech devices, smartphones, computing workstations, audio gear, and lifestyle products with official Bangladesh warranty."
+        />
+      </Suspense>
     </div>
   );
 }
