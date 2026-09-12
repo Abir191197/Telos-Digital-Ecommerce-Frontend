@@ -154,30 +154,35 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-14 items-start">
             {/* Left Column: Media Stage (6 cols on lg, sticky) */}
             <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
-              {/* Main Stage Image (Full-bleed cover, zero white space) */}
-              <div className="group relative aspect-square w-full overflow-hidden rounded-3xl">
-                <AnimatePresence mode="wait">
-                  <m.div
-                    key={activeImageIndex}
-                    initial={{ opacity: 0, scale: 1.02 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="relative h-full w-full"
-                  >
-                    <Image
-                      src={images[activeImageIndex] || product.thumbnail}
-                      alt={product.name}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </m.div>
-                </AnimatePresence>
+              {/* ── Mobile View: Swipeable Carousel Stage ── */}
+              <div className="block lg:hidden relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20">
+                <m.div
+                  key={activeImageIndex}
+                  drag={images.length > 1 ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(_, info) => {
+                    const threshold = 40;
+                    if (info.offset.x < -threshold && activeImageIndex < images.length - 1) {
+                      setActiveImageIndex((prev) => prev + 1);
+                    } else if (info.offset.x > threshold && activeImageIndex > 0) {
+                      setActiveImageIndex((prev) => prev - 1);
+                    }
+                  }}
+                  className="relative h-full w-full touch-pan-y"
+                >
+                  <Image
+                    src={images[activeImageIndex] || product.thumbnail}
+                    alt={`${product.name} - slide ${activeImageIndex + 1}`}
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-cover object-center select-none pointer-events-none"
+                  />
+                </m.div>
 
                 {/* Badges */}
-                <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10">
+                <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10 pointer-events-none">
                   {product.discountPercentage && product.discountPercentage > 0 ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-zinc-950 px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm">
                       <Zap className="h-3 w-3 fill-zinc-950" />
@@ -215,34 +220,135 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                   </button>
                 </div>
 
+                {/* Mobile Floating Pagination / Photo Count Pill Indicator */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-3.5 right-3.5 z-10 pointer-events-none">
+                    <span className="inline-flex items-center rounded-full bg-zinc-950/70 text-white px-2.5 py-1 text-[10px] font-bold backdrop-blur-md shadow-xs">
+                      {activeImageIndex + 1} / {images.length}
+                    </span>
+                  </div>
+                )}
+
+                {/* Mobile Swipe Navigation Dots */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                    {images.map((_, dotIdx) => (
+                      <button
+                        key={`mobile-dot-${dotIdx}`}
+                        type="button"
+                        onClick={() => setActiveImageIndex(dotIdx)}
+                        aria-label={`Go to slide ${dotIdx + 1}`}
+                        className={cn(
+                          "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
+                          activeImageIndex === dotIdx
+                            ? "w-5 bg-amber-500 shadow-xs"
+                            : "w-1.5 bg-white/70 hover:bg-white"
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+
                 {/* Share copied toast indicator */}
                 {showShareToast && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 text-background px-4 py-1.5 text-xs font-semibold shadow-lg z-20">
+                  <div className="absolute bottom-12 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 text-background px-4 py-1.5 text-xs font-semibold shadow-lg z-20 whitespace-nowrap">
                     Link copied to clipboard!
                   </div>
                 )}
               </div>
 
-              {/* Thumbnail Strip */}
-              {images.length > 1 && (
-                <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
-                  {images.map((img, idx) => (
+              {/* ── Desktop View: Traditional Media Stage + Thumbnails (Hidden on Mobile) ── */}
+              <div className="hidden lg:block space-y-4">
+                {/* Main Stage Image (Full-bleed cover, zero white space) */}
+                <div className="group relative aspect-square w-full overflow-hidden rounded-3xl">
+                  <AnimatePresence mode="wait">
+                    <m.div
+                      key={activeImageIndex}
+                      initial={{ opacity: 0, scale: 1.02 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="relative h-full w-full"
+                    >
+                      <Image
+                        src={images[activeImageIndex] || product.thumbnail}
+                        alt={product.name}
+                        fill
+                        priority
+                        sizes="50vw"
+                        className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </m.div>
+                  </AnimatePresence>
+
+                  {/* Badges */}
+                  <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 z-10">
+                    {product.discountPercentage && product.discountPercentage > 0 ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-zinc-950 px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm">
+                        <Zap className="h-3 w-3 fill-zinc-950" />
+                        Save {product.discountPercentage}%
+                      </span>
+                    ) : null}
+                    {product.badge && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-zinc-900/80 dark:bg-white/90 text-white dark:text-zinc-900 backdrop-blur-md px-3 py-1 text-[11px] font-bold shadow-xs">
+                        <Sparkles className="h-3 w-3" />
+                        {product.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Wishlist & Share floating action pills */}
+                  <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10">
                     <button
-                      key={img + idx}
                       type="button"
-                      onClick={() => setActiveImageIndex(idx)}
+                      onClick={handleShare}
+                      aria-label="Share product"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-muted-foreground shadow-xs hover:text-foreground hover:bg-background transition-all cursor-pointer"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleToggleWishlist}
+                      aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                       className={cn(
-                        "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer",
-                        activeImageIndex === idx
-                          ? "ring-2 ring-amber-500 shadow-sm"
-                          : "opacity-60 hover:opacity-100"
+                        "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
+                        isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
                       )}
                     >
-                      <Image src={img} alt={`${product.name} thumb ${idx + 1}`} fill className="object-cover object-center" />
+                      <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
                     </button>
-                  ))}
+                  </div>
+
+                  {/* Share copied toast indicator */}
+                  {showShareToast && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 text-background px-4 py-1.5 text-xs font-semibold shadow-lg z-20">
+                      Link copied to clipboard!
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Thumbnail Strip */}
+                {images.length > 1 && (
+                  <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+                    {images.map((img, idx) => (
+                      <button
+                        key={img + idx}
+                        type="button"
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={cn(
+                          "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer",
+                          activeImageIndex === idx
+                            ? "ring-2 ring-amber-500 shadow-sm"
+                            : "opacity-60 hover:opacity-100"
+                        )}
+                      >
+                        <Image src={img} alt={`${product.name} thumb ${idx + 1}`} fill className="object-cover object-center" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right Column: Buying Decision Hub (6 cols on lg) */}

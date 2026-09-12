@@ -240,8 +240,8 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
           className="container px-3 sm:px-6"
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border/40">
-            {/* Group Filter Pills */}
-            <div className="no-scrollbar -mx-3 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+            {/* Group Filter Pills - Hidden on Mobile, visible on tablet/desktop */}
+            <div className="hidden md:flex items-center gap-2 overflow-x-auto">
               {CATEGORY_GROUPS.map((group) => {
                 const isActive = selectedGroup === group.id;
                 return (
