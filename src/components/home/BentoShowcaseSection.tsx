@@ -29,7 +29,7 @@ const BENTO_ITEMS: BentoItem[] = [
     href: ROUTES.CATEGORY_DETAIL("gaming-gear-consoles"),
     image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=1200&q=80",
     tagline: "Up to 35% OFF Gear",
-    gridSpan: "col-span-1 sm:col-span-2 lg:col-span-8 row-span-2 min-h-[340px] sm:min-h-[420px]",
+    gridSpan: "col-span-1 sm:col-span-2 lg:col-span-8 row-span-2 min-h-[380px] sm:min-h-[460px]",
     priceHint: "Starts from ৳2,499",
     ctaText: "Explore Battle Arena",
   },
@@ -41,7 +41,7 @@ const BENTO_ITEMS: BentoItem[] = [
     href: ROUTES.CATEGORY_DETAIL("smartphones-tablets"),
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
     tagline: "Official Warranty",
-    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-4 row-span-1 min-h-[220px] sm:min-h-[240px]",
+    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-4 row-span-1 min-h-[250px] sm:min-h-[270px]",
     ctaText: "Browse Phones",
   },
   {
@@ -52,7 +52,7 @@ const BENTO_ITEMS: BentoItem[] = [
     href: ROUTES.CATEGORY_DETAIL("audio-headphones"),
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
     tagline: "Studio Clarity",
-    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-4 row-span-1 min-h-[220px] sm:min-h-[240px]",
+    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-4 row-span-1 min-h-[250px] sm:min-h-[270px]",
     ctaText: "Discover Audio",
   },
   {
@@ -63,7 +63,7 @@ const BENTO_ITEMS: BentoItem[] = [
     href: ROUTES.CATEGORY_DETAIL("laptops-macbooks"),
     image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
     tagline: "Fast Same-Day Courier",
-    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-6 row-span-1 min-h-[240px] sm:min-h-[260px]",
+    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-6 row-span-1 min-h-[260px] sm:min-h-[280px]",
     priceHint: "From ৳58,000",
     ctaText: "Shop Laptops",
   },
@@ -75,7 +75,7 @@ const BENTO_ITEMS: BentoItem[] = [
     href: ROUTES.CATEGORY_DETAIL("smartwatches-wearables"),
     image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
     tagline: "Next-Gen Mobility",
-    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-6 row-span-1 min-h-[240px] sm:min-h-[260px]",
+    gridSpan: "col-span-1 sm:col-span-1 lg:col-span-6 row-span-1 min-h-[260px] sm:min-h-[280px]",
     priceHint: "Starts at ৳3,200",
     ctaText: "View Wearables",
   },
@@ -117,7 +117,7 @@ export function BentoShowcaseSection() {
             key={item.title}
             href={item.href}
             className={cn(
-              "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/70 bg-card p-5 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/10",
+              "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/60 bg-card p-5 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 dark:hover:shadow-black/60",
               item.gridSpan
             )}
           >
@@ -130,8 +130,8 @@ export function BentoShowcaseSection() {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 66vw"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-106"
               />
-              {/* Premium Gradient Overlay: dark on bottom/left for clean contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/25" />
+              {/* Light gradient overlay to keep photography vivid behind frosted glass */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent dark:from-black/80 dark:via-black/40 dark:to-transparent" />
             </div>
 
             {/* Top Row Badges */}
@@ -152,29 +152,37 @@ export function BentoShowcaseSection() {
               )}
             </div>
 
-            {/* Bottom Content Row */}
-            <div className="relative z-10 mt-auto pt-8 space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+            {/* Liquid Glass Content Card Capsule */}
+            <div className="relative z-10 mt-auto p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl overflow-hidden bg-white/20 dark:bg-black/25 backdrop-blur-md backdrop-saturate-150 shadow-[0_6px_24px_0_rgba(0,0,0,0.1)] dark:shadow-[0_6px_24px_0_rgba(0,0,0,0.4)] space-y-1.5">
+              {/* Liquid radial refractive glow */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full bg-white/20 dark:bg-amber-500/10 blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"
+              />
+
+              <span className="relative z-10 inline-block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
                 {item.tagline}
               </span>
 
               <h3
                 className={cn(
-                  "font-black text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors",
-                  idx === 0 ? "text-2xl sm:text-3xl lg:text-4xl" : "text-lg sm:text-xl"
+                  "relative z-10 font-black text-zinc-950 dark:text-white tracking-tight leading-snug transition-colors drop-shadow-2xs",
+                  idx === 0 ? "text-lg sm:text-xl lg:text-2xl" : "text-sm sm:text-base"
                 )}
               >
                 {item.title}
               </h3>
 
-              <p className="text-xs sm:text-sm text-zinc-200 line-clamp-2 max-w-xl leading-relaxed">
+              <p className="relative z-10 text-[11px] sm:text-xs text-zinc-700 dark:text-zinc-300 font-medium line-clamp-1 leading-relaxed">
                 {item.description}
               </p>
 
-              <div className="pt-2">
-                <span className="inline-flex items-center gap-2 rounded-xl bg-white/90 group-hover:bg-amber-500 group-hover:text-zinc-950 px-4 py-2 text-xs font-bold text-zinc-900 shadow-sm backdrop-blur-md transition-all duration-200">
+              <div className="relative z-10 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 pl-3.5 pr-1 py-1 text-[11px] sm:text-xs font-black shadow-md shadow-amber-500/20 transition-all duration-200 group-hover:scale-[1.03]">
                   <span>{item.ctaText}</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/95 text-zinc-950 shadow-xs">
+                    <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:rotate-[-45deg]" />
+                  </span>
                 </span>
               </div>
             </div>

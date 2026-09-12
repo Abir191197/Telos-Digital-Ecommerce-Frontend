@@ -8,7 +8,7 @@ import { ROUTES } from "@/constants";
 export function SupportAndHelpstrip() {
   return (
     <section aria-label="Customer Support Hub" className="w-full">
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 p-6 sm:p-8 text-white shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 p-6 sm:p-8 text-white shadow-[0_4px_24px_-4px_rgba(0,0,0,0.25)]">
         {/* Subtle decorative glow */}
         <div
           aria-hidden="true"

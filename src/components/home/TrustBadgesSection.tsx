@@ -29,8 +29,8 @@ const TRUST_ITEMS = [
 export function TrustBadgesSection() {
   return (
     <section aria-label="Customer Guarantees" className="w-full">
-      <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-6 shadow-xs">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
+      <div className="rounded-3xl bg-card p-4 sm:p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
           {TRUST_ITEMS.map((item, idx) => {
             const Icon = item.icon;
             return (

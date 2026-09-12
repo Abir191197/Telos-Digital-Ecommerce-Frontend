@@ -64,26 +64,14 @@ export function CategoryAisleSection({
           </p>
         </div>
 
-        {/* Right subcategory quick pills & view all button */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {category.subcategories.slice(0, 3).map((sub) => (
-            <Link
-              key={sub.id}
-              href={ROUTES.CATEGORY_DETAIL(category.slug)}
-              className="hidden md:inline-flex rounded-full border border-border/70 bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            >
-              {sub.name}
-            </Link>
-          ))}
-
-          <Link
-            href={ROUTES.CATEGORY_DETAIL(category.slug)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 shrink-0 group"
-          >
-            <span>View All ({category.itemCount})</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
-        </div>
+        {/* Right view all button linking to dedicated category page */}
+        <Link
+          href={ROUTES.CATEGORY_DETAIL(category.slug)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
+        >
+          <span>View All</span>
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
+        </Link>
       </div>
 
       {/* Product Cards Grid: 2 cols on mobile, 3 on md, 5 cols on xl desktop */}

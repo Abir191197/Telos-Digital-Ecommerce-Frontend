@@ -1,43 +1,28 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { products } from "@/data";
 import { ProductCard } from "@/components/common";
-import { Sparkles, TrendingUp, Flame, Award } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-type TabKey = "featured" | "trending" | "new" | "topRated";
-
-const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: "featured", label: "Featured", icon: Sparkles },
-  { key: "trending", label: "Trending", icon: TrendingUp },
-  { key: "new", label: "New Arrivals", icon: Flame },
-  { key: "topRated", label: "Top Rated", icon: Award },
-];
+import { ROUTES } from "@/constants";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export function FeaturedProductsTabs() {
-  const [activeTab, setActiveTab] = React.useState<TabKey>("featured");
-
-  const filteredProducts = React.useMemo(() => {
-    switch (activeTab) {
-      case "featured":
-        return products.filter((p) => p.isFeatured).slice(0, 10);
-      case "trending":
-        return products.filter((p) => p.badge === "Trending" || p.badge === "Hot" || p.reviewCount > 15).slice(0, 10);
-      case "new":
-        return products.filter((p) => p.isNewArrival).slice(0, 10);
-      case "topRated":
-        return products.filter((p) => p.rating >= 4.5).slice(0, 10);
-      default:
-        return products.slice(0, 10);
-    }
-  }, [activeTab]);
+  const featuredProducts = React.useMemo(() => {
+    return products.filter((p) => p.isFeatured).slice(0, 10);
+  }, []);
 
   return (
     <section aria-label="Curated Products" className="w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex items-end justify-between mb-5 sm:mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-500">
+              <Sparkles className="h-3 w-3" />
+              Hand-Picked Selection
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
             Curated Products For You
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
@@ -45,37 +30,22 @@ export function FeaturedProductsTabs() {
           </p>
         </div>
 
-        {/* Tab switcher buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-xl bg-muted/50 border border-border/60 self-start sm:self-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className={cn("h-3.5 w-3.5", isActive ? "text-amber-500" : "")} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <Link
+          href={ROUTES.PRODUCTS}
+          className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
+        >
+          <span>View All</span>
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
+        </Link>
       </div>
 
       {/* Product Grid: 2 cols on mobile, 3 on md, 5 on xl desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-        {filteredProducts.map((product) => (
+        {featuredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>
   );
 }
+

@@ -20,7 +20,7 @@ export function CategorySpotlightBanner() {
     <section aria-label="Category Spotlight" className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         {/* Left Promo Card */}
-        <div className="lg:col-span-4 relative flex flex-col justify-between overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent p-6 sm:p-8">
+        <div className="lg:col-span-4 relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(245,158,11,0.12)]">
           <div className="relative z-10 space-y-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider shadow-xs">
               <Sparkles className="h-3 w-3" />
