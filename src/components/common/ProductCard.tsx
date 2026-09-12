@@ -65,8 +65,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Discount Badge */}
         {product.discountPercentage && product.discountPercentage > 0 ? (
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-full bg-rose-600 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-md shadow-rose-600/30">
-            <Zap className="h-3 w-3 fill-white" />
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-0.5 text-[11px] font-bold text-zinc-950 shadow-sm">
+            <Zap className="h-3 w-3 fill-zinc-950" />
             <span>-{product.discountPercentage}%</span>
           </div>
         ) : product.badge ? (
