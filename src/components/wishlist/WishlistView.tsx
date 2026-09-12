@@ -89,7 +89,7 @@ export function WishlistView() {
 
   if (!mounted) {
     return (
-      <div className="container max-w-7xl mx-auto px-3 sm:px-6 py-12">
+      <div className="container py-12">
         <div className="h-44 rounded-3xl bg-muted/40 animate-pulse" />
       </div>
     );
@@ -99,7 +99,7 @@ export function WishlistView() {
   if (items.length === 0) {
     return (
       <LazyMotion features={domAnimation}>
-        <div className="container max-w-6xl mx-auto px-3 sm:px-6 py-12 sm:py-16 space-y-12">
+        <div className="container py-12 sm:py-16 space-y-12">
           {/* Empty Hero Card */}
           <m.div
             variants={fadeUpAnim}
@@ -200,7 +200,7 @@ export function WishlistView() {
   // ── POPULATED STATE ──
   return (
     <LazyMotion features={domAnimation}>
-      <div className="container max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-12 space-y-8">
+      <div className="container py-8 sm:py-12 space-y-8">
         {/* ── 1. Top Header Card ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
           <div>
@@ -217,7 +217,7 @@ export function WishlistView() {
           </div>
 
           {/* Action Buttons & View Toggle */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 w-full md:w-auto">
             {/* Grid vs List View Toggle Pill */}
             <div className="flex items-center rounded-xl bg-muted/50 p-1 border border-border/70 shadow-2xs">
               <button
@@ -248,31 +248,33 @@ export function WishlistView() {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={clearWishlist}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/30 px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-all cursor-pointer shadow-2xs"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span>Clear All</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={clearWishlist}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/30 px-3 sm:px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-all cursor-pointer shadow-2xs"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline">Clear All</span>
+              </button>
 
-            <button
-              type="button"
-              disabled={inStockCount === 0}
-              onClick={handleMoveAllToCart}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95 cursor-pointer",
-                inStockCount === 0
-                  ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
-                  : allMoved
-                  ? "bg-emerald-600 text-white shadow-emerald-500/20"
-                  : "bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/25"
-              )}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span>{allMoved ? "Added to Cart!" : "Add All to Cart"}</span>
-            </button>
+              <button
+                type="button"
+                disabled={inStockCount === 0}
+                onClick={handleMoveAllToCart}
+                className={cn(
+                  "inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap",
+                  inStockCount === 0
+                    ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
+                    : allMoved
+                    ? "bg-emerald-600 text-white shadow-emerald-500/20"
+                    : "bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/25"
+                )}
+              >
+                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>{allMoved ? "Added!" : "Add All to Cart"}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -349,15 +351,13 @@ export function WishlistView() {
 
                       <Link
                         href={ROUTES.PRODUCT_DETAIL(product.slug)}
-                        className="block font-bold text-xs sm:text-sm text-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-2 leading-snug"
+                        className="line-clamp-2 text-xs sm:text-sm font-bold text-foreground hover:text-amber-500 transition-colors leading-snug"
                       >
                         {product.name}
                       </Link>
-                    </div>
 
-                    <div className="space-y-2 pt-2 border-t border-border/40">
-                      {/* Pricing Block */}
-                      <div className="flex items-baseline justify-between">
+                      {/* Live Bangladesh Pricing */}
+                      <div className="flex items-baseline gap-2 pt-1">
                         <span className="text-sm sm:text-base font-black text-foreground">
                           ৳{product.price.toLocaleString()}
                         </span>
@@ -367,35 +367,28 @@ export function WishlistView() {
                           </span>
                         )}
                       </div>
+                    </div>
 
-                      {/* Move to Cart Action Button */}
+                    {/* Bottom CTA Button */}
+                    <div>
                       {isInStock ? (
                         <button
                           type="button"
                           onClick={() => handleMoveToCart(product)}
                           className={cn(
-                            "w-full flex items-center justify-center gap-2 rounded-xl py-2 sm:py-2.5 px-3 text-xs font-bold transition-all duration-200 active:scale-[0.98] shadow-xs cursor-pointer",
+                            "flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 px-3 text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer",
                             isAdded
-                              ? "bg-emerald-600 text-white"
-                              : "bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 hover:text-amber-400"
+                              ? "bg-emerald-600 text-white shadow-emerald-500/20"
+                              : "bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/20"
                           )}
                         >
-                          {isAdded ? (
-                            <>
-                              <CheckCircle2 className="h-3.5 w-3.5 text-white" />
-                              <span>Added to Cart!</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart className="h-3.5 w-3.5 text-amber-400" />
-                              <span>Move to Cart</span>
-                            </>
-                          )}
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                          <span>{isAdded ? "Added to Cart" : "Add to Cart"}</span>
                         </button>
                       ) : (
                         <Link
                           href={ROUTES.PRODUCT_DETAIL(product.slug)}
-                          className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2 sm:py-2.5 px-3 text-xs font-semibold bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-border/80 bg-muted/50 py-2.5 px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         >
                           <span>Notify When Back</span>
                           <ArrowRight className="h-3 w-3" />
@@ -408,9 +401,9 @@ export function WishlistView() {
             })}
           </div>
         ) : (
-          /* ── Tabular List View Matching Reference Image ── */
+          /* ── Responsive List View (Desktop table, Mobile native app card) ── */
           <div className="overflow-hidden rounded-3xl bg-card border border-border/60 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
-            {/* Table Header (Desktop) */}
+            {/* Table Header (Desktop only) */}
             <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/60 text-xs font-bold uppercase tracking-wider text-muted-foreground items-center">
               <div className="col-span-4">Product</div>
               <div className="col-span-2 text-center">Stock Status</div>
@@ -420,7 +413,7 @@ export function WishlistView() {
               <div className="col-span-1 text-center">Remove</div>
             </div>
 
-            {/* Table Rows */}
+            {/* List Rows */}
             <div className="divide-y divide-border/60">
               {items.map((product) => {
                 const isAdded = addedIds[product.id];
@@ -430,11 +423,11 @@ export function WishlistView() {
                 return (
                   <div
                     key={product.id}
-                    className="p-4 sm:p-6 lg:px-6 lg:py-5 flex flex-col lg:grid lg:grid-cols-12 gap-4 items-start lg:items-center hover:bg-muted/15 transition-colors"
+                    className="p-3.5 sm:p-5 lg:px-6 lg:py-5 flex flex-col lg:grid lg:grid-cols-12 gap-3 lg:gap-4 items-stretch lg:items-center hover:bg-muted/15 transition-colors"
                   >
                     {/* 1. Product Details & Thumbnail (Col 4) */}
-                    <div className="w-full lg:col-span-4 flex items-center gap-4">
-                      <div className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/30 border border-border/40">
+                    <div className="w-full lg:col-span-4 flex items-start sm:items-center gap-3 sm:gap-4">
+                      <div className="relative h-20 w-20 sm:h-22 sm:w-22 shrink-0 overflow-hidden rounded-2xl bg-muted/30 border border-border/40">
                         {product.thumbnail ? (
                           <Image
                             src={product.thumbnail}
@@ -449,27 +442,60 @@ export function WishlistView() {
                         )}
                       </div>
 
-                      <div className="min-w-0 flex-1 space-y-0.5">
-                        <Link
-                          href={ROUTES.PRODUCT_DETAIL(product.slug)}
-                          className="font-bold text-sm sm:text-base text-foreground hover:text-amber-500 transition-colors line-clamp-1"
-                        >
-                          {product.name}
-                        </Link>
-                        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                          {product.brand || "Official Store"}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {product.categoryName || "Verified Bangladesh Tech"}
-                        </p>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <Link
+                            href={ROUTES.PRODUCT_DETAIL(product.slug)}
+                            className="font-bold text-sm sm:text-base text-foreground hover:text-amber-500 transition-colors line-clamp-2 lg:line-clamp-1 leading-snug"
+                          >
+                            {product.name}
+                          </Link>
+                          {/* Mobile quick remove */}
+                          <button
+                            type="button"
+                            onClick={() => removeItem(product.id)}
+                            aria-label={`Remove ${product.name} from wishlist`}
+                            className="lg:hidden flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                          <span className="text-emerald-600 dark:text-emerald-400">
+                            {product.brand || "Official Store"}
+                          </span>
+                          <span className="text-muted-foreground/50">•</span>
+                          {/* Mobile inline stock badge */}
+                          {isInStock ? (
+                            <span className="inline-flex lg:hidden items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              <span>In Stock</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex lg:hidden items-center gap-1 text-[11px] font-bold text-rose-500">
+                              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                              <span>Out of Stock</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Mobile inline price presentation */}
+                        <div className="flex lg:hidden items-baseline gap-2 pt-0.5">
+                          <span className="text-base font-black text-foreground">
+                            ৳{product.price.toLocaleString()}
+                          </span>
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <span className="text-xs text-muted-foreground line-through">
+                              ৳{product.originalPrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* 2. Stock Status (Col 2) */}
-                    <div className="w-full lg:col-span-2 flex lg:justify-center items-center gap-2">
-                      <span className="lg:hidden text-xs font-semibold text-muted-foreground">
-                        Stock:
-                      </span>
+                    {/* 2. Stock Status (Col 2 - Desktop) */}
+                    <div className="hidden lg:flex w-full lg:col-span-2 lg:justify-center items-center gap-2">
                       {isInStock ? (
                         <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -483,11 +509,8 @@ export function WishlistView() {
                       )}
                     </div>
 
-                    {/* 3. Price (Col 2) */}
-                    <div className="w-full lg:col-span-2 flex lg:justify-center items-baseline gap-2">
-                      <span className="lg:hidden text-xs font-semibold text-muted-foreground">
-                        Price:
-                      </span>
+                    {/* 3. Price (Col 2 - Desktop) */}
+                    <div className="hidden lg:flex w-full lg:col-span-2 lg:justify-center items-baseline gap-2">
                       <span className="text-base font-black text-foreground">
                         ৳{product.price.toLocaleString()}
                       </span>
@@ -499,18 +522,18 @@ export function WishlistView() {
                     </div>
 
                     {/* 4. Thematic Quantity Counter (Col 2) */}
-                    <div className="w-full lg:col-span-2 flex lg:justify-center items-center gap-2">
-                      <span className="lg:hidden text-xs font-semibold text-muted-foreground">
-                        Quantity:
+                    <div className="w-full lg:col-span-2 flex justify-between lg:justify-center items-center pt-2 lg:pt-0 border-t border-border/40 lg:border-t-0">
+                      <span className="lg:hidden text-xs font-medium text-muted-foreground">
+                        Select Quantity:
                       </span>
-                      <div className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/5 px-2 py-1 gap-2.5 shadow-2xs">
+                      <div className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/5 px-2.5 py-1 gap-2.5 shadow-2xs">
                         <button
                           type="button"
                           onClick={() => handleUpdateQuantity(product.id, -1, product.stock || 10)}
                           disabled={qty <= 1}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 disabled:opacity-30 transition-all cursor-pointer"
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 disabled:opacity-30 transition-all cursor-pointer active:scale-90"
                         >
-                          <Minus className="h-3 w-3" />
+                          <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="w-5 text-center text-xs font-bold text-foreground">
                           {qty}
@@ -519,15 +542,15 @@ export function WishlistView() {
                           type="button"
                           onClick={() => handleUpdateQuantity(product.id, 1, product.stock || 10)}
                           disabled={qty >= (product.stock || 10)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 disabled:opacity-30 transition-all cursor-pointer"
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 disabled:opacity-30 transition-all cursor-pointer active:scale-90"
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
 
                     {/* 5. Buy Action (Col 1) */}
-                    <div className="w-full lg:col-span-1 flex items-center justify-start lg:justify-center pt-2 lg:pt-0">
+                    <div className="w-full lg:col-span-1 flex items-center justify-center pt-1 lg:pt-0">
                       {isInStock ? (
                         <button
                           type="button"
@@ -539,27 +562,27 @@ export function WishlistView() {
                             }, 1200);
                           }}
                           className={cn(
-                            "inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap",
+                            "w-full lg:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 lg:py-2 text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap",
                             isAdded
                               ? "bg-emerald-600 text-white shadow-emerald-500/20"
                               : "bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-500/20"
                           )}
                         >
                           <ShoppingCart className="h-3.5 w-3.5" />
-                          <span>{isAdded ? "Added" : "Cart"}</span>
+                          <span>{isAdded ? "Added to Cart" : "Add to Cart"}</span>
                         </button>
                       ) : (
                         <Link
                           href={ROUTES.PRODUCT_DETAIL(product.slug)}
-                          className="inline-flex items-center justify-center rounded-xl px-3 py-1.5 text-xs font-semibold bg-muted/60 text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                          className="w-full lg:w-auto inline-flex items-center justify-center rounded-xl px-3.5 py-2.5 lg:py-1.5 text-xs font-semibold bg-muted/60 text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                         >
-                          Notify
+                          Notify When Back
                         </Link>
                       )}
                     </div>
 
-                    {/* 6. Remove Column (Col 1) */}
-                    <div className="w-full lg:col-span-1 flex items-center justify-end lg:justify-center">
+                    {/* 6. Remove Column (Col 1 - Desktop) */}
+                    <div className="hidden lg:flex w-full lg:col-span-1 items-center justify-center">
                       <button
                         type="button"
                         onClick={() => removeItem(product.id)}

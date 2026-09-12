@@ -15,7 +15,7 @@ export default function WishlistPage() {
     <div className="min-h-screen bg-background text-foreground pb-16">
       {/* ── Breadcrumb Bar ── */}
       <div className="border-b border-border/60 bg-muted/20 py-3">
-        <div className="container max-w-7xl mx-auto px-3 sm:px-6">
+        <div className="container">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Link href={ROUTES.HOME} className="hover:text-foreground transition-colors">
               Home
