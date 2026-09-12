@@ -43,7 +43,7 @@ export function WishlistView() {
   const addToCart = useCartStore((state) => state.addItem);
 
   // State
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const [allMoved, setAllMoved] = useState(false);
