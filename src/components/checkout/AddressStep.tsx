@@ -114,7 +114,7 @@ export function AddressStep({
       )}
 
       {/* Main Delivery Form Box */}
-      <div className="rounded-3xl border border-border/70 bg-card p-6 sm:p-8 shadow-sm space-y-6">
+      <div className="rounded-3xl border border-border/70 bg-card p-4 sm:p-6 lg:p-8 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/50 pb-4">
           <div>
             <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight flex items-center gap-2">

@@ -64,9 +64,9 @@ export function RegisterForm() {
 
   return (
     <div className="w-full">
-      <div className="grid lg:grid-cols-12 min-h-[calc(100vh-8rem)]">
-        {/* Left Column: Brand & VIP Perks (Col 5) */}
-        <div className="relative lg:col-span-5 p-8 sm:p-10 lg:p-14 flex flex-col justify-center overflow-hidden border-b lg:border-b-0 lg:border-r border-border/80 bg-zinc-100/90 dark:bg-zinc-900/60 text-foreground">
+      <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-8rem)]">
+        {/* Left Column: Editorial Showcase (Hidden on mobile) */}
+        <div className="hidden lg:flex relative lg:col-span-5 p-8 sm:p-10 lg:p-14 flex-col justify-center overflow-hidden border-b lg:border-b-0 lg:border-r border-border/80 bg-zinc-100/90 dark:bg-zinc-900/60 text-foreground">
           {/* Background Image as Atmospheric Ambient Overlay */}
           <div className="absolute inset-0 pointer-events-none select-none">
             <Image

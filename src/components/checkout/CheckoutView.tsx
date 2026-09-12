@@ -192,6 +192,19 @@ export function CheckoutView() {
     );
   }
 
+  // Restrict checkout without login
+  if (!user) {
+    router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CHECKOUT)}`);
+    return (
+      <div className="min-h-screen bg-background">
+        <CheckoutHeader />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
   // If cart is empty, show empty state
   if (items.length === 0) {
     return (
@@ -225,56 +238,54 @@ export function CheckoutView() {
     <div className="min-h-screen bg-background text-foreground pb-24">
       <CheckoutHeader />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container py-6 sm:py-8 space-y-8">
         {/* Step Indicator */}
-        <div className="max-w-6xl mx-auto">
-          <StepIndicator
-            currentStep={currentStep}
-            onStepChange={(step) => setCurrentStep(step)}
-            canNavigateToStep2={currentStep === 2}
-          />
+        <StepIndicator
+          currentStep={currentStep}
+          onStepChange={(step) => setCurrentStep(step)}
+          canNavigateToStep2={currentStep === 2}
+        />
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Flow Steps */}
-              <div className="lg:col-span-7 space-y-6">
-                {currentStep === 1 && (
-                  <AddressStep
-                    form={form}
-                    savedAddresses={user?.addresses || []}
-                    selectedAddressId={selectedAddressId}
-                    onSelectSavedAddress={handleSelectSavedAddress}
-                    onContinue={handleContinueToStep2}
-                  />
-                )}
-
-                {currentStep === 2 && (
-                  <PaymentStep
-                    form={form}
-                    totalAmount={totalPayable}
-                    onBack={() => setCurrentStep(1)}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-              </div>
-
-              {/* Right Column: Sticky Order Summary */}
-              <div className="lg:col-span-5">
-                <OrderSummarySticky
-                  items={items}
-                  subtotal={subtotal}
-                  shippingFee={shippingFee}
-                  deliveryZone={currentZone}
-                  appliedCoupon={appliedCoupon}
-                  couponError={couponError}
-                  onApplyCoupon={applyCoupon}
-                  onRemoveCoupon={removeCoupon}
-                  total={totalPayable}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Flow Steps */}
+            <div className="lg:col-span-7 space-y-6">
+              {currentStep === 1 && (
+                <AddressStep
+                  form={form}
+                  savedAddresses={user?.addresses || []}
+                  selectedAddressId={selectedAddressId}
+                  onSelectSavedAddress={handleSelectSavedAddress}
+                  onContinue={handleContinueToStep2}
                 />
-              </div>
+              )}
+
+              {currentStep === 2 && (
+                <PaymentStep
+                  form={form}
+                  totalAmount={totalPayable}
+                  onBack={() => setCurrentStep(1)}
+                  isSubmitting={isSubmitting}
+                />
+              )}
             </div>
-          </form>
-        </div>
+
+            {/* Right Column: Sticky Order Summary */}
+            <div className="lg:col-span-5">
+              <OrderSummarySticky
+                items={items}
+                subtotal={subtotal}
+                shippingFee={shippingFee}
+                deliveryZone={currentZone}
+                appliedCoupon={appliedCoupon}
+                couponError={couponError}
+                onApplyCoupon={applyCoupon}
+                onRemoveCoupon={removeCoupon}
+                total={totalPayable}
+              />
+            </div>
+          </div>
+        </form>
       </main>
 
       {/* ── SMS OTP Verification Modal ── */}

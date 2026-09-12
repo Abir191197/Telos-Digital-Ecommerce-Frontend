@@ -485,13 +485,13 @@ export function CartDrawer() {
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground pt-0.5">
+              <div className="hidden sm:flex items-center justify-center gap-2 text-[11px] text-muted-foreground pt-0.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                 <span>100% Genuine BD Warranty</span>
               </div>
 
               {/* Payment Methods Pill */}
-              <div className="flex items-center justify-center gap-2 text-[10px] font-medium text-muted-foreground pt-1 border-t border-border/40">
+              <div className="hidden sm:flex items-center justify-center gap-2 text-[10px] font-medium text-muted-foreground pt-1 border-t border-border/40">
                 <span>bKash</span>
                 <span>•</span>
                 <span>Nagad</span>

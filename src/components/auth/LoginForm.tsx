@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,9 @@ import {
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+
   const loginAsDemo = useAuthStore((state) => state.loginAsDemo);
   const loginWithCredentials = useAuthStore((state) => state.loginWithCredentials);
 
@@ -36,6 +39,10 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
+
+  const getRedirectUrl = (fallback: string) => {
+    return callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : fallback;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +54,7 @@ export function LoginForm() {
       // Set mock token cookie for edge middleware compatibility
       document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
       setIsLoading(false);
-      router.push(ROUTES.PROFILE);
+      router.push(getRedirectUrl(ROUTES.PROFILE));
     }, 600);
   };
 
@@ -58,7 +65,7 @@ export function LoginForm() {
       loginAsDemo();
       document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
       setIsLoading(false);
-      router.push(ROUTES.ACCOUNT);
+      router.push(getRedirectUrl(ROUTES.ACCOUNT));
     }, 400);
   };
 
@@ -76,8 +83,8 @@ export function LoginForm() {
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-8rem)]">
-        {/* ── Left Column: Editorial Brand & Hardware Showcase (5 cols) ── */}
-        <div className="relative lg:col-span-5 p-8 sm:p-10 lg:p-14 flex flex-col justify-center overflow-hidden border-b lg:border-b-0 lg:border-r border-border/80 bg-zinc-100/90 dark:bg-zinc-900/60 text-foreground">
+        {/* ── Left Column: Editorial Brand & Hardware Showcase (Hidden on mobile) ── */}
+        <div className="hidden lg:flex relative lg:col-span-5 p-8 sm:p-10 lg:p-14 flex-col justify-center overflow-hidden border-b lg:border-b-0 lg:border-r border-border/80 bg-zinc-100/90 dark:bg-zinc-900/60 text-foreground">
           {/* Background Image as Atmospheric Overlay with warm tint */}
           <div className="absolute inset-0 pointer-events-none select-none">
             <Image

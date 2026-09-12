@@ -6,7 +6,7 @@ import { ShieldCheck, Lock, ChevronLeft, Sparkles, PhoneCall } from "lucide-reac
 export function CheckoutHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-border/80 bg-background/85 backdrop-blur-md">
-      <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div className="container py-3.5 flex items-center justify-between">
         {/* Brand & Back Button */}
         <div className="flex items-center gap-4">
           <Link
@@ -34,8 +34,8 @@ export function CheckoutHeader() {
           </Link>
         </div>
 
-        {/* Security & Support Indicators */}
-        <div className="flex items-center gap-4">
+        {/* Security & Support Indicators (Hidden on mobile) */}
+        <div className="hidden sm:flex items-center gap-4">
           <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
             <PhoneCall className="h-3.5 w-3.5 text-amber-500" />
             <span>Assistance: </span>
