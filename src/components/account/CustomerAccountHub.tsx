@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, useWishlistStore, useCartStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants";
@@ -20,35 +21,70 @@ import {
   type AccountTabKey,
   type CustomerReview,
 } from "./accountNavData";
+import type { Order, OrderStatus, Address } from "@/types/order.types";
+import type { CustomerUser } from "@/stores";
 import {
   User,
+  ChevronRight,
+  CheckCircle2,
+  Truck,
+  AlertCircle,
+  Clock,
+  Sparkles,
+  Edit3,
   Package,
   MapPin,
   Heart,
-  Star,
-  CreditCard,
-  Bell,
-  Truck,
-  CheckCircle2,
-  Clock,
-  Plus,
-  Trash2,
-  Phone,
-  Building,
-  ChevronRight,
   ShieldCheck,
-  ShoppingBag,
-  RotateCcw,
-  Sparkles,
-  ExternalLink,
-  Edit3,
   Check,
-  AlertCircle,
+  Plus,
+  Building,
+  Trash2,
+  CreditCard,
+  RotateCcw,
+  Star,
+  ExternalLink,
+  Menu,
+  X,
+  LogOut,
+  Wallet,
+  Megaphone,
+  BellRing,
+  Bell,
+  FileText,
 } from "lucide-react";
-import type { OrderStatus, Address, Order } from "@/types/order.types";
+
+const TAB_TITLES: Record<AccountTabKey, string> = {
+  overview: "Customer Overview | Telos Cart BD",
+  profile: "My Profile | Telos Cart BD",
+  addresses: "Address Book | Telos Cart BD",
+  orders: "My Orders | Telos Cart BD",
+  tracking: "Order Tracking | Telos Cart BD",
+  returns: "Returns & Refunds | Telos Cart BD",
+  wishlist: "Saved Wishlist | Telos Cart BD",
+  reviews: "Reviews & Ratings | Telos Cart BD",
+  payments: "Payment Methods | Telos Cart BD",
+  notifications: "Notification Preferences | Telos Cart BD",
+};
+
+const VALID_TABS = new Set<AccountTabKey>([
+  "overview",
+  "profile",
+  "addresses",
+  "orders",
+  "tracking",
+  "returns",
+  "wishlist",
+  "reviews",
+  "payments",
+  "notifications",
+]);
 
 export function CustomerAccountHub() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const mounted = useMounted();
+
   const user = useAuthStore((state) => state.user);
   const orders = useAuthStore((state) => state.orders);
   const cancelOrder = useAuthStore((state) => state.cancelOrder);
@@ -62,7 +98,35 @@ export function CustomerAccountHub() {
   const removeWishlistItem = useWishlistStore((state) => state.removeItem);
   const addToCart = useCartStore((state) => state.addItem);
 
-  const [activeTab, setActiveTab] = useState<AccountTabKey>("overview");
+  const tabParam = searchParams.get("tab") as AccountTabKey | null;
+  const initialTab: AccountTabKey =
+    tabParam && VALID_TABS.has(tabParam) ? tabParam : "overview";
+
+  const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
+
+  // Sync tab from URL if user navigates via browser back/forward
+  useEffect(() => {
+    if (tabParam && VALID_TABS.has(tabParam) && tabParam !== activeTab) {
+      setActiveTabState(tabParam);
+    }
+  }, [tabParam, activeTab]);
+
+  // Update URL query param and document title when activeTab changes
+  const handleSelectTab = useCallback(
+    (tab: AccountTabKey) => {
+      setActiveTabState(tab);
+      const url = tab === "overview" ? "/account" : `/account?tab=${tab}`;
+      window.history.pushState(null, "", url);
+    },
+    []
+  );
+
+  // Dynamic browser title
+  useEffect(() => {
+    if (mounted) {
+      document.title = TAB_TITLES[activeTab] || "Customer Account | Telos Cart BD";
+    }
+  }, [activeTab, mounted]);
   const [orderFilter, setOrderFilter] = useState<"all" | OrderStatus>("all");
 
   // Modal states for customer actions
@@ -210,8 +274,8 @@ export function CustomerAccountHub() {
     switch (status) {
       case "delivered":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase">
-            <CheckCircle2 className="h-3 w-3" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/15 border border-zinc-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-foreground uppercase">
+            <CheckCircle2 className="h-3 w-3 text-amber-500" />
             Delivered
           </span>
         );
@@ -248,47 +312,226 @@ export function CustomerAccountHub() {
   };
 
   return (
-    <div className="container px-3 sm:px-6 py-6 sm:py-10 space-y-6">
-      {/* ── Breadcrumb / Header Strip ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-foreground">
-            Customer Dashboard & Account
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Manage your orders, personal profile, delivery addresses and preferences.
-          </p>
-        </div>
+    <div className="container py-6 sm:py-10 space-y-6">
+      {/* ── Thematic Customer Header Bar (Desktop only; on mobile, the account screen itself is shown directly) ── */}
+      <div className="hidden lg:block relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card/90 to-muted/30 p-5 sm:p-7 shadow-xs">
+        <div
+          aria-hidden="true"
+          className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"
+        />
 
-        {/* Quick Help Hotline badge */}
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full text-xs font-semibold text-amber-700 dark:text-amber-400">
-          <Phone className="h-3.5 w-3.5 text-amber-500" />
-          <span>BD Hotline: +880 1700-000000</span>
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-sm bg-muted/40">
+              {user.avatar ? (
+                <Image
+                  src={user.avatar}
+                  alt={user.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center font-black text-xl text-amber-600 bg-amber-500/10">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-black text-foreground tracking-tight truncate">
+                  {user.name}
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  <span>Telos Gold Member</span>
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground truncate">
+                {user.email} • {user.phone}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleSelectTab("profile")}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card hover:bg-muted/80 text-foreground px-3.5 py-2 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            >
+              <Edit3 className="h-3.5 w-3.5 text-amber-500" />
+              <span>Edit Profile</span>
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Mobile Horizontal Pill Scrollable Menu (Visible < lg) ── */}
-      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
-        {ACCOUNT_NAV_GROUPS.flatMap((g) => g.items).map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
+      {/* ── Mobile Account View (Appears on click of Account nav item, no menu toggle needed) ── */}
+      <div className="lg:hidden space-y-4">
+        {/* If user selected a sub-tab on mobile, render back bar to return to Account Menu */}
+        {activeTab !== "overview" ? (
+          <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-card shadow-2xs">
             <button
-              key={item.id}
               type="button"
-              onClick={() => setActiveTab(item.id)}
-              className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer",
-                isActive
-                  ? "bg-amber-500 text-white shadow-xs"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
+              onClick={() => handleSelectTab("overview")}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
             >
-              <Icon className="h-3.5 w-3.5" />
-              <span>{item.label}</span>
+              <ChevronRight className="h-4 w-4 rotate-180" />
+              <span>Back to Account</span>
             </button>
-          );
-        })}
+            <span className="text-xs font-bold text-foreground">
+              {TAB_TITLES[activeTab]?.split("|")[0]?.trim() || "Account"}
+            </span>
+          </div>
+        ) : (
+          <div className="space-y-3 pb-8">
+            {/* Top User Profile Card (Matching image structure: avatar circle, name, phone, verified badge, BN toggle) */}
+            <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-2xs">
+              <div className="flex items-center gap-4">
+                <div className="relative h-16 w-16 shrink-0 rounded-full border-2 border-border/90 flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
+                  {user.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt={user.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <User className="h-9 w-9 stroke-[1.5] text-muted-foreground" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-bold text-foreground truncate">
+                      {user.name}
+                    </h2>
+                    <ShieldCheck className="h-4 w-4 text-amber-500 shrink-0" />
+                  </div>
+                  <p className="text-xs text-muted-foreground font-medium truncate">
+                    {user.phone}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-1 gap-2">
+                    <p className="text-xs text-muted-foreground truncate flex-1 font-medium">
+                      {user.email}
+                    </p>
+
+                    {/* Edit Profile Action Icon Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTab("profile")}
+                      className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/80 bg-muted/50 hover:bg-amber-500/10 hover:border-amber-500/40 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0 cursor-pointer shadow-2xs"
+                      aria-label="Edit Profile"
+                      title="Edit Profile"
+                    >
+                      <Edit3 className="h-3.5 w-3.5 stroke-[2]" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Navigation List - 100% Synced to Desktop ACCOUNT_NAV_GROUPS */}
+            <div className="space-y-4">
+              {ACCOUNT_NAV_GROUPS.map((group) => (
+                <div key={group.group} className="space-y-2">
+                  <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {group.group}
+                  </p>
+                  <div className="space-y-2">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+
+                      // Dynamic badges synced to sidebar logic
+                      let badgeContent: React.ReactNode = null;
+                      if (item.id === "orders" && orders.length > 0) {
+                        badgeContent = (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
+                            {orders.length}
+                          </span>
+                        );
+                      } else if (item.id === "tracking") {
+                        badgeContent = (
+                          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                            Live Courier
+                          </span>
+                        );
+                      } else if (item.id === "wishlist" && wishlistItems.length > 0) {
+                        badgeContent = (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
+                            {wishlistItems.length}
+                          </span>
+                        );
+                      } else if (item.id === "reviews" && pendingReviewCount > 0) {
+                        badgeContent = (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                            {pendingReviewCount} new
+                          </span>
+                        );
+                      } else if (item.id === "addresses") {
+                        badgeContent = (
+                          <span className="text-xs text-muted-foreground font-medium">
+                            {user.addresses.length} saved
+                          </span>
+                        );
+                      } else if (item.id === "payments") {
+                        badgeContent = (
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                            ৳ 70
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleSelectTab(item.id)}
+                          className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-card hover:bg-muted/40 transition-colors cursor-pointer shadow-2xs text-left group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                            <span className="text-sm font-semibold text-foreground">
+                              {item.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {badgeContent}
+                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Sign Out Card */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 transition-colors cursor-pointer text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <LogOut className="h-5 w-5 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                    <span className="text-sm font-semibold">Sign Out</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Main Two-Column Layout (Sidebar + Content) ── */}
@@ -298,7 +541,7 @@ export function CustomerAccountHub() {
           <CustomerSidebar
             user={user}
             activeTab={activeTab}
-            onSelectTab={setActiveTab}
+            onSelectTab={handleSelectTab}
             orderCount={orders.length}
             wishlistCount={wishlistItems.length}
             pendingReviewCount={pendingReviewCount}
@@ -307,54 +550,15 @@ export function CustomerAccountHub() {
         </div>
 
         {/* Right Dynamic Content Pane */}
-        <main className="flex-1 w-full min-w-0">
-          {/* ══════════════ 1. OVERVIEW TAB ══════════════ */}
+        <main
+          className={cn(
+            "flex-1 w-full min-w-0",
+            activeTab === "overview" && "hidden lg:block"
+          )}
+        >
+          {/* ══════════════ 1. OVERVIEW TAB (Clean, Thematic, No KPI Stats) ══════════════ */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* Top 3 Stat Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-xs flex items-center gap-3.5">
-                  <div className="h-11 w-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                    <Package className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Total Orders
-                    </p>
-                    <p className="text-xl font-black text-foreground">
-                      {orders.length}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-xs flex items-center gap-3.5">
-                  <div className="h-11 w-11 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                    <Heart className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Wishlist Items
-                    </p>
-                    <p className="text-xl font-black text-foreground">
-                      {wishlistItems.length}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-xs flex items-center gap-3.5">
-                  <div className="h-11 w-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Saved Addresses
-                    </p>
-                    <p className="text-xl font-black text-foreground">
-                      {user.addresses.length}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
               {/* Latest Order Tracking Stepper */}
               {orders[0] && (
@@ -372,10 +576,10 @@ export function CustomerAccountHub() {
                   {/* Stepper Progress */}
                   <div className="py-2">
                     <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground pb-2">
-                      <span className="text-emerald-600">Order Placed</span>
+                      <span className="text-amber-600 dark:text-amber-400">Order Placed</span>
                       <span
                         className={
-                          orders[0].status !== "pending" ? "text-emerald-600" : ""
+                          orders[0].status !== "pending" ? "text-amber-600 dark:text-amber-400" : ""
                         }
                       >
                         Processing
@@ -384,7 +588,7 @@ export function CustomerAccountHub() {
                         className={
                           orders[0].status === "shipped" ||
                           orders[0].status === "delivered"
-                            ? "text-emerald-600"
+                            ? "text-amber-600 dark:text-amber-400"
                             : ""
                         }
                       >
@@ -393,7 +597,7 @@ export function CustomerAccountHub() {
                       <span
                         className={
                           orders[0].status === "delivered"
-                            ? "text-emerald-600"
+                            ? "text-amber-600 dark:text-amber-400"
                             : ""
                         }
                       >
@@ -402,7 +606,7 @@ export function CustomerAccountHub() {
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
+                        className="h-full bg-amber-500 transition-all duration-500 rounded-full"
                         style={{
                           width:
                             orders[0].status === "delivered"
@@ -433,7 +637,7 @@ export function CustomerAccountHub() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setActiveTab("tracking")}
+                        onClick={() => handleSelectTab("tracking")}
                         className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer"
                       >
                         <span>Track Live</span>
@@ -444,68 +648,39 @@ export function CustomerAccountHub() {
                 </div>
               )}
 
-              {/* Personal Info & Address Snapshot 2-Card Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Profile Card */}
-                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Personal Profile
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab("profile")}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                      >
-                        <Edit3 className="h-3 w-3" />
-                        <span>Edit</span>
-                      </button>
-                    </div>
-                    <p className="text-sm font-bold text-foreground">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                    <p className="text-xs font-semibold text-foreground">
-                      {user.phone}
-                    </p>
-                  </div>
-                  <div className="pt-2 border-t border-border/50">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      Verified Bangladesh Customer
+              {/* Default Delivery Address Snapshot */}
+              <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3 shadow-xs">
+                <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-amber-500" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Primary Delivery Address
                     </span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectTab("addresses")}
+                    className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                  >
+                    Manage Addresses
+                  </button>
                 </div>
-
-                {/* Primary Address Card */}
-                <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Default Address
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab("addresses")}
-                        className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                      >
-                        Manage
-                      </button>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div className="space-y-1">
                     <p className="text-sm font-bold text-foreground">
                       {user.addresses[0]?.name || user.name}
                     </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       {user.addresses[0]?.street}, {user.addresses[0]?.area},{" "}
                       {user.addresses[0]?.city} - {user.addresses[0]?.postalCode}
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-border/50 text-xs text-muted-foreground">
-                    Zone:{" "}
-                    <strong className="text-foreground">
+                  <div className="text-xs text-muted-foreground shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2.5 py-1 font-semibold text-foreground">
                       {user.addresses[0]?.zone === "inside-dhaka"
-                        ? "Inside Dhaka (Next Day)"
-                        : "Outside Dhaka (48 Hours)"}
-                    </strong>
+                        ? "Inside Dhaka • Next Day"
+                        : "Outside Dhaka • 48 Hours"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -525,8 +700,8 @@ export function CustomerAccountHub() {
               </div>
 
               {profileSaved && (
-                <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs font-bold text-emerald-600 animate-in fade-in">
-                  <Check className="h-4 w-4" />
+                <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-xs font-bold text-amber-700 dark:text-amber-400 animate-in fade-in">
+                  <Check className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   <span>Profile details updated successfully!</span>
                 </div>
               )}
@@ -895,7 +1070,7 @@ export function CustomerAccountHub() {
                             via {order.courierName}
                           </span>
                         </div>
-                        <span className="text-[11px] font-semibold text-emerald-600">
+                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
                           {order.estimatedDelivery}
                         </span>
                       </div>
@@ -995,7 +1170,7 @@ export function CustomerAccountHub() {
                     {/* Timeline Events */}
                     <div className="space-y-4 pl-4 border-l-2 border-amber-500/40 ml-2">
                       <div className="relative">
-                        <div className="absolute -left-[23px] top-0 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-background" />
+                        <div className="absolute -left-[23px] top-0 h-3.5 w-3.5 rounded-full bg-amber-500 border-2 border-background" />
                         <p className="text-xs font-bold text-foreground">
                           Package Dispatched from Dhaka Central Hub
                         </p>
@@ -1044,7 +1219,7 @@ export function CustomerAccountHub() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveTab("orders")}
+                  onClick={() => handleSelectTab("orders")}
                   className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
                 >
                   Create Return
@@ -1110,7 +1285,7 @@ export function CustomerAccountHub() {
 
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/40">
                         <span>Courier Pickup: Steadfast Courier (Next 24 Hours)</span>
-                        <span className="font-semibold text-emerald-600">
+                        <span className="font-semibold text-amber-600 dark:text-amber-400">
                           QC Agent Assigned
                         </span>
                       </div>
@@ -1354,7 +1529,7 @@ export function CustomerAccountHub() {
                     <span className="text-xs font-bold text-pink-600 bg-pink-500/10 px-2 py-0.5 rounded-md">
                       bKash Wallet
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-600">
+                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
                       Linked
                     </span>
                   </div>
@@ -1452,6 +1627,7 @@ export function CustomerAccountHub() {
               </div>
             </div>
           )}
+
         </main>
       </div>
 
@@ -1476,7 +1652,7 @@ export function CustomerAccountHub() {
           onClose={() => setReturnModalOrder(null)}
           onSubmitReturn={(ticket) => {
             setReturnTickets((prev) => [ticket, ...prev]);
-            setActiveTab("returns");
+            handleSelectTab("returns");
           }}
         />
       )}
@@ -1503,7 +1679,7 @@ export function CustomerAccountHub() {
               ...prev,
             ]);
             setReviewWriteItem(null);
-            setActiveTab("reviews");
+            handleSelectTab("reviews");
           }}
         />
       )}

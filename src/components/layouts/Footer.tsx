@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   Phone,
   Mail,
@@ -66,8 +68,16 @@ const COMPANY_LINKS = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+  const isAccountPage = pathname.startsWith(ROUTES.ACCOUNT);
+
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-950 text-zinc-300 dark:bg-black dark:border-zinc-800 transition-colors">
+    <footer
+      className={cn(
+        "border-t border-zinc-800 bg-zinc-950 text-zinc-300 dark:bg-black dark:border-zinc-800 transition-colors",
+        isAccountPage && "hidden md:block"
+      )}
+    >
       {/* ── Trust Pillars Section ── */}
       <div className="border-b border-zinc-800/80 bg-zinc-900/60 py-8">
         <div className="container">

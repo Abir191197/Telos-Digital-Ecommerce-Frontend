@@ -1,16 +1,13 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   ACCOUNT_NAV_GROUPS,
   type AccountTabKey,
 } from "./accountNavData";
 import {
-  User,
   LogOut,
-  ShieldCheck,
   ChevronRight,
 } from "lucide-react";
 import type { CustomerUser } from "@/stores";
@@ -36,36 +33,6 @@ export function CustomerSidebar({
 }: CustomerSidebarProps) {
   return (
     <aside className="w-full lg:w-72 shrink-0 space-y-4">
-      {/* ── User Mini Profile Card ── */}
-      <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-xs transition-all">
-        <div className="flex items-center gap-3.5">
-          <div className="relative h-14 w-14 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-xs">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <User className="h-full w-full p-2 text-amber-600" />
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h3 className="text-sm font-black text-foreground truncate">
-                {user.name}
-              </h3>
-              <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-            </div>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            <span className="inline-block mt-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-              Telos Gold Member
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* ── Navigation Group List ── */}
       <div className="rounded-2xl border border-border/80 bg-card p-3 shadow-xs divide-y divide-border/50">
         {ACCOUNT_NAV_GROUPS.map((group, groupIdx) => (

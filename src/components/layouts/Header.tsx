@@ -183,8 +183,17 @@ export function Header() {
       .slice(0, 6);
   }, [activeCategory]);
 
+  const isAccountPage = pathname.startsWith(ROUTES.ACCOUNT);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md transition-colors shadow-xs">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md transition-colors shadow-xs",
+        isAccountPage
+          ? "border-b-0 md:border-b md:border-border/60"
+          : "border-b border-border/60"
+      )}
+    >
       {/* ── Row 1: Top Bar (Thematic Deep Obsidian, Sharp Contrast) ── */}
       <div className="border-b border-zinc-800 bg-[#0c0d0e] text-xs text-zinc-300 dark:bg-[#08090a] dark:border-zinc-800/80 transition-colors">
         <div className="container flex h-9 items-center justify-between gap-3 px-4 sm:px-6">
@@ -236,7 +245,13 @@ export function Header() {
       </div>
 
       {/* ── Row 2: Main Header Bar (Logo, Large Search, Cart, Wishlist, Theme) ── */}
-      <div className="container flex h-18 items-center justify-between gap-4 sm:gap-8">
+      {/* On /account on mobile, hide the main navbar while keeping the top black nav bar */}
+      <div
+        className={cn(
+          "container flex h-18 items-center justify-between gap-4 sm:gap-8",
+          pathname.startsWith(ROUTES.ACCOUNT) && "hidden md:flex"
+        )}
+      >
         {/* Brand Logo */}
         <Link href={ROUTES.HOME} className="flex items-center gap-2">
           <Logo size={36} />
@@ -476,7 +491,12 @@ export function Header() {
       </div>
 
       {/* ── Mobile Always-Visible Search Bar ── */}
-      <div className="md:hidden px-4 pb-3">
+      <div
+        className={cn(
+          "md:hidden px-4 pb-3",
+          pathname.startsWith(ROUTES.ACCOUNT) && "hidden"
+        )}
+      >
         <form
           onSubmit={handleSearchSubmit}
           className="relative flex w-full items-center"
