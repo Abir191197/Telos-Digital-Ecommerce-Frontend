@@ -99,36 +99,56 @@ export function CustomerAccountHub() {
   const addToCart = useCartStore((state) => state.addItem);
 
   const tabParam = searchParams.get("tab") as AccountTabKey | null;
-  const initialTab: AccountTabKey =
-    tabParam && VALID_TABS.has(tabParam) ? tabParam : "overview";
+  const hasTabParam = Boolean(tabParam && VALID_TABS.has(tabParam));
+  const initialTab: AccountTabKey = hasTabParam ? (tabParam as AccountTabKey) : "overview";
 
   const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
-  // If URL has an explicit tab (or user clicks an item), show details on mobile; otherwise show menu
-  const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(Boolean(tabParam && VALID_TABS.has(tabParam)));
+  const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
 
-  // Sync tab from URL if user navigates via browser back/forward
+  // Sync state whenever URL query params change (Next.js router or browser back/forward)
   useEffect(() => {
-    if (tabParam && VALID_TABS.has(tabParam) && tabParam !== activeTab) {
-      setActiveTabState(tabParam);
+    const currentTab = searchParams.get("tab") as AccountTabKey | null;
+    if (currentTab && VALID_TABS.has(currentTab)) {
+      setActiveTabState(currentTab);
       setMobileSubScreen(true);
+    } else {
+      setActiveTabState("overview");
+      setMobileSubScreen(false);
     }
-  }, [tabParam, activeTab]);
+  }, [searchParams]);
 
-  // Update URL query param and document title when activeTab changes
+  // Listen directly to browser/mobile hardware back button (popstate event)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const currentTab = params.get("tab") as AccountTabKey | null;
+      if (currentTab && VALID_TABS.has(currentTab)) {
+        setActiveTabState(currentTab);
+        setMobileSubScreen(true);
+      } else {
+        setActiveTabState("overview");
+        setMobileSubScreen(false);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Update URL using router.push for Next.js router & browser history stack integration
   const handleSelectTab = useCallback(
     (tab: AccountTabKey) => {
       setActiveTabState(tab);
       setMobileSubScreen(true);
-      const url = tab === "overview" ? "/account?tab=overview" : `/account?tab=${tab}`;
-      window.history.pushState(null, "", url);
+      router.push(`/account?tab=${tab}`, { scroll: false });
     },
-    []
+    [router]
   );
 
   const handleBackToMobileMenu = useCallback(() => {
     setMobileSubScreen(false);
-    window.history.pushState(null, "", "/account");
-  }, []);
+    router.push("/account", { scroll: false });
+  }, [router]);
 
   // Dynamic browser title
   useEffect(() => {
