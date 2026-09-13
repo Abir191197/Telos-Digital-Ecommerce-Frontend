@@ -1,0 +1,10 @@
+export { OverviewTab } from "./OverviewTab";
+export { ProfileTab } from "./ProfileTab";
+export { AddressesTab } from "./AddressesTab";
+export { OrdersTab } from "./OrdersTab";
+export { TrackingTab } from "./TrackingTab";
+export { ReturnsTab } from "./ReturnsTab";
+export { WishlistTab } from "./WishlistTab";
+export { ReviewsTab } from "./ReviewsTab";
+export { PaymentsTab } from "./PaymentsTab";
+export { NotificationsTab } from "./NotificationsTab";
