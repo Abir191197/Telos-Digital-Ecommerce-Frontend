@@ -246,14 +246,6 @@ export function AdminHeader() {
                   <span>View Public Store</span>
                   <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
                 </Link>
-                <Link
-                  href={ROUTES.ACCOUNT}
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <User className="h-4 w-4" />
-                  <span>Customer Account</span>
-                </Link>
               </div>
 
               <div className="pt-1 mt-1 border-t border-border/60">
