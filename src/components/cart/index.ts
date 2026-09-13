@@ -1,2 +1,8 @@
-export { CartDrawer } from "./CartDrawer";
+export { CartFreeShippingBar } from "./CartFreeShippingBar";
+export { CartLineItemsTable } from "./CartLineItemsTable";
+export { CartSummarySidebar } from "./CartSummarySidebar";
+export { CartCrossSellAccessories } from "./CartCrossSellAccessories";
+export { CartSavedForLaterShelf } from "./CartSavedForLaterShelf";
+export { CartEmptyState } from "./CartEmptyState";
 export { CartView } from "./CartView";
+export { CartDrawer } from "./CartDrawer";
