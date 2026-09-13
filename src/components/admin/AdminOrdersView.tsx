@@ -200,8 +200,8 @@ export function AdminOrdersView() {
         />
       </div>
 
-      {/* ── Filter, Search & View Toggle Toolbar (Clean, No Borders, Intense Shadow) ── */}
-      <div className="admin-card rounded-2xl bg-card p-3 sm:p-4 border-none flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      {/* ── Filter, Search & View Toggle Toolbar (Sticky below nav on mobile for effortless UX) ── */}
+      <div className="sticky top-16 z-20 admin-card rounded-2xl bg-card/95 backdrop-blur-md p-3 sm:p-4 border-none flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 transition-all">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
