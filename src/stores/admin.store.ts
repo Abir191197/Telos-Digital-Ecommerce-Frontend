@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import type { Order, OrderStatus } from "@/types/order.types";
 import type { Product } from "@/types/ecommerce.types";
 import { DEMO_ORDERS } from "@/data/mock-user";
+import { RICH_DEMO_ORDERS } from "@/data/rich-orders";
 import productsData from "@/data/products.json";
 
 export interface AdminCustomer {
@@ -167,7 +168,7 @@ type AdminStore = AdminState & AdminActions;
 export const useAdminStore = create<AdminStore>()(
   persist(
     (set) => ({
-      orders: DEMO_ORDERS,
+      orders: RICH_DEMO_ORDERS,
       products: (productsData as unknown as Product[]).slice(0, 30),
       customers: INITIAL_CUSTOMERS,
       transactions: INITIAL_TRANSACTIONS,

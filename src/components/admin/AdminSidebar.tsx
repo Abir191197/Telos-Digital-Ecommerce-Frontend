@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { ROUTES } from "@/constants";
+import { Logo } from "@/components/common";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -245,24 +246,76 @@ export function AdminSidebar() {
         )}
       >
         {/* Brand Header with Gradient & Rounded Bottom-Right Corner */}
-        <div className="flex h-16 items-center justify-between px-3 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/60 border-b border-r border-border/70 shadow-sm">
+        <div className="flex h-16 items-center justify-between px-3.5 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/60 border-b border-r border-border/70 shadow-sm">
           <Link
             href={ROUTES.DASHBOARD}
-            className="flex items-center gap-3 overflow-hidden group min-w-0"
+            className="flex items-center gap-2.5 overflow-hidden group min-w-0"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground text-background font-black text-base tracking-tight shadow-sm transition-transform group-hover:scale-105">
-              <span>T</span>
+            {/* Telos Cart Real Squircle Icon */}
+            <div className="relative shrink-0 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-[#141312] p-[1.5px] shadow-sm transition-transform duration-200 group-hover:scale-105 h-9 w-9">
+              <div className="flex h-full w-full items-center justify-center rounded-[10.5px] bg-[#141312] p-1">
+                <svg
+                  viewBox="0 0 512 512"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-full w-full"
+                >
+                  <defs>
+                    <linearGradient id="sidebarCartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#fde68a" />
+                      <stop offset="50%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M104 140 H164 L204 316 C208 332 222 344 238 344 H366 C382 344 396 332 400 316 L424 204 C426 194 418 184 408 184 H174"
+                    stroke="url(#sidebarCartGrad)"
+                    strokeWidth="28"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M214 244 H396"
+                    stroke="url(#sidebarCartGrad)"
+                    strokeWidth="16"
+                    strokeLinecap="round"
+                    strokeOpacity="0.75"
+                  />
+                  <path
+                    d="M260 196 L244 332"
+                    stroke="url(#sidebarCartGrad)"
+                    strokeWidth="16"
+                    strokeLinecap="round"
+                    strokeOpacity="0.6"
+                  />
+                  <path
+                    d="M328 196 L320 332"
+                    stroke="url(#sidebarCartGrad)"
+                    strokeWidth="16"
+                    strokeLinecap="round"
+                    strokeOpacity="0.6"
+                  />
+                  <circle cx="240" cy="404" r="28" fill="url(#sidebarCartGrad)" />
+                  <circle cx="364" cy="404" r="28" fill="url(#sidebarCartGrad)" />
+                  <circle cx="240" cy="404" r="12" fill="#141312" />
+                  <circle cx="364" cy="404" r="12" fill="#141312" />
+                  <path
+                    d="M366 100 L372 118 L390 124 L372 130 L366 148 L360 130 L342 124 L360 118 Z"
+                    fill="url(#sidebarCartGrad)"
+                  />
+                </svg>
+              </div>
             </div>
 
             {(isOpen || isMobileOpen) && (
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm tracking-tight text-foreground truncate">
+                <div className="flex items-center gap-1.5 leading-none">
+                  <span className="font-extrabold text-[14px] tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
                     Telos Admin
                   </span>
                 </div>
-                <p className="text-[11px] text-foreground/60 font-medium truncate flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <p className="text-[11.5px] font-semibold text-zinc-600 dark:text-zinc-400 truncate flex items-center gap-1.5 mt-1 tracking-tight">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
                   Store Active
                 </p>
               </div>
