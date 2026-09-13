@@ -1,52 +1,84 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { LucideIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface KpiCardProps {
   title: string;
-  value: string;
+  rawValue: number;
+  prefix?: string;
+  suffix?: string;
   change: string;
   isPositive: boolean;
   icon: LucideIcon;
-  colorClass: string;
-  bgClass: string;
+  colorClass?: string;
+  bgClass?: string;
 }
 
 export function KpiCard({
   title,
-  value,
+  rawValue,
+  prefix = "",
+  suffix = "",
   change,
   isPositive,
   icon: Icon,
-  colorClass,
-  bgClass,
 }: KpiCardProps) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const duration = 1200; // 1.2s smooth count-up
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Ease-out expo curve for crisp deceleration
+      const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setDisplayValue(Math.floor(easeOut * rawValue));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setDisplayValue(rawValue);
+      }
+    };
+
+    const animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [rawValue]);
+
   return (
-    <div className="rounded-xl border border-border/80 bg-card p-4 transition-colors hover:border-border">
-      <div className="flex items-center justify-between mb-2.5">
-        <span className="text-xs font-medium text-muted-foreground">
+    <div className="group relative overflow-hidden rounded-2xl bg-card p-5 sm:p-6 border-none admin-card cursor-default">
+      {/* Subtle top hover shimmer light */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Top row: Label + Icon */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
           {title}
         </span>
-        <div
-          className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg",
-            bgClass,
-            colorClass
-          )}
-        >
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground">
           <Icon className="h-4 w-4" />
         </div>
       </div>
 
-      <div className="space-y-1">
-        <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-          {value}
-        </h3>
-        <div className="flex items-center gap-1.5 text-xs">
+      {/* Hero Number with smooth Count-up */}
+      <div className="space-y-2">
+        <div className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground leading-none tabular-nums">
+          {prefix}
+          {displayValue.toLocaleString()}
+          {suffix}
+        </div>
+
+        {/* Change chip & timeframe */}
+        <div className="flex items-center gap-2 pt-1 text-xs">
           <span
             className={cn(
-              "inline-flex items-center font-medium",
-              isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
+              "inline-flex items-center font-bold px-2 py-0.5 rounded-md text-[11px]",
+              isPositive
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
             )}
           >
             {isPositive ? (
@@ -56,7 +88,7 @@ export function KpiCard({
             )}
             {change}
           </span>
-          <span className="text-muted-foreground">&bull; 7 days</span>
+          <span className="text-muted-foreground text-[11px]">vs last period</span>
         </div>
       </div>
     </div>

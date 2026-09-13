@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Heart, ShoppingCart } from "lucide-react";
-import { Logo, ThemeToggle } from "@/components/common";
+import { Logo } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { useMounted } from "@/hooks";
 import { cn } from "@/lib/utils";
@@ -106,8 +106,6 @@ export function Header() {
               </span>
             )}
           </button>
-
-          <ThemeToggle />
 
           <HeaderUserMenu
             user={user}

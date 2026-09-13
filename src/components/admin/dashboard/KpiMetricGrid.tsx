@@ -17,45 +17,39 @@ export function KpiMetricGrid({
 }: KpiMetricGridProps) {
   const metrics = [
     {
-      title: "Revenue",
-      value: `৳${grossRevenue.toLocaleString()}`,
+      title: "Gross Revenue",
+      rawValue: grossRevenue,
+      prefix: "৳",
       change: "+18.4%",
       isPositive: true,
       icon: DollarSign,
-      colorClass: "text-foreground",
-      bgClass: "bg-muted",
     },
     {
-      title: "Orders",
-      value: totalOrders.toString(),
+      title: "Completed Orders",
+      rawValue: totalOrders,
       change: "+12.2%",
       isPositive: true,
       icon: ShoppingBag,
-      colorClass: "text-foreground",
-      bgClass: "bg-muted",
     },
     {
-      title: "Avg Value",
-      value: `৳${avgOrderValue.toLocaleString()}`,
+      title: "Avg Order Value",
+      rawValue: avgOrderValue,
+      prefix: "৳",
       change: "+6.8%",
       isPositive: true,
       icon: TrendingUp,
-      colorClass: "text-foreground",
-      bgClass: "bg-muted",
     },
     {
       title: "Pending Dispatch",
-      value: pendingOrders.toString(),
-      change: pendingOrders > 0 ? "Action" : "Clear",
+      rawValue: pendingOrders,
+      change: pendingOrders > 0 ? "+3 Queue" : "All Clear",
       isPositive: pendingOrders === 0,
       icon: Truck,
-      colorClass: "text-foreground",
-      bgClass: "bg-muted",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       {metrics.map((m) => (
         <KpiCard key={m.title} {...m} />
       ))}

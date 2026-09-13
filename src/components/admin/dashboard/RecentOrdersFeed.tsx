@@ -48,28 +48,30 @@ export function RecentOrdersFeed({
   };
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs space-y-4">
+    <div className="group relative overflow-hidden rounded-2xl bg-card p-5 sm:p-6 border-none admin-card space-y-4">
+      {/* Subtle top edge glow on hover */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+      <div className="flex items-center justify-between border-b border-border/40 pb-3">
         <div>
-          <h3 className="text-sm font-bold text-foreground">Recent Orders</h3>
-          <p className="text-[11px] text-muted-foreground">Live transactions queue</p>
+          <h3 className="text-base font-bold text-foreground tracking-tight">Recent Orders</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Live store transactions</p>
         </div>
         <Link
           href="/dashboard/orders"
-          className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+          className="text-xs font-semibold text-foreground hover:underline flex items-center gap-1"
         >
           <span>All Orders</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      {/* ── Mobile Layout (< 640px): Adaptive Clean Cards ── */}
+      {/* Mobile Layout (< 640px): Adaptive Cards */}
       <div className="space-y-2.5 sm:hidden">
         {orders.slice(0, 5).map((order) => (
           <div
             key={order.id}
-            className="p-3 rounded-xl border border-border/70 bg-muted/20 space-y-2"
+            className="p-3 rounded-xl bg-muted/30 space-y-2"
           >
             <div className="flex items-center justify-between text-xs">
               <span className="font-mono font-bold text-foreground">
@@ -98,7 +100,7 @@ export function RecentOrdersFeed({
                 onChange={(e) =>
                   onUpdateStatus(order.id, e.target.value as OrderStatus)
                 }
-                className="rounded-lg border border-border/80 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:border-amber-500 focus:outline-none cursor-pointer"
+                className="rounded-lg border border-border/60 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
@@ -111,11 +113,11 @@ export function RecentOrdersFeed({
         ))}
       </div>
 
-      {/* ── Desktop Layout (>= 640px): Clean Minimal Table ── */}
+      {/* Desktop Layout (>= 640px): Minimal Clean Table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-border/80 text-[10px] font-bold uppercase text-muted-foreground">
+            <tr className="border-b border-border/40 text-[10px] font-bold uppercase text-muted-foreground">
               <th className="py-2.5 px-2">Order #</th>
               <th className="py-2.5 px-2">Customer</th>
               <th className="py-2.5 px-2">Total</th>
@@ -124,7 +126,7 @@ export function RecentOrdersFeed({
               <th className="py-2.5 px-2 text-right">Update</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-border/30">
             {orders.slice(0, 5).map((order) => (
               <tr key={order.id} className="hover:bg-muted/30 transition-colors">
                 <td className="py-3 px-2 font-mono font-bold text-foreground">
@@ -151,7 +153,7 @@ export function RecentOrdersFeed({
                     onChange={(e) =>
                       onUpdateStatus(order.id, e.target.value as OrderStatus)
                     }
-                    className="rounded-lg border border-border/80 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:border-amber-500 focus:outline-none cursor-pointer"
+                    className="rounded-lg border border-border/60 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:outline-none cursor-pointer"
                   >
                     <option value="pending">Pending</option>
                     <option value="processing">Processing</option>

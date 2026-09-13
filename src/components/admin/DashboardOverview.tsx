@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useAdminStore } from "@/stores";
 import {
   DashboardHeader,
-  TimeRange,
   KpiMetricGrid,
   RevenueChartCard,
   PaymentSplitCard,
@@ -14,7 +13,6 @@ import {
 
 export function DashboardOverview() {
   const { orders, products, updateOrderStatus } = useAdminStore();
-  const [timeRange, setTimeRange] = useState<TimeRange>("7d");
 
   // Key KPI metrics calculations
   const grossRevenue = orders.reduce((sum, o) => sum + o.total, 0);
@@ -37,11 +35,8 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Header bar with live pulse & time filter */}
-      <DashboardHeader
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
-      />
+      {/* Header bar with live pulse */}
+      <DashboardHeader />
 
       {/* 4 Essential KPI Cards (2x2 on mobile, 4x1 on desktop) */}
       <KpiMetricGrid
@@ -51,12 +46,12 @@ export function DashboardOverview() {
         pendingOrders={pendingOrders}
       />
 
-      {/* Revenue histogram & payment methods split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-2">
-          <RevenueChartCard data={salesTrend} />
+      {/* Revenue curve & payment methods split */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-7">
+          <RevenueChartCard />
         </div>
-        <div>
+        <div className="xl:col-span-5">
           <PaymentSplitCard />
         </div>
       </div>

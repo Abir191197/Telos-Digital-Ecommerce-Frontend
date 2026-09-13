@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { useAuthStore } from "@/stores/auth.store";
@@ -20,7 +20,6 @@ import {
   Sliders,
   Settings,
   X,
-  Store,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -191,10 +190,37 @@ export function AdminSidebar() {
     router.push(ROUTES.LOGIN);
   };
 
-  const isRouteActive = (href?: string) => {
-    if (!href) return false;
-    if (href === ROUTES.DASHBOARD) return pathname === ROUTES.DASHBOARD;
-    return pathname.startsWith(href.split("?")[0]);
+  const searchParams = useSearchParams();
+
+  const isSubRouteActive = (href: string) => {
+    const [path, query] = href.split("?");
+    if (pathname !== path) return false;
+
+    if (!query) {
+      // If base path has no query params, it is active only when current URL has no query params
+      // or none of the other sibling query keys are present
+      return searchParams.toString().length === 0;
+    }
+
+    // Check every key-value pair in the query string
+    const params = new URLSearchParams(query);
+    for (const [key, val] of params.entries()) {
+      if (searchParams.get(key) !== val) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const isParentRouteActive = (item: NavGroupItem) => {
+    if (item.href) {
+      if (item.href === ROUTES.DASHBOARD) return pathname === ROUTES.DASHBOARD;
+      return pathname.startsWith(item.href.split("?")[0]);
+    }
+    if (item.children) {
+      return item.children.some((sub) => isSubRouteActive(sub.href));
+    }
+    return false;
   };
 
   return (
@@ -210,7 +236,7 @@ export function AdminSidebar() {
       {/* ── Seamless Liquid Shadow Sidebar ── */}
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-30 flex flex-col border-none bg-sidebar text-sidebar-foreground transition-all duration-300 select-none",
+          "fixed top-0 bottom-0 left-0 z-30 flex flex-col border-none bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 text-sidebar-foreground transition-all duration-300 select-none",
           "shadow-[4px_0_24px_-4px_rgba(0,0,0,0.06),12px_0_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[4px_0_30px_-4px_rgba(0,0,0,0.45),12px_0_60px_-10px_rgba(0,0,0,0.35)]",
           isOpen ? "lg:w-64" : "lg:w-20",
           isMobileOpen
@@ -219,24 +245,25 @@ export function AdminSidebar() {
         )}
       >
         {/* Brand Header with Gradient & Rounded Bottom-Right Corner */}
-        <div className="flex h-16 items-center justify-between px-3 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/50 border-b border-r border-border/50 shadow-xs">
+        <div className="flex h-16 items-center justify-between px-3 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/60 border-b border-r border-border/70 shadow-sm">
           <Link
             href={ROUTES.DASHBOARD}
-            className="flex items-center gap-2.5 overflow-hidden group min-w-0"
+            className="flex items-center gap-3 overflow-hidden group min-w-0"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background font-bold text-sm tracking-tight shadow-2xs transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground text-background font-black text-base tracking-tight shadow-sm transition-transform group-hover:scale-105">
               <span>T</span>
             </div>
 
             {(isOpen || isMobileOpen) && (
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-sm tracking-tight text-foreground truncate">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm tracking-tight text-foreground truncate">
                     Telos Admin
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground font-medium truncate">
-                  Store Management
+                <p className="text-[11px] text-foreground/60 font-medium truncate flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Store Active
                 </p>
               </div>
             )}
@@ -246,14 +273,14 @@ export function AdminSidebar() {
           <button
             type="button"
             onClick={toggleSidebar}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+            className="hidden lg:flex h-8 w-8 items-center justify-center rounded-xl bg-muted dark:bg-zinc-800 text-foreground shadow-xs border border-border/80 hover:bg-foreground hover:text-background transition-all duration-200 cursor-pointer"
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
             title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isOpen ? (
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 stroke-[2.4]" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 stroke-[2.4]" />
             )}
           </button>
 
@@ -261,27 +288,25 @@ export function AdminSidebar() {
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
+            className="lg:hidden p-2 rounded-xl text-foreground/70 hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Hierarchical Navigation List */}
-        <nav className="flex-1 space-y-4 px-3 pt-6 pb-4 overflow-y-auto">
+        <nav className="relative flex-1 space-y-5 px-3 pt-4 pb-4 mt-2 overflow-y-auto subpixel-antialiased sidebar-scrollbar">
           {ADMIN_NAV_GROUPS.map((section) => (
             <div key={section.group} className="space-y-1">
               {(isOpen || isMobileOpen) && (
-                <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                <div className="px-3 pb-1 text-[11px] font-extrabold uppercase tracking-wider text-foreground/70 dark:text-zinc-400">
                   {section.group}
                 </div>
               )}
 
               {section.items.map((item) => {
                 const hasChildren = Boolean(item.children?.length);
-                const isItemActive = hasChildren
-                  ? item.children!.some((sub) => isRouteActive(sub.href))
-                  : isRouteActive(item.href);
+                const isItemActive = isParentRouteActive(item);
                 const isItemOpen = expanded[item.title] ?? false;
 
                 // Collapsed sidebar icon item
@@ -292,14 +317,14 @@ export function AdminSidebar() {
                       href={item.href || (item.children ? item.children[0].href : "#")}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "flex h-9 w-9 mx-auto items-center justify-center rounded-lg transition-colors",
+                        "relative flex h-10 w-10 mx-auto items-center justify-center rounded-xl transition-all duration-150",
                         isItemActive
-                          ? "bg-foreground text-background font-semibold shadow-2xs"
-                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                          ? "bg-foreground text-background font-bold shadow-sm"
+                          : "text-zinc-800 dark:text-zinc-200 hover:bg-muted hover:text-foreground"
                       )}
                       title={item.title}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
+                      <item.icon className="h-5 w-5 shrink-0 stroke-[2.2]" />
                     </Link>
                   );
                 }
@@ -312,26 +337,26 @@ export function AdminSidebar() {
                       href={item.href || "#"}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors",
+                        "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold tracking-tight transition-all duration-150",
                         isItemActive
-                          ? "bg-foreground text-background font-semibold shadow-2xs"
-                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                          ? "bg-foreground text-background font-bold shadow-sm"
+                          : "text-zinc-900 dark:text-zinc-100 hover:bg-muted"
                       )}
                     >
                       <item.icon
                         className={cn(
-                          "h-4 w-4 shrink-0 transition-colors",
-                          isItemActive ? "text-background" : "text-muted-foreground group-hover:text-foreground"
+                          "h-5 w-5 shrink-0 stroke-[2.2] transition-colors",
+                          isItemActive ? "text-background" : "text-zinc-700 dark:text-zinc-300 group-hover:text-foreground"
                         )}
                       />
-                      <span className="truncate flex-1">{item.title}</span>
+                      <span className="truncate flex-1 font-semibold">{item.title}</span>
                       {item.badge && (
                         <span
                           className={cn(
-                            "rounded-md px-1.5 py-0.2 text-[10px] font-medium",
+                            "rounded-md px-1.5 py-0.5 text-xs font-bold",
                             isItemActive
                               ? "bg-background/20 text-background"
-                              : "bg-muted text-muted-foreground"
+                              : "bg-muted text-foreground border border-border"
                           )}
                         >
                           {item.badge}
@@ -348,27 +373,27 @@ export function AdminSidebar() {
                       type="button"
                       onClick={() => toggleExpand(item.title)}
                       className={cn(
-                        "w-full group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer text-left",
+                        "w-full group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold tracking-tight transition-all duration-150 cursor-pointer text-left",
                         isItemActive
-                          ? "text-foreground font-semibold"
-                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                          ? "text-foreground font-bold bg-muted"
+                          : "text-zinc-900 dark:text-zinc-100 hover:bg-muted"
                       )}
                     >
                       <item.icon
                         className={cn(
-                          "h-4 w-4 shrink-0 transition-colors",
-                          isItemActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                          "h-5 w-5 shrink-0 stroke-[2.2] transition-colors",
+                          isItemActive ? "text-foreground" : "text-zinc-700 dark:text-zinc-300 group-hover:text-foreground"
                         )}
                       />
-                      <span className="truncate flex-1">{item.title}</span>
+                      <span className="truncate flex-1 font-semibold">{item.title}</span>
                       {item.badge && (
-                        <span className="rounded-md px-1.5 py-0.2 text-[10px] font-medium bg-muted text-muted-foreground mr-1">
+                        <span className="rounded-md px-1.5 py-0.5 text-xs font-bold bg-muted text-foreground border border-border mr-1">
                           {item.badge}
                         </span>
                       )}
                       <ChevronDown
                         className={cn(
-                          "h-3.5 w-3.5 text-muted-foreground/80 transition-transform duration-200",
+                          "h-4 w-4 stroke-[2.2] transition-transform duration-200 text-zinc-600 dark:text-zinc-400 group-hover:text-foreground",
                           isItemOpen && "rotate-180"
                         )}
                       />
@@ -376,24 +401,31 @@ export function AdminSidebar() {
 
                     {/* Sub-menu drawer */}
                     {isItemOpen && (
-                      <div className="pl-6 pr-1 py-0.5 space-y-0.5 border-l border-border/40 ml-4">
+                      <div className="pl-5 pr-1 py-1 space-y-1 border-l-2 border-border ml-5 mt-0.5">
                         {item.children!.map((sub) => {
-                          const isSubActive = isRouteActive(sub.href);
+                          const isSubActive = isSubRouteActive(sub.href);
                           return (
                             <Link
                               key={sub.title}
                               href={sub.href}
                               onClick={() => setMobileOpen(false)}
                               className={cn(
-                                "flex items-center justify-between rounded-md px-2 py-1 text-[11px] font-medium transition-colors",
+                                "flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium tracking-tight transition-colors",
                                 isSubActive
-                                  ? "bg-muted font-semibold text-foreground"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                  ? "bg-foreground text-background font-semibold shadow-xs"
+                                  : "text-zinc-700 dark:text-zinc-300 hover:text-foreground hover:bg-muted"
                               )}
                             >
                               <span className="truncate">{sub.title}</span>
                               {sub.badge && (
-                                <span className="rounded px-1 text-[9px] font-semibold bg-muted text-muted-foreground border border-border/60">
+                                <span
+                                  className={cn(
+                                    "rounded-md px-1.5 py-0.5 text-xs font-semibold",
+                                    isSubActive
+                                      ? "bg-background/25 text-background"
+                                      : "bg-muted text-foreground border border-border"
+                                  )}
+                                >
                                   {sub.badge}
                                 </span>
                               )}
@@ -410,24 +442,13 @@ export function AdminSidebar() {
         </nav>
 
         {/* Footer Actions */}
-        <div className="border-t border-border/40 p-3 space-y-1">
-          <Link
-            href={ROUTES.HOME}
-            target="_blank"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
-          >
-            <Store className="h-4 w-4 shrink-0 text-muted-foreground" />
-            {(isOpen || isMobileOpen) && (
-              <span className="truncate">Public Store</span>
-            )}
-          </Link>
-
+        <div className="border-t border-border/40 p-3.5 space-y-1">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
           >
-            <LogOut className="h-4 w-4 shrink-0" />
+            <LogOut className="h-5 w-5 shrink-0" />
             {(isOpen || isMobileOpen) && (
               <span className="truncate">Log Out</span>
             )}
