@@ -21,7 +21,9 @@ export function MobileBottomNav() {
 
   // Zustand state
   const rawCartCount = useCartStore((state) => state.getItemCount());
-  const openCart = useCartStore((state) => state.openCart);
+  const isCartOpen = useCartStore((state) => state.isOpen);
+  const toggleCart = useCartStore((state) => state.toggleCart);
+  const closeCart = useCartStore((state) => state.closeCart);
   const rawWishlistCount = useWishlistStore((state) => state.items.length);
   const authUser = useAuthStore((state) => state.user);
 
@@ -38,55 +40,58 @@ export function MobileBottomNav() {
         {/* 1. Home */}
         <Link
           href={ROUTES.HOME}
+          onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
-            pathname === ROUTES.HOME
+            pathname === ROUTES.HOME && !isCartOpen
               ? "text-amber-600 font-semibold"
               : "text-muted-foreground hover:text-foreground font-medium"
           )}
         >
-          {pathname === ROUTES.HOME && (
+          {pathname === ROUTES.HOME && !isCartOpen && (
             <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
           )}
-          <Home className={cn("h-5 w-5 transition-transform duration-200", pathname === ROUTES.HOME && "scale-110 stroke-[2.4]")} />
+          <Home className={cn("h-5 w-5 transition-transform duration-200", pathname === ROUTES.HOME && !isCartOpen && "scale-110 stroke-[2.4]")} />
           <span className="text-[11px] tracking-tight">Home</span>
         </Link>
 
         {/* 2. Categories */}
         <Link
           href={ROUTES.CATEGORIES}
+          onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
-            pathname.startsWith(ROUTES.CATEGORIES)
+            pathname.startsWith(ROUTES.CATEGORIES) && !isCartOpen
               ? "text-amber-600 font-semibold"
               : "text-muted-foreground hover:text-foreground font-medium"
           )}
         >
-          {pathname.startsWith(ROUTES.CATEGORIES) && (
+          {pathname.startsWith(ROUTES.CATEGORIES) && !isCartOpen && (
             <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
           )}
-          <LayoutGrid className={cn("h-5 w-5 transition-transform duration-200", pathname.startsWith(ROUTES.CATEGORIES) && "scale-110 stroke-[2.4]")} />
+          <LayoutGrid className={cn("h-5 w-5 transition-transform duration-200", pathname.startsWith(ROUTES.CATEGORIES) && !isCartOpen && "scale-110 stroke-[2.4]")} />
           <span className="text-[11px] tracking-tight">Categories</span>
         </Link>
 
         {/* 3. Wishlist */}
         <Link
           href={ROUTES.WISHLIST}
+          onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
-            pathname === ROUTES.WISHLIST
+            pathname === ROUTES.WISHLIST && !isCartOpen
               ? "text-amber-600 font-semibold"
               : "text-muted-foreground hover:text-foreground font-medium"
           )}
         >
-          {pathname === ROUTES.WISHLIST && (
+          {pathname === ROUTES.WISHLIST && !isCartOpen && (
             <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
           )}
           <div className="relative flex items-center justify-center">
             <Heart
               className={cn(
                 "h-5 w-5 transition-transform duration-200",
-                pathname === ROUTES.WISHLIST && "scale-110 stroke-[2.4] fill-amber-500/20"
+                pathname === ROUTES.WISHLIST && !isCartOpen && "scale-110 stroke-[2.4] fill-amber-500/20"
               )}
             />
             {wishlistCount > 0 && (
@@ -98,14 +103,24 @@ export function MobileBottomNav() {
           <span className="text-[11px] tracking-tight">Wishlist</span>
         </Link>
 
-        {/* 4. Cart Button (Triggers Drawer) */}
+        {/* 4. Cart Button (Toggles Drawer & Minimizes) */}
         <button
           type="button"
-          onClick={openCart}
-          className="relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none text-muted-foreground hover:text-foreground font-medium cursor-pointer"
+          onClick={toggleCart}
+          aria-expanded={isCartOpen}
+          aria-label="Shopping Cart"
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none cursor-pointer",
+            isCartOpen
+              ? "text-amber-600 font-semibold"
+              : "text-muted-foreground hover:text-foreground font-medium"
+          )}
         >
+          {isCartOpen && (
+            <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
+          )}
           <div className="relative flex items-center justify-center">
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className={cn("h-5 w-5 transition-transform duration-200", isCartOpen && "scale-110 stroke-[2.4]")} />
             {cartCount > 0 && (
               <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white shadow-xs animate-in zoom-in">
                 {cartCount}
@@ -118,14 +133,15 @@ export function MobileBottomNav() {
         {/* 5. Account */}
         <Link
           href={user ? ROUTES.ACCOUNT : ROUTES.LOGIN}
+          onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
-            pathname.startsWith(ROUTES.ACCOUNT) || pathname.startsWith(ROUTES.PROFILE) || pathname === ROUTES.LOGIN
+            (pathname.startsWith(ROUTES.ACCOUNT) || pathname.startsWith(ROUTES.PROFILE) || pathname === ROUTES.LOGIN) && !isCartOpen
               ? "text-amber-600 font-semibold"
               : "text-muted-foreground hover:text-foreground font-medium"
           )}
         >
-          {(pathname.startsWith(ROUTES.ACCOUNT) || pathname.startsWith(ROUTES.PROFILE)) && (
+          {(pathname.startsWith(ROUTES.ACCOUNT) || pathname.startsWith(ROUTES.PROFILE) || pathname === ROUTES.LOGIN) && !isCartOpen && (
             <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
           )}
           {user ? (
