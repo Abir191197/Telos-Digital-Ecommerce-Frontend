@@ -1264,7 +1264,7 @@ export function CustomerAccountHub() {
           {activeTab === "addresses" && (
             <div className="space-y-4 sm:space-y-6">
               {/* Header bar: Responsive stack on mobile, flex on sm */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+              <div className="flex items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">
                     Address Book
@@ -1273,10 +1273,11 @@ export function CustomerAccountHub() {
                     Manage delivery destinations and primary shipping for Bangladesh.
                   </p>
                 </div>
+                {/* Desktop Add Button: stays in header */}
                 <button
                   type="button"
                   onClick={handleOpenAddAddress}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer w-full sm:w-auto"
+                  className="hidden sm:inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Add New Address</span>
@@ -1362,24 +1363,37 @@ export function CustomerAccountHub() {
                 ))}
               </div>
 
+              {/* Mobile Add Button: Placed as last item after address cards */}
+              <div className="block sm:hidden pt-2">
+                <button
+                  type="button"
+                  onClick={handleOpenAddAddress}
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white py-3.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer touch-manipulation"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add New Address</span>
+                </button>
+              </div>
+
               {/* Add / Edit Address Drawer or Modal */}
               {showAddAddressModal && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+                <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
                   <div
-                    className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl bg-card p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto"
+                    className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl bg-card shadow-2xl flex flex-col max-h-[85dvh] sm:max-h-[90vh] overflow-hidden border-t sm:border border-border/70 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95"
                     role="dialog"
                     aria-modal="true"
                   >
-                    <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                    {/* Fixed Header */}
+                    <div className="flex items-center justify-between border-b border-border/60 p-4 sm:p-5 shrink-0 bg-card">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
                           <MapPin className="h-5 w-5" />
                         </div>
-                        <div>
-                          <h3 className="text-sm sm:text-base font-bold text-foreground">
+                        <div className="min-w-0">
+                          <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
                             {editingAddressId ? "Edit Delivery Location" : "Add New Delivery Location"}
                           </h3>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground truncate">
                             Destination details for courier deliveries
                           </p>
                         </div>
@@ -1390,16 +1404,17 @@ export function CustomerAccountHub() {
                           setShowAddAddressModal(false);
                           setEditingAddressId(null);
                         }}
-                        className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                        className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
                         aria-label="Close modal"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
 
+                    {/* Scrollable Form */}
                     <form
                       onSubmit={handleAddressFormSubmit}
-                      className="space-y-3.5 text-xs"
+                      className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 text-xs overscroll-contain"
                     >
                       <div>
                         <label className="font-bold text-foreground block mb-1">
@@ -1412,7 +1427,7 @@ export function CustomerAccountHub() {
                               type="button"
                               onClick={() => setNewAddr({ ...newAddr, label: labelType })}
                               className={cn(
-                                "py-2 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5",
+                                "py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 touch-manipulation",
                                 newAddr.label === labelType
                                   ? "bg-amber-500 text-white shadow-xs"
                                   : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -1438,7 +1453,7 @@ export function CustomerAccountHub() {
                             onChange={(e) =>
                               setNewAddr({ ...newAddr, name: e.target.value })
                             }
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           />
                         </div>
 
@@ -1454,7 +1469,7 @@ export function CustomerAccountHub() {
                             onChange={(e) =>
                               setNewAddr({ ...newAddr, phone: e.target.value })
                             }
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold font-mono text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold font-mono text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           />
                         </div>
                       </div>
@@ -1471,7 +1486,7 @@ export function CustomerAccountHub() {
                           onChange={(e) =>
                             setNewAddr({ ...newAddr, street: e.target.value })
                           }
-                          className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                          className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                         />
                       </div>
 
@@ -1488,7 +1503,7 @@ export function CustomerAccountHub() {
                             onChange={(e) =>
                               setNewAddr({ ...newAddr, area: e.target.value })
                             }
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           />
                         </div>
                         <div>
@@ -1509,7 +1524,7 @@ export function CustomerAccountHub() {
                                 zone: isInside ? "inside-dhaka" : "outside-dhaka",
                               });
                             }}
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           />
                         </div>
                       </div>
@@ -1526,7 +1541,7 @@ export function CustomerAccountHub() {
                             onChange={(e) =>
                               setNewAddr({ ...newAddr, postalCode: e.target.value })
                             }
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold font-mono text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold font-mono text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           />
                         </div>
                         <div>
@@ -1541,7 +1556,7 @@ export function CustomerAccountHub() {
                                 zone: e.target.value as "inside-dhaka" | "outside-dhaka",
                               })
                             }
-                            className="h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+                            className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
                           >
                             <option value="inside-dhaka">Inside Dhaka (৳60)</option>
                             <option value="outside-dhaka">Outside Dhaka (৳120)</option>
@@ -1567,20 +1582,21 @@ export function CustomerAccountHub() {
                         </label>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-2">
+                      {/* Action buttons pinned at bottom of scrollable form with safe-area spacing */}
+                      <div className="flex items-center gap-2.5 pt-3 pb-6 sm:pb-1 border-t border-border/40">
                         <button
                           type="button"
                           onClick={() => {
                             setShowAddAddressModal(false);
                             setEditingAddressId(null);
                           }}
-                          className="flex-1 rounded-xl bg-muted/60 hover:bg-muted text-foreground py-2.5 font-bold transition-all cursor-pointer"
+                          className="flex-1 rounded-xl bg-muted/60 hover:bg-muted text-foreground py-3 font-bold transition-all cursor-pointer active:scale-98"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-2.5 font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                          className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-3 font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
                         >
                           {editingAddressId ? "Save Changes" : "Add Address"}
                         </button>
@@ -1592,9 +1608,9 @@ export function CustomerAccountHub() {
 
               {/* ── Save Warning / Confirmation Popup Modal ── */}
               {addressToConfirmSave && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
+                <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
                   <div
-                    className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95"
+                    className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95 border border-border/70 max-h-[90vh] overflow-y-auto"
                     role="alertdialog"
                     aria-modal="true"
                   >
@@ -1668,9 +1684,9 @@ export function CustomerAccountHub() {
 
               {/* ── Delete Warning / Confirmation Popup Modal ── */}
               {addressToDelete && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
+                <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
                   <div
-                    className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95"
+                    className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95 border border-border/70 max-h-[90vh] overflow-y-auto"
                     role="alertdialog"
                     aria-modal="true"
                   >
