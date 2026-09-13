@@ -59,19 +59,19 @@ export function Header() {
       {/* ── Row 1: Top Bar (Support Hotline, Promos, Track Order, About) ── */}
       <TopUtilityBar />
 
-      {/* ── Row 2: Main Header Bar (Logo, Large Search, Cart, Wishlist, User Menu) ── */}
+      {/* ── Row 2: Main Header Bar (Logo, Unified Center Search, Cart, Wishlist, User Menu) ── */}
       <div
         className={cn(
-          "container flex h-18 items-center justify-between gap-4 sm:gap-8",
+          "container flex h-14 md:h-18 items-center justify-between gap-2.5 sm:gap-4 md:gap-8 px-3 sm:px-6",
           isAccountPage && "hidden md:flex"
         )}
       >
-        {/* Brand Logo */}
-        <Link href={ROUTES.HOME} className="flex items-center gap-2">
+        {/* Brand Logo (Text hidden on mobile via Logo component) */}
+        <Link href={ROUTES.HOME} className="flex shrink-0 items-center gap-2">
           <Logo size={36} />
         </Link>
 
-        {/* Desktop Search Bar */}
+        {/* Unified Responsive Search Bar (Centered) */}
         <HeaderSearch
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
@@ -79,7 +79,7 @@ export function Header() {
         />
 
         {/* Right Utilities */}
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <Link
             href={ROUTES.WISHLIST}
             aria-label="Wishlist"
@@ -115,21 +115,6 @@ export function Header() {
             onToggle={setProfileOpen}
           />
         </div>
-      </div>
-
-      {/* ── Mobile Always-Visible Search Bar ── */}
-      <div
-        className={cn(
-          "md:hidden px-4 pb-3",
-          isAccountPage && "hidden"
-        )}
-      >
-        <HeaderSearch
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          onSubmit={handleSearchSubmit}
-          isMobile
-        />
       </div>
 
       {/* ── Row 3: Navigation Bar & Mega Menu ── */}

@@ -87,7 +87,7 @@ export function Logo({
       {/* Brand Name Typography matching mother concern Telos Digital */}
       {showText && (
         <span
-          className={`${textSize || "text-sm sm:text-base"} font-bold tracking-tight flex items-center gap-1 font-sans ${
+          className={`hidden sm:inline-flex ${textSize || "text-sm sm:text-base"} font-bold tracking-tight items-center gap-1 font-sans ${
             textColor || "text-foreground"
           }`}
         >
