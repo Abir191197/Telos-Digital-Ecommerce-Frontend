@@ -32,7 +32,7 @@ export function ReturnsTab({ returnTickets, onSelectTab }: ReturnsTabProps) {
       </div>
 
       {returnTickets.length === 0 ? (
-        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-8 space-y-3 text-center shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
+        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-8 space-y-3 text-center shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.05] transition-all duration-300">
           <div className="h-12 w-12 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center mx-auto">
             <RotateCcw className="h-6 w-6" />
           </div>
@@ -48,7 +48,7 @@ export function ReturnsTab({ returnTickets, onSelectTab }: ReturnsTabProps) {
           {returnTickets.map((ticket, idx) => (
             <div
               key={idx}
-              className="rounded-2xl border border-border/80 bg-card p-4.5 space-y-3 shadow-xs"
+              className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 space-y-3.5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_12px_30px_-4px_rgba(245,158,11,0.08)] transition-all duration-300"
             >
               <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
                 <div className="flex items-center gap-2">

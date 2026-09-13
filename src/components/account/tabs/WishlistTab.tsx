@@ -114,13 +114,13 @@ export function WishlistTab({
           {wishlistItems.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
+              className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4 sm:p-5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_12px_30px_-4px_rgba(245,158,11,0.08)] transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
             >
               {/* Product Thumbnail & Core Info */}
               <div className="flex items-center gap-3.5 min-w-0 flex-1">
                 <Link
                   href={`/products/${item.slug || item.id}`}
-                  className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs group cursor-pointer"
+                  className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs group cursor-pointer border border-border/40"
                 >
                   <Image
                     src={item.thumbnail}
@@ -188,7 +188,7 @@ export function WishlistTab({
           {wishlistItems.map((item) => (
             <div
               key={item.id}
-              className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4 space-y-3.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-all flex flex-col justify-between"
+              className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4 space-y-3.5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300 flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <Link

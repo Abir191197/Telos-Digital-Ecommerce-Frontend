@@ -88,10 +88,10 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl">
       {/* Header card with quick status & edit toggle */}
-      <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4 sm:p-8 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] relative overflow-hidden">
+      <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4 sm:p-8 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.05] transition-all duration-300 relative overflow-hidden">
         <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 border-b border-border/60 pb-5 sm:pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 border-b border-border/50 pb-5 sm:pb-6">
           <div className="flex items-center gap-3.5 sm:gap-4">
             {/* Editable Avatar */}
             <div className="relative group shrink-0">
@@ -302,7 +302,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
 
       {/* Extra Account Insights / Quick Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
-        <div className="rounded-xl sm:rounded-2xl border border-border/80 bg-card p-3 sm:p-4 space-y-1 shadow-xs">
+        <div className="rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-3.5 sm:p-4.5 space-y-1 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_12px_30px_-4px_rgba(245,158,11,0.08)] transition-all duration-300">
           <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Total Orders
           </span>
@@ -311,7 +311,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
           </p>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground">Across Bangladesh</p>
         </div>
-        <div className="rounded-xl sm:rounded-2xl border border-border/80 bg-card p-3 sm:p-4 space-y-1 shadow-xs">
+        <div className="rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-3.5 sm:p-4.5 space-y-1 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_12px_30px_-4px_rgba(245,158,11,0.08)] transition-all duration-300">
           <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Delivery Zone
           </span>
@@ -320,7 +320,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
             Next-Day RedX
           </p>
         </div>
-        <div className="col-span-2 sm:col-span-1 rounded-xl sm:rounded-2xl border border-border/80 bg-card p-3 sm:p-4 space-y-1 shadow-xs">
+        <div className="col-span-2 sm:col-span-1 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-3.5 sm:p-4.5 space-y-1 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_12px_30px_-4px_rgba(245,158,11,0.08)] transition-all duration-300">
           <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Account Security
           </span>

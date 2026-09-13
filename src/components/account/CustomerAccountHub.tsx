@@ -220,9 +220,9 @@ export function CustomerAccountHub() {
         ) : (
           <div className="space-y-3 pb-8">
             {/* Top User Profile Card */}
-            <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
+            <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4.5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] transition-all duration-300">
               <div className="flex items-center gap-4">
-                <div className="relative h-16 w-16 shrink-0 rounded-2xl border-2 border-amber-500/80 shadow-xs flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
+                <div className="relative h-16 w-16 shrink-0 rounded-2xl border-2 border-amber-500/80 shadow-md shadow-amber-500/20 flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
                   {user.avatar ? (
                     <Image
                       src={user.avatar}
@@ -255,7 +255,7 @@ export function CustomerAccountHub() {
                     <button
                       type="button"
                       onClick={() => handleSelectTab("profile")}
-                      className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/80 bg-muted/50 hover:bg-amber-500/10 hover:border-amber-500/40 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0 cursor-pointer shadow-2xs"
+                      className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/50 bg-muted/50 hover:bg-amber-500/15 hover:border-amber-500/40 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0 cursor-pointer shadow-2xs"
                       aria-label="Edit Profile"
                       title="Edit Profile"
                     >
@@ -322,7 +322,7 @@ export function CustomerAccountHub() {
                           key={item.id}
                           type="button"
                           onClick={() => handleSelectTab(item.id)}
-                          className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-card hover:bg-muted/40 transition-colors cursor-pointer shadow-2xs text-left group"
+                          className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 hover:bg-gradient-to-r hover:from-amber-500/[0.06] hover:via-amber-500/[0.02] hover:to-transparent transition-all duration-300 cursor-pointer shadow-2xs text-left group"
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />

@@ -62,7 +62,7 @@ export function OverviewTab({
   return (
     <div className="flex flex-col space-y-6">
       {/* Profile Details Hero Card on Overview */}
-      <div className="order-1 rounded-3xl border border-border/80 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.03] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/40 transition-all">
+      <div className="order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.04] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.03] hover:to-amber-500/[0.08] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.12)] transition-all duration-300">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500/80 shadow-md shadow-amber-500/20 bg-muted/40">
             {user.avatar ? (
@@ -99,7 +99,7 @@ export function OverviewTab({
           <button
             type="button"
             onClick={() => onSelectTab("profile")}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 dark:border-white/10 bg-card hover:bg-muted/80 text-foreground px-4 py-2.5 text-xs font-semibold shadow-2xs hover:border-amber-500/30 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border/50 dark:border-white/10 bg-card/80 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-transparent text-foreground px-4 py-2.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
           >
             <Edit3 className="h-3.5 w-3.5 text-amber-500" />
             <span>Edit Profile</span>
@@ -127,7 +127,7 @@ export function OverviewTab({
         ];
 
         return (
-          <div className="order-2 lg:order-1 rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6.5 space-y-5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-all">
+          <div className="order-2 lg:order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6.5 space-y-5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
             {/* Top Row: Order Details & Live Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
               <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export function OverviewTab({
               </div>
             </div>
 
-            {/* 4-Stage Segmented Milestone Cards (Replaces plain cheap progress bar) */}
+            {/* 4-Stage Segmented Milestone Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {steps.map((step, idx) => {
                 const isComplete = currentStep > idx;
@@ -182,10 +182,10 @@ export function OverviewTab({
                     className={cn(
                       "relative flex flex-col p-3 rounded-2xl border transition-all duration-300",
                       isCurrent
-                        ? "bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/50 shadow-xs ring-1 ring-amber-500/30"
+                        ? "bg-gradient-to-br from-amber-500/15 via-amber-500/10 to-transparent border-amber-500/40 shadow-xs ring-1 ring-amber-500/20"
                         : isComplete
-                        ? "bg-muted/40 border-border/70 text-foreground"
-                        : "bg-muted/15 border-border/40 opacity-60"
+                        ? "bg-muted/30 border-border/40 text-foreground"
+                        : "bg-muted/10 border-border/30 opacity-60"
                     )}
                   >
                     <div className="flex items-center justify-between gap-1 mb-1.5">
@@ -243,7 +243,6 @@ export function OverviewTab({
             {/* Items Preview Strip & Delivery Partner Footer */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs">
               <div className="flex items-center gap-3">
-                {/* Visual item thumbnails */}
                 <div className="flex -space-x-2 overflow-hidden py-0.5">
                   {latestOrder.items.slice(0, 3).map((item, i) => (
                     <div
@@ -294,9 +293,9 @@ export function OverviewTab({
       {/* 2-Column Responsive Grid on Large Screen: Primary Delivery Address + Saved Payment Methods */}
       <div className="order-3 lg:order-2 grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 1. Address Book Snapshot */}
-        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-colors">
+        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+            <div className="flex items-center justify-between border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
                   <MapPin className="h-4 w-4" />
@@ -350,7 +349,7 @@ export function OverviewTab({
         </div>
 
         {/* 2. Saved Payment Methods Snapshot */}
-        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-colors">
+        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
