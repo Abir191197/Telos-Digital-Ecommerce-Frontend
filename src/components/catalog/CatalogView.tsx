@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Product, Category } from "@/types/ecommerce.types";
 import { GridViewMode } from "@/types/catalog.types";
-import { ProductCard } from "@/components/common";
 import { SupportAndHelpstrip } from "@/components/shared";
+import { LazyMotion, domAnimation } from "framer-motion";
+
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFiltersBar } from "./ActiveFiltersBar";
 import { CatalogHeader } from "./CatalogHeader";
-import { EmptyCatalogState } from "./CatalogStateViews";
-import { X, Plus, ChevronDown, ChevronLeft, ChevronRight, CheckCircle2, SlidersHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { CatalogIntroHeader } from "./CatalogIntroHeader";
+import { CatalogProductGrid } from "./CatalogProductGrid";
+import { CatalogPagination } from "./CatalogPagination";
+import { CatalogMobileDrawer } from "./CatalogMobileDrawer";
 
 interface CatalogViewProps {
   initialProducts: Product[];
@@ -24,30 +25,6 @@ interface CatalogViewProps {
 }
 
 const ITEMS_PER_PAGE = 12;
-
-// Stable Framer Motion variants defined outside component for zero re-render overhead
-const catalogGridVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-    },
-  },
-};
-
-const catalogCardVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      damping: 24,
-      stiffness: 280,
-    },
-  },
-};
 
 export function CatalogView({
   initialProducts,
@@ -77,7 +54,7 @@ export function CatalogView({
   const [viewMode, setViewMode] = useState<GridViewMode>("grid-4");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const catalogFeedRef = React.useRef<HTMLDivElement>(null);
+  const catalogFeedRef = useRef<HTMLDivElement>(null);
 
   // Sync if URL brand param changes
   useEffect(() => {
@@ -198,34 +175,6 @@ export function CatalogView({
     return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredProducts, startIndex]);
 
-  // Thematic pagination range generator with ellipsis
-  const paginationRange = useMemo(() => {
-    const delta = 1;
-    const range: (number | string)[] = [];
-    const rangeWithDots: (number | string)[] = [];
-    let l: number | undefined = undefined;
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= validCurrentPage - delta && i <= validCurrentPage + delta)) {
-        range.push(i);
-      }
-    }
-
-    for (const i of range) {
-      if (l !== undefined) {
-        if (typeof i === "number" && i - l === 2) {
-          rangeWithDots.push(l + 1);
-        } else if (typeof i === "number" && i - l !== 1) {
-          rangeWithDots.push("...");
-        }
-      }
-      rangeWithDots.push(i);
-      if (typeof i === "number") l = i;
-    }
-
-    return rangeWithDots;
-  }, [totalPages, validCurrentPage]);
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
     setCurrentPage(page);
@@ -243,7 +192,7 @@ export function CatalogView({
     inStockOnly ||
     onSaleOnly;
 
-  // Handlers (reset to page 1 on filter changes)
+  // Filter state handlers
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setCurrentPage(1);
@@ -276,30 +225,18 @@ export function CatalogView({
   return (
     <LazyMotion features={domAnimation}>
       <div className="container px-3 sm:px-6 py-6 sm:py-10 space-y-8">
-        {/* ── Page Header / Intro ── */}
-        {showHeader && (
-          <m.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-1.5 pb-2"
-          >
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-              {title || (category ? category.name : "All Products")}
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
-              {subtitle ||
-                (category
-                  ? category.description
-                  : "Discover official Bangladesh warranty devices, smartphones, computing workstations, audio, and authentic lifestyle tech.")}
-            </p>
-          </m.div>
-        )}
+        {/* Page Header / Intro */}
+        <CatalogIntroHeader
+          showHeader={showHeader}
+          title={title}
+          subtitle={subtitle}
+          category={category}
+        />
 
-        {/* ── Main Catalog Two-Column Grid ── */}
+        {/* Main Catalog Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Faceted Filter Sidebar (Desktop) */}
-          <div className="hidden lg:block lg:col-span-3 sticky top-24">
+          <aside className="hidden lg:block lg:col-span-3 sticky top-24">
             <div className="rounded-3xl bg-card p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
               <FilterSidebar
                 availableBrands={availableBrands}
@@ -328,7 +265,7 @@ export function CatalogView({
                 hasActiveFilters={hasActiveFilters}
               />
             </div>
-          </div>
+          </aside>
 
           {/* Right Column: Catalog Feed */}
           <div ref={catalogFeedRef} className="lg:col-span-9 space-y-5 scroll-mt-24">
@@ -363,188 +300,64 @@ export function CatalogView({
             />
 
             {/* Product Cards Feed or Empty State */}
-            {filteredProducts.length === 0 ? (
-              <EmptyCatalogState onResetFilters={handleResetAll} />
-            ) : (
-              <m.div
-                key={`${validCurrentPage}-${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
-                variants={catalogGridVariants}
-                initial="hidden"
-                animate="visible"
-                className={cn(
-                  "grid gap-3 sm:gap-5",
-                  viewMode === "grid-3"
-                    ? "grid-cols-2 md:grid-cols-3"
-                    : "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-                )}
-              >
-                {displayedProducts.map((product) => (
-                  <m.div key={product.id} variants={catalogCardVariants}>
-                    <ProductCard product={product} />
-                  </m.div>
-                ))}
-              </m.div>
-            )}
-
-            {/* Thematic Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border/40">
-                <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
-                  Showing <strong className="text-foreground">{startIndex + 1}</strong>–
-                  <strong className="text-foreground">
-                    {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)}
-                  </strong>{" "}
-                  of <strong className="text-foreground">{filteredProducts.length}</strong> products
-                </p>
-
-                <nav aria-label="Catalog Pagination" className="flex items-center gap-1.5 order-1 sm:order-2">
-                  {/* Previous Page Button */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    aria-label="Previous Page"
-                    className={cn(
-                      "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-2xl px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95 shadow-2xs",
-                      currentPage === 1
-                        ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                        : "bg-card text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer"
-                    )}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="hidden xs:inline">Prev</span>
-                  </button>
-
-                  {/* Numbered Page Buttons */}
-                  <div className="flex items-center gap-1">
-                    {paginationRange.map((page, idx) => {
-                      if (typeof page === "string") {
-                        return (
-                          <span
-                            key={`ellipsis-${idx}`}
-                            className="flex h-9 w-9 items-center justify-center text-xs font-bold text-muted-foreground select-none"
-                          >
-                            •••
-                          </span>
-                        );
-                      }
-
-                      const isCurrent = page === currentPage;
-                      return (
-                        <button
-                          key={page}
-                          type="button"
-                          onClick={() => handlePageChange(page)}
-                          aria-current={isCurrent ? "page" : undefined}
-                          className={cn(
-                            "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl text-xs sm:text-sm font-bold transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs",
-                            isCurrent
-                              ? "bg-amber-500 text-zinc-950 shadow-md shadow-amber-500/25 ring-2 ring-amber-500/30"
-                              : "bg-card text-muted-foreground hover:bg-amber-500/10 hover:text-foreground"
-                          )}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Next Page Button */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    aria-label="Next Page"
-                    className={cn(
-                      "inline-flex h-9 sm:h-10 items-center justify-center gap-1 rounded-2xl px-3 text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95 shadow-2xs",
-                      currentPage === totalPages
-                        ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                        : "bg-card text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer"
-                    )}
-                  >
-                    <span className="hidden xs:inline">Next</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </nav>
-              </div>
-            )}
-          </div>
-        </div>
-
-      {/* ── Mobile Filter Drawer Slide-over (z-50) ── */}
-      {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div
-            aria-hidden="true"
-            onClick={() => setIsMobileFilterOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
-          />
-
-          <div className="relative ml-auto flex h-full w-full max-w-xs flex-col bg-background p-5 shadow-2xl overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-border/70 mb-4">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4 text-amber-500" />
-                <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
-                  Refine Catalog
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsMobileFilterOpen(false)}
-                aria-label="Close filters"
-                className="p-1 rounded-lg text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <FilterSidebar
-              availableBrands={availableBrands}
-              selectedBrands={selectedBrands}
-              onToggleBrand={handleToggleBrand}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              priceBounds={priceBounds}
-              onPriceChange={handlePriceChange}
-              selectedRating={selectedRating}
-              onSelectRating={(r) => {
-                setSelectedRating(r);
-                setCurrentPage(1);
-              }}
-              inStockOnly={inStockOnly}
-              onToggleInStock={() => {
-                setInStockOnly((v) => !v);
-                setCurrentPage(1);
-              }}
-              onSaleOnly={onSaleOnly}
-              onToggleOnSale={() => {
-                setOnSaleOnly((v) => !v);
-                setCurrentPage(1);
-              }}
-              onResetAll={handleResetAll}
-              hasActiveFilters={hasActiveFilters}
+            <CatalogProductGrid
+              products={displayedProducts}
+              totalFilteredCount={filteredProducts.length}
+              viewMode={viewMode}
+              cacheKey={`${validCurrentPage}-${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
+              onResetFilters={handleResetAll}
             />
 
-            <div className="mt-8 pt-4 border-t border-border/40">
-              <button
-                type="button"
-                onClick={() => setIsMobileFilterOpen(false)}
-                className="w-full rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
-              >
-                Apply Filters ({filteredProducts.length} results)
-              </button>
-            </div>
+            {/* Thematic Pagination Controls */}
+            <CatalogPagination
+              currentPage={validCurrentPage}
+              totalPages={totalPages}
+              totalProducts={filteredProducts.length}
+              startIndex={startIndex}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
-      )}
 
-      {/* ── Support & Guarantee Strip at Bottom ── */}
-      {showSupportStrip && (
-        <section className="pt-6">
-          <SupportAndHelpstrip />
-        </section>
-      )}
-    </div>
-  </LazyMotion>
-);
+        {/* Mobile Filter Drawer Slide-over */}
+        <CatalogMobileDrawer
+          isOpen={isMobileFilterOpen}
+          onClose={() => setIsMobileFilterOpen(false)}
+          availableBrands={availableBrands}
+          selectedBrands={selectedBrands}
+          onToggleBrand={handleToggleBrand}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          priceBounds={priceBounds}
+          onPriceChange={handlePriceChange}
+          selectedRating={selectedRating}
+          onSelectRating={(r) => {
+            setSelectedRating(r);
+            setCurrentPage(1);
+          }}
+          inStockOnly={inStockOnly}
+          onToggleInStock={() => {
+            setInStockOnly((v) => !v);
+            setCurrentPage(1);
+          }}
+          onSaleOnly={onSaleOnly}
+          onToggleOnSale={() => {
+            setOnSaleOnly((v) => !v);
+            setCurrentPage(1);
+          }}
+          onResetAll={handleResetAll}
+          hasActiveFilters={hasActiveFilters}
+          filteredCount={filteredProducts.length}
+        />
+
+        {/* Support & Guarantee Strip at Bottom */}
+        {showSupportStrip && (
+          <section className="pt-6">
+            <SupportAndHelpstrip />
+          </section>
+        )}
+      </div>
+    </LazyMotion>
+  );
 }
