@@ -470,17 +470,17 @@ export function CustomerAccountHub() {
   };
 
   return (
-    <div className="container py-6 sm:py-10 space-y-6">
+    <div className="container py-2 sm:py-10 space-y-3 sm:space-y-6">
 
 
       {/* ── Mobile Account View (Appears on click of Account nav item, no menu toggle needed) ── */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden space-y-3">
         {/* If user clicked any tab item on mobile, render back bar as fixed top nav under the 36px (h-9) black bar */}
         {mobileSubScreen ? (
           <>
             {/* Fixed Sticky Nav Bar below the 36px black top bar */}
             <div className="fixed top-9 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/80 shadow-xs">
-              <div className="container flex h-12 items-center justify-between px-4">
+              <div className="container flex h-11 items-center justify-between px-4">
                 <button
                   type="button"
                   onClick={handleBackToMobileMenu}
@@ -494,8 +494,8 @@ export function CustomerAccountHub() {
                 </span>
               </div>
             </div>
-            {/* Spacer for the fixed top nav */}
-            <div className="h-12 w-full" aria-hidden="true" />
+            {/* Minimal Spacer for the fixed top nav */}
+            <div className="h-10 w-full" aria-hidden="true" />
           </>
         ) : (
           <div className="space-y-3 pb-8">
@@ -1691,9 +1691,9 @@ export function CustomerAccountHub() {
           {/* ══════════════ 4. ORDERS TAB ══════════════ */}
           {activeTab === "orders" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Header & Filter Controls: Clean & Minimal Segmented Control */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
-                <div>
+              {/* Header & Filter Controls: Sticky on mobile under top nav, Swipeable on overflow */}
+              <div className="sticky top-[80px] z-20 sm:static flex flex-col items-start gap-3.5 bg-card/95 sm:bg-muted/20 backdrop-blur-md sm:backdrop-blur-none p-2.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-border/70 sm:border-transparent shadow-xs sm:shadow-none transition-all">
+                <div className="hidden sm:block">
                   <h3 className="text-base sm:text-lg font-bold text-foreground">
                     Order History
                   </h3>
@@ -1702,30 +1702,32 @@ export function CustomerAccountHub() {
                   </p>
                 </div>
 
-                {/* Filter Pills */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
-                  {(
-                    [
-                      { key: "all", label: "All" },
-                      { key: "processing", label: "Processing" },
-                      { key: "shipped", label: "In Transit" },
-                      { key: "delivered", label: "Delivered" },
-                    ] as const
-                  ).map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      onClick={() => setOrderFilter(tab.key)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                        orderFilter === tab.key
-                          ? "bg-amber-500 text-white shadow-2xs"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      )}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                {/* Filter Pills - Swipeable by touch on mobile with momentum scrolling */}
+                <div className="w-full overflow-x-auto overscroll-x-contain touch-pan-x scrollbar-none py-0.5">
+                  <div className="inline-flex items-center gap-1.5 bg-background/90 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs min-w-max">
+                    {(
+                      [
+                        { key: "all", label: "All" },
+                        { key: "processing", label: "Processing" },
+                        { key: "shipped", label: "In Transit" },
+                        { key: "delivered", label: "Delivered" },
+                      ] as const
+                    ).map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setOrderFilter(tab.key)}
+                        className={cn(
+                          "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 touch-manipulation active:scale-95",
+                          orderFilter === tab.key
+                            ? "bg-amber-500 text-white shadow-2xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -2279,8 +2281,8 @@ export function CustomerAccountHub() {
           {/* ══════════════ 8. REVIEWS & RATINGS TAB ══════════════ */}
           {activeTab === "reviews" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Header Bar with 2-State Segmented Control: "To Review" & "History" */}
-              <div className="flex flex-col items-start gap-3.5 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+              {/* Header Bar with 2-State Segmented Control: Sticky on mobile under top nav, Swipeable on overflow */}
+              <div className="sticky top-[80px] z-20 sm:static flex flex-col items-start gap-3.5 bg-card/95 sm:bg-muted/20 backdrop-blur-md sm:backdrop-blur-none p-2.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-border/70 sm:border-transparent shadow-xs sm:shadow-none transition-all">
                 <div className="hidden sm:block">
                   <h3 className="text-base sm:text-lg font-bold text-foreground">
                     Reviews & Ratings
@@ -2290,57 +2292,59 @@ export function CustomerAccountHub() {
                   </p>
                 </div>
 
-                {/* 2 States Toggle: "To Review" and "History" - Left Aligned */}
-                <div className="flex items-center bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setReviewTabState("to_review")}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
-                      reviewTabState === "to_review"
-                        ? "bg-amber-500 text-white shadow-2xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
-                  >
-                    <MessageSquarePlus className="h-3.5 w-3.5" />
-                    <span>To Review</span>
-                    {pendingReviewCount > 0 && (
+                {/* 2 States Toggle: "To Review" and "History" - Left Aligned & Swipeable */}
+                <div className="w-full overflow-x-auto overscroll-x-contain touch-pan-x scrollbar-none py-0.5">
+                  <div className="inline-flex items-center bg-background/90 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs min-w-max">
+                    <button
+                      type="button"
+                      onClick={() => setReviewTabState("to_review")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
+                        reviewTabState === "to_review"
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      <MessageSquarePlus className="h-3.5 w-3.5" />
+                      <span>To Review</span>
+                      {pendingReviewCount > 0 && (
+                        <span
+                          className={cn(
+                            "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
+                            reviewTabState === "to_review"
+                              ? "bg-white text-amber-600"
+                              : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                          )}
+                        >
+                          {pendingReviewCount}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setReviewTabState("history")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
+                        reviewTabState === "history"
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      <span>History</span>
                       <span
                         className={cn(
                           "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
-                          reviewTabState === "to_review"
+                          reviewTabState === "history"
                             ? "bg-white text-amber-600"
-                            : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                            : "bg-muted text-muted-foreground"
                         )}
                       >
-                        {pendingReviewCount}
+                        {reviews.filter((r) => r.status === "published").length}
                       </span>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setReviewTabState("history")}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
-                      reviewTabState === "history"
-                        ? "bg-amber-500 text-white shadow-2xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
-                  >
-                    <History className="h-3.5 w-3.5" />
-                    <span>History</span>
-                    <span
-                      className={cn(
-                        "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
-                        reviewTabState === "history"
-                          ? "bg-white text-amber-600"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {reviews.filter((r) => r.status === "published").length}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </div>
 

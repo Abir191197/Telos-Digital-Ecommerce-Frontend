@@ -397,7 +397,7 @@ export function Header() {
                       className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
                       <span className="flex items-center gap-2.5">
                         <LayoutGrid className="h-4 w-4 text-amber-500 shrink-0" />
-                        <span className="font-semibold">My Account Hub</span>
+                        <span className="font-semibold">My Account</span>
                       </span>
                     </Link>
 
@@ -444,26 +444,6 @@ export function Header() {
                         </span>
                       )}
                     </Link>
-
-                    {/* Merchant & Admin Portal Section (Separate & Distinct) */}
-                    <div className="pt-2 mt-1 border-t border-border/60">
-                      <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Staff & Administration
-                      </div>
-                      <Link
-                        href={ROUTES.DASHBOARD}
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-zinc-800/60 transition-colors font-semibold"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <LayoutDashboard className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <span>Merchant Dashboard</span>
-                        </span>
-                        <span className="text-[10px] font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
-                          Admin
-                        </span>
-                      </Link>
-                    </div>
                   </div>
 
                   {/* Divider & Logout */}
