@@ -1,2 +1,9 @@
-export { ProductView } from "./ProductView";
+export { ProductGallery } from "./ProductGallery";
+export { ProductInfo } from "./ProductInfo";
+export { ProductActions } from "./ProductActions";
+export { ProductDeliveryTrustStrip } from "./ProductDeliveryTrustStrip";
+export { ProductSpecifications } from "./ProductSpecifications";
+export { RelatedProducts } from "./RelatedProducts";
+export { RecentlyViewedProducts } from "./RecentlyViewedProducts";
 export { NotifyStockModal } from "./NotifyStockModal";
+export { ProductView } from "./ProductView";
