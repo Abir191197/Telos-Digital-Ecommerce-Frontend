@@ -237,7 +237,7 @@ export function AdminSidebar() {
       {/* ── Seamless Liquid Shadow Sidebar ── */}
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-30 flex flex-col border-none bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 text-sidebar-foreground transition-all duration-300 select-none",
+          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-none bg-sidebar text-sidebar-foreground transition-all duration-300 select-none",
           "shadow-[4px_0_24px_-4px_rgba(0,0,0,0.06),12px_0_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[4px_0_30px_-4px_rgba(0,0,0,0.45),12px_0_60px_-10px_rgba(0,0,0,0.35)]",
           isOpen ? "lg:w-64" : "lg:w-20",
           isMobileOpen
