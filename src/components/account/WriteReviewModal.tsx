@@ -66,50 +66,54 @@ export function WriteReviewModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-md rounded-3xl border border-border/80 bg-background p-6 sm:p-7 shadow-2xl space-y-5 relative">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-5 top-5 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-2">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Verified Customer Review</span>
+    <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl border-t sm:border border-border/80 bg-background shadow-2xl flex flex-col max-h-[85dvh] sm:max-h-[90vh] overflow-hidden relative animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95">
+        {/* Fixed Header */}
+        <div className="p-4 sm:p-5 border-b border-border/60 flex items-center justify-between shrink-0 bg-background">
+          <div className="min-w-0 pr-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-1">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Verified Customer Review</span>
+            </div>
+            <h3 className="text-base font-bold text-foreground">
+              Rate & Review Product
+            </h3>
           </div>
-          <h3 className="text-base font-bold text-foreground">
-            Rate & Review Product
-          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0"
+            aria-label="Close modal"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Product mini card */}
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-border/70">
-          <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
-            <Image
-              src={item.productThumbnail}
-              alt={item.productName}
-              fill
-              className="object-cover"
-            />
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 overscroll-contain">
+          {/* Product mini card */}
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-border/70">
+            <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
+              <Image
+                src={item.productThumbnail}
+                alt={item.productName}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-foreground truncate">
+                {item.productName}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Official BD Warranty Unit
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-foreground truncate">
-              {item.productName}
-            </p>
-            <p className="text-[10px] text-muted-foreground">
-              Official BD Warranty Unit
-            </p>
-          </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Star selector */}
-          <div className="text-center space-y-2 py-1">
-            <div className="flex items-center justify-center gap-2">
+          <div className="text-center space-y-2 py-1 bg-muted/20 p-3 rounded-2xl">
+            <div className="flex items-center justify-center gap-1 sm:gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -117,7 +121,8 @@ export function WriteReviewModal({
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => setRating(star)}
-                  className="p-1 cursor-pointer transition-transform hover:scale-125 focus:outline-none"
+                  className="h-11 w-11 flex items-center justify-center cursor-pointer transition-transform hover:scale-115 active:scale-125 focus:outline-none touch-manipulation"
+                  aria-label={`${star} star rating`}
                 >
                   <Star
                     className={cn(
@@ -137,7 +142,7 @@ export function WriteReviewModal({
 
           {/* Feedback textarea */}
           <div>
-            <label className="text-xs font-bold text-foreground">
+            <label className="text-xs font-bold text-foreground block mb-1">
               Your Review:
             </label>
             <textarea
@@ -146,7 +151,7 @@ export function WriteReviewModal({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="How is the build quality, performance, and battery life? Your feedback helps fellow shoppers in Bangladesh..."
-              className="mt-1 w-full rounded-2xl border border-border/80 bg-background p-3 text-xs text-foreground focus:border-amber-500 focus:outline-none"
+              className="w-full rounded-2xl border border-border/80 bg-background p-3 text-xs text-foreground focus:border-amber-500 focus:outline-none resize-none leading-relaxed"
             />
           </div>
 
@@ -166,18 +171,19 @@ export function WriteReviewModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
+          {/* Action buttons with safe-area bottom clearance */}
+          <div className="flex items-center gap-2 pt-2 pb-6 sm:pb-1 border-t border-border/40">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-border/80 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="flex-1 py-3 rounded-xl border border-border/80 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer active:scale-98"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? "Publishing..." : "Submit Review"}
             </button>

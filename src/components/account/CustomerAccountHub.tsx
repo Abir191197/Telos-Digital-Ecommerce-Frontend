@@ -15,6 +15,7 @@ import { CancelOrderModal } from "./CancelOrderModal";
 import { ReturnRequestModal, type ReturnTicketData } from "./ReturnRequestModal";
 import { WriteReviewModal } from "./WriteReviewModal";
 import { InvoiceModal } from "./InvoiceModal";
+import { OrderTrackingTimeline } from "./OrderTrackingTimeline";
 import {
   INITIAL_REVIEWS,
   ACCOUNT_NAV_GROUPS,
@@ -61,6 +62,14 @@ import {
   XCircle,
   Upload,
   ImageIcon,
+  Download,
+  LayoutGrid,
+  LayoutList,
+  ShoppingBag,
+  Eye,
+  MessageSquarePlus,
+  History,
+  ThumbsUp,
 } from "lucide-react";
 
 const TAB_TITLES: Record<AccountTabKey, string> = {
@@ -248,6 +257,9 @@ export function CustomerAccountHub() {
   const [notifSms, setNotifSms] = useState(true);
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPromos, setNotifPromos] = useState(false);
+  const [selectedTrackingId, setSelectedTrackingId] = useState<string | null>(null);
+  const [wishlistViewMode, setWishlistViewMode] = useState<"list" | "grid">("list");
+  const [reviewTabState, setReviewTabState] = useState<"to_review" | "history">("to_review");
 
   const logout = () => {
     document.cookie =
@@ -1729,136 +1741,150 @@ export function CustomerAccountHub() {
 
           {/* ══════════════ 4. ORDERS TAB ══════════════ */}
           {activeTab === "orders" && (
-            <div className="space-y-4">
-              {/* Order Status Filters */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-border/60">
-                {(
-                  [
-                    { key: "all", label: "All Orders" },
-                    { key: "processing", label: "Processing" },
-                    { key: "shipped", label: "In Transit" },
-                    { key: "delivered", label: "Delivered" },
-                  ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setOrderFilter(tab.key)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer",
-                      orderFilter === tab.key
-                        ? "bg-amber-500 text-white"
-                        : "text-muted-foreground hover:bg-muted"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+            <div className="space-y-4 sm:space-y-6">
+              {/* Header & Filter Controls: Clean & Minimal Segmented Control */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Order History
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Track shipments, invoices, and post-delivery guarantees.
+                  </p>
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
+                  {(
+                    [
+                      { key: "all", label: "All" },
+                      { key: "processing", label: "Processing" },
+                      { key: "shipped", label: "In Transit" },
+                      { key: "delivered", label: "Delivered" },
+                    ] as const
+                  ).map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setOrderFilter(tab.key)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                        orderFilter === tab.key
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {filteredOrders.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl border border-border/80 bg-card text-muted-foreground text-xs">
-                  No orders match the selected filter.
+                <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto">
+                    <Package className="h-6 w-6 stroke-[1.8]" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground">No orders found</h4>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                    There are no orders in this category yet. Browse our catalog to place your first order.
+                  </p>
                 </div>
               ) : (
-                filteredOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="rounded-2xl border border-border/80 bg-card p-5 space-y-4 shadow-xs"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-foreground">
-                            Order #{order.orderNumber}
+                <div className="space-y-4">
+                  {filteredOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 sm:p-6 space-y-4 shadow-sm hover:shadow-md transition-all"
+                    >
+                      {/* Order Header: Order Number, Date, Status, Total */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/40">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                          <span className="text-sm sm:text-base font-black tracking-tight text-foreground font-mono">
+                            #{order.orderNumber}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            • {new Date(order.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </span>
                           {getStatusBadge(order.status)}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Placed on{" "}
-                          {new Date(order.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
 
-                      <div className="text-left sm:text-right">
-                        <p className="text-sm font-black text-foreground">
-                          ৳{order.total.toLocaleString()}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Payment:{" "}
-                          <strong className="uppercase text-foreground">
-                            {order.paymentMethod}
-                          </strong>{" "}
-                          ({order.paymentStatus})
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Order Items */}
-                    <div className="space-y-3">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3">
-                          <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-border/70 bg-muted/30">
-                            <Image
-                              src={item.productThumbnail}
-                              alt={item.productName}
-                              fill
-                              className="object-cover"
-                            />
+                        <div className="flex items-center justify-between sm:justify-end gap-3 text-right">
+                          <div className="text-left sm:text-right">
+                            <span className="text-[11px] text-muted-foreground block">Order Total</span>
+                            <span className="text-sm sm:text-base font-black text-foreground">
+                              ৳{order.total.toLocaleString()}
+                            </span>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-foreground line-clamp-1">
-                              {item.productName}
-                            </p>
-                            {item.variantName && (
-                              <p className="text-[10px] text-muted-foreground">
-                                {item.variantName}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted-foreground">
-                              Qty: {item.quantity} × ৳
-                              {item.unitPrice.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="text-xs font-bold text-foreground shrink-0">
-                            ৳{item.subtotal.toLocaleString()}
-                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-muted/60 dark:bg-muted text-foreground">
+                            {order.paymentMethod} • {order.paymentStatus}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                      </div>
 
-                    {/* Footer & Action Buttons */}
-                    <div className="flex flex-col gap-3 pt-3 border-t border-border/50 text-xs">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Truck className="h-3.5 w-3.5 text-amber-500" />
-                          <span>
-                            Tracking:{" "}
-                            <strong className="font-mono text-foreground">
+                      {/* Items List */}
+                      <div className="divide-y divide-border/30">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="py-3 first:pt-0 last:pb-0 flex items-center gap-3.5">
+                            <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs">
+                              <Image
+                                src={item.productThumbnail}
+                                alt={item.productName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <p className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 leading-snug">
+                                {item.productName}
+                              </p>
+                              {item.variantName && (
+                                <p className="text-[11px] text-muted-foreground font-medium">
+                                  Variant: {item.variantName}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                Qty: <strong className="text-foreground font-semibold">{item.quantity}</strong> × ৳{item.unitPrice.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-foreground shrink-0 text-right">
+                              ৳{item.subtotal.toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Courier & Delivery Status Line */}
+                      <div className="pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Truck className="h-4 w-4 text-amber-500 shrink-0" />
+                          <span className="truncate">
+                            Courier: <strong className="text-foreground font-semibold">{order.courierName}</strong>
+                            <span className="mx-1.5 text-border">•</span>
+                            <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded text-[11px]">
                               {order.trackingNumber}
-                            </strong>{" "}
-                            via {order.courierName}
+                            </span>
                           </span>
                         </div>
                         <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                          {order.estimatedDelivery}
+                          Estimated: {order.estimatedDelivery}
                         </span>
                       </div>
 
-                      {/* Interactive Customer Actions */}
-                      <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-border/40">
-                        {/* Print / Download invoice */}
+                      {/* Action Buttons: Touch-friendly on mobile, right-aligned on desktop */}
+                      <div className="pt-2 flex flex-wrap items-center justify-end gap-2">
+                        {/* Download invoice button */}
                         <button
                           type="button"
                           onClick={() => setInvoiceModalOrder(order)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background hover:bg-muted text-xs font-bold text-foreground transition-all cursor-pointer"
+                          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted/60 hover:bg-muted text-foreground text-xs font-bold transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
                         >
-                          <CreditCard className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span>Download Invoice</span>
+                          <Download className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>Invoice</span>
                         </button>
 
                         {/* Cancel order if pending or processing */}
@@ -1866,10 +1892,10 @@ export function CustomerAccountHub() {
                           <button
                             type="button"
                             onClick={() => setCancelModalOrder(order)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-bold text-rose-600 dark:text-rose-400 transition-all cursor-pointer"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
                           >
                             <AlertCircle className="h-3.5 w-3.5" />
-                            <span>Cancel Order</span>
+                            <span>Cancel</span>
                           </button>
                         )}
 
@@ -1878,10 +1904,10 @@ export function CustomerAccountHub() {
                           <button
                             type="button"
                             onClick={() => setReturnModalOrder(order)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 transition-all cursor-pointer"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
                           >
                             <RotateCcw className="h-3.5 w-3.5" />
-                            <span>Request Return / Exchange</span>
+                            <span>Return</span>
                           </button>
                         )}
 
@@ -1896,7 +1922,7 @@ export function CustomerAccountHub() {
                                 productThumbnail: order.items[0].productThumbnail,
                               })
                             }
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
                           >
                             <Star className="h-3.5 w-3.5 fill-current" />
                             <span>Write Review</span>
@@ -1904,78 +1930,76 @@ export function CustomerAccountHub() {
                         )}
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           )}
 
           {/* ══════════════ 5. LIVE TRACKING TAB ══════════════ */}
           {activeTab === "tracking" && (
-            <div className="space-y-5">
-              <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-4">
-                <div className="border-b border-border/60 pb-3">
-                  <h3 className="text-base font-bold text-foreground">
-                    Live Courier Parcel Tracking
+            <div className="space-y-4 sm:space-y-6">
+              {/* Header Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Live Courier Tracking
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Real-time status updates synced with Pathao & Steadfast logistics in Bangladesh.
+                    Real-time parcel dispatch radar across Bangladesh (Pathao & Steadfast logistics).
                   </p>
                 </div>
 
-                {orders[0] && (
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/40 p-3.5 rounded-xl text-xs">
-                      <div>
-                        <span className="text-muted-foreground">Tracking Number: </span>
-                        <strong className="font-mono text-foreground">
-                          {orders[0].trackingNumber}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Partner: </span>
-                        <strong className="text-foreground">
-                          {orders[0].courierName}
-                        </strong>
-                      </div>
-                      {getStatusBadge(orders[0].status)}
-                    </div>
-
-                    {/* Timeline Events */}
-                    <div className="space-y-4 pl-4 border-l-2 border-amber-500/40 ml-2">
-                      <div className="relative">
-                        <div className="absolute -left-[23px] top-0 h-3.5 w-3.5 rounded-full bg-amber-500 border-2 border-background" />
-                        <p className="text-xs font-bold text-foreground">
-                          Package Dispatched from Dhaka Central Hub
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Today, 10:30 AM • Handed to courier driver
-                        </p>
-                      </div>
-
-                      <div className="relative">
-                        <div className="absolute -left-[23px] top-0 h-3.5 w-3.5 rounded-full bg-amber-500 border-2 border-background" />
-                        <p className="text-xs font-bold text-foreground">
-                          Quality Inspection Passed & Sealed
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Yesterday, 04:15 PM • Telos Fulfillment Center
-                        </p>
-                      </div>
-
-                      <div className="relative">
-                        <div className="absolute -left-[23px] top-0 h-3.5 w-3.5 rounded-full bg-muted-foreground/50 border-2 border-background" />
-                        <p className="text-xs font-bold text-foreground">
-                          Order Verified & Confirmed
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Yesterday, 02:00 PM • Digital payment verified
-                        </p>
-                      </div>
-                    </div>
+                {/* Switch order pills if multiple orders exist */}
+                {orders.length > 1 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
+                    {orders.map((o) => {
+                      const isSelected = (selectedTrackingId ? selectedTrackingId === o.id : orders[0]?.id === o.id);
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          onClick={() => setSelectedTrackingId(o.id)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                            isSelected
+                              ? "bg-amber-500 text-white shadow-2xs"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          )}
+                        >
+                          #{o.orderNumber}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
+
+              {/* Active Selected Order Timeline */}
+              {(() => {
+                const currentOrder =
+                  orders.find((o) => o.id === selectedTrackingId) || orders[0];
+
+                if (!currentOrder) {
+                  return (
+                    <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto">
+                        <Truck className="h-6 w-6 stroke-[1.8]" />
+                      </div>
+                      <h4 className="text-sm font-bold text-foreground">No active orders to track</h4>
+                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                        Once you place an order, live shipping status and courier rider milestones will appear here.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-4">
+                    <OrderTrackingTimeline order={currentOrder} />
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -2072,63 +2096,229 @@ export function CustomerAccountHub() {
 
           {/* ══════════════ 7. WISHLIST TAB ══════════════ */}
           {activeTab === "wishlist" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                <h3 className="text-base font-bold text-foreground">
-                  Saved Wishlist ({wishlistItems.length})
-                </h3>
-                <Link
-                  href={ROUTES.WISHLIST}
-                  className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
-                >
-                  <span>Full View</span>
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
+            <div className="space-y-4 sm:space-y-6">
+              {/* Header Bar: Title, Count, View Mode Toggle (List default vs Grid), and Full View link */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
+                      Saved Wishlist
+                    </h3>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                      {wishlistItems.length}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Items you saved for later purchase with live stock & price updates.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-2.5">
+                  {/* View Mode Toggle Switch (Default: List) */}
+                  <div className="flex items-center bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() => setWishlistViewMode("list")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                        wishlistViewMode === "list"
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      )}
+                      aria-label="List view"
+                    >
+                      <LayoutList className="h-3.5 w-3.5" />
+                      <span>List</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWishlistViewMode("grid")}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                        wishlistViewMode === "grid"
+                          ? "bg-amber-500 text-white shadow-2xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      )}
+                      aria-label="Grid view"
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" />
+                      <span>Grid</span>
+                    </button>
+                  </div>
+
+                  <Link
+                    href={ROUTES.WISHLIST}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline px-2.5 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors"
+                  >
+                    <span>Full Page</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </Link>
+                </div>
               </div>
 
               {wishlistItems.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl border border-border/80 bg-card text-xs text-muted-foreground">
-                  Your wishlist is currently empty.
+                <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto">
+                    <Heart className="h-6 w-6 stroke-[1.8]" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground">Your Wishlist is Empty</h4>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                    Explore our collection and tap the heart icon on any product to save it here for later.
+                  </p>
+                  <div className="pt-2">
+                    <Link
+                      href={ROUTES.PRODUCTS}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all"
+                    >
+                      <span>Explore Products</span>
+                    </Link>
+                  </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              ) : wishlistViewMode === "list" ? (
+                /* ── 1. DEFAULT LIST VIEW ── */
+                <div className="space-y-3">
                   {wishlistItems.map((item) => (
                     <div
                       key={item.id}
-                      className="rounded-xl border border-border/80 bg-card p-3 space-y-2 flex flex-col justify-between"
+                      className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
                     >
-                      <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-muted/20">
-                        <Image
-                          src={item.thumbnail}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
+                      {/* Product Thumbnail & Core Info */}
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <Link
+                          href={`/products/${item.slug || item.id}`}
+                          className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs group cursor-pointer"
+                        >
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </Link>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <Link
+                            href={`/products/${item.slug || item.id}`}
+                            className="text-xs sm:text-sm font-bold text-foreground hover:text-amber-600 dark:hover:text-amber-400 line-clamp-1 sm:line-clamp-2 transition-colors"
+                          >
+                            {item.name}
+                          </Link>
+                          <p className="text-[11px] text-muted-foreground line-clamp-1">
+                            {item.categoryName || "Electronics"}
+                          </p>
+                          <div className="flex items-baseline gap-2 pt-0.5">
+                            <span className="text-sm sm:text-base font-black text-amber-600 dark:text-amber-400 font-mono">
+                              ৳{item.price.toLocaleString()}
+                            </span>
+                            {item.originalPrice && item.originalPrice > item.price && (
+                              <span className="text-xs text-muted-foreground line-through font-mono">
+                                ৳{item.originalPrice.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-foreground line-clamp-1">
-                          {item.name}
-                        </h4>
-                        <p className="text-xs font-black text-amber-600 dark:text-amber-400 mt-0.5">
-                          ৳{item.price.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5 pt-1">
+
+                      {/* Action Buttons: Add to Cart & Remove */}
+                      <div className="flex items-center gap-2 self-stretch sm:self-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/40">
                         <button
                           type="button"
                           onClick={() => addToCart(item, 1)}
-                          className="flex-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white py-1.5 text-xs font-bold cursor-pointer"
+                          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                         >
-                          Add to Cart
+                          <ShoppingBag className="h-3.5 w-3.5" />
+                          <span>Add to Cart</span>
                         </button>
+                        <Link
+                          href={`/products/${item.slug || item.id}`}
+                          className="inline-flex items-center justify-center p-2.5 rounded-xl bg-muted/60 hover:bg-muted text-foreground text-xs font-bold transition-all cursor-pointer active:scale-95"
+                          title="View Product"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
                         <button
                           type="button"
                           onClick={() => removeWishlistItem(item.id)}
-                          aria-label="Remove item"
-                          className="p-1.5 rounded-lg border border-border/80 text-muted-foreground hover:text-rose-600 cursor-pointer"
+                          aria-label="Remove item from wishlist"
+                          className="inline-flex items-center justify-center p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition-all cursor-pointer active:scale-95"
+                          title="Remove from Wishlist"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* ── 2. GRID VIEW ── */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {wishlistItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 space-y-3.5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                    >
+                      <div className="space-y-3">
+                        <Link
+                          href={`/products/${item.slug || item.id}`}
+                          className="relative aspect-square w-full rounded-2xl overflow-hidden bg-muted/30 block group cursor-pointer shadow-2xs"
+                        >
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              removeWishlistItem(item.id);
+                            }}
+                            className="absolute top-2.5 right-2.5 h-8 w-8 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-xs cursor-pointer"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </Link>
+
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                            {item.categoryName || "Telos Cart"}
+                          </p>
+                          <Link
+                            href={`/products/${item.slug || item.id}`}
+                            className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 hover:text-amber-600 dark:hover:text-amber-400 transition-colors block mt-0.5"
+                          >
+                            {item.name}
+                          </Link>
+                          <div className="flex items-baseline gap-2 pt-1">
+                            <span className="text-sm sm:text-base font-black text-amber-600 dark:text-amber-400 font-mono">
+                              ৳{item.price.toLocaleString()}
+                            </span>
+                            {item.originalPrice && item.originalPrice > item.price && (
+                              <span className="text-xs text-muted-foreground line-through font-mono">
+                                ৳{item.originalPrice.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => addToCart(item, 1)}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <ShoppingBag className="h-3.5 w-3.5" />
+                          <span>Add to Cart</span>
+                        </button>
+                        <Link
+                          href={`/products/${item.slug || item.id}`}
+                          className="p-2.5 rounded-xl bg-muted/60 hover:bg-muted text-foreground transition-all cursor-pointer active:scale-95"
+                          title="View Product"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -2139,145 +2329,330 @@ export function CustomerAccountHub() {
 
           {/* ══════════════ 8. REVIEWS & RATINGS TAB ══════════════ */}
           {activeTab === "reviews" && (
-            <div className="space-y-4">
-              <div className="border-b border-border/60 pb-3">
-                <h3 className="text-base font-bold text-foreground">
-                  My Product Reviews & Ratings
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Share your genuine experience with Bangladeshi shoppers.
-                </p>
+            <div className="space-y-4 sm:space-y-6">
+              {/* Header Bar with 2-State Segmented Control: "To Review" & "History" */}
+              <div className="flex flex-col items-start gap-3.5 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+                <div className="hidden sm:block">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Reviews & Ratings
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Share feedback on your verified purchases and view past reviews.
+                  </p>
+                </div>
+
+                {/* 2 States Toggle: "To Review" and "History" - Left Aligned */}
+                <div className="flex items-center bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setReviewTabState("to_review")}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
+                      reviewTabState === "to_review"
+                        ? "bg-amber-500 text-white shadow-2xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <MessageSquarePlus className="h-3.5 w-3.5" />
+                    <span>To Review</span>
+                    {pendingReviewCount > 0 && (
+                      <span
+                        className={cn(
+                          "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
+                          reviewTabState === "to_review"
+                            ? "bg-white text-amber-600"
+                            : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                        )}
+                      >
+                        {pendingReviewCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setReviewTabState("history")}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
+                      reviewTabState === "history"
+                        ? "bg-amber-500 text-white shadow-2xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <History className="h-3.5 w-3.5" />
+                    <span>History</span>
+                    <span
+                      className={cn(
+                        "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
+                        reviewTabState === "history"
+                          ? "bg-white text-amber-600"
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {reviews.filter((r) => r.status === "published").length}
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="rounded-2xl border border-border/80 bg-card p-4 flex flex-col sm:flex-row items-start justify-between gap-4 shadow-xs"
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-border/70 bg-muted/20">
-                        <Image
-                          src={rev.productThumbnail}
-                          alt={rev.productName}
-                          fill
-                          className="object-cover"
-                        />
+              {/* ── STATE 1: TO REVIEW (Pending Reviews) ── */}
+              {reviewTabState === "to_review" && (
+                <div>
+                  {reviews.filter((r) => r.status === "pending_review").length === 0 ? (
+                    <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto">
+                        <CheckCircle2 className="h-6 w-6 stroke-[1.8]" />
                       </div>
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-foreground line-clamp-1">
-                          {rev.productName}
-                        </h4>
-                        {rev.status === "published" ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1 text-amber-500">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={cn(
-                                    "h-3 w-3",
-                                    i < rev.rating
-                                      ? "fill-amber-500"
-                                      : "stroke-muted-foreground/40"
-                                  )}
+                      <h4 className="text-sm font-bold text-foreground">All caught up!</h4>
+                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                        You have reviewed all your delivered purchases. Check back after your next order arrives.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {reviews
+                        .filter((r) => r.status === "pending_review")
+                        .map((rev) => (
+                          <div
+                            key={rev.id}
+                            className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          >
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                              <div className="relative h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs">
+                                <Image
+                                  src={rev.productThumbnail}
+                                  alt={rev.productName}
+                                  fill
+                                  className="object-cover"
                                 />
-                              ))}
-                              <span className="text-[10px] text-muted-foreground ml-1">
-                                {rev.date}
+                              </div>
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md">
+                                    <Sparkles className="h-2.5 w-2.5" />
+                                    <span>Verified Purchase</span>
+                                  </span>
+                                  <span className="text-[11px] text-muted-foreground">
+                                    Purchased {rev.date}
+                                  </span>
+                                </div>
+                                <h4 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 sm:line-clamp-2">
+                                  {rev.productName}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  Help other shoppers make smart choices by rating this item.
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="self-stretch sm:self-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/40">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setReviewModalItem(rev);
+                                  setRatingInput(5);
+                                  setCommentInput("");
+                                }}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                              >
+                                <Star className="h-4 w-4 fill-current" />
+                                <span>Write Review</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── STATE 2: HISTORY (Published Reviews) ── */}
+              {reviewTabState === "history" && (
+                <div>
+                  {reviews.filter((r) => r.status === "published").length === 0 ? (
+                    <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground mx-auto">
+                        <History className="h-6 w-6 stroke-[1.8]" />
+                      </div>
+                      <h4 className="text-sm font-bold text-foreground">No review history</h4>
+                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                        Your published feedback and seller responses will be recorded here.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3.5">
+                      {reviews
+                        .filter((r) => r.status === "published")
+                        .map((rev) => (
+                          <div
+                            key={rev.id}
+                            className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all space-y-3"
+                          >
+                            {/* Product Header Row */}
+                            <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/40">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-muted/40 shadow-2xs">
+                                  <Image
+                                    src={rev.productThumbnail}
+                                    alt={rev.productName}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="min-w-0">
+                                  <h4 className="text-xs sm:text-sm font-bold text-foreground truncate">
+                                    {rev.productName}
+                                  </h4>
+                                  <span className="text-[11px] text-muted-foreground font-mono">
+                                    Reviewed on {rev.date}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full shrink-0">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span>Published</span>
                               </span>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                              {rev.comment}
-                            </p>
+
+                            {/* Rating Stars & Comment Body */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-0.5 text-amber-500">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={cn(
+                                        "h-3.5 w-3.5",
+                                        i < rev.rating
+                                          ? "fill-amber-500 text-amber-500"
+                                          : "text-muted-foreground/30"
+                                      )}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs font-bold text-foreground">
+                                  {rev.rating}.0 / 5.0
+                                </span>
+                              </div>
+
+                              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed bg-muted/30 p-3 rounded-xl">
+                                {rev.comment || "Great quality product, completely satisfied with fast BD delivery."}
+                              </p>
+                            </div>
                           </div>
-                        ) : (
-                          <span className="inline-block text-[10px] font-bold text-amber-600 bg-amber-500/15 px-2 py-0.5 rounded-full">
-                            Waiting for review
-                          </span>
-                        )}
-                      </div>
+                        ))}
                     </div>
+                  )}
+                </div>
+              )}
 
-                    {rev.status === "pending_review" && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReviewModalItem(rev);
-                          setRatingInput(5);
-                          setCommentInput("");
-                        }}
-                        className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-1.5 text-xs font-bold shrink-0 self-end sm:self-center cursor-pointer"
-                      >
-                        Write Review
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Review Input Modal */}
+              {/* Review Input Modal (Optimized for Mobile Bottom Sheet + Desktop Dialog) */}
               {reviewModalItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-                  <div className="w-full max-w-md rounded-3xl border border-border/80 bg-background p-6 shadow-2xl space-y-4">
-                    <div className="flex items-center justify-between border-b border-border/70 pb-3">
-                      <h3 className="text-sm font-bold text-foreground">
-                        Rate & Review Product
-                      </h3>
+                <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+                  <div
+                    className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl bg-card shadow-2xl flex flex-col max-h-[85dvh] sm:max-h-[90vh] animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 border-t sm:border border-border/70 overflow-hidden"
+                    role="dialog"
+                    aria-modal="true"
+                  >
+                    {/* Fixed Modal Header */}
+                    <div className="flex items-center justify-between border-b border-border/60 p-4 sm:p-5 shrink-0 bg-card">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
+                          <Star className="h-4 w-4 fill-current" />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-sm sm:text-base font-bold text-foreground">
+                            Rate & Review Product
+                          </h3>
+                          <p className="text-[11px] text-muted-foreground truncate max-w-[200px] sm:max-w-[240px]">
+                            {reviewModalItem.productName}
+                          </p>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setReviewModalItem(null)}
-                        className="text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
+                        aria-label="Close modal"
                       >
-                        Cancel
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
 
-                    <form onSubmit={handleSubmitReview} className="space-y-4">
-                      <div>
-                        <p className="text-xs font-semibold text-foreground mb-2">
-                          Select Star Rating
+                    {/* Scrollable Form Content */}
+                    <form
+                      onSubmit={handleSubmitReview}
+                      className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs overscroll-contain"
+                    >
+                      {/* Rating selection with touch-friendly 44px buttons */}
+                      <div className="bg-muted/30 p-4 rounded-2xl text-center space-y-2">
+                        <p className="text-xs font-bold text-foreground">
+                          How would you rate this item?
                         </p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-1 sm:gap-2">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
                               type="button"
                               onClick={() => setRatingInput(star)}
-                              className="p-1 cursor-pointer"
+                              className="h-11 w-11 flex items-center justify-center cursor-pointer transition-transform active:scale-125 hover:scale-110 touch-manipulation"
+                              aria-label={`${star} star rating`}
                             >
                               <Star
                                 className={cn(
-                                  "h-6 w-6 transition-transform hover:scale-110",
+                                  "h-7 w-7 transition-colors",
                                   star <= ratingInput
                                     ? "text-amber-500 fill-amber-500"
-                                    : "text-muted-foreground/40"
+                                    : "text-muted-foreground/30"
                                 )}
                               />
                             </button>
                           ))}
                         </div>
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400 block">
+                          {ratingInput === 5
+                            ? "Excellent (5 Stars)"
+                            : ratingInput === 4
+                            ? "Very Good (4 Stars)"
+                            : ratingInput === 3
+                            ? "Average (3 Stars)"
+                            : ratingInput === 2
+                            ? "Poor (2 Stars)"
+                            : "Terrible (1 Star)"}
+                        </span>
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-muted-foreground">
-                          Review Comments
+                        <label className="font-bold text-foreground block mb-1.5">
+                          Your Review
                         </label>
                         <textarea
                           required
                           rows={4}
                           value={commentInput}
                           onChange={(e) => setCommentInput(e.target.value)}
-                          placeholder="What did you like about the product? Mention build quality, packaging, and performance..."
-                          className="mt-1 w-full rounded-xl border border-border/80 bg-background p-3 text-xs text-foreground focus:border-amber-500 focus:outline-none"
+                          placeholder="Tell other shoppers about authenticity, build quality, packing, and courier delivery..."
+                          className="w-full rounded-2xl bg-muted/40 p-3.5 font-medium text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs sm:text-sm leading-relaxed transition-all resize-none"
                         />
                       </div>
 
-                      <button
-                        type="submit"
-                        className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-2.5 text-xs font-bold cursor-pointer"
-                      >
-                        Publish Review
-                      </button>
+                      {/* Sticky/Bottom-docked Action Buttons with Safe-area clearance */}
+                      <div className="pt-2 pb-6 sm:pb-1 flex items-center gap-2.5 border-t border-border/40">
+                        <button
+                          type="button"
+                          onClick={() => setReviewModalItem(null)}
+                          className="flex-1 rounded-xl bg-muted/70 hover:bg-muted text-foreground py-3 text-xs font-bold transition-all cursor-pointer active:scale-98"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-3 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+                        >
+                          Publish Review
+                        </button>
+                      </div>
                     </form>
                   </div>
                 </div>
