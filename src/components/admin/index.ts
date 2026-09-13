@@ -6,3 +6,5 @@ export * from "./AdminOrdersView";
 export * from "./AdminProductsView";
 export * from "./AdminPaymentsView";
 export * from "./AdminCustomersView";
+export * from "./AdminMobileBottomNav";
+export * from "./AdminPendingDispatchView";

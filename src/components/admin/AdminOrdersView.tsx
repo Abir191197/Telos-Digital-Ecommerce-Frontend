@@ -30,18 +30,30 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 import { Order, OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
 import { KpiCard } from "./dashboard/KpiCard";
 
 export function AdminOrdersView() {
+  const searchParams = useSearchParams();
+  const initialStatus = searchParams?.get("status") || "all";
+
   const { orders, updateOrderStatus, assignCourierTracking } = useAdminStore();
 
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
+
+  React.useEffect(() => {
+    const st = searchParams?.get("status");
+    if (st) {
+      setStatusFilter(st);
+      setCurrentPage(1);
+    }
+  }, [searchParams]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
@@ -146,23 +158,36 @@ export function AdminOrdersView() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-              Orders & Fulfillment
+              {statusFilter === "pending" ? "Pending Orders & QC" : "Orders & Fulfillment"}
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-muted text-muted-foreground border border-border/70">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Live Feed
-            </span>
+            {statusFilter === "pending" ? (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                <Clock className="h-3 w-3 animate-pulse" />
+                Action Required
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-muted text-muted-foreground border border-border/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live Feed
+              </span>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time fulfillment, dispatch logistics, and invoice management
+            {statusFilter === "pending"
+              ? "Orders awaiting merchant approval, QC verification, and courier packaging"
+              : "Real-time fulfillment, dispatch logistics, and invoice management"}
           </p>
         </div>
 
         {/* Top Header info (Hidden on mobile) */}
         <div className="hidden sm:flex items-center gap-2 self-start sm:self-auto">
           <div className="px-3 py-1.5 rounded-xl bg-card border-none admin-card text-xs font-bold text-foreground flex items-center gap-1.5">
-            <span className="text-muted-foreground font-medium">Count:</span>
-            <span>{filteredOrders.length}</span>
+            <span className="text-muted-foreground font-medium">
+              {statusFilter === "pending" ? "Pending:" : "Count:"}
+            </span>
+            <span className={cn(statusFilter === "pending" && "text-amber-500 font-black")}>
+              {filteredOrders.length}
+            </span>
           </div>
         </div>
       </div>
@@ -200,8 +225,8 @@ export function AdminOrdersView() {
         />
       </div>
 
-      {/* ── Filter, Search & View Toggle Toolbar (Sticky below nav on mobile for effortless UX) ── */}
-      <div className="sticky top-16 z-20 admin-card rounded-2xl bg-card/95 backdrop-blur-md p-3 sm:p-4 border-none flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 transition-all">
+      {/* ── Sticky Filter, Search & View Toggle Dock (Full-width edge-to-edge on mobile, rounded card on desktop) ── */}
+      <div className="sticky top-16 z-20 -mx-4 sm:mx-0 px-4 sm:px-4 py-2.5 sm:py-3 bg-background/95 sm:bg-card/90 backdrop-blur-xl border-y sm:border sm:rounded-2xl border-border/50 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_28px_-8px_rgba(0,0,0,0.4)] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3 transition-all">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -210,42 +235,55 @@ export function AdminOrdersView() {
             placeholder="Search order #, customer name, phone, city, or courier..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-10 w-full rounded-xl bg-muted/40 pl-10 pr-4 text-xs sm:text-sm font-medium text-foreground focus:bg-background focus:ring-2 focus:ring-foreground/20 focus:outline-none transition-all"
+            className="h-9 sm:h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs sm:text-sm font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-foreground/20 focus:outline-none transition-all placeholder:text-muted-foreground/60"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Status Pills + View Mode Toggle Container */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-          {/* Touch-swipeable Status Pills without visible scrollbar */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 touch-pan-x overscroll-x-contain">
-            {[
-              { id: "all", label: "All" },
-              { id: "pending", label: "Pending" },
-              { id: "processing", label: "Processing" },
-              { id: "shipped", label: "In Transit" },
-              { id: "delivered", label: "Delivered" },
-              { id: "cancelled", label: "Cancelled" },
-            ].map((pill) => {
-              const isSelected = statusFilter === pill.id;
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => setStatusFilter(pill.id)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 select-none",
-                    isSelected
-                      ? "bg-foreground text-background shadow-xs font-extrabold"
-                      : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/70"
-                  )}
-                >
-                  {pill.label}
-                </button>
-              );
-            })}
+        <div className="flex items-center justify-between gap-2">
+          {/* Touch-swipeable Status Pills with subtle right fade hint */}
+          <div className="relative flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x overscroll-x-contain select-none">
+              {[
+                { id: "all", label: "All" },
+                { id: "pending", label: "Pending" },
+                { id: "processing", label: "Processing" },
+                { id: "shipped", label: "In Transit" },
+                { id: "delivered", label: "Delivered" },
+                { id: "cancelled", label: "Cancelled" },
+              ].map((pill) => {
+                const isSelected = statusFilter === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setStatusFilter(pill.id)}
+                    className={cn(
+                      "h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 select-none",
+                      isSelected
+                        ? "bg-foreground text-background shadow-xs font-black"
+                        : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                    )}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Subtle mobile right fade hint */}
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background sm:from-card to-transparent sm:hidden" />
           </div>
 
-          <div className="h-5 w-[1px] bg-border/60 shrink-0 hidden sm:block" />
+          <div className="h-4 w-[1px] bg-border/60 shrink-0 hidden sm:block mx-1" />
 
           {/* View Mode Toggle (Table / Card) - Hidden on Mobile, always dedicated Card view on mobile */}
           <div className="hidden sm:flex items-center justify-end p-1 rounded-xl bg-muted/70 text-xs font-semibold shrink-0">

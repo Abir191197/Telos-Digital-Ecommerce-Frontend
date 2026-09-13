@@ -3,6 +3,7 @@
 import React from "react";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
+import { AdminMobileBottomNav } from "./AdminMobileBottomNav";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { cn } from "@/lib/utils";
 
@@ -42,10 +43,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </svg>
         </div>
 
-        <main className="flex-1 p-4 sm:p-6 w-full space-y-6">
+        <main className="flex-1 p-4 sm:p-6 pb-20 sm:pb-6 w-full space-y-6">
           {children}
         </main>
       </div>
+
+      {/* Admin Mobile Bottom Navigation */}
+      <AdminMobileBottomNav />
     </div>
   );
 }
