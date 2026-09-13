@@ -362,8 +362,8 @@ export function CustomerAccountHub() {
 
       {/* ── Main Two-Column Layout (Sidebar + Content) ── */}
       <div className="flex flex-col lg:flex-row items-start gap-6 sm:gap-8">
-        {/* Desktop Customer Sidebar (Hidden on mobile) */}
-        <div className="hidden lg:block">
+        {/* Desktop Customer Sidebar (Sticky alongside content on desktop) */}
+        <div className="hidden lg:block lg:sticky lg:top-28 lg:self-start lg:w-72 shrink-0">
           <CustomerSidebar
             user={user}
             activeTab={activeTab}

@@ -32,7 +32,7 @@ export function CustomerSidebar({
   onLogout,
 }: CustomerSidebarProps) {
   return (
-    <aside className="w-full lg:w-72 shrink-0 space-y-4">
+    <aside className="w-full space-y-4">
       {/* ── Navigation Group List ── */}
       <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-3.5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] divide-y divide-border/40">
         {ACCOUNT_NAV_GROUPS.map((group, groupIdx) => (
