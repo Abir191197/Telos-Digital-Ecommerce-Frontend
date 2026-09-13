@@ -166,17 +166,8 @@ export function AdminSidebar() {
   const { isOpen, isMobileOpen, toggleSidebar, setMobileOpen } =
     useSidebarStore();
 
-  // Expanded parent item tracking
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Products: true,
-    Orders: false,
-    Categories: false,
-    Payments: false,
-    Inventory: false,
-    Analytics: false,
-    Customizations: false,
-    Settings: false,
-  });
+  // Expanded parent item tracking (all closed by default)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const toggleExpand = (title: string) => {
     setExpanded((prev) => ({ ...prev, [title]: !prev[title] }));
