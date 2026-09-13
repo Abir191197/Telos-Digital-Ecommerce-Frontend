@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -11,67 +11,152 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Package,
-  Users,
+  FolderTree,
   CreditCard,
+  Boxes,
+  History,
+  Star,
   BarChart3,
-  Bell,
+  Sliders,
   Settings,
   X,
   Store,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
+  ChevronDown,
   LogOut,
+  LucideIcon,
 } from "lucide-react";
 
-export const ADMIN_NAV_ITEMS = [
+export interface SubNavItem {
+  title: string;
+  href: string;
+  badge?: string | null;
+}
+
+export interface NavGroupItem {
+  title: string;
+  icon: LucideIcon;
+  href?: string;
+  badge?: string | null;
+  children?: SubNavItem[];
+}
+
+export const ADMIN_NAV_GROUPS: { group: string; items: NavGroupItem[] }[] = [
   {
-    title: "Overview",
-    href: ROUTES.DASHBOARD,
-    icon: LayoutDashboard,
-    badge: null,
+    group: "Core",
+    items: [
+      {
+        title: "Overview",
+        href: ROUTES.DASHBOARD,
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Orders",
+        icon: ShoppingBag,
+        badge: "3",
+        children: [
+          { title: "All Orders", href: "/dashboard/orders" },
+          { title: "Pending Dispatch", href: "/dashboard/orders?status=pending", badge: "2" },
+          { title: "Returns & Exchanges", href: "/dashboard/orders?tab=returns" },
+        ],
+      },
+    ],
   },
   {
-    title: "Orders & Shipping",
-    href: "/dashboard/orders",
-    icon: ShoppingBag,
-    badge: "3",
+    group: "Catalog",
+    items: [
+      {
+        title: "Products",
+        icon: Package,
+        children: [
+          { title: "Product List", href: "/dashboard/products" },
+          { title: "Create Product", href: "/dashboard/products?action=create" },
+          { title: "Manage Stock", href: "/dashboard/products?tab=stock" },
+          { title: "Grid View", href: "/dashboard/products?view=grid" },
+        ],
+      },
+      {
+        title: "Categories",
+        icon: FolderTree,
+        children: [
+          { title: "All Categories", href: "/dashboard/categories" },
+          { title: "Add Category", href: "/dashboard/categories?action=new" },
+          { title: "Attributes & Tags", href: "/dashboard/categories?tab=attributes" },
+        ],
+      },
+      {
+        title: "Inventory",
+        icon: Boxes,
+        children: [
+          { title: "Stock Overview", href: "/dashboard/inventory" },
+          { title: "Low Stock Watchlist", href: "/dashboard/inventory?filter=low", badge: "5" },
+          { title: "Warehouse Logs", href: "/dashboard/inventory?tab=warehouse" },
+        ],
+      },
+    ],
   },
   {
-    title: "Products & Stock",
-    href: "/dashboard/products",
-    icon: Package,
-    badge: null,
+    group: "Finance & Sales",
+    items: [
+      {
+        title: "Payments",
+        icon: CreditCard,
+        children: [
+          { title: "Transaction Logs", href: ROUTES.PAYMENTS },
+          { title: "Payouts & Settlement", href: "/dashboard/payments?tab=payouts" },
+          { title: "Gateway Settings", href: "/dashboard/payments?tab=gateways" },
+        ],
+      },
+      {
+        title: "Analytics",
+        icon: BarChart3,
+        children: [
+          { title: "Revenue Reports", href: ROUTES.REPORTS },
+          { title: "Sales Performance", href: "/dashboard/reports?view=sales" },
+          { title: "Customer Retention", href: "/dashboard/reports?view=retention" },
+        ],
+      },
+    ],
   },
   {
-    title: "Customers",
-    href: ROUTES.CLIENTS,
-    icon: Users,
-    badge: null,
+    group: "Engagement & Audit",
+    items: [
+      {
+        title: "Reviews",
+        icon: Star,
+        href: "/dashboard/reviews",
+      },
+      {
+        title: "Activity Logs",
+        icon: History,
+        href: "/dashboard/activity",
+      },
+    ],
   },
   {
-    title: "Payments & Trx",
-    href: ROUTES.PAYMENTS,
-    icon: CreditCard,
-    badge: null,
-  },
-  {
-    title: "Financial Reports",
-    href: ROUTES.REPORTS,
-    icon: BarChart3,
-    badge: null,
-  },
-  {
-    title: "Notifications",
-    href: ROUTES.NOTIFICATIONS,
-    icon: Bell,
-    badge: "5",
-  },
-  {
-    title: "Settings & Store",
-    href: ROUTES.SETTINGS,
-    icon: Settings,
-    badge: null,
+    group: "Store Administration",
+    items: [
+      {
+        title: "Customizations",
+        icon: Sliders,
+        children: [
+          { title: "Banners & Promos", href: "/dashboard/customizations?tab=banners" },
+          { title: "Homepage Layout", href: "/dashboard/customizations?tab=homepage" },
+          { title: "Theme Accent", href: "/dashboard/customizations?tab=theme" },
+        ],
+      },
+      {
+        title: "Settings",
+        icon: Settings,
+        children: [
+          { title: "Store Profile", href: ROUTES.SETTINGS },
+          { title: "Shipping & Delivery", href: "/dashboard/settings?tab=shipping" },
+          { title: "Tax & Currencies", href: "/dashboard/settings?tab=tax" },
+          { title: "Staff & Permissions", href: "/dashboard/settings?tab=staff" },
+        ],
+      },
+    ],
   },
 ];
 
@@ -82,6 +167,22 @@ export function AdminSidebar() {
   const { isOpen, isMobileOpen, toggleSidebar, setMobileOpen } =
     useSidebarStore();
 
+  // Expanded parent item tracking
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    Products: true,
+    Orders: false,
+    Categories: false,
+    Payments: false,
+    Inventory: false,
+    Analytics: false,
+    Customizations: false,
+    Settings: false,
+  });
+
+  const toggleExpand = (title: string) => {
+    setExpanded((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
   const handleLogout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
@@ -90,11 +191,10 @@ export function AdminSidebar() {
     router.push(ROUTES.LOGIN);
   };
 
-  const isNavActive = (href: string) => {
-    if (href === ROUTES.DASHBOARD) {
-      return pathname === ROUTES.DASHBOARD;
-    }
-    return pathname.startsWith(href);
+  const isRouteActive = (href?: string) => {
+    if (!href) return false;
+    if (href === ROUTES.DASHBOARD) return pathname === ROUTES.DASHBOARD;
+    return pathname.startsWith(href.split("?")[0]);
   };
 
   return (
@@ -119,10 +219,10 @@ export function AdminSidebar() {
         )}
       >
         {/* Brand Header with Gradient & Rounded Bottom-Right Corner */}
-        <div className="flex h-16 items-center justify-between px-4 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/50 border-b border-r border-border/50 shadow-xs">
+        <div className="flex h-16 items-center justify-between px-3 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/50 border-b border-r border-border/50 shadow-xs">
           <Link
             href={ROUTES.DASHBOARD}
-            className="flex items-center gap-3 overflow-hidden group"
+            className="flex items-center gap-2.5 overflow-hidden group min-w-0"
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background font-bold text-sm tracking-tight shadow-2xs transition-transform group-hover:scale-105">
               <span>T</span>
@@ -131,16 +231,31 @@ export function AdminSidebar() {
             {(isOpen || isMobileOpen) && (
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-sm tracking-tight text-foreground">
+                  <span className="font-semibold text-sm tracking-tight text-foreground truncate">
                     Telos Admin
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground font-medium">
+                <p className="text-[10px] text-muted-foreground font-medium truncate">
                   Store Management
                 </p>
               </div>
             )}
           </Link>
+
+          {/* Desktop Collapse Icon Toggle */}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+            aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+            title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
 
           {/* Mobile Close Button */}
           <button
@@ -152,54 +267,146 @@ export function AdminSidebar() {
           </button>
         </div>
 
-        {/* Navigation List */}
-        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
-          <div className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-            {isOpen || isMobileOpen ? "Navigation" : "•••"}
-          </div>
+        {/* Hierarchical Navigation List */}
+        <nav className="flex-1 space-y-4 px-3 pt-6 pb-4 overflow-y-auto">
+          {ADMIN_NAV_GROUPS.map((section) => (
+            <div key={section.group} className="space-y-1">
+              {(isOpen || isMobileOpen) && (
+                <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  {section.group}
+                </div>
+              )}
 
-          {ADMIN_NAV_ITEMS.map((item) => {
-            const active = isNavActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
-                  active
-                    ? "bg-foreground text-background font-semibold shadow-2xs"
-                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
-                )}
-                title={!isOpen && !isMobileOpen ? item.title : undefined}
-              >
-                <item.icon
-                  className={cn(
-                    "h-4 w-4 shrink-0 transition-colors",
-                    active ? "text-background" : "text-muted-foreground group-hover:text-foreground"
-                  )}
-                />
+              {section.items.map((item) => {
+                const hasChildren = Boolean(item.children?.length);
+                const isItemActive = hasChildren
+                  ? item.children!.some((sub) => isRouteActive(sub.href))
+                  : isRouteActive(item.href);
+                const isItemOpen = expanded[item.title] ?? false;
 
-                {(isOpen || isMobileOpen) && (
-                  <div className="flex flex-1 items-center justify-between min-w-0">
-                    <span className="truncate">{item.title}</span>
-                    {item.badge && (
-                      <span
+                // Collapsed sidebar icon item
+                if (!isOpen && !isMobileOpen) {
+                  return (
+                    <Link
+                      key={item.title}
+                      href={item.href || (item.children ? item.children[0].href : "#")}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex h-9 w-9 mx-auto items-center justify-center rounded-lg transition-colors",
+                        isItemActive
+                          ? "bg-foreground text-background font-semibold shadow-2xs"
+                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      )}
+                      title={item.title}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                    </Link>
+                  );
+                }
+
+                // Expanded Item without children
+                if (!hasChildren) {
+                  return (
+                    <Link
+                      key={item.title}
+                      href={item.href || "#"}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors",
+                        isItemActive
+                          ? "bg-foreground text-background font-semibold shadow-2xs"
+                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      )}
+                    >
+                      <item.icon
                         className={cn(
-                          "rounded-md px-1.5 py-0.5 text-[10px] font-medium",
-                          active
-                            ? "bg-background/20 text-background"
-                            : "bg-muted text-muted-foreground"
+                          "h-4 w-4 shrink-0 transition-colors",
+                          isItemActive ? "text-background" : "text-muted-foreground group-hover:text-foreground"
                         )}
-                      >
-                        {item.badge}
-                      </span>
+                      />
+                      <span className="truncate flex-1">{item.title}</span>
+                      {item.badge && (
+                        <span
+                          className={cn(
+                            "rounded-md px-1.5 py-0.2 text-[10px] font-medium",
+                            isItemActive
+                              ? "bg-background/20 text-background"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                }
+
+                // Collapsible parent with sub-items
+                return (
+                  <div key={item.title} className="space-y-0.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(item.title)}
+                      className={cn(
+                        "w-full group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer text-left",
+                        isItemActive
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-colors",
+                          isItemActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                        )}
+                      />
+                      <span className="truncate flex-1">{item.title}</span>
+                      {item.badge && (
+                        <span className="rounded-md px-1.5 py-0.2 text-[10px] font-medium bg-muted text-muted-foreground mr-1">
+                          {item.badge}
+                        </span>
+                      )}
+                      <ChevronDown
+                        className={cn(
+                          "h-3.5 w-3.5 text-muted-foreground/80 transition-transform duration-200",
+                          isItemOpen && "rotate-180"
+                        )}
+                      />
+                    </button>
+
+                    {/* Sub-menu drawer */}
+                    {isItemOpen && (
+                      <div className="pl-6 pr-1 py-0.5 space-y-0.5 border-l border-border/40 ml-4">
+                        {item.children!.map((sub) => {
+                          const isSubActive = isRouteActive(sub.href);
+                          return (
+                            <Link
+                              key={sub.title}
+                              href={sub.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={cn(
+                                "flex items-center justify-between rounded-md px-2 py-1 text-[11px] font-medium transition-colors",
+                                isSubActive
+                                  ? "bg-muted font-semibold text-foreground"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                              )}
+                            >
+                              <span className="truncate">{sub.title}</span>
+                              {sub.badge && (
+                                <span className="rounded px-1 text-[9px] font-semibold bg-muted text-muted-foreground border border-border/60">
+                                  {sub.badge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
-                )}
-              </Link>
-            );
-          })}
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Footer Actions */}
@@ -223,21 +430,6 @@ export function AdminSidebar() {
             <LogOut className="h-4 w-4 shrink-0" />
             {(isOpen || isMobileOpen) && (
               <span className="truncate">Log Out</span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            className="hidden lg:flex w-full items-center justify-center gap-2 rounded-lg border border-border/80 py-1.5 text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors cursor-pointer"
-          >
-            {isOpen ? (
-              <>
-                <ChevronLeft className="h-3.5 w-3.5" />
-                <span className="text-[11px]">Collapse</span>
-              </>
-            ) : (
-              <ChevronRight className="h-3.5 w-3.5" />
             )}
           </button>
         </div>

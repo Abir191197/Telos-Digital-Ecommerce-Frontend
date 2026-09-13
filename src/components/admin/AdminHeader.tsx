@@ -18,6 +18,8 @@ import {
   ChevronDown,
   User,
   Store,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common";
@@ -47,6 +49,30 @@ export function AdminHeader() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showProfileMenu, showNotifications]);
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    function handleFullscreenChange() {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    }
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      // Ignore unsupported or denied browser fullscreen requests
+    }
+  };
 
   const handleLogout = () => {
     document.cookie =
@@ -81,35 +107,43 @@ export function AdminHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-none bg-sidebar/95 backdrop-blur-md px-4 sm:px-6 transition-colors shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06),0_12px_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_30px_-4px_rgba(0,0,0,0.45),0_12px_60px_-10px_rgba(0,0,0,0.35)]">
-      {/* Left: Mobile Menu Trigger + Search */}
-      <div className="flex items-center gap-3 sm:gap-4 flex-1 max-w-md">
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
-          aria-label="Open mobile navigation"
-        >
-          <Menu className="h-4.5 w-4.5" />
-        </button>
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between lg:justify-end border-none bg-sidebar/95 backdrop-blur-md px-4 sm:px-6 transition-colors shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06),0_12px_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_30px_-4px_rgba(0,0,0,0.45),0_12px_60px_-10px_rgba(0,0,0,0.35)]">
+      {/* Mobile Drawer Button on Mobile Only */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
+        aria-label="Open mobile navigation"
+      >
+        <Menu className="h-4.5 w-4.5" />
+      </button>
 
-        <div className="relative w-full hidden sm:block">
+      {/* Right-Aligned Navigation Cluster */}
+      <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">
+        {/* Compact Search Bar */}
+        <div className="relative w-48 sm:w-64 hidden sm:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search orders, customers, SKUs..."
-            className="h-9 w-full rounded-lg border border-border/80 bg-background/50 pl-9 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:bg-background focus:outline-none transition-all"
+            placeholder="Search..."
+            className="h-9 w-full rounded-lg border border-border/80 bg-background/50 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:bg-background focus:outline-none transition-all"
           />
         </div>
-      </div>
 
-      {/* Right Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Status indicator */}
-        <div className="hidden md:flex items-center gap-2 rounded-full border border-border/80 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span>Gateway Active</span>
-        </div>
+        {/* Fullscreen Toggle Button */}
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg border border-border/80 bg-background/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
+        </button>
 
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
