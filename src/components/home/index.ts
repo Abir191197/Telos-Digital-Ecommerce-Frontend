@@ -1,4 +1,7 @@
 export { HeroBanner } from "./HeroBanner";
+export { HeroSlideShowcase } from "./HeroSlideShowcase";
+export { HeroContentBlock } from "./HeroContentBlock";
+export { HeroSidePromoCards } from "./HeroSidePromoCards";
 export { QuickCategoryBar } from "./QuickCategoryBar";
 export { FlashDealsSection } from "./FlashDealsSection";
 export { FeaturedProductsTabs } from "./FeaturedProductsTabs";
