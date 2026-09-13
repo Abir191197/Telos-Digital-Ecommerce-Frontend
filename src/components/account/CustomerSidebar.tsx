@@ -34,7 +34,7 @@ export function CustomerSidebar({
   return (
     <aside className="w-full lg:w-72 shrink-0 space-y-4">
       {/* ── Navigation Group List ── */}
-      <div className="rounded-2xl border border-border/80 bg-card p-3 shadow-xs divide-y divide-border/50">
+      <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-3.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] divide-y divide-border/50">
         {ACCOUNT_NAV_GROUPS.map((group, groupIdx) => (
           <div
             key={group.group}
@@ -63,7 +63,7 @@ export function CustomerSidebar({
                   className={cn(
                     "group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all cursor-pointer",
                     isActive
-                      ? "bg-amber-500 text-white shadow-sm shadow-amber-500/30"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-bold shadow-md shadow-amber-500/25"
                       : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   )}
                 >
@@ -72,7 +72,7 @@ export function CustomerSidebar({
                       className={cn(
                         "h-4 w-4 shrink-0 transition-transform group-hover:scale-110",
                         isActive
-                          ? "text-white"
+                          ? "text-zinc-950 stroke-[2.2]"
                           : "text-amber-500 dark:text-amber-400"
                       )}
                     />
@@ -85,7 +85,7 @@ export function CustomerSidebar({
                         className={cn(
                           "rounded-full px-2 py-0.5 text-[10px] font-bold tracking-tight",
                           isActive
-                            ? "bg-white/20 text-white"
+                            ? "bg-zinc-950/15 text-zinc-950"
                             : "bg-muted text-foreground"
                         )}
                       >
@@ -96,7 +96,7 @@ export function CustomerSidebar({
                       className={cn(
                         "h-3.5 w-3.5 transition-transform",
                         isActive
-                          ? "text-white translate-x-0.5"
+                          ? "text-zinc-950 translate-x-0.5"
                           : "text-muted-foreground/50 opacity-0 group-hover:opacity-100"
                       )}
                     />

@@ -116,7 +116,7 @@ export function AddressesTab({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header bar: Responsive stack on mobile, flex on sm */}
-      <div className="flex items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+      <div className="flex items-center justify-between gap-3 bg-card border border-border/80 dark:border-white/10 p-4 sm:p-5 rounded-3xl shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-foreground">
             Address Book
@@ -129,9 +129,9 @@ export function AddressesTab({
         <button
           type="button"
           onClick={handleOpenAddAddress}
-          className="hidden sm:inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="hidden sm:inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-4 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           <span>Add New Address</span>
         </button>
       </div>
@@ -154,9 +154,9 @@ export function AddressesTab({
         <button
           type="button"
           onClick={handleOpenAddAddress}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white py-3.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer touch-manipulation"
+          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 py-3.5 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer touch-manipulation"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           <span>Add New Address</span>
         </button>
       </div>

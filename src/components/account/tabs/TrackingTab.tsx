@@ -21,7 +21,7 @@ export function TrackingTab({ orders }: TrackingTabProps) {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card border border-border/80 dark:border-white/10 p-4 sm:p-5 rounded-3xl shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-foreground">
             Live Courier Tracking
@@ -33,7 +33,7 @@ export function TrackingTab({ orders }: TrackingTabProps) {
 
         {/* Switch order pills if multiple orders exist */}
         {orders.length > 1 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none bg-background/80 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none bg-background/80 dark:bg-muted/60 p-1.5 rounded-2xl shadow-2xs border border-border/50">
             {orders.map((o) => {
               const isSelected =
                 (selectedTrackingId
@@ -45,9 +45,9 @@ export function TrackingTab({ orders }: TrackingTabProps) {
                   type="button"
                   onClick={() => setSelectedTrackingId(o.id)}
                   className={cn(
-                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                    "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
                     isSelected
-                      ? "bg-amber-500 text-white shadow-2xs"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >

@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { Sparkles, Edit3, Package, Truck, MapPin, Check, ChevronRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { CustomerUser } from "@/stores";
 import type { Order, OrderStatus } from "@/types/order.types";
 import type { AccountTabKey } from "../accountNavData";
@@ -61,9 +62,9 @@ export function OverviewTab({
   return (
     <div className="flex flex-col space-y-6">
       {/* Profile Details Hero Card on Overview */}
-      <div className="order-1 rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card/90 to-muted/20 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs hover:border-amber-500/30 transition-all">
+      <div className="order-1 rounded-3xl border border-border/80 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.03] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/40 transition-all">
         <div className="flex items-center gap-4">
-          <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-sm bg-muted/40">
+          <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500/80 shadow-md shadow-amber-500/20 bg-muted/40">
             {user.avatar ? (
               <Image
                 src={user.avatar}
@@ -84,7 +85,7 @@ export function OverviewTab({
                 {user.name}
               </h2>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                <Sparkles className="h-2.5 w-2.5" />
+                <Sparkles className="h-2.5 w-2.5 text-amber-500" />
                 <span>Telos Gold Member</span>
               </span>
             </div>
@@ -98,7 +99,7 @@ export function OverviewTab({
           <button
             type="button"
             onClick={() => onSelectTab("profile")}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-card hover:bg-muted/80 text-foreground px-4 py-2.5 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 dark:border-white/10 bg-card hover:bg-muted/80 text-foreground px-4 py-2.5 text-xs font-semibold shadow-2xs hover:border-amber-500/30 transition-all cursor-pointer"
           >
             <Edit3 className="h-3.5 w-3.5 text-amber-500" />
             <span>Edit Profile</span>
@@ -106,130 +107,198 @@ export function OverviewTab({
         </div>
       </div>
 
-      {/* Top Hero Card: Latest Active Order with Real-Time Progress Stepper */}
-      {orders[0] && (
-        <div className="order-2 lg:order-1 rounded-3xl border border-border/80 bg-card p-5 sm:p-6 space-y-4 shadow-xs hover:border-amber-500/30 transition-colors">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3.5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                <Package className="h-5 w-5 stroke-[2]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-foreground">
-                    Latest Order: #{orders[0].orderNumber}
-                  </h3>
-                  <span className="hidden sm:inline-block text-xs text-muted-foreground">
-                    •{" "}
-                    {new Date(orders[0].createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+      {/* Top Hero Card: Latest Active Order with Sleek Milestone Segments */}
+      {orders[0] && (() => {
+        const latestOrder = orders[0];
+        const statusMap: Record<OrderStatus, number> = {
+          pending: 0,
+          processing: 1,
+          shipped: 2,
+          delivered: 3,
+          cancelled: -1,
+        };
+        const currentStep = statusMap[latestOrder.status] ?? 1;
+
+        const steps = [
+          { label: "Placed", icon: Clock, desc: "Confirmed" },
+          { label: "Packing", icon: Package, desc: "Quality Verified" },
+          { label: "In Transit", icon: Truck, desc: latestOrder.courierName || "Courier" },
+          { label: "Delivered", icon: CheckCircle2, desc: "To Doorstep" },
+        ];
+
+        return (
+          <div className="order-2 lg:order-1 rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6.5 space-y-5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-all">
+            {/* Top Row: Order Details & Live Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-2xs">
+                  <Package className="h-5 w-5 stroke-[2]" />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {orders[0].items.length} item
-                  {orders[0].items.length > 1 ? "s" : ""} • Total:{" "}
-                  <strong className="text-foreground font-semibold">
-                    ৳{orders[0].total.toLocaleString()}
-                  </strong>
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-foreground tracking-tight">
+                      Order #{latestOrder.orderNumber}
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      •{" "}
+                      {new Date(latestOrder.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {latestOrder.items.length} item{latestOrder.items.length > 1 ? "s" : ""} • Total:{" "}
+                    <strong className="text-foreground font-bold">
+                      ৳{latestOrder.total.toLocaleString()}
+                    </strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                {getStatusBadge(latestOrder.status)}
+                <button
+                  type="button"
+                  onClick={() => onSelectTab("tracking")}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Truck className="h-3.5 w-3.5" />
+                  <span>Track Live</span>
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 self-start sm:self-auto">
-              {getStatusBadge(orders[0].status)}
+
+            {/* 4-Stage Segmented Milestone Cards (Replaces plain cheap progress bar) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {steps.map((step, idx) => {
+                const isComplete = currentStep > idx;
+                const isCurrent = currentStep === idx;
+                const Icon = step.icon;
+
+                return (
+                  <div
+                    key={step.label}
+                    className={cn(
+                      "relative flex flex-col p-3 rounded-2xl border transition-all duration-300",
+                      isCurrent
+                        ? "bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/50 shadow-xs ring-1 ring-amber-500/30"
+                        : isComplete
+                        ? "bg-muted/40 border-border/70 text-foreground"
+                        : "bg-muted/15 border-border/40 opacity-60"
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <div
+                        className={cn(
+                          "flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold transition-all",
+                          isCurrent
+                            ? "bg-amber-500 text-zinc-950 shadow-xs"
+                            : isComplete
+                            ? "bg-emerald-500 text-white"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {isComplete ? (
+                          <Check className="h-3.5 w-3.5 stroke-[3]" />
+                        ) : (
+                          <Icon className="h-3 w-3 stroke-[2.2]" />
+                        )}
+                      </div>
+
+                      <span
+                        className={cn(
+                          "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md",
+                          isCurrent
+                            ? "bg-amber-500/20 text-amber-700 dark:text-amber-300"
+                            : isComplete
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-muted-foreground/70"
+                        )}
+                      >
+                        {isCurrent ? "Active" : isComplete ? "Done" : `Step ${idx + 1}`}
+                      </span>
+                    </div>
+
+                    <span
+                      className={cn(
+                        "text-xs font-extrabold tracking-tight truncate",
+                        isCurrent
+                          ? "text-amber-700 dark:text-amber-400"
+                          : isComplete
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {step.label}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {step.desc}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Items Preview Strip & Delivery Partner Footer */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs">
+              <div className="flex items-center gap-3">
+                {/* Visual item thumbnails */}
+                <div className="flex -space-x-2 overflow-hidden py-0.5">
+                  {latestOrder.items.slice(0, 3).map((item, i) => (
+                    <div
+                      key={item.id || i}
+                      className="relative h-8 w-8 rounded-xl border-2 border-background overflow-hidden bg-muted shadow-2xs shrink-0"
+                      title={item.productName}
+                    >
+                      <Image
+                        src={item.productThumbnail}
+                        alt={item.productName}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                  {latestOrder.items.length > 3 && (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl border-2 border-background bg-muted text-[10px] font-bold text-foreground shrink-0 shadow-2xs">
+                      +{latestOrder.items.length - 3}
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-muted-foreground truncate">
+                  Courier:{" "}
+                  <strong className="text-foreground font-semibold">
+                    {latestOrder.courierName || "Steadfast Courier"}
+                  </strong>
+                  <span className="mx-1.5 text-border">•</span>
+                  <span className="font-mono bg-muted/60 px-1.5 py-0.5 rounded text-[11px] text-foreground">
+                    {latestOrder.trackingNumber || "TRK-PENDING"}
+                  </span>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => onSelectTab("tracking")}
-                className="inline-flex items-center gap-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer"
+                onClick={() => onSelectTab("orders")}
+                className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer self-start sm:self-auto shrink-0"
               >
-                <Truck className="h-3.5 w-3.5" />
-                <span>Track Live</span>
+                <span>View All Orders ({orders.length})</span>
+                <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
-
-          {/* Stepper Progress */}
-          <div className="py-2 px-1">
-            <div className="flex items-center justify-between text-[11px] font-bold text-muted-foreground pb-2">
-              <span className="text-amber-600 dark:text-amber-400">Order Placed</span>
-              <span
-                className={
-                  orders[0].status !== "pending"
-                    ? "text-amber-600 dark:text-amber-400"
-                    : ""
-                }
-              >
-                Processing
-              </span>
-              <span
-                className={
-                  orders[0].status === "shipped" ||
-                  orders[0].status === "delivered"
-                    ? "text-amber-600 dark:text-amber-400"
-                    : ""
-                }
-              >
-                In Transit
-              </span>
-              <span
-                className={
-                  orders[0].status === "delivered"
-                    ? "text-amber-600 dark:text-amber-400"
-                    : ""
-                }
-              >
-                Delivered
-              </span>
-            </div>
-            <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500 rounded-full"
-                style={{
-                  width:
-                    orders[0].status === "delivered"
-                      ? "100%"
-                      : orders[0].status === "shipped"
-                      ? "75%"
-                      : orders[0].status === "processing"
-                      ? "45%"
-                      : "15%",
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-border/50 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span>Delivery Partner:</span>
-              <strong className="text-foreground font-semibold">
-                {orders[0].courierName}
-              </strong>
-              <span className="font-mono bg-muted/60 px-2 py-0.5 rounded-md text-[11px] text-foreground">
-                {orders[0].trackingNumber}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onSelectTab("orders")}
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer self-start sm:self-auto"
-            >
-              <span>View All Orders ({orders.length})</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 2-Column Responsive Grid on Large Screen: Primary Delivery Address + Saved Payment Methods */}
       <div className="order-3 lg:order-2 grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 1. Address Book Snapshot */}
-        <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-amber-500/30 transition-colors">
+        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-colors">
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
                   <MapPin className="h-4 w-4" />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -281,7 +350,7 @@ export function OverviewTab({
         </div>
 
         {/* 2. Saved Payment Methods Snapshot */}
-        <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-amber-500/30 transition-colors">
+        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-colors">
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">

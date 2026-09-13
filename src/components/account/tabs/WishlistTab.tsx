@@ -54,9 +54,9 @@ export function WishlistTab({
               type="button"
               onClick={() => setWishlistViewMode("list")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 wishlistViewMode === "list"
-                  ? "bg-amber-500 text-white shadow-2xs"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
               aria-label="List view"
@@ -68,9 +68,9 @@ export function WishlistTab({
               type="button"
               onClick={() => setWishlistViewMode("grid")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 wishlistViewMode === "grid"
-                  ? "bg-amber-500 text-white shadow-2xs"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
               aria-label="Grid view"
@@ -91,8 +91,8 @@ export function WishlistTab({
       </div>
 
       {wishlistItems.length === 0 ? (
-        <div className="py-16 px-6 text-center rounded-2xl sm:rounded-3xl bg-card/60 dark:bg-muted/20 space-y-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto">
+        <div className="py-16 px-6 text-center rounded-3xl border border-border/80 dark:border-white/10 bg-card p-6 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] space-y-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 mx-auto">
             <Heart className="h-6 w-6 stroke-[1.8]" />
           </div>
           <h4 className="text-sm font-bold text-foreground">Your Wishlist is Empty</h4>
@@ -102,7 +102,7 @@ export function WishlistTab({
           <div className="pt-2">
             <Link
               href={ROUTES.PRODUCTS}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all"
             >
               <span>Explore Products</span>
             </Link>
@@ -157,7 +157,7 @@ export function WishlistTab({
                 <button
                   type="button"
                   onClick={() => onAddToCart(item, 1)}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                 >
                   <ShoppingBag className="h-3.5 w-3.5" />
                   <span>Add to Cart</span>
@@ -188,12 +188,12 @@ export function WishlistTab({
           {wishlistItems.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 space-y-3.5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4 space-y-3.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <Link
                   href={`/products/${item.slug || item.id}`}
-                  className="relative aspect-square w-full rounded-2xl overflow-hidden bg-muted/30 block group cursor-pointer shadow-2xs"
+                  className="relative aspect-square w-full rounded-2xl overflow-hidden bg-muted/30 block group cursor-pointer shadow-2xs border border-border/40"
                 >
                   <Image
                     src={item.thumbnail}
@@ -241,7 +241,7 @@ export function WishlistTab({
                 <button
                   type="button"
                   onClick={() => onAddToCart(item, 1)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                 >
                   <ShoppingBag className="h-3.5 w-3.5" />
                   <span>Add to Cart</span>

@@ -21,10 +21,10 @@ export function AddressCard({
   return (
     <div
       className={cn(
-        "rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 relative transition-all shadow-sm hover:shadow-md",
+        "rounded-3xl p-5 sm:p-6 space-y-4 relative transition-all border shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.12)]",
         address.isDefault
-          ? "bg-amber-500/10 dark:bg-amber-500/15"
-          : "bg-card/90 dark:bg-muted/30"
+          ? "bg-card border-amber-500/60 dark:border-amber-500/50 ring-2 ring-amber-500/20"
+          : "bg-card border-border/80 dark:border-white/10 hover:border-amber-500/30"
       )}
     >
       {/* Top Row: Label badge + Default Status / Set Default */}

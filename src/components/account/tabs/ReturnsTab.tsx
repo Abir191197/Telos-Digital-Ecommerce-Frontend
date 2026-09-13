@@ -25,15 +25,15 @@ export function ReturnsTab({ returnTickets, onSelectTab }: ReturnsTabProps) {
         <button
           type="button"
           onClick={() => onSelectTab("orders")}
-          className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer"
+          className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-4 py-2 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
         >
           Create Return
         </button>
       </div>
 
       {returnTickets.length === 0 ? (
-        <div className="rounded-2xl border border-border/80 bg-card p-6 space-y-3 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+        <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-8 space-y-3 text-center shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
+          <div className="h-12 w-12 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center mx-auto">
             <RotateCcw className="h-6 w-6" />
           </div>
           <h4 className="text-sm font-bold text-foreground">

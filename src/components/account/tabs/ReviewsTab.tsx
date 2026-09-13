@@ -57,14 +57,14 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
 
         {/* 2 States Toggle: "To Review" and "History" - Left Aligned & Swipeable */}
         <div className="w-full overflow-x-auto overscroll-x-contain touch-pan-x scrollbar-none py-0.5">
-          <div className="inline-flex items-center bg-background/90 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs min-w-max">
+          <div className="inline-flex items-center bg-background/90 dark:bg-muted/60 p-1.5 rounded-2xl shadow-2xs min-w-max border border-border/50">
             <button
               type="button"
               onClick={() => setReviewTabState("to_review")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
+                "inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
                 reviewTabState === "to_review"
-                  ? "bg-amber-500 text-white shadow-2xs"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
@@ -75,7 +75,7 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                   className={cn(
                     "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
                     reviewTabState === "to_review"
-                      ? "bg-white text-amber-600"
+                      ? "bg-zinc-950/20 text-zinc-950"
                       : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
                   )}
                 >
@@ -88,9 +88,9 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
               type="button"
               onClick={() => setReviewTabState("history")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
+                "inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap touch-manipulation active:scale-95",
                 reviewTabState === "history"
-                  ? "bg-amber-500 text-white shadow-2xs"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
@@ -100,7 +100,7 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                 className={cn(
                   "ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black",
                   reviewTabState === "history"
-                    ? "bg-white text-amber-600"
+                    ? "bg-zinc-950/20 text-zinc-950"
                     : "bg-muted text-muted-foreground"
                 )}
               >
@@ -169,7 +169,7 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                           setRatingInput(5);
                           setCommentInput("");
                         }}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                       >
                         <Star className="h-4 w-4 fill-current" />
                         <span>Write Review</span>
@@ -364,7 +364,7 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-3 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
                 >
                   Publish Review
                 </button>

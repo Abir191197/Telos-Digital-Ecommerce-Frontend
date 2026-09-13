@@ -92,7 +92,7 @@ export function AddressConfirmDialogs({
               <button
                 type="button"
                 onClick={onConfirmSave}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
               >
                 <Check className="h-4 w-4 stroke-[2.5]" />
                 <span>Confirm & Save</span>

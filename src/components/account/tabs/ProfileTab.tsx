@@ -88,7 +88,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl">
       {/* Header card with quick status & edit toggle */}
-      <div className="rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-4 sm:p-8 shadow-xs relative overflow-hidden">
+      <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4 sm:p-8 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] relative overflow-hidden">
         <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 border-b border-border/60 pb-5 sm:pb-6">
@@ -106,7 +106,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
                 type="button"
                 onClick={() => avatarFileInputRef.current?.click()}
                 title="Click to upload profile photo"
-                className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-amber-500 overflow-hidden bg-muted/30 flex items-center justify-center font-black text-amber-600 text-xl sm:text-2xl shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-amber-500/80 overflow-hidden bg-muted/30 flex items-center justify-center font-black text-amber-600 text-xl sm:text-2xl shadow-md shadow-amber-500/20 cursor-pointer hover:opacity-90 transition-opacity"
               >
                 {(isEditingProfile ? profileAvatar : user.avatar) ? (
                   <Image
@@ -127,7 +127,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
                 type="button"
                 onClick={() => avatarFileInputRef.current?.click()}
                 title="Upload new photo"
-                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-zinc-950 shadow-xs ring-2 ring-background cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 shadow-xs ring-2 ring-background cursor-pointer transition-transform hover:scale-110 active:scale-95"
               >
                 <Camera className="h-3.5 w-3.5 stroke-[2.5]" />
               </button>
@@ -138,7 +138,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
                 <h2 className="text-lg sm:text-2xl font-black tracking-tight text-foreground truncate max-w-[200px] sm:max-w-none">
                   {isEditingProfile ? (profileName || "Your Name") : user.name}
                 </h2>
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold shrink-0">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold shrink-0">
                   <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Verified
                 </span>
@@ -163,7 +163,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               <button
                 type="button"
                 onClick={() => setIsEditingProfile(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-4 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
               >
                 <Edit3 className="h-4 w-4" />
                 <span>Edit Profile</span>
@@ -290,7 +290,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               </button>
               <button
                 type="submit"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 transition-all cursor-pointer active:scale-95 text-center"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95 text-center"
               >
                 <Save className="h-4 w-4" />
                 <span>Save Changes</span>
@@ -413,7 +413,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               <button
                 type="button"
                 onClick={handleConfirmProfileSave}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
               >
                 <Check className="h-4 w-4 stroke-[2.5]" />
                 <span>Yes, Confirm & Save</span>

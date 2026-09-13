@@ -82,7 +82,7 @@ export function OrderTrackingTimeline({ order }: OrderTrackingTimelineProps) {
   ];
 
   return (
-    <div className="rounded-3xl border border-border/70 bg-card p-6 sm:p-8 shadow-sm space-y-7">
+    <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-6 sm:p-8 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] space-y-7">
       {/* Top Banner: Status & Tracking Reference */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-5">
         <div>

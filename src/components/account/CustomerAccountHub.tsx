@@ -181,7 +181,7 @@ export function CustomerAccountHub() {
         <div className="pt-2">
           <Link
             href={ROUTES.LOGIN}
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 text-xs font-bold shadow-md transition-all active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-6 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
           >
             <span>Sign In with 1-Tap Demo</span>
             <ChevronRight className="h-4 w-4" />
@@ -220,9 +220,9 @@ export function CustomerAccountHub() {
         ) : (
           <div className="space-y-3 pb-8">
             {/* Top User Profile Card */}
-            <div className="rounded-2xl border border-border/80 bg-card p-4.5 shadow-2xs">
+            <div className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4.5 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)]">
               <div className="flex items-center gap-4">
-                <div className="relative h-16 w-16 shrink-0 rounded-full border-2 border-border/90 flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
+                <div className="relative h-16 w-16 shrink-0 rounded-2xl border-2 border-amber-500/80 shadow-xs flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
                   {user.avatar ? (
                     <Image
                       src={user.avatar}

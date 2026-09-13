@@ -238,7 +238,7 @@ export function AddressFormModal({
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white py-3 font-bold shadow-md hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+              className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 py-3 font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
             >
               {isEditing ? "Save Changes" : "Add Address"}
             </button>

@@ -113,7 +113,7 @@ export function OrdersTab({
 
         {/* Filter Pills - Swipeable by touch on mobile with momentum scrolling */}
         <div className="w-full overflow-x-auto overscroll-x-contain touch-pan-x scrollbar-none py-0.5">
-          <div className="inline-flex items-center gap-1.5 bg-background/90 dark:bg-muted/60 p-1 rounded-2xl shadow-2xs min-w-max">
+          <div className="inline-flex items-center gap-1.5 bg-background/90 dark:bg-muted/60 p-1.5 rounded-2xl shadow-2xs min-w-max border border-border/50">
             {(
               [
                 { key: "all", label: "All" },
@@ -127,9 +127,9 @@ export function OrdersTab({
                 type="button"
                 onClick={() => setOrderFilter(tab.key)}
                 className={cn(
-                  "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 touch-manipulation active:scale-95",
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 touch-manipulation active:scale-95",
                   orderFilter === tab.key
-                    ? "bg-amber-500 text-white shadow-2xs"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black shadow-md shadow-amber-500/25"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
@@ -155,7 +155,7 @@ export function OrdersTab({
           {filteredOrders.map((order) => (
             <div
               key={order.id}
-              className="rounded-2xl sm:rounded-3xl bg-card/90 dark:bg-muted/30 p-4 sm:p-6 space-y-4 shadow-sm hover:shadow-md transition-all"
+              className="rounded-3xl border border-border/80 dark:border-white/10 bg-card p-4.5 sm:p-6 space-y-4 shadow-[0_6px_25px_-4px_rgba(0,0,0,0.08),0_2px_10px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.65)] hover:border-amber-500/30 hover:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.12)] transition-all"
             >
               {/* Order Header: Order Number, Date, Status, Total */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/40">
@@ -190,7 +190,7 @@ export function OrdersTab({
               <div className="divide-y divide-border/30">
                 {order.items.map((item) => (
                   <div key={item.id} className="py-3 first:pt-0 last:pb-0 flex items-center gap-3.5">
-                    <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs">
+                    <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs border border-border/40">
                       <Image
                         src={item.productThumbnail}
                         alt={item.productName}
@@ -282,7 +282,7 @@ export function OrdersTab({
                         productThumbnail: order.items[0].productThumbnail,
                       })
                     }
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-amber-500/20 transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95 flex-1 sm:flex-initial"
                   >
                     <Star className="h-3.5 w-3.5 fill-current" />
                     <span>Write Review</span>
