@@ -35,7 +35,7 @@ export const ADMIN_NAV_ITEMS = [
     title: "Orders & Shipping",
     href: "/dashboard/orders",
     icon: ShoppingBag,
-    badge: "3 New",
+    badge: "3",
   },
   {
     title: "Products & Stock",
@@ -99,45 +99,44 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* ── Mobile Backdrop (Drawer overlay) ── */}
+      {/* ── Mobile Backdrop ── */}
       {isMobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-xs lg:hidden animate-in fade-in duration-200"
         />
       )}
 
-      {/* ── Sidebar Element (Desktop Fixed + Mobile Slide-over) ── */}
+      {/* ── Seamless Liquid Shadow Sidebar ── */}
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-border/80 bg-sidebar transition-all duration-300",
-          // Desktop sizing
+          "fixed top-0 bottom-0 left-0 z-30 flex flex-col border-none bg-sidebar text-sidebar-foreground transition-all duration-300 select-none",
+          "shadow-[4px_0_24px_-4px_rgba(0,0,0,0.06),12px_0_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[4px_0_30px_-4px_rgba(0,0,0,0.45),12px_0_60px_-10px_rgba(0,0,0,0.35)]",
           isOpen ? "lg:w-64" : "lg:w-20",
-          // Mobile drawer positioning
           isMobileOpen
-            ? "translate-x-0 w-72 shadow-2xl"
+            ? "translate-x-0 w-72"
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Brand Header */}
-        <div className="flex h-16 items-center justify-between border-b border-border/80 px-4">
+        {/* Brand Header with Gradient & Rounded Bottom-Right Corner */}
+        <div className="flex h-16 items-center justify-between px-4 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/50 border-b border-r border-border/50 shadow-xs">
           <Link
             href={ROUTES.DASHBOARD}
-            className="flex items-center gap-2.5 overflow-hidden group"
+            className="flex items-center gap-3 overflow-hidden group"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-black text-sm shadow-md shadow-amber-500/20">
-              T
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background font-bold text-sm tracking-tight shadow-2xs transition-transform group-hover:scale-105">
+              <span>T</span>
             </div>
+
             {(isOpen || isMobileOpen) && (
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-black text-sm tracking-tight text-foreground">
-                    TELOS ADMIN
+                  <span className="font-semibold text-sm tracking-tight text-foreground">
+                    Telos Admin
                   </span>
-                  <ShieldCheck className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                 </div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                  Merchant Hub BD
+                <p className="text-[10px] text-muted-foreground font-medium">
+                  Store Management
                 </p>
               </div>
             )}
@@ -147,16 +146,16 @@ export function AdminSidebar() {
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+            className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation List */}
-        <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
-          <div className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            {isOpen || isMobileOpen ? "Store Management" : "•••"}
+        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+          <div className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+            {isOpen || isMobileOpen ? "Navigation" : "•••"}
           </div>
 
           {ADMIN_NAV_ITEMS.map((item) => {
@@ -167,29 +166,30 @@ export function AdminSidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition-all",
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
                   active
-                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                    ? "bg-foreground text-background font-semibold shadow-2xs"
+                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                 )}
                 title={!isOpen && !isMobileOpen ? item.title : undefined}
               >
                 <item.icon
                   className={cn(
-                    "h-4 w-4 shrink-0 transition-transform group-hover:scale-110",
-                    active ? "text-white" : "text-muted-foreground"
+                    "h-4 w-4 shrink-0 transition-colors",
+                    active ? "text-background" : "text-muted-foreground group-hover:text-foreground"
                   )}
                 />
+
                 {(isOpen || isMobileOpen) && (
-                  <div className="flex flex-1 items-center justify-between">
+                  <div className="flex flex-1 items-center justify-between min-w-0">
                     <span className="truncate">{item.title}</span>
                     {item.badge && (
                       <span
                         className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-extrabold",
+                          "rounded-md px-1.5 py-0.5 text-[10px] font-medium",
                           active
-                            ? "bg-white/20 text-white"
-                            : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                            ? "bg-background/20 text-background"
+                            : "bg-muted text-muted-foreground"
                         )}
                       >
                         {item.badge}
@@ -202,23 +202,23 @@ export function AdminSidebar() {
           })}
         </nav>
 
-        {/* Public Storefront Link, Logout & Desktop Collapse Toggle */}
-        <div className="border-t border-border/80 p-3 space-y-1.5">
+        {/* Footer Actions */}
+        <div className="border-t border-border/40 p-3 space-y-1">
           <Link
             href={ROUTES.HOME}
             target="_blank"
-            className="flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
           >
-            <Store className="h-4 w-4 shrink-0 text-amber-500" />
+            <Store className="h-4 w-4 shrink-0 text-muted-foreground" />
             {(isOpen || isMobileOpen) && (
-              <span className="truncate">View Public Store</span>
+              <span className="truncate">Public Store</span>
             )}
           </Link>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             {(isOpen || isMobileOpen) && (
@@ -229,15 +229,15 @@ export function AdminSidebar() {
           <button
             type="button"
             onClick={toggleSidebar}
-            className="hidden lg:flex w-full items-center justify-center gap-2 rounded-xl border border-border/80 py-2 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            className="hidden lg:flex w-full items-center justify-center gap-2 rounded-lg border border-border/80 py-1.5 text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors cursor-pointer"
           >
             {isOpen ? (
               <>
-                <ChevronLeft className="h-4 w-4" />
-                <span>Collapse</span>
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span className="text-[11px]">Collapse</span>
               </>
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             )}
           </button>
         </div>
