@@ -1,6 +1,9 @@
 export { OverviewTab } from "./OverviewTab";
 export { ProfileTab } from "./ProfileTab";
 export { AddressesTab } from "./AddressesTab";
+export { AddressCard } from "./AddressCard";
+export { AddressFormModal } from "./AddressFormModal";
+export { AddressConfirmDialogs } from "./AddressConfirmDialogs";
 export { OrdersTab } from "./OrdersTab";
 export { TrackingTab } from "./TrackingTab";
 export { ReturnsTab } from "./ReturnsTab";
