@@ -24,6 +24,7 @@ interface AuthActions {
   registerCustomer: (name: string, email: string, phone: string) => void;
   updateUser: (updates: Partial<CustomerUser>) => void;
   addAddress: (address: Omit<Address, "id">) => void;
+  updateAddress: (id: string, updates: Partial<Omit<Address, "id">>) => void;
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
   addOrder: (order: Order) => void;
@@ -129,6 +130,26 @@ export const useAuthStore = create<AuthStore>()(
             user: {
               ...state.user,
               addresses: [addrWithId, ...updatedAddresses],
+            },
+          };
+        });
+      },
+
+      updateAddress: (id, updates) => {
+        set((state) => {
+          if (!state.user) return state;
+          let updatedAddresses = state.user.addresses.map((a) =>
+            a.id === id ? { ...a, ...updates } : a
+          );
+          if (updates.isDefault) {
+            updatedAddresses = updatedAddresses.map((a) =>
+              a.id === id ? { ...a, isDefault: true } : { ...a, isDefault: false }
+            );
+          }
+          return {
+            user: {
+              ...state.user,
+              addresses: updatedAddresses,
             },
           };
         });
