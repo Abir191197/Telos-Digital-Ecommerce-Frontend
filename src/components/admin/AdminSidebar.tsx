@@ -54,11 +54,10 @@ export const ADMIN_NAV_GROUPS: { group: string; items: NavGroupItem[] }[] = [
       {
         title: "Orders",
         icon: ShoppingBag,
-        badge: "3",
+        badge: "2",
         children: [
           { title: "All Orders", href: "/dashboard/orders" },
           { title: "Pending Dispatch", href: "/dashboard/orders?status=pending", badge: "2" },
-          { title: "Returns & Exchanges", href: "/dashboard/orders?tab=returns" },
         ],
       },
     ],
@@ -226,27 +225,61 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* ── Mobile Backdrop ── */}
+      {/* ── Mobile Backdrop (Sits above content, below bottom dock) ── */}
       {isMobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-xs lg:hidden animate-in fade-in duration-200"
+          className="fixed top-0 left-0 right-0 bottom-16 z-40 bg-foreground/20 backdrop-blur-xs lg:hidden animate-in fade-in duration-200"
         />
       )}
 
       {/* ── Seamless Liquid Shadow Sidebar ── */}
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-none bg-sidebar text-sidebar-foreground transition-all duration-300 select-none",
+          "fixed top-0 left-0 z-40 flex flex-col border-none bg-sidebar text-sidebar-foreground transition-all duration-300 select-none",
           "shadow-[4px_0_24px_-4px_rgba(0,0,0,0.06),12px_0_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[4px_0_30px_-4px_rgba(0,0,0,0.45),12px_0_60px_-10px_rgba(0,0,0,0.35)]",
+          "bottom-16 lg:bottom-0 border-r border-border/70 lg:border-r-0",
           isOpen ? "lg:w-64" : "lg:w-20",
           isMobileOpen
             ? "translate-x-0 w-72"
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Brand Header with Gradient & Rounded Bottom-Right Corner */}
-        <div className="flex h-16 items-center justify-between px-3.5 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/60 border-b border-r border-border/70 shadow-sm">
+        {/* ── Top Header Area ── */}
+        {/* On Mobile: Rich Admin Profile Card */}
+        <div className="lg:hidden flex items-center justify-between p-3.5 bg-muted/40 border-b border-border/70">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Admin Avatar Squircle */}
+            <div className="relative shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 font-black text-white text-xs shadow-xs">
+              AD
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-sidebar" />
+            </div>
+            {/* Info */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="font-bold text-xs text-foreground truncate">
+                  Store Administrator
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                admin@telos.com.bd
+              </p>
+            </div>
+          </div>
+
+          {/* Close Drawer Button */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors shrink-0"
+            aria-label="Close sidebar"
+          >
+            <X className="h-4.5 w-4.5" />
+          </button>
+        </div>
+
+        {/* On Desktop: Standard Brand Header with Collapse Toggle */}
+        <div className="hidden lg:flex h-16 items-center justify-between px-3.5 rounded-br-2xl bg-gradient-to-br from-sidebar via-sidebar to-muted/60 border-b border-r border-border/70 shadow-sm">
           <Link
             href={ROUTES.DASHBOARD}
             className="flex items-center gap-2.5 overflow-hidden group min-w-0"
@@ -307,7 +340,7 @@ export function AdminSidebar() {
               </div>
             </div>
 
-            {(isOpen || isMobileOpen) && (
+            {isOpen && (
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 leading-none">
                   <span className="font-extrabold text-[14px] tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
@@ -326,7 +359,7 @@ export function AdminSidebar() {
           <button
             type="button"
             onClick={toggleSidebar}
-            className="hidden lg:flex h-8 w-8 items-center justify-center rounded-xl bg-muted dark:bg-zinc-800 text-foreground shadow-xs border border-border/80 hover:bg-foreground hover:text-background transition-all duration-200 cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted dark:bg-zinc-800 text-foreground shadow-xs border border-border/80 hover:bg-foreground hover:text-background transition-all duration-200 cursor-pointer"
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
             title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
@@ -335,15 +368,6 @@ export function AdminSidebar() {
             ) : (
               <ChevronRight className="h-4 w-4 stroke-[2.4]" />
             )}
-          </button>
-
-          {/* Mobile Close Button */}
-          <button
-            type="button"
-            onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-2 rounded-xl text-foreground/70 hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
-          >
-            <X className="h-5 w-5" />
           </button>
         </div>
 

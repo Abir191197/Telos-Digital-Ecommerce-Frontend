@@ -22,7 +22,7 @@ import {
   Minimize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/common";
+import { ThemeToggle, Logo } from "@/components/common";
 
 export function AdminHeader() {
   const router = useRouter();
@@ -108,15 +108,13 @@ export function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between lg:justify-end border-none bg-sidebar/95 backdrop-blur-md px-4 sm:px-6 transition-colors shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06),0_12px_48px_-12px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_30px_-4px_rgba(0,0,0,0.45),0_12px_60px_-10px_rgba(0,0,0,0.35)]">
-      {/* Mobile Drawer Button on Mobile Only */}
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
-        aria-label="Open mobile navigation"
+      {/* Mobile Brand Logo on Mobile Only */}
+      <Link
+        href={ROUTES.DASHBOARD}
+        className="lg:hidden flex items-center gap-2 group min-w-0"
       >
-        <Menu className="h-4.5 w-4.5" />
-      </button>
+        <Logo size={32} showText={true} />
+      </Link>
 
       {/* Right-Aligned Navigation Cluster */}
       <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">

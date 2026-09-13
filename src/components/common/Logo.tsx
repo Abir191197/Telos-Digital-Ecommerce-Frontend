@@ -5,6 +5,7 @@ interface LogoProps {
   size?: number;
   showText?: boolean;
   textColor?: string;
+  textSize?: string;
 }
 
 export function Logo({
@@ -12,6 +13,7 @@ export function Logo({
   size = 34,
   showText = true,
   textColor,
+  textSize,
 }: LogoProps) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
@@ -85,11 +87,11 @@ export function Logo({
       {/* Brand Name Typography matching mother concern Telos Digital */}
       {showText && (
         <span
-          className={`text-lg font-bold tracking-tight flex items-center gap-1.5 font-sans ${
+          className={`${textSize || "text-sm sm:text-base"} font-bold tracking-tight flex items-center gap-1 font-sans ${
             textColor || "text-foreground"
           }`}
         >
-          TELOS <span className="text-amber-500 font-semibold text-base tracking-normal">CART</span>
+          TELOS <span className="text-amber-500 font-semibold text-xs sm:text-sm tracking-normal">CART</span>
         </span>
       )}
     </div>
