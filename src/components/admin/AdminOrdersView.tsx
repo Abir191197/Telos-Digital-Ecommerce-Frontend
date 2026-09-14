@@ -152,7 +152,7 @@ export function AdminOrdersView() {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
       {/* ── Header Strip ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
         <div>
@@ -266,7 +266,14 @@ export function AdminOrdersView() {
                   <button
                     key={pill.id}
                     type="button"
-                    onClick={() => setStatusFilter(pill.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const currentY = window.scrollY;
+                      setStatusFilter(pill.id);
+                      requestAnimationFrame(() => {
+                        window.scrollTo({ top: currentY, behavior: "instant" });
+                      });
+                    }}
                     className={cn(
                       "h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 select-none",
                       isSelected
@@ -323,12 +330,12 @@ export function AdminOrdersView() {
       {/* 1. DEDICATED CARD VIEW: Always rendered on mobile, or when viewMode === 'card' on desktop */}
       <div
         className={cn(
-          "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5",
+          "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 min-h-[70vh] sm:min-h-[440px]",
           viewMode === "table" && "sm:hidden"
         )}
       >
           {filteredOrders.length === 0 ? (
-            <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground">
+            <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[380px]">
               <Box className="h-10 w-10 mx-auto mb-2 opacity-40" />
               <p className="font-bold text-foreground text-sm">No orders found</p>
               <p className="text-xs mt-0.5">Try clearing your filters or search query.</p>

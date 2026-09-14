@@ -112,7 +112,7 @@ export function AdminPendingDispatchView() {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
       {/* ── Header Strip: Dedicated Dispatch Operational Hub ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
         <div>
@@ -213,9 +213,14 @@ export function AdminPendingDispatchView() {
                   <button
                     key={pill.id}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const currentY = window.scrollY;
                       setCourierFilter(pill.id);
                       setCurrentPage(1);
+                      requestAnimationFrame(() => {
+                        window.scrollTo({ top: currentY, behavior: "instant" });
+                      });
                     }}
                     className={cn(
                       "h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95",
@@ -243,9 +248,14 @@ export function AdminPendingDispatchView() {
                   <button
                     key={zone.id}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const currentY = window.scrollY;
                       setZoneFilter(zone.id);
                       setCurrentPage(1);
+                      requestAnimationFrame(() => {
+                        window.scrollTo({ top: currentY, behavior: "instant" });
+                      });
                     }}
                     className={cn(
                       "h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95",
@@ -301,12 +311,12 @@ export function AdminPendingDispatchView() {
       {/* ── Operational Dispatch Grid (Action-First Cards) - Always rendered on mobile ── */}
       <div
         className={cn(
-          "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5",
+          "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 min-h-[70vh] sm:min-h-[440px]",
           viewMode === "table" && "sm:hidden"
         )}
       >
         {filteredQueue.length === 0 ? (
-          <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground">
+          <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[380px]">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-emerald-500 opacity-80" />
             <p className="font-bold text-foreground text-sm">Dispatch Queue All Clear!</p>
             <p className="text-xs mt-0.5">No pending orders matching your filter require fulfillment.</p>
