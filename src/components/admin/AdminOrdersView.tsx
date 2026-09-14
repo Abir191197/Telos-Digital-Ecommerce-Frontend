@@ -30,12 +30,14 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Order, OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
 import { KpiCard } from "./dashboard/KpiCard";
 
 export function AdminOrdersView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialStatus = searchParams?.get("status") || "all";
 
@@ -374,8 +376,9 @@ export function AdminOrdersView() {
               return (
                 <div
                   key={order.id}
+                  onClick={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
                   className={cn(
-                    "group relative admin-card rounded-2xl bg-card p-4 sm:p-5 border-none flex flex-col justify-between gap-4 cursor-default transition-all duration-300 hover:-translate-y-0.5",
+                    "group relative admin-card rounded-2xl bg-card p-4 sm:p-5 border-none flex flex-col justify-between gap-4 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.99]",
                     accent.glow
                   )}
                 >
@@ -401,7 +404,9 @@ export function AdminOrdersView() {
                           })}
                         </span>
                       </div>
-                      {getStatusBadge(order.status)}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        {getStatusBadge(order.status)}
+                      </div>
                     </div>
                   </div>
 
@@ -418,7 +423,13 @@ export function AdminOrdersView() {
 
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0" />
-                      <span className="font-mono">{order.shippingAddress.phone}</span>
+                      <a
+                        href={`tel:${order.shippingAddress.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-mono hover:underline"
+                      >
+                        {order.shippingAddress.phone}
+                      </a>
                     </div>
 
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
@@ -489,15 +500,17 @@ export function AdminOrdersView() {
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOrder(order)}
+                  <div
+                    className="flex items-center gap-2 pt-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Link
+                      href={`/dashboard/orders/${order.orderNumber}`}
                       className="flex-1 py-2 px-3 rounded-xl bg-foreground text-background text-xs font-bold shadow-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      <span>Manage</span>
-                    </button>
+                      <span>Details</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => setInvoiceModalOrder(order)}
@@ -617,11 +630,12 @@ export function AdminOrdersView() {
                   paginatedOrders.map((order) => (
                     <tr
                       key={order.id}
-                      className="hover:bg-muted/30 transition-colors group"
+                      onClick={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
+                      className="hover:bg-muted/40 transition-colors group cursor-pointer"
                     >
                       {/* Order Number + Time */}
                       <td className="py-3.5 px-4 font-medium">
-                        <span className="font-mono font-black text-foreground">
+                        <span className="font-mono font-black text-foreground group-hover:text-amber-500 transition-colors">
                           #{order.orderNumber}
                         </span>
                         <p className="text-[11px] text-muted-foreground">
@@ -711,18 +725,23 @@ export function AdminOrdersView() {
 
                       {/* Action buttons */}
                       <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedOrder(order)}
-                            className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors cursor-pointer"
+                        <div
+                          className="flex items-center justify-end gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link
+                            href={`/dashboard/orders/${order.orderNumber}`}
+                            className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors cursor-pointer inline-flex items-center justify-center"
                             title="View order details"
                           >
                             <Eye className="h-4 w-4" />
-                          </button>
+                          </Link>
                           <button
                             type="button"
-                            onClick={() => setInvoiceModalOrder(order)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setInvoiceModalOrder(order);
+                            }}
                             className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors cursor-pointer"
                             title="Print invoice"
                           >

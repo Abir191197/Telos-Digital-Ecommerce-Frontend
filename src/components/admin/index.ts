@@ -8,3 +8,4 @@ export * from "./AdminPaymentsView";
 export * from "./AdminCustomersView";
 export * from "./AdminMobileBottomNav";
 export * from "./AdminPendingDispatchView";
+export * from "./AdminOrderDetailView";

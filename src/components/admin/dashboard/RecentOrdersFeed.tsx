@@ -6,12 +6,10 @@ import { cn } from "@/lib/utils";
 
 interface RecentOrdersFeedProps {
   orders: Order[];
-  onUpdateStatus: (orderId: string, status: OrderStatus) => void;
 }
 
 export function RecentOrdersFeed({
   orders,
-  onUpdateStatus,
 }: RecentOrdersFeedProps) {
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
@@ -93,22 +91,6 @@ export function RecentOrdersFeed({
                 ৳{order.total.toLocaleString()}
               </span>
             </div>
-
-            <div className="pt-1 flex items-center justify-end">
-              <select
-                value={order.status}
-                onChange={(e) =>
-                  onUpdateStatus(order.id, e.target.value as OrderStatus)
-                }
-                className="rounded-lg border border-border/60 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:outline-none cursor-pointer"
-              >
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
           </div>
         ))}
       </div>
@@ -122,8 +104,7 @@ export function RecentOrdersFeed({
               <th className="py-2.5 px-2">Customer</th>
               <th className="py-2.5 px-2">Total</th>
               <th className="py-2.5 px-2">Method</th>
-              <th className="py-2.5 px-2">Status</th>
-              <th className="py-2.5 px-2 text-right">Update</th>
+              <th className="py-2.5 px-2 text-right">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/30">
@@ -146,22 +127,7 @@ export function RecentOrdersFeed({
                 <td className="py-3 px-2 uppercase font-medium text-muted-foreground text-[10px]">
                   {order.paymentMethod}
                 </td>
-                <td className="py-3 px-2">{getStatusBadge(order.status)}</td>
-                <td className="py-3 px-2 text-right">
-                  <select
-                    value={order.status}
-                    onChange={(e) =>
-                      onUpdateStatus(order.id, e.target.value as OrderStatus)
-                    }
-                    className="rounded-lg border border-border/60 bg-background px-2 py-1 text-[11px] font-semibold text-foreground focus:outline-none cursor-pointer"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </td>
+                <td className="py-3 px-2 text-right">{getStatusBadge(order.status)}</td>
               </tr>
             ))}
           </tbody>
