@@ -147,11 +147,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
+            aria-label="Add to cart"
             className={cn(
-              "shrink-0 flex h-7 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-4 text-[10px] sm:text-xs font-bold transition-all active:scale-95 cursor-pointer",
+              "shrink-0 flex h-7 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-4 text-[10px] sm:text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer",
               isAdding
-                ? "bg-emerald-600 text-white"
-                : "bg-foreground text-background hover:opacity-90 hover:scale-105 shadow-sm"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                : "bg-foreground text-background hover:bg-amber-500 hover:text-zinc-950 hover:shadow-md hover:shadow-amber-500/25 hover:scale-105 shadow-sm"
             )}
           >
             <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.3]" />

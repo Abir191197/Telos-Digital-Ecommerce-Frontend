@@ -380,10 +380,10 @@ export function CategoriesView({ categories, popularProducts }: CategoriesViewPr
 
                       <Link
                         href={ROUTES.CATEGORY_DETAIL(cat.slug)}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98] shadow-xs"
+                        className="group/btn flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 hover:bg-amber-500 text-white hover:text-zinc-950 dark:bg-zinc-800 dark:hover:bg-amber-500 dark:text-zinc-100 dark:hover:text-zinc-950 py-2 sm:py-2.5 px-3 text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98] shadow-xs hover:shadow-md hover:shadow-amber-500/20"
                       >
                         <span>Explore</span>
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-400" />
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 group-hover/btn:translate-x-1 text-amber-400 group-hover/btn:text-zinc-950" />
                       </Link>
                     </div>
                   </m.div>

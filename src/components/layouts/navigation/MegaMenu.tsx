@@ -248,11 +248,11 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
                       <Link
                         href={ROUTES.CATEGORIES}
                         onClick={() => setCategoriesOpen(false)}
-                        className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 hover:bg-amber-500 hover:text-white dark:hover:text-zinc-950 px-2.5 py-1 text-[11px] font-extrabold text-amber-600 dark:text-amber-400 shadow-xs transition-all duration-200 group"
+                        className="inline-flex items-center gap-1 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3 py-1 text-[11px] font-extrabold shadow-sm shadow-amber-500/25 hover:shadow-md hover:shadow-amber-500/35 transition-all duration-200 group active:scale-95"
                       >
-                        <Grid className="h-3 w-3 text-amber-500 group-hover:text-inherit" />
+                        <Grid className="h-3 w-3 stroke-[2.5]" />
                         <span>View All</span>
-                        <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+                        <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5 stroke-[2.5]" />
                       </Link>
                     </div>
                     <div className="space-y-1 mt-1">
@@ -324,10 +324,10 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
                         <Link
                           href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
                           onClick={() => setCategoriesOpen(false)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white dark:hover:text-zinc-950 px-3 py-1 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-xs transition-all shrink-0 group"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3.5 py-1.5 text-xs font-extrabold shadow-sm shadow-amber-500/25 hover:shadow-md hover:shadow-amber-500/35 transition-all duration-200 shrink-0 group active:scale-95"
                         >
                           <span>View All</span>
-                          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 stroke-[2.5]" />
                         </Link>
                       </div>
 
