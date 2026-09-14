@@ -19,7 +19,7 @@ export function InvoiceModal({ order, isOpen, onClose }: InvoiceModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
       <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl border border-border/80 bg-background p-6 sm:p-8 shadow-2xl space-y-6 relative print:p-0 print:border-none print:shadow-none print:max-h-none">
         {/* Modal Controls (Hidden in Print) */}
         <div className="flex items-center justify-between border-b border-border/60 pb-3 print:hidden">
