@@ -19,7 +19,7 @@ export default async function AdminCategoriesPage({
 }: AdminCategoriesPageProps) {
   const params = await searchParams;
 
-  const initialTab = params.view === "list" ? "list" : "create";
+  const initialTab = params.action === "create" || params.view === "create" ? "create" : "list";
 
   return <CreateCategoryView initialTab={initialTab} />;
 }

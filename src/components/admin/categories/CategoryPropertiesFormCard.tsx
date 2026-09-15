@@ -25,8 +25,6 @@ import {
   Glasses,
   Plus,
   X,
-  Lock,
-  Unlock,
   Layers,
 } from "lucide-react";
 
@@ -81,20 +79,17 @@ export function CategoryPropertiesFormCard({
   onAddSubcategory,
   onRemoveSubcategory,
 }: CategoryPropertiesFormCardProps) {
-  const [isSlugCustom, setIsSlugCustom] = useState(false);
   const [subcategoryInput, setSubcategoryInput] = useState("");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     onChange("name", newName);
 
-    if (!isSlugCustom) {
-      const generatedSlug = newName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      onChange("slug", generatedSlug);
-    }
+    const generatedSlug = newName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    onChange("slug", generatedSlug);
   };
 
   const handleAddSubcategory = (e?: React.FormEvent) => {
@@ -148,41 +143,28 @@ export function CategoryPropertiesFormCard({
             />
           </div>
 
-          {/* URL Slug */}
+          {/* URL Slug (Auto-generated & Read-only) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-foreground flex items-center gap-1">
                 <span>URL Slug</span>
                 <span className="text-amber-500">*</span>
               </label>
-              <button
-                type="button"
-                onClick={() => setIsSlugCustom(!isSlugCustom)}
-                className="text-[11px] font-semibold text-muted-foreground hover:text-amber-500 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                {isSlugCustom ? (
-                  <>
-                    <Unlock className="h-3 w-3" /> Custom
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-3 w-3" /> Auto
-                  </>
-                )}
-              </button>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
+                Auto-generated
+              </span>
             </div>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono select-none">
                 /category/
               </span>
               <input
                 type="text"
-                required
-                disabled={!isSlugCustom}
+                readOnly
+                tabIndex={-1}
                 value={values.slug}
-                onChange={(e) => onChange("slug", e.target.value)}
-                placeholder="smart-watches"
-                className="w-full pl-22 pr-3.5 py-2.5 rounded-xl border border-border/80 bg-background disabled:bg-muted/20 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber-500 font-mono transition-all disabled:text-muted-foreground"
+                placeholder="auto-generated-slug"
+                className="w-full pl-22 pr-3.5 py-2.5 rounded-xl border border-border/70 bg-muted/30 text-sm text-muted-foreground font-mono transition-all cursor-not-allowed select-all focus:outline-none"
               />
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, CheckCircle2, FolderTree, ListFilter } from "lucide-react";
+import { ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
 import { useAdminStore } from "@/stores";
 import type { Category } from "@/types/ecommerce.types";
 import {
@@ -153,37 +153,9 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
               <span className="text-xs text-muted-foreground">Hierarchy & Taxonomies</span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              Category Management
+              Create Category
             </h1>
           </div>
-        </div>
-
-        {/* View Switcher Toggle */}
-        <div className="flex items-center rounded-2xl bg-muted/40 p-1 border border-border/60 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setCurrentView("create")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === "create"
-                ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <FolderTree className="h-3.5 w-3.5 text-amber-500" />
-            <span>Create Category</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrentView("list")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === "list"
-                ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <ListFilter className="h-3.5 w-3.5" />
-            <span>All Categories ({categories.length})</span>
-          </button>
         </div>
       </div>
 

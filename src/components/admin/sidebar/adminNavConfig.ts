@@ -69,15 +69,11 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         ],
       },
       {
-        title: "Categories",
+        title: "Category",
         icon: FolderTree,
         children: [
-          { title: "All Categories", href: "/dashboard/categories" },
-          { title: "Add Category", href: "/dashboard/categories?action=new" },
-          {
-            title: "Attributes & Tags",
-            href: "/dashboard/categories?tab=attributes",
-          },
+          { title: "Create category", href: "/dashboard/create-category" },
+          { title: "Manage category", href: "/dashboard/categories" },
         ],
       },
       {
