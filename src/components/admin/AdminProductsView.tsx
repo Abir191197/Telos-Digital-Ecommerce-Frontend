@@ -28,6 +28,7 @@ import {
   ProductDesktopTable,
   ProductCardItem,
   ProductFilterDock,
+  ProductFormValues,
 } from "./products";
 
 export function AdminProductsView() {
@@ -66,17 +67,30 @@ export function AdminProductsView() {
   const itemsPerPage = 12;
 
   // New product form state
-  const [formData, setFormData] = useState({
-    name: "",
-    categoryName: "Smartphones & Tablets",
-    price: 0,
-    originalPrice: 0,
-    stock: 10,
+  const [formData, setFormData] = useState<ProductFormValues>({
+    title: "",
     brand: "Apple",
+    categorySlug: "smartphones",
+    shortDesc: "",
+    price: "",
+    originalPrice: "",
+    stock: 10,
+    badge: "",
+    warranty: "",
+    hasVoucher: false,
+    voucherType: "percentage",
+    voucherValue: "",
+    voucherCode: "",
+    showVoucherOnCard: false,
     sku: "",
-    thumbnail:
-      "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
+    description: "",
+    isFeatured: false,
+    isFlashDeal: false,
   });
+
+  const [formImages, setFormImages] = useState<string[]>([
+    "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
+  ]);
 
   // Mobile Manage Sheet/Modal Product State
   const [managingProduct, setManagingProduct] = useState<Product | null>(null);
@@ -254,16 +268,28 @@ export function AdminProductsView() {
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     setFormData({
-      name: "",
-      categoryName: categories[0] || "Smartphones & Tablets",
-      price: 0,
-      originalPrice: 0,
-      stock: 10,
+      title: "",
       brand: "Apple",
+      categorySlug: "smartphones",
+      shortDesc: "",
+      price: "",
+      originalPrice: "",
+      stock: 10,
+      badge: "",
+      warranty: "",
+      hasVoucher: false,
+      voucherType: "percentage",
+      voucherValue: "",
+      voucherCode: "",
+      showVoucherOnCard: false,
       sku: "",
-      thumbnail:
-        "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
+      description: "",
+      isFeatured: false,
+      isFlashDeal: false,
     });
+    setFormImages([
+      "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
+    ]);
     setShowAddModal(true);
   };
 
@@ -271,50 +297,75 @@ export function AdminProductsView() {
     setActiveMenuId(null);
     setEditingProduct(product);
     setFormData({
-      name: product.name,
-      categoryName: product.categoryName,
-      price: product.price,
-      originalPrice: product.originalPrice || product.price,
-      stock: product.stock,
+      title: product.name,
       brand: product.brand,
+      categorySlug: product.categorySlug || "smartphones",
+      shortDesc: product.shortDescription || "",
+      price: product.price,
+      originalPrice: product.originalPrice || "",
+      stock: product.stock,
+      badge: product.tags?.[0] || "",
+      warranty: product.specifications?.Warranty || "",
+      hasVoucher: false,
+      voucherType: "percentage",
+      voucherValue: "",
+      voucherCode: "",
+      showVoucherOnCard: false,
       sku: product.sku || "",
-      thumbnail: product.thumbnail,
+      description: product.description || "",
+      isFeatured: product.isFeatured || false,
+      isFlashDeal: product.isFlashDeal || false,
     });
+    setFormImages(product.images && product.images.length > 0 ? product.images : [product.thumbnail]);
     setShowAddModal(true);
   };
 
   // Warning Popup on Form Save
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || formData.price <= 0) return;
+    if (!formData.title || !formData.price || Number(formData.price) <= 0) return;
+
+    const categoryName = formData.categorySlug.replace(/-/g, " ");
+    const thumbnail = formImages[0] || "";
 
     if (editingProduct) {
       setConfirmDialog({
         isOpen: true,
         title: "Save Product Updates",
-        message: `Confirm updating "${formData.name}"? Price will be set to ৳${Number(
+        message: `Confirm updating "${formData.title}"? Price will be set to ৳${Number(
           formData.price
         ).toLocaleString()} with stock set to ${formData.stock} units.`,
         confirmLabel: "Save Changes",
         variant: "primary",
         onConfirm: () => {
           updateProduct(editingProduct.id, {
-            name: formData.name,
-            categoryName: formData.categoryName,
+            name: formData.title,
+            categoryName: categoryName,
+            categorySlug: formData.categorySlug,
             price: Number(formData.price),
-            originalPrice: Number(formData.originalPrice || formData.price),
+            originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
             stock: Number(formData.stock),
             inStock: Number(formData.stock) > 0,
             brand: formData.brand,
             sku: formData.sku,
-            thumbnail: formData.thumbnail,
+            thumbnail: thumbnail,
+            images: formImages,
+            shortDescription: formData.shortDesc,
+            description: formData.description,
+            isFeatured: formData.isFeatured,
+            isFlashDeal: formData.isFlashDeal,
+            specifications: {
+              ...(editingProduct.specifications || {}),
+              Brand: formData.brand,
+              Warranty: formData.warranty || "1 Year Brand Warranty",
+            }
           });
           setShowAddModal(false);
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
         },
       });
     } else {
-      const slug = formData.name
+      const slug = formData.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
@@ -322,25 +373,25 @@ export function AdminProductsView() {
       const created: Product = {
         id: `prod-${Date.now()}`,
         slug: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.name,
-        shortDescription: `Authentic ${formData.name} with official brand warranty.`,
-        description: `Premium authentic ${formData.name} with verified warranty.`,
+        name: formData.title,
+        shortDescription: formData.shortDesc || `Authentic ${formData.title} with official brand warranty.`,
+        description: formData.description || `Premium authentic ${formData.title} with verified warranty.`,
         categoryId: "cat-general",
-        categorySlug: "general-tech",
-        categoryName: formData.categoryName,
+        categorySlug: formData.categorySlug,
+        categoryName: categoryName,
         price: Number(formData.price),
-        originalPrice: Number(formData.originalPrice || formData.price),
+        originalPrice: formData.originalPrice ? Number(formData.originalPrice) : Number(formData.price),
         discountPercentage: 0,
         currency: "BDT",
         rating: 4.9,
         reviewCount: 1,
         stock: Number(formData.stock),
         inStock: Number(formData.stock) > 0,
-        isFeatured: false,
-        isFlashDeal: false,
+        isFeatured: formData.isFeatured,
+        isFlashDeal: formData.isFlashDeal,
         isNewArrival: true,
-        images: [formData.thumbnail],
-        thumbnail: formData.thumbnail,
+        images: formImages,
+        thumbnail: thumbnail,
         brand: formData.brand,
         sku:
           formData.sku ||
@@ -349,9 +400,9 @@ export function AdminProductsView() {
           )}`,
         specifications: {
           Brand: formData.brand,
-          Warranty: "1 Year Brand Warranty",
+          Warranty: formData.warranty || "1 Year Brand Warranty",
         },
-        tags: ["official-store", "tech"],
+        tags: formData.badge ? [formData.badge.toLowerCase()] : ["official-store", "tech"],
         createdAt: new Date().toISOString(),
       };
 
@@ -608,7 +659,8 @@ export function AdminProductsView() {
         editingProduct={editingProduct}
         formData={formData}
         setFormData={setFormData}
-        categories={categories}
+        images={formImages}
+        setImages={setFormImages}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleSaveProduct}
       />
