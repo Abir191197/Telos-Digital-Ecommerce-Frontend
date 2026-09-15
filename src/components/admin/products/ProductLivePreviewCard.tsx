@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Zap, ShieldCheck, Star, Ticket, ImageIcon } from "lucide-react";
 

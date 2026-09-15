@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef } from "react";
 import { UploadCloud, X, Trash2, AlertTriangle } from "lucide-react";
 
