@@ -49,6 +49,56 @@ export function AdminOrdersView() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
 
+  // Mobile Draggable Floating Filter State
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [fabPosition, setFabPosition] = useState<{ x: number; y: number }>({
+    x: 16,
+    y: 90,
+  });
+  const isDraggingRef = React.useRef(false);
+  const dragStartRef = React.useRef<{ startX: number; startY: number; posX: number; posY: number }>({
+    startX: 0,
+    startY: 0,
+    posX: 16,
+    posY: 90,
+  });
+  const hasMovedRef = React.useRef(false);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    isDraggingRef.current = true;
+    hasMovedRef.current = false;
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      posX: fabPosition.x,
+      posY: fabPosition.y,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    const deltaX = dragStartRef.current.startX - e.clientX;
+    const deltaY = dragStartRef.current.startY - e.clientY;
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      hasMovedRef.current = true;
+    }
+    const newX = Math.max(10, Math.min(window.innerWidth - 65, dragStartRef.current.posX + deltaX));
+    const newY = Math.max(70, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY));
+    setFabPosition({ x: newX, y: newY });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    try {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+    if (!hasMovedRef.current) {
+      setShowMobileFilters(true);
+    }
+  };
+
   React.useEffect(() => {
     const st = searchParams?.get("status");
     if (st) {
@@ -155,6 +205,32 @@ export function AdminOrdersView() {
 
   return (
     <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
+      {/* ── Mobile Dedicated Top Search Bar (Pinned immediately below navbar on page landing) ── */}
+      <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
+        <div className="relative w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search order #, customer, phone, city..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-amber-500/40 focus:outline-none transition-all placeholder:text-muted-foreground/60 border border-border/50"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* ── Header Strip ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
         <div>
@@ -195,7 +271,7 @@ export function AdminOrdersView() {
       </div>
 
       {/* ── 4 Essential Orders KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         <KpiCard
           title="Fulfillment Volume"
           rawValue={totalVolume}
@@ -227,17 +303,17 @@ export function AdminOrdersView() {
         />
       </div>
 
-      {/* ── Sticky Filter, Search & View Toggle Dock (Full-width edge-to-edge on mobile, rounded card on desktop) ── */}
-      <div className="sticky top-16 z-20 -mx-4 sm:mx-0 px-4 sm:px-4 py-2.5 sm:py-3 bg-background/95 sm:bg-card/90 backdrop-blur-xl border-y sm:border sm:rounded-2xl border-border/50 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_28px_-8px_rgba(0,0,0,0.4)] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3 transition-all">
-        {/* Search */}
-        <div className="relative flex-1">
+      {/* ── Status Pills & Desktop Search Controls Dock ── */}
+      <div className="sticky top-16 z-20 px-3 sm:px-4 py-2.5 sm:py-3 bg-card/90 backdrop-blur-xl border rounded-2xl border-border/50 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 transition-all">
+        {/* Desktop Search (hidden on mobile, mobile uses top pinned bar) */}
+        <div className="relative flex-1 hidden md:block">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search order #, customer name, phone, city, or courier..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 sm:h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs sm:text-sm font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-foreground/20 focus:outline-none transition-all placeholder:text-muted-foreground/60"
+            className="h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs sm:text-sm font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-amber-500/40 focus:outline-none transition-all placeholder:text-muted-foreground/60 border border-border/40"
           />
           {searchQuery && (
             <button
@@ -251,51 +327,43 @@ export function AdminOrdersView() {
         </div>
 
         {/* Status Pills + View Mode Toggle Container */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Touch-swipeable Status Pills with subtle right fade hint */}
+        <div className="flex items-center justify-between gap-2 w-full md:w-auto">
+          {/* Touch-swipeable Status Pills */}
           <div className="relative flex-1 min-w-0">
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x overscroll-x-contain select-none">
               {[
                 { id: "all", label: "All" },
                 { id: "pending", label: "Pending" },
                 { id: "processing", label: "Processing" },
-                { id: "shipped", label: "In Transit" },
+                { id: "shipped", label: "Shipped" },
                 { id: "delivered", label: "Delivered" },
                 { id: "cancelled", label: "Cancelled" },
-              ].map((pill) => {
-                const isSelected = statusFilter === pill.id;
+              ].map((tab) => {
+                const isSelected = statusFilter === tab.id;
                 return (
                   <button
-                    key={pill.id}
+                    key={tab.id}
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const currentY = window.scrollY;
-                      setStatusFilter(pill.id);
-                      requestAnimationFrame(() => {
-                        window.scrollTo({ top: currentY, behavior: "instant" });
-                      });
+                    onClick={() => {
+                      setStatusFilter(tab.id);
+                      setCurrentPage(1);
                     }}
                     className={cn(
-                      "h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 select-none",
+                      "h-8 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95",
                       isSelected
-                        ? "bg-foreground text-background shadow-xs font-black"
-                        : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                        ? "bg-amber-500 text-zinc-950 font-black shadow-xs"
+                        : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60"
                     )}
                   >
-                    {pill.label}
+                    {tab.label}
                   </button>
                 );
               })}
             </div>
-            {/* Subtle mobile right fade hint */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background sm:from-card to-transparent sm:hidden" />
           </div>
 
-          <div className="h-4 w-[1px] bg-border/60 shrink-0 hidden sm:block mx-1" />
-
-          {/* View Mode Toggle (Table / Card) - Hidden on Mobile, always dedicated Card view on mobile */}
-          <div className="hidden sm:flex items-center justify-end p-1 rounded-xl bg-muted/70 text-xs font-semibold shrink-0">
+          {/* Desktop Only View Mode Switcher */}
+          <div className="hidden md:flex items-center p-1 rounded-xl bg-muted/70 text-xs font-semibold shrink-0">
             <button
               type="button"
               onClick={() => setViewMode("table")}
@@ -308,7 +376,7 @@ export function AdminOrdersView() {
               title="Table View"
             >
               <List className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Table</span>
+              <span>Table</span>
             </button>
             <button
               type="button"
@@ -322,7 +390,7 @@ export function AdminOrdersView() {
               title="Card Grid View"
             >
               <LayoutGrid className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Cards</span>
+              <span>Cards</span>
             </button>
           </div>
         </div>
@@ -819,10 +887,10 @@ export function AdminOrdersView() {
         </div>
       )}
 
-      {/* ── Order Detail Drawer Modal (Clean, No Border, Intense Backdrop) ── */}
+      {/* ── Order Detail Drawer Modal (z-[9999] covers all headers and bottom navs) ── */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card p-5 sm:p-6 shadow-[0_20px_70px_rgba(0,0,0,0.5)] border-none space-y-5 relative">
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-card p-5 sm:p-6 shadow-2xl border-none space-y-5 relative animate-in slide-in-from-bottom-6 duration-200">
             <button
               type="button"
               onClick={() => setSelectedOrder(null)}
@@ -967,6 +1035,123 @@ export function AdminOrdersView() {
           isOpen={Boolean(invoiceModalOrder)}
           onClose={() => setInvoiceModalOrder(null)}
         />
+      )}
+      {/* ── Mobile Draggable Floating Filter Button (Icon-Only Circle) ── */}
+      <div
+        style={{
+          right: `${fabPosition.x}px`,
+          bottom: `${fabPosition.y}px`,
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="md:hidden fixed z-40 touch-none select-none cursor-grab active:cursor-grabbing"
+      >
+        <button
+          type="button"
+          aria-label="Open Orders Filter"
+          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background shadow-2xl border-2 border-background/20 active:scale-90 transition-transform pointer-events-none"
+        >
+          <Filter className="h-5 w-5 text-amber-500 fill-amber-500/30" />
+          {statusFilter !== "all" && (
+            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-background animate-pulse" />
+          )}
+        </button>
+      </div>
+
+      {/* ── Mobile Fullscreen Filter Modal (z-[9999] covers all headers & bottom nav) ── */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-background animate-in fade-in duration-200 md:hidden">
+          <div className="flex-1 flex flex-col p-5 overflow-y-auto space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border/50 pb-4 pt-1">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-500">
+                  <Filter className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-foreground tracking-tight">Filter Orders</h3>
+                  <p className="text-[11px] text-muted-foreground">Select order status pipeline</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(false)}
+                className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Status Segmented Cards */}
+            <div className="space-y-2 text-xs">
+              <span className="font-bold text-foreground block mb-2">Order Status Pipeline</span>
+              {[
+                { id: "all", label: "All Orders", desc: "Show complete order registry", count: orders.length },
+                { id: "pending", label: "Pending Verification", desc: "Awaiting customer or payment verification", count: orders.filter((o) => o.status === "pending").length },
+                { id: "processing", label: "Processing / QC", desc: "Quality check and courier packaging", count: orders.filter((o) => o.status === "processing").length },
+                { id: "shipped", label: "In Transit / Shipped", desc: "Handed over to courier with tracking", count: orders.filter((o) => o.status === "shipped").length },
+                { id: "delivered", label: "Delivered Successfully", desc: "Completed deliveries with payment verified", count: orders.filter((o) => o.status === "delivered").length },
+                { id: "cancelled", label: "Cancelled / Refunded", desc: "Cancelled orders and return processing", count: orders.filter((o) => o.status === "cancelled").length },
+              ].map((s) => {
+                const isSelected = statusFilter === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(s.id);
+                      setCurrentPage(1);
+                      setShowMobileFilters(false);
+                    }}
+                    className={cn(
+                      "w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between",
+                      isSelected
+                        ? "border-amber-500 bg-amber-500/10 text-foreground ring-1 ring-amber-500"
+                        : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                    )}
+                  >
+                    <div>
+                      <p className={cn("font-bold text-xs text-foreground", isSelected && "text-amber-500 font-black")}>
+                        {s.label}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{s.desc}</p>
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md",
+                      isSelected ? "bg-amber-500 text-zinc-950" : "bg-muted text-muted-foreground"
+                    )}>
+                      {s.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Bottom Reset & Dismiss */}
+            <div className="pt-2 flex items-center gap-2.5 border-t border-border/40">
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setCurrentPage(1);
+                  setShowMobileFilters(false);
+                }}
+                className="py-3 px-4 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(false)}
+                className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black transition-all cursor-pointer shadow-md active:scale-98"
+              >
+                Apply ({filteredOrders.length} orders)
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

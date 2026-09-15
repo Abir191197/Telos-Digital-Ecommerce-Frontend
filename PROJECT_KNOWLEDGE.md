@@ -209,11 +209,44 @@ export const useSidebarStore = create<SidebarState>((set) => ({
 
 ---
 
-## 5. Guidelines for AI Sessions
+---
+
+## 6. Admin Catalog & Responsive Mobile/Desktop Design Patterns
+
+When building or extending Admin interfaces (such as `/dashboard/products`):
+
+### A. Responsive Viewport Strategy (Desktop vs. Mobile)
+- **Desktop (≥ 1024px / `lg:`)**:
+  - Sticky control dock (`sticky top-16 z-20`) combining Search, custom thematic dropdown cards, bulk actions, and view switchers (`Table` vs `Cards`).
+  - Table view displays detailed columnar data; Stock column is strictly numerical badge indicators (`in stock`, `Low`, `Out`), avoiding noisy steppers.
+  - Action column utilizes a desktop 3-dot dropdown menu (`MoreVertical`).
+  - KPI cards follow standard metrics layout: Title & Icon on top, hero count in middle, change badge and timeframe at bottom.
+- **Mobile (< 768px / `md:hidden`)**:
+  - **Sticky Search Layer**: Pinned directly beneath the top navigation (`sticky top-16 z-25`) immediately available upon landing without initial scrolling.
+  - **Single View Mode**: Mobile is strictly ergonomic cards; view mode switchers are hidden.
+  - **Number-First KPI Cards**: 2x2 grid displaying large hero values and change chips on top, with full un-truncated titles and watermark icons in the bottom-right corner.
+  - **Horizontal Ergonomic Cards**: Square thumbnail (`80x80`) with stock ribbon overlay, uppercase brand & SKU row, clamped title, price with discount strikethrough, and **stock health badge stacked directly beneath the price**.
+  - **Manage Product Button**: Direct full-width button opening a dedicated `z-[9999]` mobile manager bottom sheet/modal.
+
+### B. Thematic Luxury Dropdown Cards (Never OS `<select>`)
+- Avoid raw browser OS `<select>` elements which render inconsistent native blue pickers.
+- Use custom popover trigger cards (`data-thematic-dropdown`) with active state amber borders, rotating chevron indicators, and glassmorphic popover menus (`bg-card/95 backdrop-blur-xl border border-border/80 shadow-2xl`).
+- Maintain global outside-click listener to dismiss menus cleanly.
+
+### C. Modal Stacking & Full-Screen Takeovers (`z-[9999]`)
+- Mobile filters and mobile product management modals must overlay with `z-[9999]` (above both the `z-50` bottom navigation and `z-30` admin header) to completely obscure navigation bars and avoid modal content being cut off.
+
+### D. Mobile Floating Action Pills
+- Bulk actions on mobile are triggered via product checkboxes and render as a borderless, floating glassy pill (`fixed bottom-20 inset-x-3.5 z-40 bg-zinc-950/75 dark:bg-zinc-900/80 backdrop-blur-2xl rounded-full shadow-2xl border-none`).
+- Floating pill docks safely above the bottom nav (`bottom-20`) containing selected item count, `Cancel` action, and destructive confirmation trigger.
+
+---
+
+## 7. Guidelines for AI Sessions
 
 1. **Check Existing Components First**: Before building new primitives, check `src/components/common/` to reuse existing components (`Button`, `Input`, `Table`, `Loader`, `EmptyState`).
 2. **Keep UI Primitives Clean**: Build UI components using native React + Tailwind CSS.
-3. **Keep `page.tsx` Focused**: Place business logic, state handling, and detailed layouts inside `features/<domain>/` and keep route `page.tsx` as lightweight containers.
+3. **Keep `page.tsx` Focused**: Place business logic, state handling, and detailed layouts inside `features/<domain>/` or domain components, and keep route `page.tsx` as lightweight containers.
 4. **Centralize Routes**: Always reference `ROUTES` from `@/constants`.
-5. **Always Verify**: Ensure all TypeScript types and builds pass (`npm run build`) without errors.
+5. **Always Verify**: Ensure all TypeScript types and builds pass (`npx tsc --noEmit` or `npm run build`) without errors.
 6. **Maintain this Document**: If you create a new root folder, feature module, or architectural pattern, update this file so future AI sessions stay synchronized.
