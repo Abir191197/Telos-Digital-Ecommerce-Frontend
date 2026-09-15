@@ -31,8 +31,8 @@ export function WishlistTab({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header Bar: Title, Count, View Mode Toggle (List default vs Grid), and Full View link */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
+      {/* Header Bar: Title, Count, View Mode Toggle (List default vs Grid), and Full View link - hidden on mobile */}
+      <div className="hidden sm:flex sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-4 sm:p-5 rounded-2xl sm:rounded-3xl">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base sm:text-lg font-bold text-foreground">
