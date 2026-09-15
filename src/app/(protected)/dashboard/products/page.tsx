@@ -1,11 +1,27 @@
 import type { Metadata } from "next";
-import { AdminProductsView } from "@/components/admin";
+import { AdminProductsView, CreateProductView } from "@/components/admin";
 
 export const metadata: Metadata = {
   title: "Inventory & Catalog | Admin Portal",
   description: "Manage product listings, realtime stock counts, and new items.",
 };
 
-export default function AdminProductsPage() {
+interface AdminProductsPageProps {
+  searchParams: Promise<{
+    action?: string;
+    tab?: string;
+    view?: string;
+  }>;
+}
+
+export default async function AdminProductsPage({
+  searchParams,
+}: AdminProductsPageProps) {
+  const params = await searchParams;
+
+  if (params.action === "create") {
+    return <CreateProductView />;
+  }
+
   return <AdminProductsView />;
 }

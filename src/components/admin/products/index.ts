@@ -7,3 +7,4 @@ export * from "./ProductFloatingActionPill";
 export * from "./ProductDesktopTable";
 export * from "./ProductCardItem";
 export * from "./ProductFilterDock";
+export * from "./CreateProductView";
