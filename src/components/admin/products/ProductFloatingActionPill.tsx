@@ -15,8 +15,8 @@ export function ProductFloatingActionPill({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="md:hidden fixed bottom-20 inset-x-3.5 z-40 animate-in slide-in-from-bottom-5 fade-in duration-300">
-      <div className="flex items-center justify-between pl-3 pr-2 py-2 rounded-full bg-zinc-950/75 dark:bg-zinc-900/80 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] border-none">
+    <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 w-[92vw] max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300">
+      <div className="flex items-center justify-between pl-3 pr-2 py-2 rounded-full bg-zinc-950/85 dark:bg-zinc-900/90 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] border border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 rounded-full bg-amber-500/20 backdrop-blur-md flex items-center justify-center text-amber-400 shrink-0">
             <CheckSquare className="h-4 w-4" />

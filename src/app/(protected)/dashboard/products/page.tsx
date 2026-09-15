@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { AdminProductsView, CreateProductView } from "@/components/admin";
 
 export const metadata: Metadata = {
-  title: "Inventory & Catalog | Admin Portal",
-  description: "Manage product listings, realtime stock counts, and new items.",
+  title: "Manage Products | Admin Portal",
+  description: "Comprehensive product inventory management, stock controls, and merchandising workspace.",
 };
 
 interface AdminProductsPageProps {

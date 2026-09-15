@@ -458,8 +458,8 @@ export function AdminProductsView() {
                 Catalog &amp; Warehouse
               </span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-1">
-              Products Directory
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+              Manage Products
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Live stock balances, catalog health, valuation, and SKU control.

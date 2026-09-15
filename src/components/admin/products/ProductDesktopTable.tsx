@@ -27,7 +27,7 @@ export function ProductDesktopTable({
   onRequestDelete,
 }: ProductDesktopTableProps) {
   return (
-    <div className="hidden md:block rounded-2xl sm:rounded-3xl border border-border/60 bg-card overflow-visible shadow-xs">
+    <div className="hidden md:block rounded-3xl border-none bg-card overflow-visible shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)]">
       <div className="overflow-x-auto overflow-y-visible">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
