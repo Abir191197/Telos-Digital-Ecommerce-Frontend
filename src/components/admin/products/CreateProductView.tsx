@@ -22,10 +22,12 @@ import {
   Tag,
   Zap,
   Ticket,
+  ImageIcon,
 } from "lucide-react";
 import { useAdminStore } from "@/stores";
 import categoriesData from "@/data/categories.json";
 import brandsData from "@/data/brands.json";
+import { cn } from "@/lib/utils";
 import type { Product } from "@/types/ecommerce.types";
 
 const MAX_FILE_SIZE_MB = 5;
@@ -44,10 +46,16 @@ export function CreateProductView() {
   );
   const [price, setPrice] = useState<number | "">(95000);
   const [originalPrice, setOriginalPrice] = useState<number | "">(105000);
-  const [voucherCode, setVoucherCode] = useState<string>("");
   const [stock, setStock] = useState<number>(15);
   const [badge, setBadge] = useState<string>("New");
   const [shortDesc, setShortDesc] = useState("");
+
+  // Voucher / Promo Discount State
+  const [hasVoucher, setHasVoucher] = useState(false);
+  const [voucherType, setVoucherType] = useState<"percentage" | "flat">("percentage");
+  const [voucherValue, setVoucherValue] = useState<number | "">(10);
+  const [voucherCode, setVoucherCode] = useState<string>("TELOS10");
+  const [showVoucherOnCard, setShowVoucherOnCard] = useState(true);
 
   // Advanced Options Accordion (Clean toggle so non-techy person isn't overwhelmed)
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -495,32 +503,137 @@ export function CreateProductView() {
                 </div>
               </div>
 
-              {/* Optional Voucher / Promo Code Field */}
-              <div className="pt-1">
-                <label className="flex items-center justify-between text-xs font-bold text-foreground mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <Ticket className="h-3.5 w-3.5 text-amber-500" />
-                    <span>Special Voucher / Promo Discount</span>
-                  </span>
-                  <span className="text-[10px] font-normal text-muted-foreground">Optional</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="e.g. TELOS10 (10% OFF) or BDFIRST (৳500 OFF)"
-                    value={voucherCode}
-                    onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                    className="w-full rounded-xl border border-border/80 bg-muted/30 pl-3.5 pr-20 py-2 text-xs font-mono font-bold text-foreground placeholder:font-normal placeholder:text-muted-foreground focus:border-amber-500 focus:outline-none uppercase tracking-wider"
-                  />
-                  {voucherCode && (
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md">
-                      ACTIVE
-                    </span>
+              {/* Interactive Voucher / Coupon Section with Toggle */}
+              <div className="pt-2">
+                <div className="rounded-2xl border border-border/70 bg-muted/20 p-4 space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                        <Ticket className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">
+                          Special Voucher / Promo Discount
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground">
+                          Attach an optional coupon code for extra discount on this item
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Main ON/OFF Toggle Switch */}
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={hasVoucher}
+                        onChange={(e) => setHasVoucher(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                      <span className="ml-2 text-[11px] font-bold text-foreground">
+                        {hasVoucher ? "ON" : "OFF"}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Expanded Voucher Controls when ON */}
+                  {hasVoucher && (
+                    <div className="space-y-3 pt-2 border-t border-border/50 animate-in fade-in slide-in-from-top-1 duration-150">
+                      {/* Discount Type Pill Selector */}
+                      <div>
+                        <label className="block text-[11px] font-bold text-foreground mb-1.5">
+                          Discount Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-muted/40 border border-border/60">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVoucherType("percentage");
+                              if (!voucherValue || Number(voucherValue) > 100) setVoucherValue(10);
+                            }}
+                            className={cn(
+                              "py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                              voucherType === "percentage"
+                                ? "bg-amber-500 text-zinc-950 shadow-xs"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            % Percentage Off
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVoucherType("flat");
+                              if (!voucherValue || Number(voucherValue) <= 100) setVoucherValue(500);
+                            }}
+                            className={cn(
+                              "py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                              voucherType === "flat"
+                                ? "bg-amber-500 text-zinc-950 shadow-xs"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            ৳ Flat Money Off
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Value and Coupon Code Inputs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-foreground mb-1">
+                            {voucherType === "percentage" ? "Discount Percentage (%)" : "Discount Amount (৳)"}
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="1"
+                              max={voucherType === "percentage" ? 99 : 500000}
+                              placeholder={voucherType === "percentage" ? "10" : "500"}
+                              value={voucherValue}
+                              onChange={(e) => setVoucherValue(e.target.value ? Number(e.target.value) : "")}
+                              className="w-full rounded-xl border border-border/80 bg-background px-3.5 py-2 text-xs font-mono font-bold text-foreground focus:border-amber-500 focus:outline-none"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                              {voucherType === "percentage" ? "%" : "৳"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-foreground mb-1">
+                            Coupon Code
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. TELOS10"
+                            value={voucherCode}
+                            onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                            className="w-full rounded-xl border border-border/80 bg-background px-3.5 py-2 text-xs font-mono font-bold text-foreground uppercase tracking-wider focus:border-amber-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Storefront Card Visibility Toggle */}
+                      <label className="flex items-center justify-between p-2 rounded-xl bg-background/60 border border-border/60 hover:bg-background cursor-pointer transition-colors">
+                        <div>
+                          <span className="text-xs font-bold text-foreground block">
+                            Show Voucher Badge on Storefront Card
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            When enabled, customers see coupon ribbon directly on the product card
+                          </span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={showVoucherOnCard}
+                          onChange={(e) => setShowVoucherOnCard(e.target.checked)}
+                          className="h-4 w-4 rounded accent-amber-500 cursor-pointer ml-3 shrink-0"
+                        />
+                      </label>
+                    </div>
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Customers can apply this coupon code at checkout for extra savings on this item.
-                </p>
               </div>
             </div>
 
@@ -626,13 +739,24 @@ export function CreateProductView() {
           {/* Actual Storefront Product Card Mockup */}
           <div className="relative flex flex-col rounded-3xl bg-card text-card-foreground p-3 border border-border/80 shadow-md">
             {/* Image Box */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted/30">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewThumbnail}
-                alt={title || "Product preview"}
-                className="h-full w-full object-cover transition-transform duration-300"
-              />
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted/40 flex items-center justify-center">
+              {images.length > 0 ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={previewThumbnail}
+                  alt={title || "Product preview"}
+                  className="h-full w-full object-cover transition-transform duration-300"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-muted-foreground/60 gap-1.5 p-4 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/80 text-muted-foreground/50">
+                    <ImageIcon className="h-7 w-7" />
+                  </div>
+                  <span className="text-[11px] font-medium text-muted-foreground/70">
+                    Product Photo Preview
+                  </span>
+                </div>
+              )}
 
               {/* Discount or Custom Badge */}
               {discountPercent > 0 ? (
@@ -705,14 +829,18 @@ export function CreateProductView() {
               </div>
 
               {/* Live Voucher Pill in Preview */}
-              {voucherCode && (
-                <div className="mt-2.5 flex items-center justify-between rounded-xl bg-amber-500/10 border border-dashed border-amber-500/30 px-2.5 py-1 text-[10px] text-amber-700 dark:text-amber-300 font-bold">
-                  <span className="flex items-center gap-1">
-                    <Ticket className="h-3 w-3 text-amber-500" />
-                    <span>Coupon: {voucherCode}</span>
+              {hasVoucher && showVoucherOnCard && voucherCode && (
+                <div className="mt-2.5 flex items-center justify-between rounded-xl bg-amber-500/10 border border-dashed border-amber-500/35 px-2.5 py-1 text-[10px] text-amber-700 dark:text-amber-300 font-bold animate-in fade-in duration-200">
+                  <span className="flex items-center gap-1.5">
+                    <Ticket className="h-3.5 w-3.5 text-amber-500" />
+                    <span>
+                      {voucherType === "percentage"
+                        ? `${voucherValue || 0}% OFF with ${voucherCode}`
+                        : `৳${(voucherValue || 0).toLocaleString()} OFF with ${voucherCode}`}
+                    </span>
                   </span>
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-amber-600 dark:text-amber-400">
-                    Apply at Cart
+                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded">
+                    Coupon
                   </span>
                 </div>
               )}
