@@ -377,9 +377,9 @@ export function AdminProductsView() {
 
   return (
     <div className="w-full space-y-5 sm:space-y-6">
-      {/* ── Mobile Dedicated Search Bar (Immediately below navbar on page landing) ── */}
-      <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 sm:-mt-6 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
-        <div className="relative w-full">
+      {/* ── Mobile Dedicated Search Bar & Add Action (Immediately below navbar on page landing) ── */}
+      <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 sm:-mt-6 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs flex items-center gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
@@ -401,10 +401,19 @@ export function AdminProductsView() {
             </button>
           )}
         </div>
+        <button
+          type="button"
+          onClick={handleOpenAddModal}
+          className="h-10 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shrink-0 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+          title="Add New Product"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Add</span>
+        </button>
       </div>
 
-      {/* ── Top Header Banner ── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/70 bg-gradient-to-br from-card via-card/95 to-muted/20 p-4 sm:p-7 shadow-xs">
+      {/* ── Top Header Banner (Hidden on mobile, desktop only) ── */}
+      <div className="hidden sm:block relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/70 bg-gradient-to-br from-card via-card/95 to-muted/20 p-4 sm:p-7 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">

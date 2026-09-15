@@ -231,8 +231,8 @@ export function AdminOrdersView() {
         </div>
       </div>
 
-      {/* ── Header Strip ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
+      {/* ── Header Strip (Hidden on mobile, desktop only) ── */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
@@ -257,8 +257,8 @@ export function AdminOrdersView() {
           </p>
         </div>
 
-        {/* Top Header info (Hidden on mobile) */}
-        <div className="hidden sm:flex items-center gap-2 self-start sm:self-auto">
+        {/* Top Header info */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="px-3 py-1.5 rounded-xl bg-card border-none admin-card text-xs font-bold text-foreground flex items-center gap-1.5">
             <span className="text-muted-foreground font-medium">
               {statusFilter === "pending" ? "Pending:" : "Count:"}

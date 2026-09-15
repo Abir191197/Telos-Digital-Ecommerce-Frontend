@@ -190,8 +190,8 @@ export function AdminPendingDispatchView() {
         </div>
       </div>
 
-      {/* ── Header Strip: Dedicated Dispatch Operational Hub ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
+      {/* ── Header Strip: Dedicated Dispatch Operational Hub (Hidden on mobile, desktop only) ── */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
