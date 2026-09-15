@@ -43,7 +43,7 @@ export function ProductLivePreviewCard({
   voucherValue,
 }: ProductLivePreviewCardProps) {
   return (
-    <div className="relative flex flex-col rounded-3xl bg-card text-card-foreground p-3 border border-border/80 shadow-md">
+    <div className="relative flex flex-col rounded-3xl bg-card text-card-foreground p-3 border-none shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)]">
       {/* Image Box */}
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted/40 flex items-center justify-center">
         {hasImages ? (
