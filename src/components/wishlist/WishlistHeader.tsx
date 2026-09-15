@@ -24,22 +24,22 @@ export function WishlistHeader({
   onMoveAllToCart,
 }: WishlistHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border/60">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 md:pb-6 border-b border-border/60">
       <div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/25 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400 mb-2">
+        <div className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/25 px-3 py-1 text-xs font-bold text-rose-600 dark:text-rose-400 mb-2">
           <Heart className="h-3.5 w-3.5 fill-rose-600 text-rose-600" />
           <span>Saved Tech Favorites</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
+        <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
           My Wishlist ({itemCount})
         </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+        <p className="hidden md:block text-xs sm:text-sm text-muted-foreground mt-0.5">
           Live Bangladesh pricing, authentic manufacturer distributor warranty, and real-time inventory.
         </p>
       </div>
 
-      {/* Action Buttons & View Toggle */}
-      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 w-full md:w-auto">
+      {/* Action Buttons & View Toggle (desktop only) */}
+      <div className="hidden md:flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 w-full md:w-auto">
         {/* Grid vs List View Toggle Pill */}
         <div className="flex items-center rounded-xl bg-muted/50 p-1 border border-border/70 shadow-2xs">
           <button

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useWishlistStore, useCartStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { products } from "@/data";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation, type Variants } from "framer-motion";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
 
 import {
@@ -14,6 +15,9 @@ import {
   WishlistCardGrid,
   WishlistListRow,
 } from "./";
+
+const INITIAL_BATCH_SIZE = 10;
+const LOAD_MORE_BATCH_SIZE = 6;
 
 const fadeUpAnim: Variants = {
   hidden: { opacity: 0, y: 16 },
@@ -36,6 +40,48 @@ export function WishlistView() {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const [allMoved, setAllMoved] = useState(false);
+
+  // Infinite Scroll State (active when items.length > 10)
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  const isInfiniteScrollActive = items.length > INITIAL_BATCH_SIZE;
+  const displayedItems = useMemo(() => {
+    if (!isInfiniteScrollActive) return items;
+    return items.slice(0, visibleCount);
+  }, [items, visibleCount, isInfiniteScrollActive]);
+
+  const hasMore = isInfiniteScrollActive && visibleCount < items.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) => Math.min(prev + LOAD_MORE_BATCH_SIZE, items.length));
+            setIsLoadingMore(false);
+          }, 400);
+        }
+      },
+      { rootMargin: "150px" }
+    );
+
+    const currentRef = loadMoreTriggerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasMore, isLoadingMore, items.length]);
 
   const handleUpdateQuantity = (id: string, delta: number, maxStock: number = 99) => {
     setQuantities((prev) => {
@@ -120,20 +166,37 @@ export function WishlistView() {
         {/* ── 2. Wishlist Product Cards Grid / List View ── */}
         {viewMode === "grid" ? (
           <WishlistCardGrid
-            items={items}
+            items={displayedItems}
             addedIds={addedIds}
             onRemoveItem={removeItem}
             onMoveToCart={handleMoveToCart}
           />
         ) : (
           <WishlistListRow
-            items={items}
+            items={displayedItems}
             addedIds={addedIds}
             quantities={quantities}
             onUpdateQuantity={handleUpdateQuantity}
             onRemoveItem={removeItem}
             onAddToCartWithQty={handleAddToCartWithQty}
           />
+        )}
+
+        {/* ── Infinite Scroll Trigger Indicator (shown when > 10 items) ── */}
+        {isInfiniteScrollActive && (
+          <div ref={loadMoreTriggerRef} className="pt-4 pb-2 flex justify-center">
+            {hasMore ? (
+              <div className="inline-flex items-center gap-2.5 rounded-full bg-card border border-border px-5 py-2.5 text-xs font-bold text-muted-foreground shadow-2xs animate-pulse">
+                <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+                <span>Loading more saved items... ({displayedItems.length} of {items.length})</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground font-medium py-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <span>All {items.length} saved wishlist items loaded</span>
+              </div>
+            )}
+          </div>
         )}
 
         {/* ── BD Authenticity & Logistics Guarantees ── */}
