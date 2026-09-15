@@ -10,3 +10,4 @@ export * from "./AdminMobileBottomNav";
 export * from "./AdminPendingDispatchView";
 export * from "./AdminOrderDetailView";
 export { CreateProductView } from "./products";
+export * from "./categories";

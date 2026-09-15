@@ -2,10 +2,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Order, OrderStatus } from "@/types/order.types";
-import type { Product } from "@/types/ecommerce.types";
+import type { Product, Category } from "@/types/ecommerce.types";
 import { DEMO_ORDERS } from "@/data/mock-user";
 import { RICH_DEMO_ORDERS } from "@/data/rich-orders";
 import productsData from "@/data/products.json";
+import categoriesData from "@/data/categories.json";
 
 export interface AdminCustomer {
   id: string;
@@ -149,6 +150,7 @@ const INITIAL_TRANSACTIONS: AdminPaymentTransaction[] = [
 interface AdminState {
   orders: Order[];
   products: Product[];
+  categories: Category[];
   customers: AdminCustomer[];
   transactions: AdminPaymentTransaction[];
 }
@@ -160,6 +162,9 @@ interface AdminActions {
   addProduct: (product: Product) => void;
   updateProduct: (productId: string, updates: Partial<Product>) => void;
   deleteProduct: (productId: string) => void;
+  addCategory: (category: Category) => void;
+  updateCategory: (categoryId: string, updates: Partial<Category>) => void;
+  deleteCategory: (categoryId: string) => void;
   verifyTransaction: (transactionId: string, status: "verified" | "rejected") => void;
 }
 
@@ -170,6 +175,7 @@ export const useAdminStore = create<AdminStore>()(
     (set) => ({
       orders: RICH_DEMO_ORDERS,
       products: (productsData as unknown as Product[]).slice(0, 30),
+      categories: (categoriesData as unknown as Category[]),
       customers: INITIAL_CUSTOMERS,
       transactions: INITIAL_TRANSACTIONS,
 
@@ -224,6 +230,26 @@ export const useAdminStore = create<AdminStore>()(
       deleteProduct: (productId) => {
         set((state) => ({
           products: state.products.filter((p) => p.id !== productId),
+        }));
+      },
+
+      addCategory: (newCategory) => {
+        set((state) => ({
+          categories: [newCategory, ...state.categories],
+        }));
+      },
+
+      updateCategory: (categoryId, updates) => {
+        set((state) => ({
+          categories: state.categories.map((c) =>
+            c.id === categoryId ? { ...c, ...updates } : c
+          ),
+        }));
+      },
+
+      deleteCategory: (categoryId) => {
+        set((state) => ({
+          categories: state.categories.filter((c) => c.id !== categoryId),
         }));
       },
 
