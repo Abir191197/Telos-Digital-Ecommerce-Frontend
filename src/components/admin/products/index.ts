@@ -8,3 +8,6 @@ export * from "./ProductDesktopTable";
 export * from "./ProductCardItem";
 export * from "./ProductFilterDock";
 export * from "./CreateProductView";
+export * from "./ProductPhotosUploadCard";
+export * from "./ProductLivePreviewCard";
+export * from "./ProductDetailsFormCard";
