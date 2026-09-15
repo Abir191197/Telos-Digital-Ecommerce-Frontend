@@ -66,8 +66,6 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         children: [
           { title: "Product List", href: "/dashboard/products" },
           { title: "Create Product", href: "/dashboard/products?action=create" },
-          { title: "Manage Stock", href: "/dashboard/products?tab=stock" },
-          { title: "Grid View", href: "/dashboard/products?view=grid" },
         ],
       },
       {

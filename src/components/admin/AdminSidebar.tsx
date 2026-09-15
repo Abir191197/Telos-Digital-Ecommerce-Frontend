@@ -24,21 +24,7 @@ export function AdminSidebar() {
   const { isOpen, isMobileOpen, toggleSidebar, setMobileOpen } =
     useSidebarStore();
 
-  // Expanded parent item tracking (all closed by default)
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  const toggleExpand = (title: string) => {
-    setExpanded((prev) => ({ ...prev, [title]: !prev[title] }));
-  };
-
-  const handleLogout = () => {
-    document.cookie =
-      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    storeLogout();
-    if (isMobileOpen) setMobileOpen(false);
-    router.push(ROUTES.LOGIN);
-  };
-
+  // Check active routes
   const searchParams = useSearchParams();
 
   const isSubRouteActive = (href: string) => {
@@ -67,6 +53,45 @@ export function AdminSidebar() {
       return item.children.some((sub) => isSubRouteActive(sub.href));
     }
     return false;
+  };
+
+  // Expanded parent tracking (open if active sub-route matches current URL on load/refresh)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    ADMIN_NAV_GROUPS.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.children?.some((sub) => {
+          const [path] = sub.href.split("?");
+          return pathname === path;
+        })) {
+          initial[item.title] = true;
+        }
+      });
+    });
+    return initial;
+  });
+
+  // Sync expanded state when pathname / searchParams change
+  React.useEffect(() => {
+    ADMIN_NAV_GROUPS.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.children && isParentRouteActive(item)) {
+          setExpanded((prev) => (prev[item.title] ? prev : { ...prev, [item.title]: true }));
+        }
+      });
+    });
+  }, [pathname, searchParams]);
+
+  const toggleExpand = (title: string) => {
+    setExpanded((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
+  const handleLogout = () => {
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    storeLogout();
+    if (isMobileOpen) setMobileOpen(false);
+    router.push(ROUTES.LOGIN);
   };
 
   return (
