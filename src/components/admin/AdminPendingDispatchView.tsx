@@ -218,36 +218,44 @@ export function AdminPendingDispatchView() {
         </div>
       </div>
 
-      {/* ── 4 Dedicated Logistics & Dispatch KPIs ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-        <KpiCard
-          title="Awaiting QC Check"
-          rawValue={awaitingPackingCount}
-          change="Pending verification"
-          isPositive={awaitingPackingCount === 0}
-          icon={Box}
-        />
-        <KpiCard
-          title="Ready For Courier"
-          rawValue={qcReadyCount}
-          change="Packed & tagged"
-          isPositive={true}
-          icon={Package}
-        />
-        <KpiCard
-          title="Unassigned Courier"
-          rawValue={unassignedCourierCount}
-          change={unassignedCourierCount > 0 ? "Rider needed" : "All assigned"}
-          isPositive={unassignedCourierCount === 0}
-          icon={Truck}
-        />
-        <KpiCard
-          title="SLA Breach / Urgent"
-          rawValue={urgentCount}
-          change={urgentCount > 0 ? "Action >12h" : "On schedule"}
-          isPositive={urgentCount === 0}
-          icon={BadgeAlert}
-        />
+      {/* ── 4 Dedicated Logistics & Dispatch KPIs (Horizontal Swipe Carousel on mobile, Grid on desktop) ── */}
+      <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-2 sm:pb-0 sm:mx-0 sm:px-0 sm:overflow-visible sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
+          <KpiCard
+            title="Awaiting QC Check"
+            rawValue={awaitingPackingCount}
+            change="Pending verification"
+            isPositive={awaitingPackingCount === 0}
+            icon={Box}
+          />
+        </div>
+        <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
+          <KpiCard
+            title="Ready For Courier"
+            rawValue={qcReadyCount}
+            change="Packed & tagged"
+            isPositive={true}
+            icon={Package}
+          />
+        </div>
+        <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
+          <KpiCard
+            title="Unassigned Courier"
+            rawValue={unassignedCourierCount}
+            change={unassignedCourierCount > 0 ? "Rider needed" : "All assigned"}
+            isPositive={unassignedCourierCount === 0}
+            icon={Truck}
+          />
+        </div>
+        <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
+          <KpiCard
+            title="SLA Breach / Urgent"
+            rawValue={urgentCount}
+            change={urgentCount > 0 ? "Action >12h" : "On schedule"}
+            isPositive={urgentCount === 0}
+            icon={BadgeAlert}
+          />
+        </div>
       </div>
 
       {/* ── Sticky Dispatch Filter & Search Dock (Full-width edge-to-edge on mobile, rounded card on desktop) ── */}

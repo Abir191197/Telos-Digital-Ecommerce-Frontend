@@ -221,7 +221,13 @@ When building or extending Admin interfaces (such as `/dashboard/products`):
   - Table view displays detailed columnar data; Stock column is strictly numerical badge indicators (`in stock`, `Low`, `Out`), avoiding noisy steppers.
   - Action column utilizes a desktop 3-dot dropdown menu (`MoreVertical`).
   - KPI cards follow standard metrics layout: Title & Icon on top, hero count in middle, change badge and timeframe at bottom.
-- **Mobile (< 768px / `md:hidden`)**:
+- **Mobile KPI Cards Horizontal Swipe Carousel**:
+  - Instead of multi-column grid squeezing cards or 1-column consuming ~500px vertical space, mobile renders KPI cards in a sleek horizontal swipe carousel (`flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4`).
+  - Card width on mobile: `shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none`. Second card peeks in by ~25%, signaling swipeability.
+  - Zero text wrapping or badge clipping; saves over 400px of vertical space so products and orders stay visible above the fold.
+  - Applied uniformly across [AdminProductsView.tsx](file:///d:/2026-%20PROJECTS/TELOS%20ECOMMERCE/src/components/admin/AdminProductsView.tsx), [AdminOrdersView.tsx](file:///d:/2026-%20PROJECTS/TELOS%20ECOMMERCE/src/components/admin/AdminOrdersView.tsx), and [AdminPendingDispatchView.tsx](file:///d:/2026-%20PROJECTS/TELOS%20ECOMMERCE/src/components/admin/AdminPendingDispatchView.tsx).
+
+- **Mobile Viewport Full-Bleed Search & Sticky Dock**:
   - **Sticky Search Layer**: Pinned directly beneath the top navigation (`sticky top-16 z-25`) immediately available upon landing without initial scrolling.
   - **Single View Mode**: Mobile is strictly ergonomic cards; view mode switchers are hidden.
   - **Number-First KPI Cards**: 2x2 grid displaying large hero values and change chips on top, with full un-truncated titles and watermark icons in the bottom-right corner.

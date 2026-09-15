@@ -50,23 +50,29 @@ export function KpiCard({
   }, [rawValue]);
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-card p-3.5 sm:p-5 lg:p-6 border border-border/40 sm:border-none admin-card cursor-default flex flex-col justify-between transition-all">
+    <div className="group relative overflow-hidden rounded-2xl bg-card p-3.5 sm:p-5 lg:p-6 border border-border/40 sm:border-none admin-card cursor-default flex flex-col justify-between h-full transition-all">
       {/* Subtle top hover shimmer light */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-      {/* ── MOBILE VIEW ONLY: Number First + Bottom-Right Icon ── */}
-      <div className="flex sm:hidden flex-col justify-between h-full space-y-3">
-        {/* Top: Number + Change Chip */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="text-2xl font-black tracking-tight text-foreground leading-none tabular-nums">
-            {prefix}
-            {displayValue.toLocaleString()}
-            {suffix}
-          </div>
+      {/* ── MOBILE VIEW ONLY: Clean Non-Breaking Vertical Hierarchy ── */}
+      <div className="flex sm:hidden flex-col justify-between h-full space-y-2">
+        {/* Row 1: Title */}
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground leading-tight line-clamp-1">
+          {title}
+        </p>
 
+        {/* Row 2: Hero Number */}
+        <div className="text-2xl font-black tracking-tight text-foreground leading-none tabular-nums">
+          {prefix}
+          {displayValue.toLocaleString()}
+          {suffix}
+        </div>
+
+        {/* Row 3: Bottom Row with Change Badge + Micro Icon */}
+        <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-border/30">
           <span
             className={cn(
-              "inline-flex items-center font-bold px-1.5 py-0.5 rounded-md text-[10px] whitespace-nowrap shrink-0",
+              "inline-flex items-center font-bold px-1.5 py-0.5 rounded-md text-[10px] whitespace-nowrap min-w-0 max-w-[130px] truncate",
               isPositive
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -77,17 +83,11 @@ export function KpiCard({
             ) : (
               <ArrowDownRight className="h-3 w-3 mr-0.5 shrink-0" />
             )}
-            <span>{change}</span>
+            <span className="truncate">{change}</span>
           </span>
-        </div>
 
-        {/* Bottom: Title + Right Corner Icon */}
-        <div className="flex items-end justify-between gap-2 pt-1">
-          <p className="text-xs font-bold text-muted-foreground leading-snug pr-1">
-            {title}
-          </p>
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground shrink-0">
-            <Icon className="h-3.5 w-3.5" />
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground shrink-0">
+            <Icon className="h-3 w-3" />
           </div>
         </div>
       </div>
