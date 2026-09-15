@@ -10,6 +10,7 @@ export interface Category {
   itemCount: number;
   featured: boolean;
   subcategories: Subcategory[];
+  createdAt?: string;
 }
 
 export interface Subcategory {

@@ -108,7 +108,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
     setIsSubmitting(true);
 
     const newCategory: Category = {
-      id: `cat-${Date.now()}`,
+      id: String(Date.now()).slice(-6),
       slug: formValues.slug.trim(),
       name: formValues.name.trim(),
       description:
@@ -124,6 +124,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
         slug: sub.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         itemCount: 0,
       })),
+      createdAt: new Date().toISOString(),
     };
 
     addCategory(newCategory);
@@ -176,13 +177,12 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
             >
               Add Another
             </button>
-            <button
-              type="button"
-              onClick={() => setCurrentView("list")}
+            <Link
+              href="/dashboard/categories"
               className="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 cursor-pointer"
             >
               View Catalog
-            </button>
+            </Link>
           </div>
         </div>
       )}
