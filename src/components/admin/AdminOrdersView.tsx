@@ -1,43 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useRef, useEffect } from "react";
 import { useAdminStore } from "@/stores";
 import {
   Search,
-  Filter,
   Truck,
   CheckCircle2,
   Clock,
   AlertCircle,
-  Eye,
-  Printer,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   X,
-  CreditCard,
-  MapPin,
-  Sparkles,
-  LayoutGrid,
-  List,
-  Phone,
-  Calendar,
   Box,
-  BadgeCheck,
-  ShieldAlert,
   DollarSign,
   PackageCheck,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Order, OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
 import { KpiCard } from "./dashboard/KpiCard";
+import {
+  OrderCardItem,
+  OrderDesktopTable,
+  OrderFilterDock,
+  OrderQuickInspectModal,
+  OrderMobileFilterModal,
+  OrderFloatingFilterFab,
+} from "./orders";
 
 export function AdminOrdersView() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const initialStatus = searchParams?.get("status") || "all";
 
@@ -55,14 +46,14 @@ export function AdminOrdersView() {
     x: 16,
     y: 90,
   });
-  const isDraggingRef = React.useRef(false);
-  const dragStartRef = React.useRef<{ startX: number; startY: number; posX: number; posY: number }>({
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef<{ startX: number; startY: number; posX: number; posY: number }>({
     startX: 0,
     startY: 0,
     posX: 16,
     posY: 90,
   });
-  const hasMovedRef = React.useRef(false);
+  const hasMovedRef = useRef(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     isDraggingRef.current = true;
@@ -99,7 +90,7 @@ export function AdminOrdersView() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const st = searchParams?.get("status");
     if (st) {
       setStatusFilter(st);
@@ -118,6 +109,15 @@ export function AdminOrdersView() {
   const pendingCount = orders.filter((o) => o.status === "pending" || o.status === "processing").length;
   const inTransitCount = orders.filter((o) => o.status === "shipped").length;
   const completedCount = orders.filter((o) => o.status === "delivered").length;
+
+  const orderCounts = {
+    all: orders.length,
+    pending: orders.filter((o) => o.status === "pending").length,
+    processing: orders.filter((o) => o.status === "processing").length,
+    shipped: inTransitCount,
+    delivered: completedCount,
+    cancelled: orders.filter((o) => o.status === "cancelled").length,
+  };
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -205,7 +205,7 @@ export function AdminOrdersView() {
 
   return (
     <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
-      {/* ── Mobile Dedicated Top Search Bar (Pinned immediately below navbar on page landing) ── */}
+      {/* ── Mobile Dedicated Top Search Bar ── */}
       <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
         <div className="relative w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -257,13 +257,12 @@ export function AdminOrdersView() {
           </p>
         </div>
 
-        {/* Top Header info */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="px-3 py-1.5 rounded-xl bg-card border-none admin-card text-xs font-bold text-foreground flex items-center gap-1.5">
             <span className="text-muted-foreground font-medium">
               {statusFilter === "pending" ? "Pending:" : "Count:"}
             </span>
-            <span className={cn(statusFilter === "pending" && "text-amber-500 font-black")}>
+            <span className={statusFilter === "pending" ? "text-amber-500 font-black" : ""}>
               {filteredOrders.length}
             </span>
           </div>
@@ -312,854 +311,211 @@ export function AdminOrdersView() {
       </div>
 
       {/* ── Status Pills & Desktop Search Controls Dock ── */}
-      <div className="sticky top-16 z-20 px-3 sm:px-4 py-2.5 sm:py-3 bg-card/90 backdrop-blur-xl border rounded-2xl border-border/50 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 transition-all">
-        {/* Desktop Search (hidden on mobile, mobile uses top pinned bar) */}
-        <div className="relative flex-1 hidden md:block">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search order #, customer name, phone, city, or courier..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs sm:text-sm font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-amber-500/40 focus:outline-none transition-all placeholder:text-muted-foreground/60 border border-border/40"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Status Pills + View Mode Toggle Container */}
-        <div className="flex items-center justify-between gap-2 w-full md:w-auto">
-          {/* Touch-swipeable Status Pills */}
-          <div className="relative flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x overscroll-x-contain select-none">
-              {[
-                { id: "all", label: "All" },
-                { id: "pending", label: "Pending" },
-                { id: "processing", label: "Processing" },
-                { id: "shipped", label: "Shipped" },
-                { id: "delivered", label: "Delivered" },
-                { id: "cancelled", label: "Cancelled" },
-              ].map((tab) => {
-                const isSelected = statusFilter === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter(tab.id);
-                      setCurrentPage(1);
-                    }}
-                    className={cn(
-                      "h-8 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95",
-                      isSelected
-                        ? "bg-amber-500 text-zinc-950 font-black shadow-xs"
-                        : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Desktop Only View Mode Switcher */}
-          <div className="hidden md:flex items-center p-1 rounded-xl bg-muted/70 text-xs font-semibold shrink-0">
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-xs",
-                viewMode === "table"
-                  ? "bg-card text-foreground shadow-xs font-bold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              title="Table View"
-            >
-              <List className="h-3.5 w-3.5" />
-              <span>Table</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("card")}
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-xs",
-                viewMode === "card"
-                  ? "bg-card text-foreground shadow-xs font-bold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              title="Card Grid View"
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              <span>Cards</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <OrderFilterDock
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        orderCounts={orderCounts}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onResetPage={() => setCurrentPage(1)}
+      />
 
       {/* ── View Mode: Cards or Table (Mobile is ALWAYS Dedicated Card View) ── */}
-      {/* 1. DEDICATED CARD VIEW: Always rendered on mobile, or when viewMode === 'card' on desktop */}
       <div
-        className={cn(
-          "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 min-h-[70vh] sm:min-h-[440px]",
-          viewMode === "table" && "sm:hidden"
-        )}
+        className={
+          viewMode === "table"
+            ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 min-h-[70vh] sm:min-h-[440px] sm:hidden"
+            : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 min-h-[70vh] sm:min-h-[440px]"
+        }
       >
-          {filteredOrders.length === 0 ? (
-            <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[380px]">
-              <Box className="h-10 w-10 mx-auto mb-2 opacity-40" />
-              <p className="font-bold text-foreground text-sm">No orders found</p>
-              <p className="text-xs mt-0.5">Try clearing your filters or search query.</p>
-            </div>
-          ) : (
-            paginatedOrders.map((order) => {
-              const statusAccents: Record<OrderStatus, { bar: string; glow: string; text: string }> = {
-                delivered: {
-                  bar: "bg-emerald-500",
-                  glow: "shadow-[0_0_20px_rgba(16,185,129,0.12)]",
-                  text: "text-emerald-600 dark:text-emerald-400",
-                },
-                shipped: {
-                  bar: "bg-blue-500",
-                  glow: "shadow-[0_0_20px_rgba(59,130,246,0.12)]",
-                  text: "text-blue-600 dark:text-blue-400",
-                },
-                processing: {
-                  bar: "bg-amber-500",
-                  glow: "shadow-[0_0_20px_rgba(245,158,11,0.12)]",
-                  text: "text-amber-600 dark:text-amber-400",
-                },
-                pending: {
-                  bar: "bg-zinc-400 dark:bg-zinc-600",
-                  glow: "shadow-[0_0_20px_rgba(113,113,122,0.1)]",
-                  text: "text-muted-foreground",
-                },
-                cancelled: {
-                  bar: "bg-rose-500",
-                  glow: "shadow-[0_0_20px_rgba(244,63,94,0.12)]",
-                  text: "text-rose-600",
-                },
-              };
-              const accent = statusAccents[order.status] || statusAccents.pending;
-
-              return (
-                <div
-                  key={order.id}
-                  onClick={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
-                  className={cn(
-                    "group relative admin-card rounded-2xl bg-card p-4 sm:p-5 border-none flex flex-col justify-between gap-4 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.99]",
-                    accent.glow
-                  )}
-                >
-                  {/* Subtle Status Color Indicator Bar (Top Left Accent) */}
-                  <div
-                    className={cn(
-                      "absolute top-4 left-0 w-1 h-7 rounded-r-full transition-all duration-300 group-hover:h-10",
-                      accent.bar
-                    )}
-                  />
-
-                  {/* Header: Order # + Status Badge */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 pl-2">
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-mono font-black text-sm sm:text-base text-foreground tracking-tight">
-                          #{order.orderNumber}
-                        </span>
-                        <span className="text-[10.5px] font-medium text-muted-foreground">
-                          {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </span>
-                      </div>
-                      <div onClick={(e) => e.stopPropagation()}>
-                        {getStatusBadge(order.status)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Customer Card Section */}
-                  <div className="p-3 rounded-xl bg-muted/30 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-foreground">
-                        {order.shippingAddress.name}
-                      </p>
-                      <span className="text-[10px] font-semibold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
-                        {order.shippingAddress.city}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <Phone className="h-3 w-3 shrink-0" />
-                      <a
-                        href={`tel:${order.shippingAddress.phone}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="font-mono hover:underline"
-                      >
-                        {order.shippingAddress.phone}
-                      </a>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">
-                        {order.shippingAddress.street}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Items Preview Strip */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-foreground">
-                        {order.items.length} {order.items.length === 1 ? "Product" : "Products"}
-                      </span>
-                      <div className="text-right">
-                        <span className="font-mono font-black text-sm sm:text-base text-foreground">
-                          ৳{order.total.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Thumbnail Row */}
-                    <div className="flex items-center gap-2 overflow-x-auto py-0.5 scrollbar-none">
-                      {order.items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="relative h-11 w-11 shrink-0 rounded-lg overflow-hidden bg-muted shadow-xs"
-                          title={`${item.productName} (x${item.quantity})`}
-                        >
-                          <Image
-                            src={item.productThumbnail}
-                            alt={item.productName}
-                            fill
-                            className="object-cover"
-                          />
-                          {item.quantity > 1 && (
-                            <span className="absolute bottom-0.5 right-0.5 rounded px-1 text-[9px] font-black bg-black/80 text-white leading-tight">
-                              ×{item.quantity}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Logistics & Payment Meta Strip */}
-                  <div className="flex items-center justify-between pt-2.5 border-t border-border/30 text-[11px]">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <Truck className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">Courier: </span>
-                      <strong className="text-foreground font-semibold truncate max-w-[100px]">
-                        {order.courierName || "Unassigned"}
-                      </strong>
-                    </div>
-
-                    <span
-                      className={cn(
-                        "px-2 py-0.5 rounded-md font-bold uppercase text-[10px]",
-                        order.paymentStatus === "paid"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      )}
-                    >
-                      {order.paymentMethod.toUpperCase()} • {order.paymentStatus}
-                    </span>
-                  </div>
-
-                  {/* Actions Footer */}
-                  <div
-                    className="flex items-center gap-2 pt-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Link
-                      href={`/dashboard/orders/${order.orderNumber}`}
-                      className="flex-1 py-2 px-3 rounded-xl bg-foreground text-background text-xs font-bold shadow-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      <span>Details</span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setInvoiceModalOrder(order)}
-                      className="p-2 rounded-xl bg-muted/60 text-foreground hover:bg-muted transition-colors cursor-pointer"
-                      title="Print Invoice"
-                    >
-                      <Printer className="h-4 w-4" />
-                    </button>
-                    {order.status !== "cancelled" && order.status !== "delivered" && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm(`Cancel order #${order.orderNumber}?`)) {
-                            updateOrderStatus(order.id, "cancelled");
-                          }
-                        }}
-                        className="p-2 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition-colors cursor-pointer"
-                        title="Cancel Order"
-                      >
-                        <AlertCircle className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-
-          {/* Integrated Pagination inside Card Grid View */}
-          {filteredOrders.length > 0 && (
-            <div className="col-span-full p-4 rounded-2xl bg-card/60 backdrop-blur-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <p className="text-muted-foreground font-medium">
-                Showing <strong className="text-foreground font-bold">{(currentPage - 1) * pageSize + 1}</strong> to{" "}
-                <strong className="text-foreground font-bold">
-                  {Math.min(currentPage * pageSize, filteredOrders.length)}
-                </strong>{" "}
-                of <strong className="text-foreground font-bold">{filteredOrders.length}</strong> orders
-              </p>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className={cn(
-                    "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer",
-                    currentPage === 1
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                      : "bg-muted/60 text-foreground hover:bg-muted"
-                  )}
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span>Prev</span>
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={cn(
-                      "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                      currentPage === page
-                        ? "bg-foreground text-background shadow-xs font-black"
-                        : "bg-muted/40 text-foreground/80 hover:bg-muted"
-                    )}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className={cn(
-                    "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer",
-                    currentPage === totalPages
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                      : "bg-muted/60 text-foreground hover:bg-muted"
-                  )}
-                >
-                  <span>Next</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 2. TABLE VIEW: Only rendered when user chooses 'table' on tablet/desktop (sm+) */}
-        {viewMode === "table" && (
-          <div className="hidden sm:flex admin-card rounded-2xl bg-card border-none overflow-hidden flex-col">
-            {/* Desktop Table View */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-muted/40 text-muted-foreground font-bold tracking-wider uppercase text-[10px]">
-                  <th className="py-3 px-4">Order</th>
-                  <th className="py-3 px-4">Customer</th>
-                  <th className="py-3 px-4">City / Area</th>
-                  <th className="py-3 px-4">Items</th>
-                  <th className="py-3 px-4 text-right">Amount</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Logistics</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-12 text-center text-muted-foreground">
-                      No orders found matching your search.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedOrders.map((order) => (
-                    <tr
-                      key={order.id}
-                      onClick={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
-                      className="hover:bg-muted/40 transition-colors group cursor-pointer"
-                    >
-                      {/* Order Number + Time */}
-                      <td className="py-3.5 px-4 font-medium">
-                        <span className="font-mono font-black text-foreground group-hover:text-amber-500 transition-colors">
-                          #{order.orderNumber}
-                        </span>
-                        <p className="text-[11px] text-muted-foreground">
-                          {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </td>
-
-                      {/* Customer Info */}
-                      <td className="py-3.5 px-4">
-                        <p className="font-bold text-foreground">
-                          {order.shippingAddress.name}
-                        </p>
-                        <p className="text-[11px] font-mono text-muted-foreground">
-                          {order.shippingAddress.phone}
-                        </p>
-                      </td>
-
-                      {/* City & Address */}
-                      <td className="py-3.5 px-4">
-                        <span className="font-semibold text-foreground">
-                          {order.shippingAddress.city}
-                        </span>
-                        <p className="text-[11px] text-muted-foreground truncate max-w-[140px]" title={order.shippingAddress.street}>
-                          {order.shippingAddress.street}
-                        </p>
-                      </td>
-
-                      {/* Items + Thumbnails */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5">
-                          {order.items.slice(0, 2).map((item) => (
-                            <div
-                              key={item.id}
-                              className="relative h-7 w-7 rounded-md overflow-hidden bg-muted shrink-0"
-                              title={item.productName}
-                            >
-                              <Image
-                                src={item.productThumbnail}
-                                alt={item.productName}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          ))}
-                          {order.items.length > 2 && (
-                            <span className="text-[10px] font-bold text-muted-foreground">
-                              +{order.items.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Price + Payment */}
-                      <td className="py-3.5 px-4 text-right">
-                        <span className="font-mono font-black text-foreground">
-                          ৳{order.total.toLocaleString()}
-                        </span>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">
-                          {order.paymentMethod}
-                        </p>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 px-4">{getStatusBadge(order.status)}</td>
-
-                      {/* Courier Logistics */}
-                      <td className="py-3.5 px-4">
-                        {order.courierName ? (
-                          <div>
-                            <span className="font-bold text-foreground text-[11px]">
-                              {order.courierName}
-                            </span>
-                            <p className="font-mono text-[10px] text-muted-foreground truncate max-w-[120px]" title={order.trackingNumber}>
-                              {order.trackingNumber}
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] text-muted-foreground/60 italic">
-                            Unassigned
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Action buttons */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div
-                          className="flex items-center justify-end gap-1.5"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Link
-                            href={`/dashboard/orders/${order.orderNumber}`}
-                            className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors cursor-pointer inline-flex items-center justify-center"
-                            title="View order details"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setInvoiceModalOrder(order);
-                            }}
-                            className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors cursor-pointer"
-                            title="Print invoice"
-                          >
-                            <Printer className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {filteredOrders.length === 0 ? (
+          <div className="col-span-full admin-card rounded-2xl bg-card p-12 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[380px]">
+            <Box className="h-10 w-10 mx-auto mb-2 opacity-40" />
+            <p className="font-bold text-foreground text-sm">No orders found</p>
+            <p className="text-xs mt-0.5">Try clearing your filters or search query.</p>
           </div>
+        ) : (
+          paginatedOrders.map((order) => (
+            <OrderCardItem
+              key={order.id}
+              order={order}
+              getStatusBadge={getStatusBadge}
+              onPrintInvoice={setInvoiceModalOrder}
+              onQuickInspect={setSelectedOrder}
+            />
+          ))
+        )}
 
-          {/* ── Table Integrated Pagination Footer ── */}
-          {filteredOrders.length > 0 && (
-            <div className="mt-auto p-3.5 sm:p-4 bg-muted/20 border-t border-border/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <p className="text-muted-foreground font-medium">
-                Showing <strong className="text-foreground font-bold">{(currentPage - 1) * pageSize + 1}</strong> to{" "}
-                <strong className="text-foreground font-bold">
-                  {Math.min(currentPage * pageSize, filteredOrders.length)}
-                </strong>{" "}
-                of <strong className="text-foreground font-bold">{filteredOrders.length}</strong> orders
-              </p>
+        {/* Integrated Pagination Footer for Card View */}
+        {filteredOrders.length > 0 && (
+          <div className="col-span-full p-4 rounded-2xl bg-card/60 backdrop-blur-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs admin-card border-none">
+            <p className="text-muted-foreground font-medium">
+              Showing <strong className="text-foreground font-bold">{(currentPage - 1) * pageSize + 1}</strong> to{" "}
+              <strong className="text-foreground font-bold">
+                {Math.min(currentPage * pageSize, filteredOrders.length)}
+              </strong>{" "}
+              of <strong className="text-foreground font-bold">{filteredOrders.length}</strong> orders
+            </p>
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className={cn(
-                    "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer",
-                    currentPage === 1
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                      : "bg-muted/60 text-foreground hover:bg-muted"
-                  )}
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span>Prev</span>
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={cn(
-                      "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                      currentPage === page
-                        ? "bg-foreground text-background shadow-xs font-black"
-                        : "bg-muted/40 text-foreground/80 hover:bg-muted"
-                    )}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className={cn(
-                    "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer",
-                    currentPage === totalPages
-                      ? "opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
-                      : "bg-muted/60 text-foreground hover:bg-muted"
-                  )}
-                >
-                  <span>Next</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Order Detail Drawer Modal (z-[9999] covers all headers and bottom navs) ── */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-card p-5 sm:p-6 shadow-2xl border-none space-y-5 relative animate-in slide-in-from-bottom-6 duration-200">
-            <button
-              type="button"
-              onClick={() => setSelectedOrder(null)}
-              className="absolute right-4 top-4 p-1.5 rounded-full bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center justify-between border-b border-border/40 pb-3 pr-8">
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-foreground">
-                  Order #{selectedOrder.orderNumber}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Placed on {new Date(selectedOrder.createdAt).toLocaleString()}
-                </p>
-              </div>
-              {getStatusBadge(selectedOrder.status)}
-            </div>
-
-            {/* Change Status Stepper */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-foreground">
-                Update Order Status:
-              </label>
-              <select
-                value={selectedOrder.status}
-                onChange={(e) => {
-                  const newSt = e.target.value as OrderStatus;
-                  updateOrderStatus(selectedOrder.id, newSt);
-                  setSelectedOrder({ ...selectedOrder, status: newSt });
-                }}
-                className="h-10 w-full rounded-xl bg-muted/50 px-3 text-xs font-bold text-foreground focus:outline-none cursor-pointer"
-              >
-                <option value="pending">Pending Verification</option>
-                <option value="processing">Processing & QC Inspection</option>
-                <option value="shipped">Handed to Courier (In Transit)</option>
-                <option value="delivered">Delivered Successfully</option>
-                <option value="cancelled">Cancelled & Refunded</option>
-              </select>
-            </div>
-
-            {/* Courier Dispatch Assignment */}
-            <form
-              onSubmit={handleAssignTracking}
-              className="p-4 rounded-2xl bg-muted/30 space-y-2.5"
-            >
-              <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <Truck className="h-3.5 w-3.5 text-amber-500" />
-                <span>Assign Courier Shipment</span>
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Steadfast Courier / Pathao"
-                  value={courierNameInput}
-                  onChange={(e) => setCourierNameInput(e.target.value)}
-                  className="h-9 rounded-xl bg-background px-3 text-xs font-medium text-foreground focus:outline-none"
-                />
-                <input
-                  type="text"
-                  required
-                  placeholder="Tracking code (e.g. STE-99420)"
-                  value={trackingNumberInput}
-                  onChange={(e) => setTrackingNumberInput(e.target.value)}
-                  className="h-9 rounded-xl bg-background px-3 text-xs font-medium text-foreground focus:outline-none"
-                />
-              </div>
+            <div className="flex items-center gap-1.5">
               <button
-                type="submit"
-                className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className={
+                  currentPage === 1
+                    ? "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                    : "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-muted/60 text-foreground hover:bg-muted"
+                }
               >
-                Save Courier & Dispatch Parcel
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>Prev</span>
               </button>
-            </form>
 
-            {/* Items List */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-                Order Items ({selectedOrder.items.length})
-              </h4>
-              <div className="divide-y divide-border/40 rounded-2xl p-3 bg-muted/20">
-                {selectedOrder.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="py-2.5 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-muted shrink-0">
-                        <Image
-                          src={item.productThumbnail}
-                          alt={item.productName}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-bold text-foreground">
-                          {item.productName}
-                        </p>
-                        {item.variantName && (
-                          <p className="text-[10px] text-muted-foreground">
-                            {item.variantName}
-                          </p>
-                        )}
-                        <p className="text-[11px] text-muted-foreground">
-                          Qty: {item.quantity} × ৳{item.unitPrice.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="font-mono font-bold text-foreground">
-                      ৳{item.subtotal.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                  className={
+                    currentPage === page
+                      ? "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer bg-foreground text-background shadow-xs font-black"
+                      : "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer bg-muted/40 text-foreground/80 hover:bg-muted"
+                  }
+                >
+                  {page}
+                </button>
+              ))}
 
-            {/* Customer & Address */}
-            <div className="p-3.5 rounded-2xl bg-muted/20 text-xs space-y-1">
-              <span className="font-bold text-foreground flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-amber-500" />
-                Shipping Destination:
-              </span>
-              <p className="font-semibold text-foreground">
-                {selectedOrder.shippingAddress.name} ({selectedOrder.shippingAddress.phone})
-              </p>
-              <p className="text-muted-foreground">
-                {selectedOrder.shippingAddress.street}, {selectedOrder.shippingAddress.area},{" "}
-                {selectedOrder.shippingAddress.city} - {selectedOrder.shippingAddress.postalCode}
-              </p>
+              <button
+                type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className={
+                  currentPage === totalPages
+                    ? "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                    : "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-muted/60 text-foreground hover:bg-muted"
+                }
+              >
+                <span>Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Invoice Modal */}
-      {invoiceModalOrder && (
-        <InvoiceModal
-          order={invoiceModalOrder}
-          isOpen={Boolean(invoiceModalOrder)}
-          onClose={() => setInvoiceModalOrder(null)}
+      {/* ── Table View: Full Desktop Table ── */}
+      {viewMode === "table" && (
+        <OrderDesktopTable
+          orders={paginatedOrders}
+          getStatusBadge={getStatusBadge}
+          onPrintInvoice={setInvoiceModalOrder}
         />
       )}
-      {/* ── Mobile Draggable Floating Filter Button (Icon-Only Circle) ── */}
-      <div
-        style={{
-          right: `${fabPosition.x}px`,
-          bottom: `${fabPosition.y}px`,
+
+      {/* Desktop Table Integrated Pagination Footer */}
+      {viewMode === "table" && filteredOrders.length > 0 && (
+        <div className="hidden sm:flex mt-auto p-3.5 sm:p-4 bg-card rounded-2xl border border-border/20 flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <p className="text-muted-foreground font-medium">
+            Showing <strong className="text-foreground font-bold">{(currentPage - 1) * pageSize + 1}</strong> to{" "}
+            <strong className="text-foreground font-bold">
+              {Math.min(currentPage * pageSize, filteredOrders.length)}
+            </strong>{" "}
+            of <strong className="text-foreground font-bold">{filteredOrders.length}</strong> orders
+          </p>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className={
+                currentPage === 1
+                  ? "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                  : "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-muted/60 text-foreground hover:bg-muted"
+              }
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <span>Prev</span>
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={
+                  currentPage === page
+                    ? "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer bg-foreground text-background shadow-xs font-black"
+                    : "h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer bg-muted/40 text-foreground/80 hover:bg-muted"
+                }
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className={
+                currentPage === totalPages
+                  ? "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer opacity-40 cursor-not-allowed bg-muted/40 text-muted-foreground"
+                  : "h-8 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer bg-muted/60 text-foreground hover:bg-muted"
+              }
+            >
+              <span>Next</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Order Detail Quick Drawer Modal ── */}
+      <OrderQuickInspectModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onUpdateStatus={(id, status) => {
+          updateOrderStatus(id, status);
+          setSelectedOrder((prev) => (prev ? { ...prev, status } : null));
         }}
+        onAssignTracking={handleAssignTracking}
+        courierNameInput={courierNameInput}
+        setCourierNameInput={setCourierNameInput}
+        trackingNumberInput={trackingNumberInput}
+        setTrackingNumberInput={setTrackingNumberInput}
+        getStatusBadge={getStatusBadge}
+      />
+
+      {/* ── Mobile Floating Filter Button ── */}
+      <OrderFloatingFilterFab
+        position={fabPosition}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        className="md:hidden fixed z-40 touch-none select-none cursor-grab active:cursor-grabbing"
-      >
-        <button
-          type="button"
-          aria-label="Open Orders Filter"
-          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background shadow-2xl border-2 border-background/20 active:scale-90 transition-transform pointer-events-none"
-        >
-          <Filter className="h-5 w-5 text-amber-500 fill-amber-500/30" />
-          {statusFilter !== "all" && (
-            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-background animate-pulse" />
-          )}
-        </button>
-      </div>
+        isFiltered={statusFilter !== "all"}
+      />
 
-      {/* ── Mobile Fullscreen Filter Modal (z-[9999] covers all headers & bottom nav) ── */}
-      {showMobileFilters && (
-        <div className="fixed inset-0 z-[9999] flex flex-col bg-background animate-in fade-in duration-200 md:hidden">
-          <div className="flex-1 flex flex-col p-5 overflow-y-auto space-y-5">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/50 pb-4 pt-1">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-500">
-                  <Filter className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-foreground tracking-tight">Filter Orders</h3>
-                  <p className="text-[11px] text-muted-foreground">Select order status pipeline</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters(false)}
-                className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      {/* ── Mobile Fullscreen Filter Modal ── */}
+      <OrderMobileFilterModal
+        isOpen={showMobileFilters}
+        onClose={() => setShowMobileFilters(false)}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        orders={orders}
+        onResetPage={() => setCurrentPage(1)}
+      />
 
-            {/* Status Segmented Cards */}
-            <div className="space-y-2 text-xs">
-              <span className="font-bold text-foreground block mb-2">Order Status Pipeline</span>
-              {[
-                { id: "all", label: "All Orders", desc: "Show complete order registry", count: orders.length },
-                { id: "pending", label: "Pending Verification", desc: "Awaiting customer or payment verification", count: orders.filter((o) => o.status === "pending").length },
-                { id: "processing", label: "Processing / QC", desc: "Quality check and courier packaging", count: orders.filter((o) => o.status === "processing").length },
-                { id: "shipped", label: "In Transit / Shipped", desc: "Handed over to courier with tracking", count: orders.filter((o) => o.status === "shipped").length },
-                { id: "delivered", label: "Delivered Successfully", desc: "Completed deliveries with payment verified", count: orders.filter((o) => o.status === "delivered").length },
-                { id: "cancelled", label: "Cancelled / Refunded", desc: "Cancelled orders and return processing", count: orders.filter((o) => o.status === "cancelled").length },
-              ].map((s) => {
-                const isSelected = statusFilter === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter(s.id);
-                      setCurrentPage(1);
-                      setShowMobileFilters(false);
-                    }}
-                    className={cn(
-                      "w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between",
-                      isSelected
-                        ? "border-amber-500 bg-amber-500/10 text-foreground ring-1 ring-amber-500"
-                        : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
-                    )}
-                  >
-                    <div>
-                      <p className={cn("font-bold text-xs text-foreground", isSelected && "text-amber-500 font-black")}>
-                        {s.label}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{s.desc}</p>
-                    </div>
-                    <span className={cn(
-                      "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md",
-                      isSelected ? "bg-amber-500 text-zinc-950" : "bg-muted text-muted-foreground"
-                    )}>
-                      {s.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Bottom Reset & Dismiss */}
-            <div className="pt-2 flex items-center gap-2.5 border-t border-border/40">
-              <button
-                type="button"
-                onClick={() => {
-                  setStatusFilter("all");
-                  setCurrentPage(1);
-                  setShowMobileFilters(false);
-                }}
-                className="py-3 px-4 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
-              >
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters(false)}
-                className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black transition-all cursor-pointer shadow-md active:scale-98"
-              >
-                Apply ({filteredOrders.length} orders)
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── Invoice Modal ── */}
+      {invoiceModalOrder && (
+        <InvoiceModal
+          isOpen={Boolean(invoiceModalOrder)}
+          order={invoiceModalOrder}
+          onClose={() => setInvoiceModalOrder(null)}
+        />
       )}
     </div>
   );
