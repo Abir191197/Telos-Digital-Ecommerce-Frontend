@@ -38,7 +38,7 @@ export function CategoryLivePreviewCard({
   return (
     <div className="space-y-3">
       {/* Container Card */}
-      <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-4">
+      <div className="rounded-3xl border-none bg-card p-5 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)] space-y-4">
         {/* Preview Header with Mode Toggle */}
         <div className="flex items-center justify-between pb-3 border-b border-border/50">
           <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export function CategoryLivePreviewCard({
         {/* MODE 1: Storefront Grid Card (matches CategoryCardItem) */}
         {previewTab === "card" && (
           <div className="space-y-4">
-            <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl bg-background border border-border/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.65)] transition-all duration-300">
+            <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl bg-background border-none shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.5),0_18px_50px_-8px_rgba(0,0,0,0.35)] hover:shadow-[0_16px_36px_-8px_rgba(245,158,11,0.15)] transition-all duration-300">
               {/* Visual Category Cover Image / Banner */}
               <div className="relative block h-36 w-full overflow-hidden bg-muted/20">
                 <Image
@@ -120,7 +120,7 @@ export function CategoryLivePreviewCard({
 
             {/* Subcategories tags preview if any */}
             {subcategories.length > 0 && (
-              <div className="p-3 rounded-2xl bg-muted/20 border border-border/70 space-y-1.5">
+              <div className="p-3.5 rounded-2xl bg-muted/30 border-none shadow-2xs space-y-1.5">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
                   <Layers className="h-3 w-3 text-amber-500" />
                   <span>Subcategories Included ({subcategories.length})</span>
@@ -129,7 +129,7 @@ export function CategoryLivePreviewCard({
                   {subcategories.map((sub, idx) => (
                     <span
                       key={idx}
-                      className="text-[10px] font-semibold bg-background px-2 py-0.5 rounded-md border border-border/60 text-foreground"
+                      className="text-[10px] font-semibold bg-background px-2.5 py-0.5 rounded-md border-none shadow-2xs text-foreground"
                     >
                       {sub}
                     </span>
@@ -143,7 +143,7 @@ export function CategoryLivePreviewCard({
         {/* MODE 2: Category Hero Page Header Banner */}
         {previewTab === "banner" && (
           <div className="space-y-3">
-            <div className="relative overflow-hidden rounded-2xl border border-border/80 aspect-16/9 w-full shadow-md">
+            <div className="relative overflow-hidden rounded-2xl border-none aspect-16/9 w-full shadow-[0_8px_24px_-4px_rgba(0,0,0,0.12)]">
               <Image
                 src={displayBanner}
                 alt={displayName}

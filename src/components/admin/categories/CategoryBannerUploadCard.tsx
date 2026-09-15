@@ -55,7 +55,7 @@ export function CategoryBannerUploadCard({
   };
 
   return (
-    <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-7 shadow-xs space-y-4">
+    <div className="rounded-3xl border-none bg-card p-5 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)] space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border/50">
         <div>
@@ -132,7 +132,7 @@ export function CategoryBannerUploadCard({
 
       {/* Upload Drop Area or Active Banner View */}
       {bannerUrl ? (
-        <div className="relative group overflow-hidden rounded-2xl border border-border/80 bg-muted/20 aspect-16/7 sm:aspect-21/9 w-full shadow-inner">
+        <div className="relative group overflow-hidden rounded-2xl border-none bg-muted/20 aspect-16/7 sm:aspect-21/9 w-full shadow-[0_4px_20px_-4px_rgba(0,0,0,0.12)]">
           <Image
             src={bannerUrl}
             alt="Category banner preview"

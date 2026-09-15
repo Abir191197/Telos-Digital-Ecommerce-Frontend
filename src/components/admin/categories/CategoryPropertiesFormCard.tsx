@@ -109,7 +109,7 @@ export function CategoryPropertiesFormCard({
   };
 
   return (
-    <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-7 shadow-xs space-y-6">
+    <div className="rounded-3xl border-none bg-card p-5 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)] space-y-6">
       <div className="pb-3 border-b border-border/50">
         <div className="flex items-center gap-2">
           <h3 className="text-sm sm:text-base font-bold text-foreground">

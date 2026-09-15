@@ -162,7 +162,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
 
       {/* SUCCESS BANNER ALERT */}
       {successToast && (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
+        <div className="rounded-2xl border-none bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 shadow-[0_8px_24px_-4px_rgba(16,185,129,0.15)]">
           <div className="flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
             <div className="text-xs">
@@ -217,7 +217,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="px-4 py-2.5 rounded-xl border border-border/80 bg-card text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border-none bg-card text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shadow-xs"
                 >
                   Reset Form
                 </button>
