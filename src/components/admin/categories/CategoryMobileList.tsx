@@ -18,7 +18,7 @@ export interface CategoryMobileListProps {
   categories: Category[];
   getNumericId: (id: string, index: number) => string;
   formatDate: (dateStr?: string) => string;
-  onEdit: (category: Category) => void;
+  onEdit?: (category: Category) => void;
   onDelete: (category: Category) => void;
 }
 
@@ -101,14 +101,13 @@ export function CategoryMobileList({
               </Link>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onEdit(category)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 dark:text-blue-400 hover:text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                <Link
+                  href={`/dashboard/categories?action=edit&id=${category.id}`}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 dark:text-blue-400 hover:text-white text-xs font-bold transition-all shadow-xs active:scale-95"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                   <span>Edit</span>
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={() => onDelete(category)}

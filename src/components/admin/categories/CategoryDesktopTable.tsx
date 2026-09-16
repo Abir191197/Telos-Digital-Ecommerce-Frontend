@@ -23,7 +23,7 @@ export interface CategoryDesktopTableProps {
   setActiveMenuId: (id: string | null) => void;
   getNumericId: (id: string, index: number) => string;
   formatDate: (dateStr?: string) => string;
-  onEdit: (category: Category) => void;
+  onEdit?: (category: Category) => void;
   onDelete: (category: Category) => void;
 }
 
@@ -163,17 +163,14 @@ export function CategoryDesktopTable({
                           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                           <span>View in Store</span>
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveMenuId(null);
-                            onEdit(category);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted rounded-lg transition-colors text-left cursor-pointer"
+                        <Link
+                          href={`/dashboard/categories?action=edit&id=${category.id}`}
+                          onClick={() => setActiveMenuId(null)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted rounded-lg transition-colors text-left"
                         >
                           <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
                           <span>Edit Details</span>
-                        </button>
+                        </Link>
                         <div className="my-1 border-t border-border/60" />
                         <button
                           type="button"

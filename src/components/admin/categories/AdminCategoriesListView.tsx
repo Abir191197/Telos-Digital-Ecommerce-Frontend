@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useAdminStore } from "@/stores";
 import type { Category } from "@/types/ecommerce.types";
-import { CategoryEditModal } from "./CategoryEditModal";
 import { CategoryDesktopTable } from "./CategoryDesktopTable";
 import { CategoryMobileList } from "./CategoryMobileList";
 import { CategoryCardGrid } from "./CategoryCardGrid";
@@ -28,7 +27,7 @@ export interface AdminCategoriesListViewProps {
 }
 
 export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesListViewProps = {}) {
-  const { categories, deleteCategory, updateCategory } = useAdminStore();
+  const { categories, deleteCategory } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -45,9 +44,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
   }, []);
-
-  // Edit Modal State
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   // Confirmation Dialog State
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
@@ -133,11 +129,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
         showToast(`Category "${category.name}" removed successfully.`);
       },
     });
-  };
-
-  const handleSaveEdit = (id: string, updates: Partial<Category>) => {
-    updateCategory(id, updates);
-    showToast(`Category "${updates.name || "item"}" updated.`);
   };
 
   return (
@@ -287,7 +278,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
               categories={paginatedCategories}
               getNumericId={getNumericCategoryId}
               formatDate={formatCategoryDate}
-              onEdit={setEditingCategory}
               onDelete={handleDeleteRequest}
             />
           </div>
@@ -303,7 +293,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
                 setActiveMenuId={setActiveMenuId}
                 getNumericId={getNumericCategoryId}
                 formatDate={formatCategoryDate}
-                onEdit={setEditingCategory}
                 onDelete={handleDeleteRequest}
               />
             ) : (
@@ -311,7 +300,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
                 categories={paginatedCategories}
                 getNumericId={getNumericCategoryId}
                 formatDate={formatCategoryDate}
-                onEdit={setEditingCategory}
                 onDelete={handleDeleteRequest}
               />
             )}
@@ -329,14 +317,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
           )}
         </div>
       )}
-
-      {/* Edit Category Modal */}
-      <CategoryEditModal
-        isOpen={Boolean(editingCategory)}
-        category={editingCategory}
-        onClose={() => setEditingCategory(null)}
-        onSave={handleSaveEdit}
-      />
 
       {/* Confirmation Dialog */}
       <ProductConfirmDialog

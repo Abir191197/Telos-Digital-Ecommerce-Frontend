@@ -6,6 +6,17 @@ export const metadata: Metadata = {
   description: "Create and organize store product categories, banner imagery, and catalog hierarchy.",
 };
 
-export default function AdminCreateCategoryPage() {
-  return <CreateCategoryView initialTab="create" />;
+interface AdminCreateCategoryPageProps {
+  searchParams?: Promise<{
+    id?: string;
+    edit?: string;
+  }>;
+}
+
+export default async function AdminCreateCategoryPage({
+  searchParams,
+}: AdminCreateCategoryPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const categoryId = params?.id || params?.edit;
+  return <CreateCategoryView initialTab="create" categoryId={categoryId} />;
 }

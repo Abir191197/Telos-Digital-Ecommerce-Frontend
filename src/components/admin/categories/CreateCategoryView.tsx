@@ -18,35 +18,81 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export interface CreateCategoryViewProps {
   initialTab?: "create" | "list";
+  categoryId?: string;
 }
 
-export function CreateCategoryView({ initialTab = "create" }: CreateCategoryViewProps) {
-  const { categories, addCategory } = useAdminStore();
+export function CreateCategoryView({ initialTab = "create", categoryId }: CreateCategoryViewProps) {
+  const { categories, addCategory, updateCategory } = useAdminStore();
   const [currentView, setCurrentView] = useState<"create" | "list">(initialTab);
 
+  const editingCategory = React.useMemo(() => {
+    if (!categoryId) return null;
+    return (
+      categories.find((c) => c.id === categoryId || c.slug === categoryId) || null
+    );
+  }, [categoryId, categories]);
+
+  const isEditMode = Boolean(editingCategory);
+
   // Form State
-  const [formValues, setFormValues] = useState<CategoryFormValues>({
-    name: "",
-    slug: "",
-    description: "",
-    icon: "Smartphone",
-    itemCount: 0,
-    featured: false,
+  const [formValues, setFormValues] = useState<CategoryFormValues>(() => {
+    if (editingCategory) {
+      return {
+        name: editingCategory.name,
+        slug: editingCategory.slug,
+        description: editingCategory.description || "",
+        icon: editingCategory.icon || "Smartphone",
+        itemCount: editingCategory.itemCount || 0,
+        featured: Boolean(editingCategory.featured),
+      };
+    }
+    return {
+      name: "",
+      slug: "",
+      description: "",
+      icon: "Smartphone",
+      itemCount: 0,
+      featured: false,
+    };
   });
 
   // Banner State
-  const [bannerUrl, setBannerUrl] = useState<string | null>(
-    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80"
-  );
+  const [bannerUrl, setBannerUrl] = useState<string | null>(() => {
+    if (editingCategory) {
+      return editingCategory.image || null;
+    }
+    return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80";
+  });
   const [bannerError, setBannerError] = useState<string | null>(null);
 
   // Subcategories
-  const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>(() => {
+    if (editingCategory?.subcategories) {
+      return editingCategory.subcategories.map((s) => s.name);
+    }
+    return [];
+  });
 
   // Submission / Toast
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
   const [lastCreatedCategory, setLastCreatedCategory] = useState<string>("");
+
+  // Sync state if editingCategory changes
+  React.useEffect(() => {
+    if (editingCategory) {
+      setFormValues({
+        name: editingCategory.name,
+        slug: editingCategory.slug,
+        description: editingCategory.description || "",
+        icon: editingCategory.icon || "Smartphone",
+        itemCount: editingCategory.itemCount || 0,
+        featured: Boolean(editingCategory.featured),
+      });
+      setBannerUrl(editingCategory.image || null);
+      setSubcategories(editingCategory.subcategories?.map((s) => s.name) || []);
+    }
+  }, [editingCategory]);
 
   const handleFieldChange = <K extends keyof CategoryFormValues>(
     key: K,
@@ -88,16 +134,29 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
   };
 
   const handleResetForm = () => {
-    setFormValues({
-      name: "",
-      slug: "",
-      description: "",
-      icon: "Smartphone",
-      itemCount: 0,
-      featured: false,
-    });
-    setBannerUrl(null);
-    setSubcategories([]);
+    if (editingCategory) {
+      setFormValues({
+        name: editingCategory.name,
+        slug: editingCategory.slug,
+        description: editingCategory.description || "",
+        icon: editingCategory.icon || "Smartphone",
+        itemCount: editingCategory.itemCount || 0,
+        featured: Boolean(editingCategory.featured),
+      });
+      setBannerUrl(editingCategory.image || null);
+      setSubcategories(editingCategory.subcategories?.map((s) => s.name) || []);
+    } else {
+      setFormValues({
+        name: "",
+        slug: "",
+        description: "",
+        icon: "Smartphone",
+        itemCount: 0,
+        featured: false,
+      });
+      setBannerUrl(null);
+      setSubcategories([]);
+    }
     setSuccessToast(false);
   };
 
@@ -106,6 +165,35 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
     if (!formValues.name.trim() || !formValues.slug.trim()) return;
 
     setIsSubmitting(true);
+
+    if (isEditMode && editingCategory) {
+      const updatedCategory: Partial<Category> = {
+        name: formValues.name.trim(),
+        slug: formValues.slug.trim(),
+        description: formValues.description.trim(),
+        icon: formValues.icon,
+        image: bannerUrl || undefined,
+        itemCount: Number(formValues.itemCount) || 0,
+        featured: formValues.featured,
+        subcategories: subcategories.map((sub, idx) => {
+          const existing = editingCategory.subcategories?.find((s) => s.name.toLowerCase() === sub.toLowerCase());
+          return (
+            existing || {
+              id: `sub-${Date.now()}-${idx}`,
+              name: sub,
+              slug: sub.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+              itemCount: 0,
+            }
+          );
+        }),
+      };
+
+      updateCategory(editingCategory.id, updatedCategory);
+      setLastCreatedCategory(formValues.name);
+      setIsSubmitting(false);
+      setSuccessToast(true);
+      return;
+    }
 
     const newCategory: Category = {
       id: String(Date.now()).slice(-6),
@@ -139,9 +227,9 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
+            href="/dashboard/categories"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors shadow-2xs"
-            title="Back to Dashboard"
+            title="Back to Categories"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -154,7 +242,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
               <span className="text-xs text-muted-foreground">Hierarchy & Taxonomies</span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              Create Category
+              {isEditMode ? `Edit Category: ${editingCategory?.name || "Category"}` : "Create Category"}
             </h1>
           </div>
         </div>
@@ -166,17 +254,22 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
           <div className="flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
             <div className="text-xs">
-              <strong className="font-bold">Category Created!</strong> &ldquo;{lastCreatedCategory}&rdquo; added to store catalog navigation.
+              <strong className="font-bold">
+                {isEditMode ? "Category Updated!" : "Category Created!"}
+              </strong>{" "}
+              &ldquo;{lastCreatedCategory}&rdquo; {isEditMode ? "changes saved successfully." : "added to store catalog navigation."}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleResetForm}
-              className="text-xs font-bold underline hover:no-underline cursor-pointer"
-            >
-              Add Another
-            </button>
+            {!isEditMode && (
+              <button
+                type="button"
+                onClick={handleResetForm}
+                className="text-xs font-bold underline hover:no-underline cursor-pointer"
+              >
+                Add Another
+              </button>
+            )}
             <Link
               href="/dashboard/categories"
               className="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 cursor-pointer"
@@ -219,7 +312,7 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
                   onClick={handleResetForm}
                   className="px-4 py-2.5 rounded-xl border-none bg-card text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shadow-xs"
                 >
-                  Reset Form
+                  {isEditMode ? "Reset Changes" : "Reset Form"}
                 </button>
                 <button
                   type="submit"
@@ -227,7 +320,13 @@ export function CreateCategoryView({ initialTab = "create" }: CreateCategoryView
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <Sparkles className="h-4 w-4" />
-                  <span>{isSubmitting ? "Publishing..." : "Publish Category"}</span>
+                  <span>
+                    {isSubmitting
+                      ? "Saving..."
+                      : isEditMode
+                      ? "Save Category Changes"
+                      : "Publish Category"}
+                  </span>
                 </button>
               </div>
             </form>
