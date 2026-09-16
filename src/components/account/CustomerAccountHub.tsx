@@ -66,7 +66,9 @@ export function CustomerAccountHub() {
 
   const tabParam = searchParams.get("tab") as AccountTabKey | null;
   const hasTabParam = Boolean(tabParam && VALID_TABS.has(tabParam));
-  const initialTab: AccountTabKey = hasTabParam ? (tabParam as AccountTabKey) : "overview";
+  const initialTab: AccountTabKey = hasTabParam
+    ? (tabParam as AccountTabKey)
+    : "overview";
 
   const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
   const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
@@ -112,7 +114,7 @@ export function CustomerAccountHub() {
       setMobileSubScreen(true);
       router.push(`/account?tab=${tab}`, { scroll: false });
     },
-    [router]
+    [router],
   );
 
   const handleBackToMobileMenu = useCallback(() => {
@@ -123,18 +125,21 @@ export function CustomerAccountHub() {
   // Dynamic browser title
   useEffect(() => {
     if (mounted) {
-      document.title = TAB_TITLES[activeTab] || "Customer Account | Telos Cart BD";
+      document.title =
+        TAB_TITLES[activeTab] || "Customer Account | Telos Cart BD";
     }
   }, [activeTab, mounted]);
 
   const logout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "authRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     storeLogout();
   };
 
   const pendingReviewCount = reviews.filter(
-    (r) => r.status === "pending_review"
+    (r) => r.status === "pending_review",
   ).length;
 
   if (!mounted) {
@@ -191,7 +196,7 @@ export function CustomerAccountHub() {
         <main
           className={cn(
             "flex-1 w-full min-w-0",
-            !mobileSubScreen && "hidden lg:block"
+            !mobileSubScreen && "hidden lg:block",
           )}
         >
           <AccountTabContent
@@ -207,7 +212,9 @@ export function CustomerAccountHub() {
             onUpdateAddress={updateAddress}
             onDeleteAddress={deleteAddress}
             onSetDefaultAddress={setDefaultAddress}
-            onCancelOrder={(orderNumber, reason) => cancelOrder(orderNumber, reason)}
+            onCancelOrder={(orderNumber, reason) =>
+              cancelOrder(orderNumber, reason)
+            }
             onAddReturnTicket={(ticket) => {
               setReturnTickets((prev) => [ticket, ...prev]);
               handleSelectTab("returns");
@@ -231,7 +238,7 @@ export function CustomerAccountHub() {
             }}
             onUpdateReview={(updated) => {
               setReviews((prev) =>
-                prev.map((r) => (r.id === updated.id ? updated : r))
+                prev.map((r) => (r.id === updated.id ? updated : r)),
               );
             }}
             onAddToCart={(product, quantity) => addToCart(product, quantity)}

@@ -18,8 +18,15 @@ const protectedPaths = [
   "/settings",
 ];
 
+const adminOnlyPaths = ["/dashboard", "/clients", "/payments", "/reports"];
+
 // Routes only for unauthenticated users
-const authPaths = ["/login", "/register", "/forgot-password", "/reset-password"];
+const authPaths = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,9 +34,13 @@ export function middleware(request: NextRequest) {
   // TODO: Replace with actual token check (cookie-based or header-based)
   // For now, this is a placeholder that allows all requests through.
   const token = request.cookies.get("accessToken")?.value;
+  const authRole = request.cookies.get("authRole")?.value;
 
   const isProtectedRoute = protectedPaths.some((path) =>
-    pathname.startsWith(path)
+    pathname.startsWith(path),
+  );
+  const isAdminOnlyRoute = adminOnlyPaths.some((path) =>
+    pathname.startsWith(path),
   );
   const isAuthRoute = authPaths.some((path) => pathname.startsWith(path));
 
@@ -40,9 +51,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (isAdminOnlyRoute && token && authRole !== "SUPER_ADMIN") {
+    return NextResponse.redirect(new URL("/account", request.url));
+  }
+
   // Redirect authenticated users away from auth routes
   if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const redirectPath = authRole === "SUPER_ADMIN" ? "/dashboard" : "/account";
+    return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
   return NextResponse.next();

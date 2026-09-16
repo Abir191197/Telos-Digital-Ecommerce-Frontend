@@ -48,13 +48,21 @@ export function HeaderUserMenu({
 
   if (!user) {
     return (
-      <Link
-        href={ROUTES.LOGIN}
-        className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
-      >
-        <UserIcon className="h-4 w-4" />
-        <span>Sign In</span>
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href={ROUTES.LOGIN}
+          className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/30 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-muted/60 transition-colors"
+        >
+          <UserIcon className="h-4 w-4" />
+          <span>Sign In</span>
+        </Link>
+        <Link
+          href={ROUTES.REGISTER}
+          className="hidden sm:inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-xs sm:text-sm font-bold text-zinc-950 hover:bg-amber-400 transition-colors"
+        >
+          Register
+        </Link>
+      </div>
     );
   }
 
@@ -68,7 +76,7 @@ export function HeaderUserMenu({
         aria-label="User account menu"
         className={cn(
           "group flex items-center gap-2 rounded-full p-1 sm:pr-3 transition-all duration-200 cursor-pointer bg-card/60 hover:bg-card hover:shadow-md active:scale-98",
-          isOpen && "bg-card shadow-lg"
+          isOpen && "bg-card shadow-lg",
         )}
       >
         {/* Minimalist Avatar or Monogram Disc */}
@@ -97,7 +105,7 @@ export function HeaderUserMenu({
         <ChevronDown
           className={cn(
             "hidden sm:block h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover:text-foreground",
-            isOpen && "rotate-180 text-amber-500"
+            isOpen && "rotate-180 text-amber-500",
           )}
         />
       </button>

@@ -1,7 +1,7 @@
 // ── Customer Auth & Account Store (Zustand + Persist) ─────────────────
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { User } from "@/types/auth.types";
+import type { BackendAuthUser, User } from "@/types/auth.types";
 import type { Address, Order } from "@/types/order.types";
 import { DEMO_USER, DEMO_ORDERS } from "@/data/mock-user";
 
@@ -34,6 +34,40 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
+export const mapBackendUserToCustomerUser = (
+  backendUser: BackendAuthUser,
+): CustomerUser => ({
+  id: backendUser.id,
+  name: backendUser.name,
+  email: backendUser.email,
+  phone: backendUser.phone ?? "",
+  avatar: backendUser.avatar ?? undefined,
+  role: backendUser.role === "SUPER_ADMIN" ? "admin" : "user",
+  createdAt: backendUser.createdAt,
+  updatedAt: backendUser.updatedAt,
+  addresses:
+    backendUser.addresses?.map((address) => ({
+      id: address.id,
+      name: backendUser.name,
+      phone: backendUser.phone ?? "",
+      street: address.street,
+      area: address.state ?? address.city,
+      city: address.city,
+      zone:
+        address.city.trim().toLowerCase() === "dhaka"
+          ? "inside-dhaka"
+          : "outside-dhaka",
+      postalCode: address.postalCode ?? "",
+      isDefault: address.isDefault,
+      label:
+        address.title === "Office"
+          ? "Office"
+          : address.title === "Home" || !address.title
+            ? "Home"
+            : "Other",
+    })) ?? [],
+});
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
@@ -58,11 +92,16 @@ export const useAuthStore = create<AuthStore>()(
 
       loginWithCredentials: (emailOrPhone) => {
         // Mock authentication simulation
-        const isPhone = emailOrPhone.startsWith("+88") || emailOrPhone.startsWith("01");
+        const isPhone =
+          emailOrPhone.startsWith("+88") || emailOrPhone.startsWith("01");
         const customUser: CustomerUser = {
           ...DEMO_USER,
-          name: isPhone ? `Customer (${emailOrPhone.slice(-4)})` : emailOrPhone.split("@")[0],
-          email: isPhone ? `${emailOrPhone.replace(/\D/g, "")}@teloscart.com` : emailOrPhone,
+          name: isPhone
+            ? `Customer (${emailOrPhone.slice(-4)})`
+            : emailOrPhone.split("@")[0],
+          email: isPhone
+            ? `${emailOrPhone.replace(/\D/g, "")}@teloscart.com`
+            : emailOrPhone,
           phone: isPhone ? emailOrPhone : DEMO_USER.phone,
         };
 
@@ -82,7 +121,8 @@ export const useAuthStore = create<AuthStore>()(
           email: email.trim(),
           phone: phone.trim(),
           role: "user",
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+          avatar:
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
           addresses: [
             {
               id: `addr-${Date.now()}`,
@@ -124,7 +164,10 @@ export const useAuthStore = create<AuthStore>()(
           if (!state.user) return state;
           let updatedAddresses = [...state.user.addresses];
           if (addrWithId.isDefault) {
-            updatedAddresses = updatedAddresses.map((a) => ({ ...a, isDefault: false }));
+            updatedAddresses = updatedAddresses.map((a) => ({
+              ...a,
+              isDefault: false,
+            }));
           }
           return {
             user: {
@@ -139,11 +182,13 @@ export const useAuthStore = create<AuthStore>()(
         set((state) => {
           if (!state.user) return state;
           let updatedAddresses = state.user.addresses.map((a) =>
-            a.id === id ? { ...a, ...updates } : a
+            a.id === id ? { ...a, ...updates } : a,
           );
           if (updates.isDefault) {
             updatedAddresses = updatedAddresses.map((a) =>
-              a.id === id ? { ...a, isDefault: true } : { ...a, isDefault: false }
+              a.id === id
+                ? { ...a, isDefault: true }
+                : { ...a, isDefault: false },
             );
           }
           return {
@@ -193,7 +238,7 @@ export const useAuthStore = create<AuthStore>()(
           orders: state.orders.map((o) =>
             o.id === orderId || o.orderNumber === orderId
               ? { ...o, status: "cancelled" }
-              : o
+              : o,
           ),
         }));
       },
@@ -209,6 +254,6 @@ export const useAuthStore = create<AuthStore>()(
         isAuthenticated: state.isAuthenticated,
         orders: state.orders,
       }),
-    }
-  )
+    },
+  ),
 );

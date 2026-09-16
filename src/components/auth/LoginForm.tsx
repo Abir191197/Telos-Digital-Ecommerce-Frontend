@@ -3,13 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { mapBackendUserToCustomerUser, useAuthStore } from "@/stores";
 import { ROUTES } from "@/constants";
-import { cn } from "@/lib/utils";
+import {
+  useAdminLoginMutation,
+  useLoginMutation,
+} from "@/services/api/auth/authApi";
 import Image from "next/image";
 import { Logo } from "@/components/common";
 import {
-  Phone,
   Mail,
   Lock,
   Eye,
@@ -17,67 +19,121 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  UserCheck,
-  CheckCircle2,
   LayoutDashboard,
   User,
-  Truck,
-  ShieldAlert,
   Zap,
 } from "lucide-react";
+
+const DEMO_CUSTOMER = {
+  identifier: "customer@teloscart.website",
+  password: "Customer123!",
+};
+
+const DEMO_ADMIN = {
+  email: "admin@teloscart.website",
+  password: "SuperAdmin123!",
+};
+
+const setAuthCookies = (accessToken: string, role: string) => {
+  document.cookie = `accessToken=${encodeURIComponent(
+    accessToken,
+  )}; path=/; max-age=86400; SameSite=Lax`;
+  document.cookie = `authRole=${encodeURIComponent(
+    role,
+  )}; path=/; max-age=86400; SameSite=Lax`;
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (typeof error !== "object" || error === null || !("data" in error)) {
+    return "Login failed. Please try again.";
+  }
+
+  const data = (error as { data?: unknown }).data;
+  if (typeof data === "object" && data !== null && "message" in data) {
+    const message = (data as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+
+  return "Login failed. Please try again.";
+};
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
-  const loginAsDemo = useAuthStore((state) => state.loginAsDemo);
-  const loginWithCredentials = useAuthStore((state) => state.loginWithCredentials);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [adminLogin, { isLoading: isAdminLoginLoading }] =
+    useAdminLoginMutation();
 
-  const [inputVal, setInputVal] = useState("rahim.ahmed@example.com");
-  const [password, setPassword] = useState("••••••••");
+  const [inputVal, setInputVal] = useState(DEMO_CUSTOMER.identifier);
+  const [password, setPassword] = useState(DEMO_CUSTOMER.password);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const isLoading = isLoginLoading || isAdminLoginLoading;
 
   const getRedirectUrl = (fallback: string) => {
     return callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : fallback;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const persistSession = (
+    accessToken: string,
+    user: Parameters<typeof mapBackendUserToCustomerUser>[0],
+  ) => {
+    setAuth(mapBackendUserToCustomerUser(user), accessToken);
+    setAuthCookies(accessToken, user.role);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputVal.trim()) return;
+    const identifier = inputVal.trim();
+    if (!identifier || !password) return;
 
-    setIsLoading(true);
-    setTimeout(() => {
-      loginWithCredentials(inputVal);
-      // Set mock token cookie for edge middleware compatibility
-      document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
-      setIsLoading(false);
+    try {
+      setErrorMessage("");
+      const response = await login(
+        identifier.includes("@")
+          ? { email: identifier, password }
+          : { phone: identifier, password },
+      ).unwrap();
+      persistSession(response.data.accessToken, response.data.user);
       router.push(getRedirectUrl(ROUTES.PROFILE));
-    }, 600);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
   };
 
-  const handleQuickDemoCustomer = () => {
-    setIsLoading(true);
+  const handleQuickDemoCustomer = async () => {
     setDemoLoaded(true);
-    setTimeout(() => {
-      loginAsDemo();
-      document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
-      setIsLoading(false);
+    setInputVal(DEMO_CUSTOMER.identifier);
+    setPassword(DEMO_CUSTOMER.password);
+
+    try {
+      setErrorMessage("");
+      const response = await login(DEMO_CUSTOMER).unwrap();
+      persistSession(response.data.accessToken, response.data.user);
       router.push(getRedirectUrl(ROUTES.ACCOUNT));
-    }, 400);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
   };
 
-  const handleQuickDemoAdmin = () => {
-    setIsLoading(true);
+  const handleQuickDemoAdmin = async () => {
     setDemoLoaded(true);
-    setTimeout(() => {
-      loginAsDemo();
-      document.cookie = "accessToken=mock-admin-jwt-token; path=/; max-age=86400; SameSite=Lax";
-      setIsLoading(false);
+    setInputVal(DEMO_ADMIN.email);
+    setPassword(DEMO_ADMIN.password);
+
+    try {
+      setErrorMessage("");
+      const response = await adminLogin(DEMO_ADMIN).unwrap();
+      persistSession(response.data.accessToken, response.data.user);
       router.push(ROUTES.DASHBOARD);
-    }, 400);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
   };
 
   return (
@@ -116,7 +172,8 @@ export function LoginForm() {
                 Authentic Gadgets. Official BD Warranties.
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Log in to check live Steadfast & Pathao parcel pings, redeem saved vouchers, and access express checkout.
+                Log in to check live Steadfast & Pathao parcel pings, redeem
+                saved vouchers, and access express checkout.
               </p>
             </div>
 
@@ -126,15 +183,21 @@ export function LoginForm() {
                 <span className="text-[10px] uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
                   Authenticity
                 </span>
-                <p className="text-xs font-bold text-foreground">100% Genuine BD</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Official importer seal</p>
+                <p className="text-xs font-bold text-foreground">
+                  100% Genuine BD
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Official importer seal
+                </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60 backdrop-blur-md shadow-xs">
                 <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-700 dark:text-emerald-400 block mb-0.5">
                   Dispatch
                 </span>
                 <p className="text-xs font-bold text-foreground">24h Express</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Steadfast & Pathao hub</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Steadfast & Pathao hub
+                </p>
               </div>
             </div>
 
@@ -156,7 +219,8 @@ export function LoginForm() {
                 Welcome Back
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Enter your credentials or test immediately with 1-click demo profiles.
+                Enter your credentials or test immediately with 1-click demo
+                profiles.
               </p>
             </div>
 
@@ -197,6 +261,12 @@ export function LoginForm() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMessage && (
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  {errorMessage}
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 text-muted-foreground" />
@@ -240,7 +310,9 @@ export function LoginForm() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {showPassword ? (

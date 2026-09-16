@@ -36,6 +36,8 @@ export function Header() {
   const handleLogout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "authRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     storeLogout();
     setProfileOpen(false);
   };
@@ -53,7 +55,7 @@ export function Header() {
         "sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md transition-colors shadow-xs",
         isAccountPage
           ? "border-b-0 md:border-b md:border-border/60"
-          : "border-b border-border/60"
+          : "border-b border-border/60",
       )}
     >
       {/* ── Row 1: Top Bar (Support Hotline, Promos, Track Order, About) ── */}
@@ -63,7 +65,7 @@ export function Header() {
       <div
         className={cn(
           "container flex h-14 md:h-18 items-center justify-between gap-2.5 sm:gap-4 md:gap-8 px-3 sm:px-6",
-          isAccountPage && "hidden md:flex"
+          isAccountPage && "hidden md:flex",
         )}
       >
         {/* Brand Logo (Text hidden on mobile via Logo component) */}

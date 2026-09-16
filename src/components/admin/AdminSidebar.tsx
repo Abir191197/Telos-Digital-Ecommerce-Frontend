@@ -60,10 +60,12 @@ export function AdminSidebar() {
     const initial: Record<string, boolean> = {};
     ADMIN_NAV_GROUPS.forEach((group) => {
       group.items.forEach((item) => {
-        if (item.children?.some((sub) => {
-          const [path] = sub.href.split("?");
-          return pathname === path;
-        })) {
+        if (
+          item.children?.some((sub) => {
+            const [path] = sub.href.split("?");
+            return pathname === path;
+          })
+        ) {
           initial[item.title] = true;
         }
       });
@@ -76,7 +78,9 @@ export function AdminSidebar() {
     ADMIN_NAV_GROUPS.forEach((group) => {
       group.items.forEach((item) => {
         if (item.children && isParentRouteActive(item)) {
-          setExpanded((prev) => (prev[item.title] ? prev : { ...prev, [item.title]: true }));
+          setExpanded((prev) =>
+            prev[item.title] ? prev : { ...prev, [item.title]: true },
+          );
         }
       });
     });
@@ -89,6 +93,8 @@ export function AdminSidebar() {
   const handleLogout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "authRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     storeLogout();
     if (isMobileOpen) setMobileOpen(false);
     router.push(ROUTES.LOGIN);
@@ -113,7 +119,7 @@ export function AdminSidebar() {
           isOpen ? "lg:w-64" : "lg:w-20",
           isMobileOpen
             ? "translate-x-0 w-72"
-            : "-translate-x-full lg:translate-x-0"
+            : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Top Header Area */}

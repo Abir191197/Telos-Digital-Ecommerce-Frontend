@@ -29,6 +29,7 @@ export function AdminHeader() {
   const router = useRouter();
   const { setMobileOpen } = useSidebarStore();
   const storeLogout = useAuthStore((state) => state.logout);
+  const authUser = useAuthStore((state) => state.user);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -36,10 +37,16 @@ export function AdminHeader() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target as Node)
+      ) {
         setShowProfileMenu(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
         setShowNotifications(false);
       }
     }
@@ -78,6 +85,8 @@ export function AdminHeader() {
   const handleLogout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "authRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     storeLogout();
     setShowProfileMenu(false);
     router.push(ROUTES.LOGIN);
@@ -195,7 +204,10 @@ export function AdminHeader() {
         <ThemeToggle className="border-border/80 bg-background/50" />
 
         {/* Profile */}
-        <div className="relative pl-1 sm:pl-2 border-l border-border/60" ref={profileMenuRef}>
+        <div
+          className="relative pl-1 sm:pl-2 border-l border-border/60"
+          ref={profileMenuRef}
+        >
           <button
             type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -208,7 +220,7 @@ export function AdminHeader() {
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-xs font-semibold text-foreground leading-none">
-                Admin
+                {authUser?.name.split(" ")[0] ?? "Admin"}
               </p>
               <p className="text-[10px] text-muted-foreground leading-none mt-1">
                 Store Console
@@ -217,7 +229,7 @@ export function AdminHeader() {
             <ChevronDown
               className={cn(
                 "hidden sm:block h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
-                showProfileMenu && "rotate-180"
+                showProfileMenu && "rotate-180",
               )}
             />
           </button>
@@ -227,10 +239,10 @@ export function AdminHeader() {
             <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border/80 bg-card p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-3 py-2 border-b border-border/60">
                 <p className="text-xs font-semibold text-foreground">
-                  Store Administrator
+                  {authUser?.name ?? "Store Administrator"}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  admin@telos.com.bd
+                  {authUser?.email ?? "admin@teloscart.website"}
                 </p>
               </div>
 

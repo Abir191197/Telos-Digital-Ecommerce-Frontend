@@ -3,8 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { mapBackendUserToCustomerUser, useAuthStore } from "@/stores";
 import { ROUTES } from "@/constants";
+import {
+  useLoginMutation,
+  useRegisterMutation,
+} from "@/services/api/auth/authApi";
 import Image from "next/image";
 import { Logo } from "@/components/common";
 import {
@@ -24,10 +28,40 @@ import {
   Zap,
 } from "lucide-react";
 
+const DEMO_CUSTOMER = {
+  identifier: "customer@teloscart.website",
+  password: "Customer123!",
+};
+
+const setAuthCookies = (accessToken: string, role: string) => {
+  document.cookie = `accessToken=${encodeURIComponent(
+    accessToken,
+  )}; path=/; max-age=86400; SameSite=Lax`;
+  document.cookie = `authRole=${encodeURIComponent(
+    role,
+  )}; path=/; max-age=86400; SameSite=Lax`;
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (typeof error !== "object" || error === null || !("data" in error)) {
+    return "Registration failed. Please try again.";
+  }
+
+  const data = (error as { data?: unknown }).data;
+  if (typeof data === "object" && data !== null && "message" in data) {
+    const message = (data as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+
+  return "Registration failed. Please try again.";
+};
+
 export function RegisterForm() {
   const router = useRouter();
-  const registerCustomer = useAuthStore((state) => state.registerCustomer);
-  const loginAsDemo = useAuthStore((state) => state.loginAsDemo);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const [registerCustomer, { isLoading: isRegisterLoading }] =
+    useRegisterMutation();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,31 +69,47 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email || !phoneWithoutPrefix) return;
+  const isLoading = isRegisterLoading || isLoginLoading;
 
-    setIsLoading(true);
-    const fullPhone = `+880${phoneWithoutPrefix.trim().replace(/^0+/, "")}`;
-    setTimeout(() => {
-      registerCustomer(name, email, fullPhone);
-      // Set cookie for edge middleware
-      document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
-      setIsLoading(false);
-      router.push(ROUTES.PROFILE);
-    }, 600);
+  const persistSession = (
+    accessToken: string,
+    user: Parameters<typeof mapBackendUserToCustomerUser>[0],
+  ) => {
+    setAuth(mapBackendUserToCustomerUser(user), accessToken);
+    setAuthCookies(accessToken, user.role);
   };
 
-  const handleQuickDemo = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      loginAsDemo();
-      document.cookie = "accessToken=mock-demo-jwt-token; path=/; max-age=86400; SameSite=Lax";
-      setIsLoading(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !phoneWithoutPrefix || !password) return;
+    const fullPhone = `+880${phoneWithoutPrefix.trim().replace(/^0+/, "")}`;
+
+    try {
+      setErrorMessage("");
+      const response = await registerCustomer({
+        name,
+        email,
+        phone: fullPhone,
+        password,
+      }).unwrap();
+      persistSession(response.data.accessToken, response.data.user);
       router.push(ROUTES.PROFILE);
-    }, 400);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
+  };
+
+  const handleQuickDemo = async () => {
+    try {
+      setErrorMessage("");
+      const response = await login(DEMO_CUSTOMER).unwrap();
+      persistSession(response.data.accessToken, response.data.user);
+      router.push(ROUTES.PROFILE);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
   };
 
   return (
@@ -98,7 +148,8 @@ export function RegisterForm() {
                 Unlock Bangladesh&apos;s Smartest Tech Store.
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Create your Telos ID to save multiple delivery addresses, track live courier dispatches, and get VIP pre-order access.
+                Create your Telos ID to save multiple delivery addresses, track
+                live courier dispatches, and get VIP pre-order access.
               </p>
             </div>
 
@@ -108,22 +159,32 @@ export function RegisterForm() {
                 <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-700 dark:text-emerald-400 block mb-0.5">
                   Savings
                 </span>
-                <p className="text-xs font-bold text-foreground">Up to 15% OFF</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Member flash access</p>
+                <p className="text-xs font-bold text-foreground">
+                  Up to 15% OFF
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Member flash access
+                </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60 backdrop-blur-md shadow-xs">
                 <span className="text-[10px] uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
                   Checkout
                 </span>
-                <p className="text-xs font-bold text-foreground">1-Click Order</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Saved hub locations</p>
+                <p className="text-xs font-bold text-foreground">
+                  1-Click Order
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Saved hub locations
+                </p>
               </div>
             </div>
 
             {/* Trust Tag */}
             <div className="pt-2 flex items-center gap-2 text-xs text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="font-medium text-foreground">Official Warranty BD</span>
+              <span className="font-medium text-foreground">
+                Official Warranty BD
+              </span>
               <span>•</span>
               <span className="font-mono text-[11px]">256-Bit SSL</span>
             </div>
@@ -159,7 +220,8 @@ export function RegisterForm() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Skip filling forms. Instantly load pre-configured customer profile with orders & saved addresses.
+                Skip filling forms. Instantly load pre-configured customer
+                profile with orders & saved addresses.
               </p>
               <button
                 type="button"
@@ -174,6 +236,12 @@ export function RegisterForm() {
 
             {/* Registration Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMessage && (
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  {errorMessage}
+                </div>
+              )}
+
               <div>
                 <label className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5">
                   <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -208,18 +276,24 @@ export function RegisterForm() {
                 <div>
                   <label className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5">
                     <span>Mobile Number</span>
-                    <span className="text-[10px] font-normal text-muted-foreground">(BD only)</span>
+                    <span className="text-[10px] font-normal text-muted-foreground">
+                      (BD only)
+                    </span>
                   </label>
                   <div className="flex h-11 items-center rounded-xl border border-border/80 bg-background overflow-hidden focus-within:border-amber-500 transition-colors">
                     <div className="flex items-center gap-1.5 bg-muted/60 px-3 h-full border-r border-border/70 select-none">
                       <span className="text-base leading-none">🇧🇩</span>
-                      <span className="text-xs font-bold text-foreground">+880</span>
+                      <span className="text-xs font-bold text-foreground">
+                        +880
+                      </span>
                     </div>
                     <input
                       type="tel"
                       required
                       value={phoneWithoutPrefix}
-                      onChange={(e) => setPhoneWithoutPrefix(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) =>
+                        setPhoneWithoutPrefix(e.target.value.replace(/\D/g, ""))
+                      }
                       placeholder="1712345678"
                       maxLength={10}
                       className="h-full flex-1 bg-transparent px-3 text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none"
@@ -246,7 +320,9 @@ export function RegisterForm() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {showPassword ? (
@@ -268,11 +344,17 @@ export function RegisterForm() {
                 />
                 <span className="text-[11px] text-muted-foreground leading-snug">
                   I agree to the{" "}
-                  <Link href={ROUTES.TERMS} className="text-amber-600 dark:text-amber-400 font-medium hover:underline">
+                  <Link
+                    href={ROUTES.TERMS}
+                    className="text-amber-600 dark:text-amber-400 font-medium hover:underline"
+                  >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href={ROUTES.PRIVACY_POLICY} className="text-amber-600 dark:text-amber-400 font-medium hover:underline">
+                  <Link
+                    href={ROUTES.PRIVACY_POLICY}
+                    className="text-amber-600 dark:text-amber-400 font-medium hover:underline"
+                  >
                     Privacy Policy
                   </Link>
                   .

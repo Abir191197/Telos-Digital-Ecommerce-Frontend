@@ -11,6 +11,7 @@ import { API_URL } from "@/constants";
 // Base query with auth header injection
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_URL,
+  credentials: "include",
   prepareHeaders: (headers) => {
     const token = useAuthStore.getState().accessToken;
     if (token) {
@@ -31,6 +32,10 @@ export const baseQueryWithReauth: BaseQueryFn<
 
   if (result.error && result.error.status === 401) {
     // Token expired or invalid — clear auth state
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "authRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     useAuthStore.getState().logout();
   }
 
