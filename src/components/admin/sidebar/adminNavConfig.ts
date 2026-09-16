@@ -3,6 +3,7 @@ import {
   ShoppingBag,
   Package,
   FolderTree,
+  Award,
   Boxes,
   CreditCard,
   BarChart3,
@@ -74,6 +75,14 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         children: [
           { title: "Create category", href: "/dashboard/create-category" },
           { title: "Manage category", href: "/dashboard/categories" },
+        ],
+      },
+      {
+        title: "Brands",
+        icon: Award,
+        children: [
+          { title: "Create Brand", href: "/dashboard/brands?action=create" },
+          { title: "Manage brand", href: "/dashboard/brands" },
         ],
       },
       {

@@ -66,4 +66,8 @@ export interface Brand {
   icon: string;
   color?: string;
   featured?: boolean;
+  description?: string;
+  website?: string;
+  logo?: string;
+  createdAt?: string;
 }
