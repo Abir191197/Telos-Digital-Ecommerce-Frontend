@@ -2,3 +2,8 @@ export * from "./CreateBrandView";
 export * from "./BrandLogoUploadCard";
 export * from "./BrandPropertiesFormCard";
 export * from "./BrandLivePreviewCard";
+export * from "./AdminBrandsListView";
+export * from "./BrandCardGrid";
+export * from "./BrandDesktopTable";
+export * from "./BrandMobileList";
+export * from "./BrandEditModal";

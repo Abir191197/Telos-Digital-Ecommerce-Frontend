@@ -31,12 +31,9 @@ export function BrandLivePreviewCard({
       </div>
 
       <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl bg-card border-none p-6 transition-all duration-300 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)]">
-        {/* Top Accent Strip */}
-        <div className="h-1.5 w-full rounded-full mb-4 bg-amber-500/80" />
-
         {/* Logo / Emblem */}
         <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-sm flex items-center justify-center p-2.5 bg-muted/40 transition-transform group-hover:scale-105">
+          <div className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-xs flex items-center justify-center p-2.5 bg-muted/30 border border-border/40 transition-transform group-hover:scale-105">
             {logoUrl ? (
               <Image
                 src={logoUrl}
@@ -46,11 +43,11 @@ export function BrandLivePreviewCard({
                 unoptimized
               />
             ) : (
-              <Award className="h-8 w-8 text-muted-foreground/60" />
+              <Award className="h-8 w-8 text-amber-500" />
             )}
           </div>
 
-          <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/15 text-amber-600 dark:text-amber-400">
+          <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
             {tag}
           </span>
         </div>

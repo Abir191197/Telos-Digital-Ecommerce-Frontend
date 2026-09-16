@@ -1,0 +1,316 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Search,
+  Plus,
+  LayoutGrid,
+  Table as TableIcon,
+  CheckCircle2,
+  Award,
+  X,
+} from "lucide-react";
+import { useAdminStore } from "@/stores";
+import type { Brand } from "@/types/ecommerce.types";
+import {
+  ProductConfirmDialog,
+  type ConfirmationDialogState,
+} from "@/components/admin/products/ProductConfirmDialog";
+import { BrandCardGrid } from "./BrandCardGrid";
+import { BrandDesktopTable } from "./BrandDesktopTable";
+import { BrandMobileList } from "./BrandMobileList";
+import { BrandEditModal } from "./BrandEditModal";
+import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
+
+export function AdminBrandsListView() {
+  const { brands, products, deleteBrand, updateBrand } = useAdminStore();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
+  const [viewMode, setViewMode] = useState<"card" | "table">("card");
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  // Close three-dot action menu when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest("[data-action-menu]")) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  // Edit Modal State
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+
+  // Confirmation Dialog State
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "",
+    variant: "danger",
+    onConfirm: () => {},
+  });
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
+
+  const getProductCount = (brandName: string) => {
+    return products.filter(
+      (p) => p.brand.toLowerCase() === brandName.toLowerCase()
+    ).length;
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 8;
+
+  const filteredBrands = brands.filter((b) => {
+    const matchSearch =
+      b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchFeatured = filterFeatured === "all" || b.featured;
+    return matchSearch && matchFeatured;
+  });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterFeatured]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBrands.length / PAGE_SIZE));
+  const paginatedBrands = filteredBrands.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleDeleteRequest = (brand: Brand) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Delete Brand?",
+      message: `Are you sure you want to permanently delete "${brand.name}" (/brand/${brand.slug})? Linked products will remain in store.`,
+      confirmLabel: "Delete Brand",
+      variant: "danger",
+      onConfirm: () => {
+        deleteBrand(brand.id);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        showToast(`Brand "${brand.name}" removed successfully.`);
+      },
+    });
+  };
+
+  const handleSaveEdit = (id: string, updates: Partial<Brand>) => {
+    updateBrand(id, updates);
+    showToast(`Brand "${updates.name || "item"}" updated.`);
+  };
+
+  return (
+    <div className="w-full space-y-6 pb-20">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-emerald-800 dark:text-emerald-300 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 text-xs font-semibold">
+          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Top Header (Hidden on mobile) */}
+      <div className="hidden sm:flex sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+              Brand Partnerships
+            </span>
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              {brands.length} Brands Total
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mt-0.5">
+            Manage Brands
+          </h1>
+        </div>
+
+        <Link
+          href="/dashboard/brands?action=create"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Create Brand</span>
+        </Link>
+      </div>
+
+      {/* Search Bar: Sticky Sub-Nav Layer under Header on Mobile, Toolbar on Tablet/Desktop */}
+      <div className="sticky top-16 sm:static z-20 -mx-4 sm:mx-0 px-4 sm:px-0 -mt-6 sm:mt-0 py-3 sm:py-0 bg-background/95 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none border-b sm:border-0 border-border/80 shadow-xs sm:shadow-none transition-all">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search brands or tags..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-border/80 bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-500 transition-colors shadow-2xs"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter Pills + View Switcher (Hidden on mobile) */}
+          <div className="hidden sm:flex items-center gap-2.5 flex-wrap justify-end">
+            {/* Featured / All filter */}
+            <div className="flex rounded-xl bg-muted/40 p-1 border border-border/60 text-xs">
+              <button
+                type="button"
+                onClick={() => setFilterFeatured("all")}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  filterFeatured === "all"
+                    ? "bg-background text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                All ({brands.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterFeatured("featured")}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  filterFeatured === "featured"
+                    ? "bg-background text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Featured ({brands.filter((b) => b.featured).length})
+              </button>
+            </div>
+
+            {/* Card / Table View Toggle */}
+            <div className="flex rounded-xl bg-muted/40 p-1 border border-border/60 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("card")}
+                title="Card View"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  viewMode === "card"
+                    ? "bg-background text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Cards</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                title="Table View"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  viewMode === "table"
+                    ? "bg-background text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <TableIcon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Empty State */}
+      {filteredBrands.length === 0 ? (
+        <div className="rounded-3xl border-none bg-card p-12 text-center space-y-3 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+            <Award className="h-6 w-6" />
+          </div>
+          <p className="text-sm font-bold text-foreground">No brands found</p>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Try adjusting your search criteria or register a new brand partner.
+          </p>
+          <Link
+            href="/dashboard/brands?action=create"
+            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Create Brand</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Mobile view: Mobile List */}
+          <div className="block md:hidden">
+            <BrandMobileList
+              brands={paginatedBrands}
+              getProductCount={getProductCount}
+              onEdit={setEditingBrand}
+              onDelete={handleDeleteRequest}
+            />
+          </div>
+
+          {/* Desktop & Tablet view: Respects Card / Table toggle */}
+          <div className="hidden md:block">
+            {viewMode === "card" ? (
+              <BrandCardGrid
+                brands={paginatedBrands}
+                getProductCount={getProductCount}
+                onEdit={setEditingBrand}
+                onDelete={handleDeleteRequest}
+              />
+            ) : (
+              <BrandDesktopTable
+                brands={paginatedBrands}
+                activeMenuId={activeMenuId}
+                setActiveMenuId={setActiveMenuId}
+                getProductCount={getProductCount}
+                onEdit={setEditingBrand}
+                onDelete={handleDeleteRequest}
+              />
+            )}
+          </div>
+
+          {/* Pagination */}
+          {filteredBrands.length > 0 && (
+            <CategoryPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={PAGE_SIZE}
+              totalItems={filteredBrands.length}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Edit Brand Modal */}
+      <BrandEditModal
+        isOpen={Boolean(editingBrand)}
+        brand={editingBrand}
+        onClose={() => setEditingBrand(null)}
+        onSave={handleSaveEdit}
+      />
+
+      {/* Confirmation Dialog */}
+      <ProductConfirmDialog
+        dialog={confirmDialog}
+        onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+      />
+    </div>
+  );
+}
