@@ -239,7 +239,7 @@ export function AdminPaymentsView() {
 
       {/* ── Pending Action Alert Banner ── */}
       {hasMounted && pendingVerification.length > 0 && (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center justify-between gap-3 text-xs">
+        <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
             <div>

@@ -54,7 +54,7 @@ export function PaymentFilterDock({
   onResetPage,
 }: PaymentFilterDockProps) {
   return (
-    <div className="hidden md:flex sticky top-16 z-20 px-4 py-3 bg-card/90 backdrop-blur-xl border rounded-2xl border-border/50 shadow-xs items-center justify-between gap-3 transition-all">
+    <div className="hidden md:flex sticky top-16 z-20 px-4 py-3 bg-card/90 backdrop-blur-xl border rounded-3xl border-border/50 shadow-xs items-center justify-between gap-3 transition-all">
       {/* Desktop Search */}
       <div className="relative flex-1">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
