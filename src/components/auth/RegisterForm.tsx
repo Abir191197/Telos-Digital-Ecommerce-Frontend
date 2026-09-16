@@ -14,6 +14,7 @@ import { Logo } from "@/components/common";
 import {
   User,
   Mail,
+  Phone,
   Lock,
   Eye,
   EyeOff,
@@ -65,7 +66,7 @@ export function RegisterForm() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneWithoutPrefix, setPhoneWithoutPrefix] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
@@ -83,15 +84,14 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phoneWithoutPrefix || !password) return;
-    const fullPhone = `+880${phoneWithoutPrefix.trim().replace(/^0+/, "")}`;
+    if (!name || !email || !phone || !password) return;
 
     try {
       setErrorMessage("");
       const response = await registerCustomer({
         name,
         email,
-        phone: fullPhone,
+        phone: phone.trim(),
         password,
       }).unwrap();
       persistSession(response.data.accessToken, response.data.user);
@@ -275,30 +275,17 @@ export function RegisterForm() {
 
                 <div>
                   <label className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5">
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Mobile Number</span>
-                    <span className="text-[10px] font-normal text-muted-foreground">
-                      (BD only)
-                    </span>
                   </label>
-                  <div className="flex h-11 items-center rounded-xl border border-border/80 bg-background overflow-hidden focus-within:border-amber-500 transition-colors">
-                    <div className="flex items-center gap-1.5 bg-muted/60 px-3 h-full border-r border-border/70 select-none">
-                      <span className="text-base leading-none">🇧🇩</span>
-                      <span className="text-xs font-bold text-foreground">
-                        +880
-                      </span>
-                    </div>
-                    <input
-                      type="tel"
-                      required
-                      value={phoneWithoutPrefix}
-                      onChange={(e) =>
-                        setPhoneWithoutPrefix(e.target.value.replace(/\D/g, ""))
-                      }
-                      placeholder="1712345678"
-                      maxLength={10}
-                      className="h-full flex-1 bg-transparent px-3 text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none"
-                    />
-                  </div>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter mobile number"
+                    className="h-11 w-full rounded-xl border border-border/80 bg-background px-3.5 text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground focus:border-amber-500 focus:outline-none transition-colors"
+                  />
                 </div>
               </div>
 
