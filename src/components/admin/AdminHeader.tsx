@@ -235,6 +235,15 @@ export function AdminHeader() {
 
               <div className="py-1 space-y-0.5">
                 <Link
+                  href={ROUTES.ADMIN_PROFILE}
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-foreground hover:bg-amber-500/10 hover:text-amber-500 transition-colors"
+                >
+                  <ShieldCheck className="h-4 w-4 text-amber-500" />
+                  <span>Admin Profile & Security</span>
+                </Link>
+
+                <Link
                   href={ROUTES.HOME}
                   target="_blank"
                   onClick={() => setShowProfileMenu(false)}

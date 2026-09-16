@@ -33,6 +33,7 @@ export const ROUTES = {
   REPORTS: "/reports",
   NOTIFICATIONS: "/notifications",
   PROFILE: "/profile",
+  ADMIN_PROFILE: "/dashboard/profile",
   ACCOUNT_HUB: "/account",
   SETTINGS: "/settings",
   REVIEWS: "/dashboard/reviews",
