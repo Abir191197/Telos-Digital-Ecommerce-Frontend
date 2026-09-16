@@ -105,15 +105,8 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     items: [
       {
         title: "Payments",
+        href: ROUTES.PAYMENTS,
         icon: CreditCard,
-        children: [
-          { title: "Transaction Logs", href: ROUTES.PAYMENTS },
-          {
-            title: "Payouts & Settlement",
-            href: "/dashboard/payments?tab=payouts",
-          },
-          { title: "Gateway Settings", href: "/dashboard/payments?tab=gateways" },
-        ],
       },
       {
         title: "Analytics",
