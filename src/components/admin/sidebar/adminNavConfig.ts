@@ -54,6 +54,11 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
             href: "/dashboard/orders?status=pending",
             badge: "2",
           },
+          {
+            title: "Active Carts",
+            href: "/dashboard/orders?tab=carts",
+            badge: "Live",
+          },
         ],
       },
     ],

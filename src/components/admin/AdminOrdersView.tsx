@@ -14,7 +14,9 @@ import {
   Box,
   DollarSign,
   PackageCheck,
+  ShoppingCart,
 } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Order, OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
@@ -258,13 +260,23 @@ export function AdminOrdersView() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="px-3 py-1.5 rounded-xl bg-card border-none admin-card text-xs font-bold text-foreground flex items-center gap-1.5">
-            <span className="text-muted-foreground font-medium">
-              {statusFilter === "pending" ? "Pending:" : "Count:"}
-            </span>
-            <span className={statusFilter === "pending" ? "text-amber-500 font-black" : ""}>
-              {filteredOrders.length}
-            </span>
+          {/* Workspace Tabs */}
+          <div className="flex rounded-xl bg-muted/50 p-1 border border-border/60 text-xs">
+            <Link
+              href="/dashboard/orders"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold bg-background text-foreground shadow-2xs transition-all"
+            >
+              <Box className="h-3.5 w-3.5" />
+              <span>Orders ({filteredOrders.length})</span>
+            </Link>
+            <Link
+              href="/dashboard/orders?tab=carts"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-muted-foreground hover:text-foreground transition-all"
+            >
+              <ShoppingCart className="h-3.5 w-3.5 text-amber-500" />
+              <span>Active Carts</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </Link>
           </div>
         </div>
       </div>
