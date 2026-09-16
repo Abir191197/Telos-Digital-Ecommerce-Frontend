@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 interface AdminBrandsPageProps {
   searchParams: Promise<{
     action?: string;
+    id?: string;
+    edit?: string;
   }>;
 }
 
@@ -19,6 +21,11 @@ export default async function AdminBrandsPage({
 
   if (params.action === "create") {
     return <CreateBrandView />;
+  }
+
+  const editId = params.id || params.edit || (params.action === "edit" ? params.id : undefined);
+  if (params.action === "edit" || editId) {
+    return <CreateBrandView brandId={editId} />;
   }
 
   return <AdminBrandsListView />;

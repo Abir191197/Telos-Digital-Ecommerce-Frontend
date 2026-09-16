@@ -9,7 +9,7 @@ import type { Brand } from "@/types/ecommerce.types";
 interface BrandCardGridProps {
   brands: Brand[];
   getProductCount: (brandName: string) => number;
-  onEdit: (brand: Brand) => void;
+  onEdit?: (brand: Brand) => void;
   onDelete: (brand: Brand) => void;
 }
 
@@ -76,14 +76,13 @@ export function BrandCardGrid({
 
             {/* Direct Action Buttons: Edit, Delete, Store Link */}
             <div className="flex items-center gap-2 pt-3 mt-4 border-t border-border/30">
-              <button
-                type="button"
-                onClick={() => onEdit(brand)}
+              <Link
+                href={`/dashboard/brands?action=edit&id=${brand.id}`}
                 className="flex-1 py-2 px-3 rounded-xl bg-muted/60 hover:bg-amber-500 hover:text-zinc-950 text-foreground text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
               >
                 <Edit3 className="h-3.5 w-3.5 text-amber-500 group-hover:text-inherit" />
                 <span>Edit</span>
-              </button>
+              </Link>
 
               <button
                 type="button"

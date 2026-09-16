@@ -9,7 +9,7 @@ import type { Brand } from "@/types/ecommerce.types";
 interface BrandMobileListProps {
   brands: Brand[];
   getProductCount: (brandName: string) => number;
-  onEdit: (brand: Brand) => void;
+  onEdit?: (brand: Brand) => void;
   onDelete: (brand: Brand) => void;
 }
 
@@ -29,33 +29,32 @@ export function BrandMobileList({
             key={brand.id}
             className="p-4 rounded-3xl bg-card border-none space-y-3 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.06),0_16px_40px_-8px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.5),0_18px_50px_-8px_rgba(0,0,0,0.35)]"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="relative h-12 w-12 shrink-0 rounded-2xl overflow-hidden bg-muted/40 flex items-center justify-center p-1.5 shadow-xs">
+            {/* Top row: Brand Emblem + Name/Tag + Product count pill */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="relative h-10 w-10 shrink-0 rounded-2xl bg-muted/50 p-1 flex items-center justify-center overflow-hidden border border-border/40">
                   {brand.logo ? (
                     <Image
                       src={brand.logo}
                       alt={brand.name}
-                      fill
-                      className="object-contain p-1"
-                      unoptimized
+                      width={36}
+                      height={36}
+                      className="object-contain"
                     />
                   ) : (
-                    <Award className="h-6 w-6 text-amber-500" />
+                    <Award className="h-5 w-5 text-amber-500" />
                   )}
                 </div>
-                <div className="min-w-0">
-                  <h4 className="font-extrabold text-foreground text-sm truncate">
-                    {brand.name}
-                  </h4>
-                  <p className="text-[11px] font-mono text-muted-foreground truncate">
-                    /{brand.slug} &bull; {count} items
-                  </p>
+                <div>
+                  <h4 className="text-sm font-black text-foreground">{brand.name}</h4>
+                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                    {brand.tag}
+                  </span>
                 </div>
               </div>
 
-              <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                {brand.tag}
+              <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-xl">
+                {count} {count === 1 ? "Product" : "Products"}
               </span>
             </div>
 
@@ -67,14 +66,13 @@ export function BrandMobileList({
 
             {/* Mobile Actions */}
             <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-              <button
-                type="button"
-                onClick={() => onEdit(brand)}
+              <Link
+                href={`/dashboard/brands?action=edit&id=${brand.id}`}
                 className="flex-1 py-2 px-3 rounded-xl bg-muted/60 hover:bg-amber-500 hover:text-zinc-950 text-foreground text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
               >
                 <Edit3 className="h-3.5 w-3.5 text-amber-500 group-hover:text-inherit" />
                 <span>Edit</span>
-              </button>
+              </Link>
 
               <button
                 type="button"

@@ -35,27 +35,67 @@ const PRESET_TAGS = [
   "Direct Distributor",
 ];
 
-export function CreateBrandView() {
+export interface CreateBrandViewProps {
+  brandId?: string;
+}
+
+export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
   const router = useRouter();
-  const { addBrand } = useAdminStore();
+  const { brands, addBrand, updateBrand } = useAdminStore();
+
+  const editingBrand = React.useMemo(() => {
+    if (!brandId) return null;
+    return brands.find((b) => b.id === brandId || b.slug === brandId) || null;
+  }, [brandId, brands]);
+
+  const isEditMode = Boolean(editingBrand);
 
   // Form State
-  const [formValues, setFormValues] = useState<BrandFormValues>({
-    name: "",
-    slug: "",
-    tag: PRESET_TAGS[0],
-    customTag: "",
-    featured: true,
-    description: "",
+  const [formValues, setFormValues] = useState<BrandFormValues>(() => {
+    if (editingBrand) {
+      const isPreset = PRESET_TAGS.includes(editingBrand.tag);
+      return {
+        name: editingBrand.name,
+        slug: editingBrand.slug,
+        tag: isPreset ? editingBrand.tag : PRESET_TAGS[0],
+        customTag: isPreset ? "" : editingBrand.tag,
+        featured: Boolean(editingBrand.featured),
+        description: editingBrand.description || "",
+      };
+    }
+    return {
+      name: "",
+      slug: "",
+      tag: PRESET_TAGS[0],
+      customTag: "",
+      featured: true,
+      description: "",
+    };
   });
 
   // Logo / Asset State
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => editingBrand?.logo || null);
   const [logoError, setLogoError] = useState<string | null>(null);
 
   // Status
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
+
+  // Sync state if editingBrand changes
+  React.useEffect(() => {
+    if (editingBrand) {
+      const isPreset = PRESET_TAGS.includes(editingBrand.tag);
+      setFormValues({
+        name: editingBrand.name,
+        slug: editingBrand.slug,
+        tag: isPreset ? editingBrand.tag : PRESET_TAGS[0],
+        customTag: isPreset ? "" : editingBrand.tag,
+        featured: Boolean(editingBrand.featured),
+        description: editingBrand.description || "",
+      });
+      setLogoUrl(editingBrand.logo || null);
+    }
+  }, [editingBrand]);
 
   const handleFieldChange = <K extends keyof BrandFormValues>(
     key: K,
@@ -119,6 +159,26 @@ export function CreateBrandView() {
 
     const finalTag = formValues.customTag.trim() || formValues.tag;
 
+    if (isEditMode && editingBrand) {
+      const updatedBrand: Partial<Brand> = {
+        name: formValues.name.trim(),
+        slug: effectiveSlug,
+        tag: finalTag,
+        icon: formValues.name.trim(),
+        featured: formValues.featured,
+        description: formValues.description.trim() || undefined,
+        logo: logoUrl || undefined,
+      };
+
+      updateBrand(editingBrand.id, updatedBrand);
+      setSuccessToast(true);
+
+      setTimeout(() => {
+        router.push("/dashboard/brands");
+      }, 900);
+      return;
+    }
+
     const newBrand: Brand = {
       id: `brand-${Date.now()}`,
       name: formValues.name.trim(),
@@ -157,10 +217,12 @@ export function CreateBrandView() {
                 Brand Catalog
               </span>
               <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">New Partnership</span>
+              <span className="text-xs text-muted-foreground">
+                {isEditMode ? "Edit Partnership" : "New Partnership"}
+              </span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              Create Brand
+              {isEditMode ? `Edit Brand: ${editingBrand?.name || "Brand"}` : "Create Brand"}
             </h1>
           </div>
         </div>
@@ -171,7 +233,10 @@ export function CreateBrandView() {
         <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
           <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
           <div className="text-xs font-medium">
-            <strong className="font-bold">Brand Created!</strong> &ldquo;{formValues.name}&rdquo; registered to catalog. Redirecting...
+            <strong className="font-bold">
+              {isEditMode ? "Brand Updated!" : "Brand Created!"}
+            </strong>{" "}
+            &ldquo;{formValues.name}&rdquo; {isEditMode ? "changes saved." : "registered to catalog."} Redirecting...
           </div>
         </div>
       )}
@@ -193,6 +258,7 @@ export function CreateBrandView() {
               values={formValues}
               presetTags={PRESET_TAGS}
               isSubmitting={isSubmitting}
+              submitLabel={isEditMode ? "Save Brand Changes" : "Save & Register Brand"}
               onFieldChange={handleFieldChange}
               onNameChange={handleNameChange}
               onSubmit={handleSubmit}

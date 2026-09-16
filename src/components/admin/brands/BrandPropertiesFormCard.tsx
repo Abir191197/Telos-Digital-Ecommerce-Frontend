@@ -17,6 +17,7 @@ interface BrandPropertiesFormCardProps {
   values: BrandFormValues;
   presetTags: string[];
   isSubmitting: boolean;
+  submitLabel?: string;
   onFieldChange: <K extends keyof BrandFormValues>(key: K, value: BrandFormValues[K]) => void;
   onNameChange: (name: string) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -26,6 +27,7 @@ export function BrandPropertiesFormCard({
   values,
   presetTags,
   isSubmitting,
+  submitLabel,
   onFieldChange,
   onNameChange,
   onSubmit,
@@ -151,7 +153,11 @@ export function BrandPropertiesFormCard({
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
         >
           <Sparkles className="h-4 w-4" />
-          <span>{isSubmitting ? "Creating..." : "Save & Register Brand"}</span>
+          <span>
+            {isSubmitting
+              ? "Saving..."
+              : submitLabel || "Save & Register Brand"}
+          </span>
         </button>
       </div>
     </div>

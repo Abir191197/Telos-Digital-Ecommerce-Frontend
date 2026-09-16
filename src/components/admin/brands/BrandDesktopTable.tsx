@@ -11,7 +11,7 @@ interface BrandDesktopTableProps {
   activeMenuId: string | null;
   setActiveMenuId: (id: string | null) => void;
   getProductCount: (brandName: string) => number;
-  onEdit: (brand: Brand) => void;
+  onEdit?: (brand: Brand) => void;
   onDelete: (brand: Brand) => void;
 }
 
@@ -129,17 +129,14 @@ export function BrandDesktopTable({
                           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                           <span>Storefront</span>
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveMenuId(null);
-                            onEdit(brand);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/70 rounded-xl transition-colors text-left cursor-pointer"
+                        <Link
+                          href={`/dashboard/brands?action=edit&id=${brand.id}`}
+                          onClick={() => setActiveMenuId(null)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/70 rounded-xl transition-colors text-left"
                         >
                           <Edit3 className="h-3.5 w-3.5 text-amber-500" />
                           <span>Edit Brand</span>
-                        </button>
+                        </Link>
                         <div className="my-1 border-t border-border/60" />
                         <button
                           type="button"

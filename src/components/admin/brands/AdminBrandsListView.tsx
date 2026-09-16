@@ -20,14 +20,13 @@ import {
 import { BrandCardGrid } from "./BrandCardGrid";
 import { BrandDesktopTable } from "./BrandDesktopTable";
 import { BrandMobileList } from "./BrandMobileList";
-import { BrandEditModal } from "./BrandEditModal";
 import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
 
 export function AdminBrandsListView() {
-  const { brands, products, deleteBrand, updateBrand } = useAdminStore();
+  const { brands, products, deleteBrand } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
-  const [viewMode, setViewMode] = useState<"card" | "table">("card");
+  const [viewMode, setViewMode] = useState<"card" | "table">("table");
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
   // Close three-dot action menu when clicking outside
@@ -41,9 +40,6 @@ export function AdminBrandsListView() {
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
   }, []);
-
-  // Edit Modal State
-  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
 
   // Confirmation Dialog State
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
@@ -106,11 +102,6 @@ export function AdminBrandsListView() {
         showToast(`Brand "${brand.name}" removed successfully.`);
       },
     });
-  };
-
-  const handleSaveEdit = (id: string, updates: Partial<Brand>) => {
-    updateBrand(id, updates);
-    showToast(`Brand "${updates.name || "item"}" updated.`);
   };
 
   return (
@@ -259,7 +250,6 @@ export function AdminBrandsListView() {
             <BrandMobileList
               brands={paginatedBrands}
               getProductCount={getProductCount}
-              onEdit={setEditingBrand}
               onDelete={handleDeleteRequest}
             />
           </div>
@@ -270,7 +260,6 @@ export function AdminBrandsListView() {
               <BrandCardGrid
                 brands={paginatedBrands}
                 getProductCount={getProductCount}
-                onEdit={setEditingBrand}
                 onDelete={handleDeleteRequest}
               />
             ) : (
@@ -279,7 +268,6 @@ export function AdminBrandsListView() {
                 activeMenuId={activeMenuId}
                 setActiveMenuId={setActiveMenuId}
                 getProductCount={getProductCount}
-                onEdit={setEditingBrand}
                 onDelete={handleDeleteRequest}
               />
             )}
@@ -297,14 +285,6 @@ export function AdminBrandsListView() {
           )}
         </div>
       )}
-
-      {/* Edit Brand Modal */}
-      <BrandEditModal
-        isOpen={Boolean(editingBrand)}
-        brand={editingBrand}
-        onClose={() => setEditingBrand(null)}
-        onSave={handleSaveEdit}
-      />
 
       {/* Confirmation Dialog */}
       <ProductConfirmDialog
