@@ -12,3 +12,5 @@ export * from "./AdminOrderDetailView";
 export { CreateProductView } from "./products";
 export * from "./categories";
 export * from "./brands";
+export * from "./AdminReviewsView";
+export * from "./reviews";

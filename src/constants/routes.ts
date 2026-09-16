@@ -35,6 +35,7 @@ export const ROUTES = {
   PROFILE: "/profile",
   ACCOUNT_HUB: "/account",
   SETTINGS: "/settings",
+  REVIEWS: "/dashboard/reviews",
 } as const;
 
 export const PUBLIC_ROUTES = [

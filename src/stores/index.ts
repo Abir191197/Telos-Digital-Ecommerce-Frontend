@@ -9,4 +9,5 @@ export {
   useAdminStore,
   type AdminCustomer,
   type AdminPaymentTransaction,
+  type AdminReview,
 } from "./admin.store";

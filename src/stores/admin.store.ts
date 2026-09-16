@@ -32,6 +32,22 @@ export interface AdminPaymentTransaction {
   status: "verified" | "pending_verification" | "rejected";
 }
 
+export interface AdminReview {
+  id: string;
+  productId: string;
+  productName: string;
+  productThumbnail: string;
+  customerName: string;
+  customerEmail: string;
+  rating: number; // 1 to 5
+  title?: string;
+  comment: string;
+  date: string;
+  verifiedPurchase: boolean;
+  status: "published" | "hidden" | "flagged";
+  helpfulCount?: number;
+}
+
 const INITIAL_CUSTOMERS: AdminCustomer[] = [
   {
     id: "cust-001",
@@ -223,6 +239,128 @@ const INITIAL_TRANSACTIONS: AdminPaymentTransaction[] = [
   },
 ];
 
+const INITIAL_ADMIN_REVIEWS: AdminReview[] = [
+  {
+    id: "rev-001",
+    productId: "prod-0001",
+    productName: "Apple iPhone 16 Pro Max 256GB",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
+    customerName: "Rahim Ahmed",
+    customerEmail: "rahim.ahmed@example.com",
+    rating: 5,
+    title: "Exceptional flagship smartphone",
+    comment:
+      "Original BTRC approved official device. Delivery took less than 24 hours inside Dhaka with Steadfast courier. Camera sharpness, titanium finish, and battery backup are second to none!",
+    date: "2026-09-09T18:15:00.000Z",
+    verifiedPurchase: true,
+    status: "published",
+    helpfulCount: 24,
+  },
+  {
+    id: "rev-002",
+    productId: "prod-0002",
+    productName: "Samsung Galaxy S24 Ultra 512GB",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=80",
+    customerName: "Tanvir Hossain",
+    customerEmail: "tanvir.h@gmail.com",
+    rating: 4,
+    title: "Awesome display and stylus",
+    comment:
+      "Display is remarkably anti-reflective in sunlight. S-Pen latency is virtually zero. Packaging was nicely bubbled. Deducted 1 star because DHL took 3 days instead of 2.",
+    date: "2026-09-08T14:30:00.000Z",
+    verifiedPurchase: true,
+    status: "published",
+    helpfulCount: 12,
+  },
+  {
+    id: "rev-003",
+    productId: "prod-0004",
+    productName: "Sony WH-1000XM5 Wireless Headphones",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
+    customerName: "Spam Bot 99",
+    customerEmail: "cheap-deals@promo-xyz.biz",
+    rating: 1,
+    title: "VISIT MY SITE FOR CHEAP PHONES",
+    comment:
+      "Go to www.fake-discount-store.com for 90% discount on all Apple products and free vouchers! Call 017000000 now!",
+    date: "2026-09-07T09:12:00.000Z",
+    verifiedPurchase: false,
+    status: "hidden",
+    helpfulCount: 0,
+  },
+  {
+    id: "rev-004",
+    productId: "prod-0003",
+    productName: "Apple MacBook Pro 16\" M3 Max",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
+    customerName: "Nusrat Jahan",
+    customerEmail: "nusrat.j@yahoo.com",
+    rating: 5,
+    title: "Unmatched performance for rendering",
+    comment:
+      "4K video exports in DaVinci Resolve render in real-time without fan noise. Authentic Apple warranty verified directly with support. Very pleased with Telos customer service.",
+    date: "2026-09-05T16:20:00.000Z",
+    verifiedPurchase: true,
+    status: "published",
+    helpfulCount: 18,
+  },
+  {
+    id: "rev-005",
+    productId: "prod-0005",
+    productName: "Apple Watch Ultra 2 GPS + Cellular",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
+    customerName: "Farhan Kabir",
+    customerEmail: "farhan.k@techbd.com",
+    rating: 2,
+    title: "Box seal arrived torn",
+    comment:
+      "The outer brown carton was fine, but the official retail box seal was cut. Watch itself has no scratches and battery cycles are zero, but seller must ensure tamper-proof seals are intact.",
+    date: "2026-09-04T11:45:00.000Z",
+    verifiedPurchase: true,
+    status: "flagged",
+    helpfulCount: 6,
+  },
+  {
+    id: "rev-006",
+    productId: "prod-0006",
+    productName: "Sony PlayStation 5 Slim Digital",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80",
+    customerName: "Sabbir Ahmed",
+    customerEmail: "sabbir.ahmed@gmail.com",
+    rating: 5,
+    title: "Superb gaming console",
+    comment:
+      "DualSense haptic feedback is truly next level. Fast delivery to Sylhet within 48 hours. Genuine box with official power cable and HDMI 2.1 cable included.",
+    date: "2026-09-02T19:00:00.000Z",
+    verifiedPurchase: true,
+    status: "published",
+    helpfulCount: 9,
+  },
+  {
+    id: "rev-007",
+    productId: "prod-0001",
+    productName: "Apple iPhone 16 Pro Max 256GB",
+    productThumbnail:
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
+    customerName: "Sadia Rahman",
+    customerEmail: "sadia.r@outlook.com",
+    rating: 5,
+    title: "Dessert Titanium is gorgeous",
+    comment:
+      "The color looks even better in natural light. Smooth transaction via bKash gateway. Everything matches catalog specs.",
+    date: "2026-08-31T12:10:00.000Z",
+    verifiedPurchase: true,
+    status: "published",
+    helpfulCount: 14,
+  },
+];
+
 interface AdminState {
   orders: Order[];
   products: Product[];
@@ -230,6 +368,7 @@ interface AdminState {
   brands: Brand[];
   customers: AdminCustomer[];
   transactions: AdminPaymentTransaction[];
+  reviews: AdminReview[];
 }
 
 interface AdminActions {
@@ -246,6 +385,8 @@ interface AdminActions {
   updateBrand: (brandId: string, updates: Partial<Brand>) => void;
   deleteBrand: (brandId: string) => void;
   verifyTransaction: (transactionId: string, status: "verified" | "rejected") => void;
+  toggleReviewVisibility: (reviewId: string, status?: "published" | "hidden" | "flagged") => void;
+  deleteReview: (reviewId: string) => void;
 }
 
 type AdminStore = AdminState & AdminActions;
@@ -259,6 +400,7 @@ export const useAdminStore = create<AdminStore>()(
       brands: (brandsData as unknown as Brand[]),
       customers: INITIAL_CUSTOMERS,
       transactions: INITIAL_TRANSACTIONS,
+      reviews: INITIAL_ADMIN_REVIEWS,
 
       updateOrderStatus: (orderId, status) => {
         set((state) => ({
@@ -359,6 +501,23 @@ export const useAdminStore = create<AdminStore>()(
           transactions: state.transactions.map((t) =>
             t.id === transactionId ? { ...t, status } : t
           ),
+        }));
+      },
+
+      toggleReviewVisibility: (reviewId, status) => {
+        set((state) => ({
+          reviews: state.reviews.map((r) => {
+            if (r.id !== reviewId) return r;
+            const newStatus =
+              status || (r.status === "hidden" ? "published" : "hidden");
+            return { ...r, status: newStatus };
+          }),
+        }));
+      },
+
+      deleteReview: (reviewId) => {
+        set((state) => ({
+          reviews: state.reviews.filter((r) => r.id !== reviewId),
         }));
       },
     }),
