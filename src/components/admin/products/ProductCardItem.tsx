@@ -121,14 +121,13 @@ export function ProductCardItem({
 
         {/* Mobile Visible Action Buttons: Edit + Delete */}
         <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-          <button
-            type="button"
-            onClick={() => onOpenEdit(product)}
-            className="flex-1 py-2 px-3 rounded-xl bg-muted/60 hover:bg-amber-500 hover:text-zinc-950 text-foreground text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+          <Link
+            href={`/dashboard/products?action=edit&id=${product.id}`}
+            className="flex-1 py-2 px-3 rounded-xl bg-muted/60 hover:bg-amber-500 hover:text-zinc-950 text-foreground text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-98 text-center"
           >
             <Edit3 className="h-3.5 w-3.5 text-amber-500 group-hover:text-inherit" />
             <span>Edit</span>
-          </button>
+          </Link>
 
           <button
             type="button"

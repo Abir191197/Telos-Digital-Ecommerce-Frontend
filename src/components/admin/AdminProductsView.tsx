@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/stores";
 import { Product } from "@/types/ecommerce.types";
 import {
@@ -32,6 +34,7 @@ import {
 } from "./products";
 
 export function AdminProductsView() {
+  const router = useRouter();
   const { products, addProduct, deleteProduct, updateProduct } =
     useAdminStore();
 
@@ -266,58 +269,12 @@ export function AdminProductsView() {
   };
 
   const handleOpenAddModal = () => {
-    setEditingProduct(null);
-    setFormData({
-      title: "",
-      brand: "Apple",
-      categorySlug: "smartphones",
-      shortDesc: "",
-      price: "",
-      originalPrice: "",
-      stock: 10,
-      badge: "",
-      warranty: "",
-      hasVoucher: false,
-      voucherType: "percentage",
-      voucherValue: "",
-      voucherCode: "",
-      showVoucherOnCard: false,
-      sku: "",
-      description: "",
-      isFeatured: false,
-      isFlashDeal: false,
-    });
-    setFormImages([
-      "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
-    ]);
-    setShowAddModal(true);
+    router.push("/dashboard/products?action=create");
   };
 
   const handleOpenEditModal = (product: Product) => {
     setActiveMenuId(null);
-    setEditingProduct(product);
-    setFormData({
-      title: product.name,
-      brand: product.brand,
-      categorySlug: product.categorySlug || "smartphones",
-      shortDesc: product.shortDescription || "",
-      price: product.price,
-      originalPrice: product.originalPrice || "",
-      stock: product.stock,
-      badge: product.tags?.[0] || "",
-      warranty: product.specifications?.Warranty || "",
-      hasVoucher: false,
-      voucherType: "percentage",
-      voucherValue: "",
-      voucherCode: "",
-      showVoucherOnCard: false,
-      sku: product.sku || "",
-      description: product.description || "",
-      isFeatured: product.isFeatured || false,
-      isFlashDeal: product.isFlashDeal || false,
-    });
-    setFormImages(product.images && product.images.length > 0 ? product.images : [product.thumbnail]);
-    setShowAddModal(true);
+    router.push(`/dashboard/products?action=edit&id=${product.id}`);
   };
 
   // Warning Popup on Form Save
@@ -437,15 +394,14 @@ export function AdminProductsView() {
             </button>
           )}
         </div>
-        <button
-          type="button"
-          onClick={handleOpenAddModal}
-          className="h-10 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shrink-0 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+        <Link
+          href="/dashboard/products?action=create"
+          className="h-10 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shrink-0 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
           title="Add New Product"
         >
           <Plus className="h-4 w-4" />
           <span>Add</span>
-        </button>
+        </Link>
       </div>
 
       {/* ── Top Header Banner (Hidden on mobile, desktop only) ── */}
@@ -467,14 +423,13 @@ export function AdminProductsView() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap self-stretch sm:self-auto">
-            <button
-              type="button"
-              onClick={handleOpenAddModal}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+            <Link
+              href="/dashboard/products?action=create"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>Add New Product</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -651,18 +606,6 @@ export function AdminProductsView() {
       <ProductConfirmDialog
         dialog={confirmDialog}
         onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
-      />
-
-      {/* ── Add / Edit Product Modal ── */}
-      <ProductFormModal
-        isOpen={showAddModal}
-        editingProduct={editingProduct}
-        formData={formData}
-        setFormData={setFormData}
-        images={formImages}
-        setImages={setFormImages}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={handleSaveProduct}
       />
 
       {/* ── Mobile Product Management Sheet/Modal ── */}

@@ -18,34 +18,76 @@ import {
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export function CreateProductView() {
+interface CreateProductViewProps {
+  productId?: string;
+}
+
+export function CreateProductView({ productId }: CreateProductViewProps = {}) {
   const router = useRouter();
-  const { addProduct } = useAdminStore();
+  const { products, addProduct, updateProduct } = useAdminStore();
+
+  const editingProduct = productId
+    ? products.find((p) => p.id === productId || p.slug === productId)
+    : null;
 
   // Form State
-  const [formValues, setFormValues] = useState<ProductFormValues>({
-    title: "",
-    brand: brandsData[0]?.name || "Apple",
-    categorySlug: categoriesData[0]?.slug || "smartphones-tablets",
-    shortDesc: "",
-    price: 95000,
-    originalPrice: 105000,
-    stock: 15,
-    badge: "New",
-    warranty: "1 Year Official Brand Warranty",
-    hasVoucher: false,
-    voucherType: "percentage",
-    voucherValue: 10,
-    voucherCode: "TELOS10",
-    showVoucherOnCard: true,
-    sku: "",
-    description: "",
-    isFeatured: false,
-    isFlashDeal: false,
+  const [formValues, setFormValues] = useState<ProductFormValues>(() => {
+    if (editingProduct) {
+      return {
+        title: editingProduct.name,
+        brand: editingProduct.brand || brandsData[0]?.name || "Apple",
+        categorySlug: editingProduct.categorySlug || categoriesData[0]?.slug || "smartphones-tablets",
+        shortDesc: editingProduct.shortDescription || "",
+        price: editingProduct.price,
+        originalPrice: editingProduct.originalPrice || editingProduct.price,
+        stock: editingProduct.stock,
+        badge: editingProduct.badge || editingProduct.tags?.[0] || "New",
+        warranty: editingProduct.specifications?.Warranty || "1 Year Official Brand Warranty",
+        hasVoucher: false,
+        voucherType: "percentage",
+        voucherValue: 10,
+        voucherCode: "TELOS10",
+        showVoucherOnCard: true,
+        sku: editingProduct.sku || "",
+        description: editingProduct.description || "",
+        isFeatured: editingProduct.isFeatured || false,
+        isFlashDeal: editingProduct.isFlashDeal || false,
+      };
+    }
+
+    return {
+      title: "",
+      brand: brandsData[0]?.name || "Apple",
+      categorySlug: categoriesData[0]?.slug || "smartphones-tablets",
+      shortDesc: "",
+      price: 95000,
+      originalPrice: 105000,
+      stock: 15,
+      badge: "New",
+      warranty: "1 Year Official Brand Warranty",
+      hasVoucher: false,
+      voucherType: "percentage",
+      voucherValue: 10,
+      voucherCode: "TELOS10",
+      showVoucherOnCard: true,
+      sku: "",
+      description: "",
+      isFeatured: false,
+      isFlashDeal: false,
+    };
   });
 
   // Photos State
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(() => {
+    if (editingProduct) {
+      return editingProduct.images && editingProduct.images.length > 0
+        ? editingProduct.images
+        : editingProduct.thumbnail
+        ? [editingProduct.thumbnail]
+        : [];
+    }
+    return [];
+  });
   const [imageError, setImageError] = useState<string | null>(null);
 
   // Status
@@ -131,44 +173,73 @@ export function CreateProductView() {
         1000 + Math.random() * 9000
       )}`;
 
-    const newProduct: Product = {
-      id: `prod-${Date.now()}`,
-      slug: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: formValues.title.trim(),
-      shortDescription:
-        formValues.shortDesc.trim() ||
-        `Authentic ${formValues.brand} ${formValues.title.trim()} backed with official Bangladesh manufacturer warranty.`,
-      description:
-        formValues.description.trim() ||
-        `Authentic ${formValues.title.trim()} from ${formValues.brand}. Includes official verified importer coverage.`,
-      categoryId: selectedCategory.id,
-      categorySlug: selectedCategory.slug,
-      categoryName: selectedCategory.name,
-      price: numericPrice,
-      originalPrice: numericOriginal > numericPrice ? numericOriginal : numericPrice,
-      discountPercentage: discountPercent,
-      currency: "BDT",
-      rating: 5.0,
-      reviewCount: 0,
-      stock: Number(formValues.stock),
-      inStock: Number(formValues.stock) > 0,
-      isFeatured: formValues.isFeatured,
-      isFlashDeal: formValues.isFlashDeal,
-      isNewArrival: true,
-      badge: (formValues.badge as any) || undefined,
-      images: images.length > 0 ? images : [previewThumbnail],
-      thumbnail: previewThumbnail,
-      brand: formValues.brand,
-      sku: generatedSku,
-      specifications: {
-        Brand: formValues.brand,
-        Warranty: formValues.warranty || "1 Year Official Warranty",
-      },
-      tags: ["official-store", "bangladesh-tech"],
-      createdAt: new Date().toISOString(),
-    };
+    if (editingProduct) {
+      updateProduct(editingProduct.id, {
+        name: formValues.title.trim(),
+        shortDescription: formValues.shortDesc.trim() || editingProduct.shortDescription,
+        description: formValues.description.trim() || editingProduct.description,
+        categoryId: selectedCategory.id,
+        categorySlug: selectedCategory.slug,
+        categoryName: selectedCategory.name,
+        price: numericPrice,
+        originalPrice: numericOriginal > numericPrice ? numericOriginal : numericPrice,
+        discountPercentage: discountPercent,
+        stock: Number(formValues.stock),
+        inStock: Number(formValues.stock) > 0,
+        isFeatured: formValues.isFeatured,
+        isFlashDeal: formValues.isFlashDeal,
+        badge: (formValues.badge as any) || undefined,
+        images: images.length > 0 ? images : [previewThumbnail],
+        thumbnail: previewThumbnail,
+        brand: formValues.brand,
+        sku: formValues.sku.trim() || editingProduct.sku,
+        specifications: {
+          ...(editingProduct.specifications || {}),
+          Brand: formValues.brand,
+          Warranty: formValues.warranty || "1 Year Official Warranty",
+        },
+      });
+    } else {
+      const newProduct: Product = {
+        id: `prod-${Date.now()}`,
+        slug: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`,
+        name: formValues.title.trim(),
+        shortDescription:
+          formValues.shortDesc.trim() ||
+          `Authentic ${formValues.brand} ${formValues.title.trim()} backed with official Bangladesh manufacturer warranty.`,
+        description:
+          formValues.description.trim() ||
+          `Authentic ${formValues.title.trim()} from ${formValues.brand}. Includes official verified importer coverage.`,
+        categoryId: selectedCategory.id,
+        categorySlug: selectedCategory.slug,
+        categoryName: selectedCategory.name,
+        price: numericPrice,
+        originalPrice: numericOriginal > numericPrice ? numericOriginal : numericPrice,
+        discountPercentage: discountPercent,
+        currency: "BDT",
+        rating: 5.0,
+        reviewCount: 0,
+        stock: Number(formValues.stock),
+        inStock: Number(formValues.stock) > 0,
+        isFeatured: formValues.isFeatured,
+        isFlashDeal: formValues.isFlashDeal,
+        isNewArrival: true,
+        badge: (formValues.badge as any) || undefined,
+        images: images.length > 0 ? images : [previewThumbnail],
+        thumbnail: previewThumbnail,
+        brand: formValues.brand,
+        sku: generatedSku,
+        specifications: {
+          Brand: formValues.brand,
+          Warranty: formValues.warranty || "1 Year Official Warranty",
+        },
+        tags: ["official-store", "bangladesh-tech"],
+        createdAt: new Date().toISOString(),
+      };
 
-    addProduct(newProduct);
+      addProduct(newProduct);
+    }
+
     setSuccessToast(true);
 
     setTimeout(() => {
@@ -194,10 +265,12 @@ export function CreateProductView() {
                 Admin Catalog
               </span>
               <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">Quick Entry</span>
+              <span className="text-xs text-muted-foreground">
+                {editingProduct ? "Edit Product" : "Quick Entry"}
+              </span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              Add New Product
+              {editingProduct ? `Edit "${editingProduct.name}"` : "Add New Product"}
             </h1>
           </div>
         </div>
@@ -208,7 +281,8 @@ export function CreateProductView() {
         <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
           <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
           <div className="text-xs font-medium">
-            <strong className="font-bold">Product saved!</strong> &ldquo;{formValues.title}&rdquo; added to live inventory. Redirecting...
+            <strong className="font-bold">Product saved!</strong> &ldquo;{formValues.title}&rdquo;{" "}
+            {editingProduct ? "updated successfully." : "added to live inventory."} Redirecting...
           </div>
         </div>
       )}

@@ -183,14 +183,14 @@ export function ProductDesktopTable({
                             <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                             <span>View in Store</span>
                           </Link>
-                          <button
-                            type="button"
-                            onClick={() => onOpenEdit(prod)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted rounded-lg transition-colors text-left cursor-pointer"
+                          <Link
+                            href={`/dashboard/products?action=edit&id=${prod.id}`}
+                            onClick={() => setActiveMenuId(null)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted rounded-lg transition-colors text-left"
                           >
                             <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
                             <span>Edit Details</span>
-                          </button>
+                          </Link>
                           <div className="my-1 border-t border-border/60" />
                           <button
                             type="button"
