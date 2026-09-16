@@ -15,3 +15,5 @@ export * from "./brands";
 export * from "./AdminReviewsView";
 export * from "./reviews";
 export * from "./AdminProfileView";
+export * from "./AdminActivityView";
+export * from "./activity";

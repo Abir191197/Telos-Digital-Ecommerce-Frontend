@@ -18,6 +18,7 @@ import {
   ChevronDown,
   User,
   Store,
+  History,
   Maximize2,
   Minimize2,
 } from "lucide-react";
@@ -241,6 +242,15 @@ export function AdminHeader() {
                 >
                   <ShieldCheck className="h-4 w-4 text-amber-500" />
                   <span>Admin Profile & Security</span>
+                </Link>
+
+                <Link
+                  href={ROUTES.ACTIVITY}
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-foreground hover:bg-amber-500/10 hover:text-amber-500 transition-colors"
+                >
+                  <History className="h-4 w-4 text-amber-500" />
+                  <span>Activity &amp; Audit Logs</span>
                 </Link>
 
                 <Link
