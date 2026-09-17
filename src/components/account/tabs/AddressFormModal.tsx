@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Building, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/order.types";
+import { useBDLocation } from "@/hooks/useBDLocation";
 
 interface AddressFormModalProps {
   isOpen: boolean;
@@ -22,6 +23,121 @@ export function AddressFormModal({
   setFormData,
   onSubmit,
 }: AddressFormModalProps) {
+  const { data: locationData, loading: locationLoading } = useBDLocation();
+  const [selectedDistrictId, setSelectedDistrictId] = useState<string>("");
+  const [selectedUpazilaId, setSelectedUpazilaId] = useState<string>("");
+  const [selectedUnionId, setSelectedUnionId] = useState<string>("");
+
+  const availableDistricts = useMemo(() => {
+    if (!locationData) return [];
+    const allDistricts: { value: number; title: string }[] = [];
+    Object.values(locationData.districts).forEach((districts) => {
+      allDistricts.push(...districts);
+    });
+    return allDistricts.sort((a, b) => a.title.localeCompare(b.title));
+  }, [locationData]);
+
+  const availableUpazilas = useMemo(() => {
+    if (!locationData || !selectedDistrictId) return [];
+    return locationData.upazilas[selectedDistrictId] || [];
+  }, [locationData, selectedDistrictId]);
+
+  const availableUnions = useMemo(() => {
+    if (!locationData || !selectedUpazilaId) return [];
+    return locationData.unions[selectedUpazilaId] || [];
+  }, [locationData, selectedUpazilaId]);
+
+  const handleDistrictChange = (districtId: string) => {
+    setSelectedDistrictId(districtId);
+    setSelectedUpazilaId("");
+    setSelectedUnionId("");
+    const district = availableDistricts.find((d) => String(d.value) === districtId);
+    const isDhaka = district?.title.toLowerCase().includes("dhaka");
+    setFormData((prev) => ({
+      ...prev,
+      city: district?.title || "",
+      area: "",
+      zone: isDhaka ? "inside-dhaka" : "outside-dhaka",
+    }));
+  };
+
+  const handleUpazilaChange = (upazilaId: string) => {
+    setSelectedUpazilaId(upazilaId);
+    setSelectedUnionId("");
+    const upazila = availableUpazilas.find((u) => String(u.value) === upazilaId);
+    setFormData((prev) => ({
+      ...prev,
+      area: upazila?.title || "",
+    }));
+  };
+
+  const handleUnionChange = (unionId: string) => {
+    const prevUnion = availableUnions.find((u) => String(u.value) === selectedUnionId);
+    setSelectedUnionId(unionId);
+
+    if (!unionId) {
+      if (prevUnion && formData.street.includes(prevUnion.title)) {
+        const cleaned = formData.street
+          .replace(new RegExp("(^|,\\s*)" + prevUnion.title + "(,\\s*|$)", "i"), "$1")
+          .replace(/^,\s*|,\s*$/g, "")
+          .trim();
+        setFormData((prev) => ({ ...prev, street: cleaned }));
+      }
+      return;
+    }
+
+    const union = availableUnions.find((u) => String(u.value) === unionId);
+    if (union) {
+      setFormData((prev) => {
+        let currentStreet = prev.street.trim();
+        if (prevUnion && currentStreet.includes(prevUnion.title)) {
+          currentStreet = currentStreet.replace(prevUnion.title, union.title);
+        } else if (currentStreet) {
+          currentStreet = currentStreet + ", " + union.title;
+        } else {
+          currentStreet = union.title;
+        }
+        return {
+          ...prev,
+          street: currentStreet,
+        };
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && locationData) {
+      if (formData.city) {
+        const dist = availableDistricts.find(
+          (d) => d.title.toLowerCase() === formData.city.toLowerCase()
+        );
+        if (dist) {
+          const distId = String(dist.value);
+          setSelectedDistrictId(distId);
+          if (formData.area && locationData.upazilas[distId]) {
+            const upz = locationData.upazilas[distId].find(
+              (u) => u.title.toLowerCase() === formData.area.toLowerCase()
+            );
+            if (upz) {
+              setSelectedUpazilaId(String(upz.value));
+            } else {
+              setSelectedUpazilaId("");
+            }
+          } else {
+            setSelectedUpazilaId("");
+          }
+        } else {
+          setSelectedDistrictId("");
+          setSelectedUpazilaId("");
+        }
+      } else {
+        setSelectedDistrictId("");
+        setSelectedUpazilaId("");
+      }
+      setSelectedUnionId("");
+    }
+  }, [isOpen, locationData, formData.city, formData.area, availableDistricts]);
+
   if (!isOpen) return null;
 
   return (
@@ -85,6 +201,7 @@ export function AddressFormModal({
             </div>
           </div>
 
+          {/* Name and Phone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-foreground block mb-1">
@@ -119,94 +236,91 @@ export function AddressFormModal({
             </div>
           </div>
 
+          {/* District, Upazila & Union Dropdowns */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label className="font-bold text-foreground block mb-1">
+                District
+              </label>
+              <select
+                required
+                value={selectedDistrictId}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                disabled={locationLoading}
+                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all disabled:opacity-50"
+              >
+                <option value="">
+                  {locationLoading ? "Loading..." : "Select District"}
+                </option>
+                {availableDistricts.map((district) => (
+                  <option key={district.value} value={String(district.value)}>
+                    {district.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="font-bold text-foreground block mb-1">
+                Upazila
+              </label>
+              <select
+                required
+                value={selectedUpazilaId}
+                onChange={(e) => handleUpazilaChange(e.target.value)}
+                disabled={!selectedDistrictId || locationLoading}
+                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all disabled:opacity-50"
+              >
+                <option value="">
+                  {selectedDistrictId ? "Select Upazila" : "Select District first"}
+                </option>
+                {availableUpazilas.map((upazila) => (
+                  <option key={upazila.value} value={String(upazila.value)}>
+                    {upazila.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <label className="font-bold text-foreground block mb-1">
+                Union <span className="text-muted-foreground font-normal">(Optional)</span>
+              </label>
+              <select
+                value={selectedUnionId}
+                onChange={(e) => handleUnionChange(e.target.value)}
+                disabled={!selectedUpazilaId || locationLoading || availableUnions.length === 0}
+                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all disabled:opacity-50"
+              >
+                <option value="">
+                  {!selectedUpazilaId
+                    ? "Select Upazila first"
+                    : availableUnions.length === 0
+                    ? "No unions available"
+                    : "Select Union (Optional)"}
+                </option>
+                {availableUnions.map((union) => (
+                  <option key={union.value} value={String(union.value)}>
+                    {union.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Address Textarea placed AFTER District, Upazila, Union */}
           <div>
             <label className="font-bold text-foreground block mb-1">
-              Street & Building Address
+              Address
             </label>
-            <input
-              type="text"
+            <textarea
               required
               placeholder="e.g. House 14, Road 3, Block D"
+              rows={2}
               value={formData.street}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, street: e.target.value }))
               }
-              className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
+              className="w-full rounded-xl bg-muted/40 px-3.5 py-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all resize-none"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="font-bold text-foreground block mb-1">
-                Area / Thana
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Dhanmondi"
-                value={formData.area}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, area: e.target.value }))
-                }
-                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
-              />
-            </div>
-            <div>
-              <label className="font-bold text-foreground block mb-1">
-                City / District
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Dhaka"
-                value={formData.city}
-                onChange={(e) => {
-                  const cityVal = e.target.value;
-                  const isInside = cityVal.toLowerCase().includes("dhaka");
-                  setFormData((prev) => ({
-                    ...prev,
-                    city: cityVal,
-                    zone: isInside ? "inside-dhaka" : "outside-dhaka",
-                  }));
-                }}
-                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="font-bold text-foreground block mb-1">
-                Postal Code
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 1209"
-                value={formData.postalCode}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, postalCode: e.target.value }))
-                }
-                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3.5 font-semibold font-mono text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
-              />
-            </div>
-            <div>
-              <label className="font-bold text-foreground block mb-1">
-                Courier Zone
-              </label>
-              <select
-                value={formData.zone}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    zone: e.target.value as "inside-dhaka" | "outside-dhaka",
-                  }))
-                }
-                className="h-11 sm:h-10 w-full rounded-xl bg-muted/40 px-3 font-semibold text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-xs transition-all"
-              >
-                <option value="inside-dhaka">Inside Dhaka (৳60)</option>
-                <option value="outside-dhaka">Outside Dhaka (৳120)</option>
-              </select>
-            </div>
           </div>
 
           <div className="pt-2 flex items-center gap-2">

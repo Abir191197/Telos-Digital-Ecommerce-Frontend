@@ -14,6 +14,7 @@ export const TAG_TYPES = [
   "Dashboard",
   "Category",
   "Brand",
+  "Address",
 ] as const;
 
 export type TagType = (typeof TAG_TYPES)[number];

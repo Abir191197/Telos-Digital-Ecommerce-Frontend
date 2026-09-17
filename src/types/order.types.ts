@@ -7,6 +7,7 @@ export interface Address {
   phone: string;
   street: string;
   area: string;
+  union?: string;
   city: string; // e.g. "Dhaka", "Chittagong"
   zone: "inside-dhaka" | "outside-dhaka";
   postalCode: string;
