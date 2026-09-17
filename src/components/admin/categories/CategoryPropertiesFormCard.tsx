@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Smartphone,
   Laptop,
@@ -25,16 +25,14 @@ import {
   Glasses,
   Plus,
   X,
-  Layers,
 } from "lucide-react";
 
 export interface CategoryFormValues {
   name: string;
-  slug: string;
   description: string;
   icon: string;
-  itemCount: number;
   featured: boolean;
+  isActive: boolean;
 }
 
 export const POPULAR_CATEGORY_ICONS = [
@@ -79,26 +77,19 @@ export function CategoryPropertiesFormCard({
   onAddSubcategory,
   onRemoveSubcategory,
 }: CategoryPropertiesFormCardProps) {
-  const [subcategoryInput, setSubcategoryInput] = useState("");
+  const [subcategoryInput, setSubcategoryInput] = React.useState("");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    onChange("name", newName);
-
-    const generatedSlug = newName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-    onChange("slug", generatedSlug);
+    onChange("name", e.target.value);
   };
 
-  const handleAddSubcategory = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleAddSubcategory = () => {
     const trimmed = subcategoryInput.trim();
-    if (trimmed && !subcategories.includes(trimmed)) {
-      onAddSubcategory(trimmed);
-      setSubcategoryInput("");
+    if (!trimmed || subcategories.some((item) => item.toLowerCase() === trimmed.toLowerCase())) {
+      return;
     }
+    onAddSubcategory(trimmed);
+    setSubcategoryInput("");
   };
 
   const handleSubcategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,13 +111,13 @@ export function CategoryPropertiesFormCard({
           </span>
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">
-          Define category naming, URL routing slug, iconography, and catalog hierarchy.
+          Define category naming, iconography, homepage visibility, and subcategory groups.
         </p>
       </div>
 
       <div className="space-y-5">
-        {/* Name & Slug Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Category Name */}
+        <div>
           {/* Category Name */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground flex items-center gap-1">
@@ -141,32 +132,6 @@ export function CategoryPropertiesFormCard({
               placeholder="e.g. Smart Watches & Wearables"
               className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium"
             />
-          </div>
-
-          {/* URL Slug (Auto-generated & Read-only) */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-foreground flex items-center gap-1">
-                <span>URL Slug</span>
-                <span className="text-amber-500">*</span>
-              </label>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
-                Auto-generated
-              </span>
-            </div>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono select-none">
-                /category/
-              </span>
-              <input
-                type="text"
-                readOnly
-                tabIndex={-1}
-                value={values.slug}
-                placeholder="auto-generated-slug"
-                className="w-full pl-22 pr-3.5 py-2.5 rounded-xl border border-border/70 bg-muted/30 text-sm text-muted-foreground font-mono transition-all cursor-not-allowed select-all focus:outline-none"
-              />
-            </div>
           </div>
         </div>
 
@@ -229,15 +194,12 @@ export function CategoryPropertiesFormCard({
           />
         </div>
 
-        {/* Subcategories Tag Builder */}
+        {/* Subcategories */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Layers className="h-3.5 w-3.5 text-amber-500" />
-              <span>Subcategories</span>
-            </label>
+            <label className="text-xs font-bold text-foreground">Sub Categories</label>
             <span className="text-[11px] text-muted-foreground">
-              {subcategories.length} item{subcategories.length === 1 ? "" : "s"}
+              {subcategories.length} added
             </span>
           </div>
 
@@ -247,12 +209,12 @@ export function CategoryPropertiesFormCard({
               value={subcategoryInput}
               onChange={(e) => setSubcategoryInput(e.target.value)}
               onKeyDown={handleSubcategoryKeyDown}
-              placeholder="e.g. Flagship Wearables (Press Enter)"
+              placeholder="e.g. Men Shoes, Women Shoes, Sneakers"
               className="flex-1 px-3.5 py-2 rounded-xl border border-border/80 bg-background text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber-500"
             />
             <button
               type="button"
-              onClick={() => handleAddSubcategory()}
+              onClick={handleAddSubcategory}
               disabled={!subcategoryInput.trim()}
               className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold disabled:opacity-50 transition-all flex items-center gap-1 cursor-pointer"
             >
@@ -261,13 +223,12 @@ export function CategoryPropertiesFormCard({
             </button>
           </div>
 
-          {/* Subcategories Chips */}
           {subcategories.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1.5">
               {subcategories.map((sub, index) => (
                 <span
-                  key={index}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-muted border border-border/70 text-xs font-semibold text-foreground animate-in fade-in"
+                  key={`${sub}-${index}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-muted border border-border/70 text-xs font-semibold text-foreground"
                 >
                   <span>{sub}</span>
                   <button
@@ -283,7 +244,7 @@ export function CategoryPropertiesFormCard({
           )}
         </div>
 
-        {/* Bottom Options: Featured + Item Count */}
+        {/* Bottom Options: Featured + Active + Sort Order */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/50 items-center">
           {/* Featured Toggle */}
           <label className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/70 cursor-pointer hover:bg-muted/40 transition-colors">
@@ -303,25 +264,24 @@ export function CategoryPropertiesFormCard({
             />
           </label>
 
-          {/* Initial Products Count */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/70">
+          <label className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/70 cursor-pointer hover:bg-muted/40 transition-colors">
             <div>
               <p className="text-xs font-bold text-foreground">
-                Initial Stock Items
+                Active Category
               </p>
               <p className="text-[10px] text-muted-foreground">
-                Assigned active product listings
+                Visible in storefront and menus
               </p>
             </div>
             <input
-              type="number"
-              min={0}
-              value={values.itemCount}
-              onChange={(e) => onChange("itemCount", Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-16 px-2.5 py-1.5 rounded-lg border border-border/80 bg-background text-xs text-center font-bold text-foreground focus:outline-none focus:border-amber-500"
+              type="checkbox"
+              checked={values.isActive}
+              onChange={(e) => onChange("isActive", e.target.checked)}
+              className="h-4 w-4 rounded text-amber-500 focus:ring-amber-500 border-border cursor-pointer accent-amber-500"
             />
-          </div>
+          </label>
         </div>
+
       </div>
     </div>
   );

@@ -1,58 +1,25 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
-import { UploadCloud, Image as ImageIcon, Trash2, AlertTriangle, Link as LinkIcon, Sparkles } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, Trash2, AlertTriangle } from "lucide-react";
 
 export interface CategoryBannerUploadCardProps {
   bannerUrl: string | null;
   bannerError: string | null;
   onBannerSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBannerRemove: () => void;
-  onBannerUrlChange: (url: string) => void;
   onClearError: () => void;
 }
-
-const PRESET_BANNERS = [
-  {
-    name: "Devices & Tech",
-    url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "Laptops & Workspace",
-    url: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "Audio & Acoustics",
-    url: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "Smart Wearables",
-    url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
-  },
-];
 
 export function CategoryBannerUploadCard({
   bannerUrl,
   bannerError,
   onBannerSelect,
   onBannerRemove,
-  onBannerUrlChange,
   onClearError,
 }: CategoryBannerUploadCardProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [customUrl, setCustomUrl] = useState("");
-  const [showUrlInput, setShowUrlInput] = useState(false);
-
-  const handleApplyCustomUrl = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (customUrl.trim()) {
-      onBannerUrlChange(customUrl.trim());
-      setCustomUrl("");
-      setShowUrlInput(false);
-      onClearError();
-    }
-  };
 
   return (
     <div className="rounded-3xl border-none bg-card p-5 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)] space-y-4">
@@ -71,14 +38,6 @@ export function CategoryBannerUploadCard({
             Upload high-resolution category hero banner. Recommended aspect ratio 16:9 or 800x400px.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowUrlInput(!showUrlInput)}
-          className="text-xs font-semibold text-muted-foreground hover:text-amber-500 flex items-center gap-1.5 transition-colors cursor-pointer py-1 px-2.5 rounded-lg hover:bg-muted/60"
-        >
-          <LinkIcon className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Image URL</span>
-        </button>
       </div>
 
       {/* Hidden File Input */}
@@ -105,29 +64,6 @@ export function CategoryBannerUploadCard({
             Dismiss
           </button>
         </div>
-      )}
-
-      {/* Optional Direct Image URL Input */}
-      {showUrlInput && (
-        <form
-          onSubmit={handleApplyCustomUrl}
-          className="flex items-center gap-2 p-2 rounded-2xl bg-muted/30 border border-border/60 animate-in fade-in slide-in-from-top-1"
-        >
-          <input
-            type="url"
-            placeholder="Paste direct image URL (https://...)"
-            value={customUrl}
-            onChange={(e) => setCustomUrl(e.target.value)}
-            className="flex-1 bg-transparent px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none"
-          />
-          <button
-            type="submit"
-            disabled={!customUrl.trim()}
-            className="px-3 py-1.5 rounded-xl bg-amber-500 text-zinc-950 text-xs font-bold hover:bg-amber-400 disabled:opacity-50 transition-all cursor-pointer"
-          >
-            Apply
-          </button>
-        </form>
       )}
 
       {/* Upload Drop Area or Active Banner View */}
@@ -192,40 +128,6 @@ export function CategoryBannerUploadCard({
         </div>
       )}
 
-      {/* Preset Suggestions */}
-      <div className="pt-2">
-        <div className="flex items-center gap-1.5 mb-2.5">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            Quick Curated Presets
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {PRESET_BANNERS.map((preset) => (
-            <button
-              key={preset.name}
-              type="button"
-              onClick={() => {
-                onBannerUrlChange(preset.url);
-                onClearError();
-              }}
-              className="relative overflow-hidden rounded-xl border border-border/70 hover:border-amber-500/80 bg-muted/30 p-1.5 text-left group transition-all duration-200 cursor-pointer"
-            >
-              <div className="relative h-14 w-full rounded-lg overflow-hidden mb-1">
-                <Image
-                  src={preset.url}
-                  alt={preset.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <p className="text-[10px] font-bold text-foreground truncate px-1">
-                {preset.name}
-              </p>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

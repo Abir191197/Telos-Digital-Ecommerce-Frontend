@@ -7,7 +7,6 @@ import { CATEGORY_ICON_MAP } from "@/components/categories/categoryConfig";
 
 export interface CategoryLivePreviewCardProps {
   name: string;
-  slug: string;
   icon: string;
   bannerUrl: string | null;
   itemCount: number;
@@ -18,7 +17,6 @@ export interface CategoryLivePreviewCardProps {
 
 export function CategoryLivePreviewCard({
   name,
-  slug,
   icon,
   bannerUrl,
   itemCount,
@@ -33,7 +31,6 @@ export function CategoryLivePreviewCard({
     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80";
   const displayBanner = bannerUrl || fallbackBanner;
   const displayName = name.trim() || "Untitled Category";
-  const displaySlug = slug.trim() || "category-slug";
 
   return (
     <div className="space-y-3">
@@ -167,22 +164,13 @@ export function CategoryLivePreviewCard({
                 <p className="text-[11px] text-white/80 line-clamp-2 mt-1 leading-relaxed">
                   {description || "Explore top-tier official hardware, verified warranties, and fast delivery."}
                 </p>
-                <div className="mt-2 text-[10px] font-mono text-amber-400">
-                  /category/{displaySlug}
-                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* Metadata summary */}
-        <div className="pt-2 border-t border-border/50 grid grid-cols-2 gap-2 text-[11px]">
-          <div className="p-2 rounded-xl bg-muted/20 border border-border/60">
-            <span className="text-muted-foreground block text-[10px]">Slug Link</span>
-            <span className="font-mono font-bold text-foreground truncate block">
-              /{displaySlug}
-            </span>
-          </div>
+        <div className="pt-2 border-t border-border/50 text-[11px]">
           <div className="p-2 rounded-xl bg-muted/20 border border-border/60">
             <span className="text-muted-foreground block text-[10px]">Stock Count</span>
             <span className="font-bold text-foreground block">

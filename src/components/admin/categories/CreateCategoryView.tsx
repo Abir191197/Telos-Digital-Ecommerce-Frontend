@@ -3,8 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
-import { useAdminStore } from "@/stores";
-import type { Category } from "@/types/ecommerce.types";
+import {
+  useCreateCategoryMutation,
+  useGetCategoryByIdQuery,
+  useUpdateCategoryMutation,
+} from "@/services/api/categories/categoryApi";
 import {
   CategoryBannerUploadCard,
   CategoryPropertiesFormCard,
@@ -22,15 +25,16 @@ export interface CreateCategoryViewProps {
 }
 
 export function CreateCategoryView({ initialTab = "create", categoryId }: CreateCategoryViewProps) {
-  const { categories, addCategory, updateCategory } = useAdminStore();
   const [currentView, setCurrentView] = useState<"create" | "list">(initialTab);
-
-  const editingCategory = React.useMemo(() => {
-    if (!categoryId) return null;
-    return (
-      categories.find((c) => c.id === categoryId || c.slug === categoryId) || null
-    );
-  }, [categoryId, categories]);
+  const {
+    data: editingCategory,
+    isLoading: isLoadingCategory,
+    error: categoryLoadError,
+  } = useGetCategoryByIdQuery(categoryId || "", {
+    skip: !categoryId,
+  });
+  const [createCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
 
   const isEditMode = Boolean(editingCategory);
 
@@ -39,58 +43,51 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
     if (editingCategory) {
       return {
         name: editingCategory.name,
-        slug: editingCategory.slug,
         description: editingCategory.description || "",
         icon: editingCategory.icon || "Smartphone",
-        itemCount: editingCategory.itemCount || 0,
         featured: Boolean(editingCategory.featured),
+        isActive: editingCategory.isActive ?? true,
       };
     }
     return {
       name: "",
-      slug: "",
       description: "",
       icon: "Smartphone",
-      itemCount: 0,
       featured: false,
+      isActive: true,
     };
   });
+  const [subcategories, setSubcategories] = useState<string[]>([]);
 
   // Banner State
   const [bannerUrl, setBannerUrl] = useState<string | null>(() => {
     if (editingCategory) {
       return editingCategory.image || null;
     }
-    return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80";
+    return null;
   });
+  const [selectedBannerFile, setSelectedBannerFile] = useState<File | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
-
-  // Subcategories
-  const [subcategories, setSubcategories] = useState<string[]>(() => {
-    if (editingCategory?.subcategories) {
-      return editingCategory.subcategories.map((s) => s.name);
-    }
-    return [];
-  });
 
   // Submission / Toast
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
   const [lastCreatedCategory, setLastCreatedCategory] = useState<string>("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Sync state if editingCategory changes
   React.useEffect(() => {
     if (editingCategory) {
       setFormValues({
         name: editingCategory.name,
-        slug: editingCategory.slug,
         description: editingCategory.description || "",
         icon: editingCategory.icon || "Smartphone",
-        itemCount: editingCategory.itemCount || 0,
         featured: Boolean(editingCategory.featured),
+        isActive: editingCategory.isActive ?? true,
       });
       setBannerUrl(editingCategory.image || null);
-      setSubcategories(editingCategory.subcategories?.map((s) => s.name) || []);
+      setSelectedBannerFile(null);
+      setSubcategories(editingCategory.subcategories?.map((sub) => sub.name) || []);
     }
   }, [editingCategory]);
 
@@ -117,11 +114,13 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
     }
 
     const previewUrl = URL.createObjectURL(file);
+    setSelectedBannerFile(file);
     setBannerUrl(previewUrl);
     e.target.value = "";
   };
 
   const handleBannerRemove = () => {
+    setSelectedBannerFile(null);
     setBannerUrl(null);
   };
 
@@ -137,89 +136,103 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
     if (editingCategory) {
       setFormValues({
         name: editingCategory.name,
-        slug: editingCategory.slug,
         description: editingCategory.description || "",
         icon: editingCategory.icon || "Smartphone",
-        itemCount: editingCategory.itemCount || 0,
         featured: Boolean(editingCategory.featured),
+        isActive: editingCategory.isActive ?? true,
       });
       setBannerUrl(editingCategory.image || null);
-      setSubcategories(editingCategory.subcategories?.map((s) => s.name) || []);
+      setSelectedBannerFile(null);
+      setSubcategories(editingCategory.subcategories?.map((sub) => sub.name) || []);
     } else {
       setFormValues({
         name: "",
-        slug: "",
         description: "",
         icon: "Smartphone",
-        itemCount: 0,
         featured: false,
+        isActive: true,
       });
       setBannerUrl(null);
+      setSelectedBannerFile(null);
       setSubcategories([]);
     }
     setSuccessToast(false);
+    setFormError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getApiErrorMessage = (error: unknown) => {
+    if (
+      error &&
+      typeof error === "object" &&
+      "data" in error &&
+      error.data &&
+      typeof error.data === "object" &&
+      "message" in error.data
+    ) {
+      return String(error.data.message);
+    }
+
+    return "Category could not be saved. Please check the form and try again.";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formValues.name.trim() || !formValues.slug.trim()) return;
+    if (!formValues.name.trim()) return;
 
-    setIsSubmitting(true);
-
-    if (isEditMode && editingCategory) {
-      const updatedCategory: Partial<Category> = {
-        name: formValues.name.trim(),
-        slug: formValues.slug.trim(),
-        description: formValues.description.trim(),
-        icon: formValues.icon,
-        image: bannerUrl || undefined,
-        itemCount: Number(formValues.itemCount) || 0,
-        featured: formValues.featured,
-        subcategories: subcategories.map((sub, idx) => {
-          const existing = editingCategory.subcategories?.find((s) => s.name.toLowerCase() === sub.toLowerCase());
-          return (
-            existing || {
-              id: `sub-${Date.now()}-${idx}`,
-              name: sub,
-              slug: sub.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-              itemCount: 0,
-            }
-          );
-        }),
-      };
-
-      updateCategory(editingCategory.id, updatedCategory);
-      setLastCreatedCategory(formValues.name);
-      setIsSubmitting(false);
-      setSuccessToast(true);
+    if (formValues.featured && !selectedBannerFile && !editingCategory?.image) {
+      setBannerError("Featured homepage categories require an uploaded image.");
       return;
     }
 
-    const newCategory: Category = {
-      id: String(Date.now()).slice(-6),
-      slug: formValues.slug.trim(),
-      name: formValues.name.trim(),
-      description:
-        formValues.description.trim() ||
-        `Explore verified ${formValues.name} catalog with official warranties and fast delivery across Bangladesh.`,
-      icon: formValues.icon,
-      image: bannerUrl || undefined,
-      itemCount: Number(formValues.itemCount) || 0,
-      featured: formValues.featured,
-      subcategories: subcategories.map((sub, idx) => ({
-        id: `sub-${Date.now()}-${idx}`,
-        name: sub,
-        slug: sub.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        itemCount: 0,
-      })),
-      createdAt: new Date().toISOString(),
-    };
+    setIsSubmitting(true);
+    setFormError(null);
 
-    addCategory(newCategory);
-    setLastCreatedCategory(formValues.name);
-    setIsSubmitting(false);
-    setSuccessToast(true);
+    try {
+      const payload = {
+        name: formValues.name.trim(),
+        description: formValues.description.trim(),
+        icon: formValues.icon,
+        subCategories: subcategories.map((name) => ({
+          name,
+          isActive: true,
+        })),
+        isActive: formValues.isActive,
+        isFeaturedHomepage: formValues.featured,
+        image: selectedBannerFile,
+        removeImage: isEditMode && !bannerUrl && Boolean(editingCategory?.image),
+      };
+
+      if (isEditMode && editingCategory) {
+        await updateCategory({ id: editingCategory.id, payload }).unwrap();
+      } else {
+        await createCategory(payload).unwrap();
+      }
+
+      setLastCreatedCategory(formValues.name);
+      setSuccessToast(true);
+      setSelectedBannerFile(null);
+    } catch (error) {
+      setFormError(getApiErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (categoryId && isLoadingCategory) {
+    return (
+      <div className="rounded-3xl bg-card p-8 text-sm font-bold text-muted-foreground">
+        Loading category details...
+      </div>
+    );
+  }
+
+  if (categoryId && categoryLoadError) {
+    return (
+      <div className="rounded-3xl bg-card p-8 text-sm font-bold text-rose-500">
+        Category could not be loaded.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6 pb-24">
@@ -280,6 +293,12 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
         </div>
       )}
 
+      {formError && (
+        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
+          {formError}
+        </div>
+      )}
+
       {/* VIEW 1: CATEGORY CREATION (Banner Upload Card + Properties Card + Live Preview Card) */}
       {currentView === "create" ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -291,7 +310,6 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
               bannerError={bannerError}
               onBannerSelect={handleBannerSelect}
               onBannerRemove={handleBannerRemove}
-              onBannerUrlChange={(url) => setBannerUrl(url)}
               onClearError={() => setBannerError(null)}
             />
 
@@ -336,10 +354,9 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
           <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-3">
             <CategoryLivePreviewCard
               name={formValues.name}
-              slug={formValues.slug}
               icon={formValues.icon}
               bannerUrl={bannerUrl}
-              itemCount={formValues.itemCount}
+              itemCount={0}
               featured={formValues.featured}
               description={formValues.description}
               subcategories={subcategories}

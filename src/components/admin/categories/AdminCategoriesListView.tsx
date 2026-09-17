@@ -11,8 +11,11 @@ import {
   FolderTree,
   X,
 } from "lucide-react";
-import { useAdminStore } from "@/stores";
 import type { Category } from "@/types/ecommerce.types";
+import {
+  useDeleteCategoryMutation,
+  useGetCategoriesQuery,
+} from "@/services/api/categories/categoryApi";
 import { CategoryDesktopTable } from "./CategoryDesktopTable";
 import { CategoryMobileList } from "./CategoryMobileList";
 import { CategoryCardGrid } from "./CategoryCardGrid";
@@ -27,7 +30,11 @@ export interface AdminCategoriesListViewProps {
 }
 
 export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesListViewProps = {}) {
-  const { categories, deleteCategory } = useAdminStore();
+  const { data: categoriesResponse, isLoading, isError } = useGetCategoriesQuery({
+    limit: 100,
+  });
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const categories = categoriesResponse?.data || [];
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -120,16 +127,37 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
     setConfirmDialog({
       isOpen: true,
       title: "Delete Category?",
-      message: `Are you sure you want to permanently delete "${category.name}" (/category/${category.slug})? Associated catalog hierarchies will be removed.`,
+      message: `Are you sure you want to delete "${category.name}" (/category/${category.slug})? If it has active child categories, the backend will block the delete.`,
       confirmLabel: "Delete Category",
       variant: "danger",
-      onConfirm: () => {
-        deleteCategory(category.id);
-        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-        showToast(`Category "${category.name}" removed successfully.`);
+      onConfirm: async () => {
+        try {
+          await deleteCategory(category.id).unwrap();
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          showToast(`Category "${category.name}" removed successfully.`);
+        } catch {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          showToast(`Could not delete "${category.name}". Move child categories first.`);
+        }
       },
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="rounded-3xl bg-card p-10 text-sm font-bold text-muted-foreground">
+        Loading categories...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-3xl bg-card p-10 text-sm font-bold text-rose-500">
+        Categories could not be loaded. Please check your admin session.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6 pb-20">

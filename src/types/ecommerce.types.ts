@@ -7,16 +7,24 @@ export interface Category {
   description: string;
   icon?: string;
   image?: string;
+  imageKey?: string | null;
   itemCount: number;
   featured: boolean;
+  isActive?: boolean;
+  isFeaturedHomepage?: boolean;
   subcategories: Subcategory[];
+  subCategories?: Subcategory[];
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Subcategory {
   id: string;
+  categoryId?: string;
   slug: string;
   name: string;
+  description?: string | null;
+  isActive?: boolean;
   itemCount: number;
 }
 
