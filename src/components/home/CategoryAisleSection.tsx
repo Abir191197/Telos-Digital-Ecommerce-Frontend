@@ -2,12 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { products, categories } from "@/data";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 const aisleGridVariants: Variants = {
   hidden: { opacity: 0 },
@@ -49,18 +50,20 @@ export function CategoryAisleSection({
   subtitle,
   limit = 5,
 }: CategoryAisleSectionProps) {
+  const { data: categories = [] } = useGetCategoryTreeQuery();
   const category = categories.find((c) => c.slug === categorySlug);
 
-  const aisleProducts = React.useMemo(() => {
-    return products
-      .filter((p) => p.categorySlug === categorySlug)
-      .slice(0, limit);
-  }, [categorySlug, limit]);
+  const { data: productsResponse, isLoading } = useGetProductsQuery(
+    { categoryId: category?.id, limit },
+    { skip: !category?.id },
+  );
+  const aisleProducts = productsResponse?.data || [];
 
-  if (!category || aisleProducts.length === 0) return null;
+  if (!category && !isLoading) return null;
+  if (category && !isLoading && aisleProducts.length === 0) return null;
 
-  const displayTitle = title || category.name;
-  const displaySubtitle = subtitle || category.description;
+  const displayTitle = title || category?.name || "";
+  const displaySubtitle = subtitle || category?.description || "";
 
   return (
     <LazyMotion features={domAnimation}>
@@ -96,29 +99,37 @@ export function CategoryAisleSection({
           </div>
 
           {/* Right view all button linking to dedicated category page */}
-          <Link
-            href={ROUTES.CATEGORY_DETAIL(category.slug)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
-          >
-            <span>View All</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
-          </Link>
+          {category && (
+            <Link
+              href={ROUTES.CATEGORY_DETAIL(category.slug)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group"
+            >
+              <span>View All</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
+            </Link>
+          )}
         </m.div>
 
         {/* Product Cards Grid: 2 cols on mobile, 3 on md, 5 cols on xl desktop */}
-        <m.div
-          variants={aisleGridVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4"
-        >
-          {aisleProducts.map((product) => (
-            <m.div key={product.id} variants={aisleItemVariants}>
-              <ProductCard product={product} />
-            </m.div>
-          ))}
-        </m.div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+          </div>
+        ) : (
+          <m.div
+            variants={aisleGridVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4"
+          >
+            {aisleProducts.map((product) => (
+              <m.div key={product.id} variants={aisleItemVariants}>
+                <ProductCard product={product} />
+              </m.div>
+            ))}
+          </m.div>
+        )}
       </section>
     </LazyMotion>
   );

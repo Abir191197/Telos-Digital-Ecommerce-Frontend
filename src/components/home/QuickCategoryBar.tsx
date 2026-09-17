@@ -4,14 +4,15 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
-import { categories } from "@/data";
 import { ROUTES } from "@/constants";
+import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
 import {
   LayoutGrid,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
@@ -93,13 +94,24 @@ const cardVariants: Variants = {
 
 export function QuickCategoryBar() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const topCategories = categories.slice(0, 8);
+  const { data: allCategories = [], isLoading } = useGetCategoryTreeQuery();
+  const topCategories = allCategories.slice(0, 8);
 
   const handleScroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
     const scrollAmount = direction === "left" ? -280 : 280;
     scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
+
+  if (isLoading) {
+    return (
+      <section className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+      </section>
+    );
+  }
+
+  if (topCategories.length === 0) return null;
 
   return (
     <LazyMotion features={domAnimation}>
@@ -210,7 +222,7 @@ export function QuickCategoryBar() {
                       {cat.name}
                     </span>
                     <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/80">
-                      {cat.itemCount} items
+                      {(cat.subcategories || []).length} items
                     </span>
                   </div>
                 </Link>
@@ -222,4 +234,3 @@ export function QuickCategoryBar() {
     </LazyMotion>
   );
 }
-

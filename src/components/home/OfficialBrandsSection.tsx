@@ -1,8 +1,8 @@
 "use client";
 
 import { ROUTES } from "@/constants";
-import { brands, products } from "@/data";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { useGetMarqueeBrandsQuery } from "@/services/api/brands/brandApi";
+import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -164,6 +164,18 @@ const LOGO_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function OfficialBrandsSection() {
+  const { data: brands = [], isLoading } = useGetMarqueeBrandsQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
+  if (brands.length === 0) return null;
+
   // Duplicate array for infinite seamless marquee
   const marqueeItems = [...brands, ...brands];
 
@@ -189,7 +201,7 @@ export function OfficialBrandsSection() {
         </div>
 
         <Link
-          href={ROUTES.PRODUCTS}
+          href={ROUTES.BRANDS}
           className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 hover:bg-secondary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-foreground transition-colors shrink-0 group">
           <span>All Brands</span>
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 text-amber-500" />
@@ -214,14 +226,11 @@ export function OfficialBrandsSection() {
         <div className="animate-marquee gap-3 sm:gap-4 select-none">
           {marqueeItems.map((brand, idx) => {
             const Logo = LOGO_MAP[brand.name] || AppleLogo;
-            const matchingCount = products.filter(
-              (p) => p.brand.toLowerCase() === brand.name.toLowerCase(),
-            ).length;
 
             return (
               <Link
                 key={`${brand.id}-${idx}`}
-                href={`${ROUTES.PRODUCTS}?brand=${encodeURIComponent(brand.name)}`}
+                href={ROUTES.BRAND_DETAIL(brand.slug)}
                 className="group relative flex flex-col items-center justify-between w-[155px] sm:w-[180px] shrink-0 p-5 rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 text-center select-none overflow-hidden">
                 {/* Ambient glow on hover - borderless design */}
                 <div
@@ -244,7 +253,7 @@ export function OfficialBrandsSection() {
                     {brand.name}
                   </span>
                   <span className="text-[11px] font-medium text-muted-foreground/80">
-                    {matchingCount > 0 ? `${matchingCount} items` : brand.tagline}
+                    {brand.tagline}
                   </span>
                 </div>
               </Link>

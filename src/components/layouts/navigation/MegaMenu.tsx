@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
-import { categories, products } from "@/data";
+import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 import {
   QUICK_CATEGORIES,
   MegaMenuCategoryList,
@@ -26,11 +27,19 @@ interface MegaMenuProps {
 }
 
 export function MegaMenu({ pathname }: MegaMenuProps) {
+  const { data: categories = [], isLoading: catsLoading } = useGetCategoryTreeQuery();
   const [categoriesOpen, setCategoriesOpen] = React.useState(false);
-  const [activeCategorySlug, setActiveCategorySlug] = React.useState<string>(
-    categories[0]?.slug || "smartphones-tablets"
-  );
+  const [activeCategorySlug, setActiveCategorySlug] = React.useState<string>("");
   const categoriesRef = useRef<HTMLDivElement>(null);
+
+  // Set initial active slug once categories load
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategorySlug) {
+      const quickSlug = QUICK_CATEGORIES[0]?.slug;
+      const match = categories.find((c) => c.slug === quickSlug);
+      setActiveCategorySlug(match?.slug || categories[0].slug);
+    }
+  }, [categories, activeCategorySlug]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -49,14 +58,14 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
     return (
       categories.find((c) => c.slug === activeCategorySlug) || categories[0]
     );
-  }, [activeCategorySlug]);
+  }, [categories, activeCategorySlug]);
 
-  const activeCategoryProducts = React.useMemo(() => {
-    if (!activeCategory) return [];
-    return products
-      .filter((p) => p.categorySlug === activeCategory.slug)
-      .slice(0, 6);
-  }, [activeCategory]);
+  // Fetch products for active category
+  const { data: productsResponse } = useGetProductsQuery(
+    { categoryId: activeCategory?.id, limit: 6 },
+    { skip: !activeCategory?.id },
+  );
+  const activeCategoryProducts = productsResponse?.data || [];
 
   return (
     <div className="hidden md:block border-t border-border/60 bg-muted/20">
@@ -94,7 +103,11 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
             onClick={() => setCategoriesOpen((prev) => !prev)}
             onMouseEnter={() => {
               setCategoriesOpen(true);
-              setActiveCategorySlug("smartphones-tablets");
+              if (categories.length > 0) {
+                const quickSlug = QUICK_CATEGORIES[0]?.slug;
+                const match = categories.find((c) => c.slug === quickSlug);
+                setActiveCategorySlug(match?.slug || categories[0].slug);
+              }
             }}
             aria-expanded={categoriesOpen}
             className={cn(
@@ -161,7 +174,7 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
           </div>
 
           {/* ── Rich Expanded Categories Mega Menu ── */}
-          {categoriesOpen && (
+          {categoriesOpen && !catsLoading && categories.length > 0 && (
             <div className="absolute left-0 top-full pt-2 z-50 w-[min(96vw,1200px)] animate-fade-in">
               <div className="overflow-hidden rounded-2xl border border-border/80 bg-popover/98 text-popover-foreground shadow-2xl backdrop-blur-xl transition-all">
                 <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-border/60">

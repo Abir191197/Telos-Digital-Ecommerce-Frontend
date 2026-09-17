@@ -129,6 +129,12 @@ export const categoryApi = baseApi.injectEndpoints({
         response.data.map(normalizeCategory),
       providesTags: ["Category"],
     }),
+    getCategoryBySlug: builder.query<Category, string>({
+      query: (slug) => `/categories/slug/${slug}`,
+      transformResponse: (response: ApiResponse<Category>) =>
+        normalizeCategory(response.data),
+      providesTags: ["Category"],
+    }),
     getCategoryById: builder.query<Category, string>({
       query: (id) => `/categories/${id}`,
       transformResponse: (response: ApiResponse<Category>) =>
@@ -176,6 +182,7 @@ export const {
   useGetParentCategoriesQuery,
   useGetCategoryTreeQuery,
   useGetFeaturedHomepageCategoriesQuery,
+  useGetCategoryBySlugQuery,
   useGetCategoryByIdQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
