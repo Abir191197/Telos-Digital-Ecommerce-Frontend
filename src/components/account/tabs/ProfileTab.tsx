@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { CustomerUser } from "@/stores";
 import type { Order } from "@/types/order.types";
+import { useUpdateProfileMutation, useChangePasswordMutation } from "@/services/api/auth/authApi";
 
 interface ProfileTabProps {
   user: CustomerUser;
@@ -29,15 +30,25 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showProfileConfirmModal, setShowProfileConfirmModal] = useState(false);
   const [profileName, setProfileName] = useState(user.name);
-  const [profilePhone, setProfilePhone] = useState(user.phone || "");
   const [profileAvatar, setProfileAvatar] = useState(user.avatar || "");
   const [profileSaved, setProfileSaved] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [updateProfile] = useUpdateProfileMutation();
+  const [changePassword] = useChangePasswordMutation();
 
   useEffect(() => {
     if (!isEditingProfile) {
       setProfileName(user.name);
-      setProfilePhone(user.phone || "");
       setProfileAvatar(user.avatar || "");
     }
   }, [user, isEditingProfile]);
@@ -65,24 +76,72 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
     setShowProfileConfirmModal(true);
   };
 
-  const handleConfirmProfileSave = () => {
-    onUpdateUser({
-      name: profileName.trim(),
-      phone: profilePhone.trim(),
-      avatar: profileAvatar,
-    });
-    setShowProfileConfirmModal(false);
-    setIsEditingProfile(false);
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3000);
+  const handleConfirmProfileSave = async () => {
+    setIsSaving(true);
+    setProfileError(null);
+    try {
+      const updates: Record<string, string> = {};
+      if (profileName.trim() !== user.name) {
+        updates.name = profileName.trim();
+      }
+      if (profileAvatar !== (user.avatar || "")) {
+        updates.avatar = profileAvatar;
+      }
+      const res = await updateProfile(updates).unwrap();
+      onUpdateUser({
+        name: res.data.name,
+        avatar: res.data.avatar || "",
+      });
+      setShowProfileConfirmModal(false);
+      setIsEditingProfile(false);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3000);
+    } catch (err: any) {
+      setProfileError(err?.data?.message || "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancelProfileEdit = () => {
     setProfileName(user.name);
-    setProfilePhone(user.phone || "");
     setProfileAvatar(user.avatar || "");
     setIsEditingProfile(false);
     setShowProfileConfirmModal(false);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSaved(false);
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await changePassword({
+        oldPassword: currentPassword,
+        newPassword,
+      }).unwrap();
+      setPasswordSaved(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordForm(false);
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch (err: any) {
+      setPasswordError(err?.data?.message || "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -180,6 +239,14 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
           </div>
         )}
 
+        {/* Profile update error banner */}
+        {profileError && (
+          <div className="mt-4 sm:mt-5 flex items-center gap-2 rounded-xl sm:rounded-2xl bg-rose-500/15 border border-rose-500/40 p-3 sm:p-3.5 text-xs font-bold text-rose-700 dark:text-rose-400 animate-in fade-in">
+            <X className="h-4 w-4 shrink-0" />
+            <span>{profileError}</span>
+          </div>
+        )}
+
         {/* Profile Form */}
         <form onSubmit={handleProfileFormSubmit} className="mt-5 sm:mt-6 space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5">
@@ -220,41 +287,24 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               )}
             </div>
 
-            {/* Phone Number Card */}
-            <div className="rounded-xl sm:rounded-2xl border border-border/70 bg-background/60 p-3.5 sm:p-4 space-y-2 transition-all">
+            {/* Phone Number Card - Read Only */}
+            <div className="rounded-xl sm:rounded-2xl border border-border/70 bg-muted/20 p-3.5 sm:p-4 space-y-1.5 sm:space-y-2 transition-all">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Phone Number (+880 BD)</span>
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Phone Number</span>
                 </label>
-                {!isEditingProfile && (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingProfile(true)}
-                    className="text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 p-1 rounded-md transition-colors"
-                    title="Edit phone number"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" />
-                  </button>
-                )}
+                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
+                  <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span>Locked</span>
+                </span>
               </div>
-
-              {isEditingProfile ? (
-                <div className="relative">
-                  <input
-                    type="tel"
-                    required
-                    value={profilePhone}
-                    onChange={(e) => setProfilePhone(e.target.value)}
-                    placeholder="+880 17XX-XXXXXX"
-                    className="h-10 sm:h-11 w-full rounded-xl border border-amber-500/80 bg-background px-3 sm:px-3.5 text-sm font-semibold text-foreground focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none font-mono"
-                  />
-                </div>
-              ) : (
-                <p className="text-sm font-bold font-mono text-foreground py-0.5 sm:py-1 truncate">
-                  {user.phone || "Not provided"}
-                </p>
-              )}
+              <p className="text-sm font-bold font-mono text-foreground py-0.5 sm:py-1 truncate">
+                {user.phone || "Not provided"}
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground">
+                Phone number cannot be changed for security reasons
+              </p>
             </div>
 
             {/* Email Address (Immutable Security Card) */}
@@ -298,6 +348,127 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
             </div>
           )}
         </form>
+      </div>
+
+      {/* Password Change Section */}
+      <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4 sm:p-8 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+              <Lock className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-foreground">Password</h3>
+              <p className="text-xs text-muted-foreground">Change your account password</p>
+            </div>
+          </div>
+          {!showPasswordForm && (
+            <button
+              type="button"
+              onClick={() => setShowPasswordForm(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-4 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
+            >
+              <Edit3 className="h-4 w-4" />
+              <span>Change Password</span>
+            </button>
+          )}
+        </div>
+
+        {passwordSaved && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-amber-500/15 border border-amber-500/40 p-3 text-xs font-bold text-amber-700 dark:text-amber-400 animate-in fade-in">
+            <CheckCircle2 className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>Password changed successfully!</span>
+          </div>
+        )}
+
+        {passwordError && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-500/15 border border-rose-500/40 p-3 text-xs font-bold text-rose-700 dark:text-rose-400 animate-in fade-in">
+            <X className="h-4 w-4 shrink-0" />
+            <span>{passwordError}</span>
+          </div>
+        )}
+
+        {showPasswordForm && (
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-amber-500" />
+                <span>Current Password</span>
+              </label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="h-10 sm:h-11 w-full rounded-xl border border-border bg-background px-3 sm:px-3.5 text-sm font-semibold text-foreground focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-amber-500" />
+                <span>New Password</span>
+              </label>
+              <input
+                type="password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (min 6 characters)"
+                className="h-10 sm:h-11 w-full rounded-xl border border-border bg-background px-3 sm:px-3.5 text-sm font-semibold text-foreground focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-amber-500" />
+                <span>Confirm New Password</span>
+              </label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="h-10 sm:h-11 w-full rounded-xl border border-border bg-background px-3 sm:px-3.5 text-sm font-semibold text-foreground focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-border/60">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordForm(false);
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                  setPasswordError(null);
+                }}
+                className="w-full sm:w-auto rounded-xl border border-border/80 px-4 py-2.5 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-all cursor-pointer text-center"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isChangingPassword}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isChangingPassword ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin" />
+                    <span>Changing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4" />
+                    <span>Change Password</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Extra Account Insights / Quick Stats Cards */}
@@ -413,10 +584,11 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               <button
                 type="button"
                 onClick={handleConfirmProfileSave}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95"
+                disabled={isSaving}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-5 py-2.5 text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Check className="h-4 w-4 stroke-[2.5]" />
-                <span>Yes, Confirm & Save</span>
+                <span>{isSaving ? "Saving..." : "Yes, Confirm & Save"}</span>
               </button>
             </div>
           </div>

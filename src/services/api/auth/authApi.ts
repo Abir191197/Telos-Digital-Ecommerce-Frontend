@@ -6,8 +6,10 @@ import { baseApi } from "@/lib/rtk-query/baseApi";
 import type {
   BackendAuthResponse,
   BackendAuthUser,
+  ChangePasswordRequest,
   LoginRequest,
   RegisterRequest,
+  UpdateProfileRequest,
 } from "@/types/auth.types";
 import type { ApiResponse } from "@/types/api.types";
 
@@ -47,6 +49,24 @@ export const authApi = baseApi.injectEndpoints({
       query: () => "/auth/me",
       providesTags: ["User"],
     }),
+    updateProfile: builder.mutation<
+      ApiResponse<BackendAuthUser>,
+      UpdateProfileRequest
+    >({
+      query: (body) => ({
+        url: "/auth/me",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    changePassword: builder.mutation<ApiResponse<null>, ChangePasswordRequest>({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -56,4 +76,6 @@ export const {
   useAdminLoginMutation,
   useRegisterMutation,
   useGetProfileQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
 } = authApi;

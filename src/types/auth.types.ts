@@ -74,3 +74,13 @@ export interface ResetPasswordRequest {
   password: string;
   passwordConfirmation: string;
 }
+
+export interface UpdateProfileRequest {
+  name?: string;
+  avatar?: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
