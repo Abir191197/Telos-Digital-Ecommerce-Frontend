@@ -9,6 +9,8 @@ import {
   useAdminLoginMutation,
   useLoginMutation,
 } from "@/services/api/auth/authApi";
+import { useAddToCartMutation } from "@/services/api/cart/cartApi";
+import { useAddToWishlistMutation } from "@/services/api/wishlist/wishlistApi";
 import Image from "next/image";
 import { Logo } from "@/components/common";
 import {
@@ -61,6 +63,31 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  const action = searchParams.get("action");
+  const productId = searchParams.get("productId");
+  const quantityParam = searchParams.get("quantity");
+  const variantIdParam = searchParams.get("variantId");
+
+  const [addToCartMutation] = useAddToCartMutation();
+  const [addToWishlistMutation] = useAddToWishlistMutation();
+
+  const handlePendingAction = async () => {
+    if (!productId) return;
+    try {
+      if (action === "add-to-cart") {
+        const qty = quantityParam ? parseInt(quantityParam, 10) : 1;
+        await addToCartMutation({
+          productId,
+          quantity: isNaN(qty) ? 1 : qty,
+          variantId: variantIdParam || undefined,
+        }).unwrap();
+      } else if (action === "add-to-wishlist") {
+        await addToWishlistMutation({ productId }).unwrap();
+      }
+    } catch (err) {
+      console.error("Failed to execute pending action on login:", err);
+    }
+  };
 
   const setAuth = useAuthStore((state) => state.setAuth);
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
@@ -100,6 +127,7 @@ export function LoginForm() {
           : { phone: identifier, password },
       ).unwrap();
       persistSession(response.data.accessToken, response.data.user);
+      await handlePendingAction();
       router.push(getRedirectUrl(ROUTES.ACCOUNT));
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
@@ -115,6 +143,7 @@ export function LoginForm() {
       setErrorMessage("");
       const response = await login(DEMO_CUSTOMER).unwrap();
       persistSession(response.data.accessToken, response.data.user);
+      await handlePendingAction();
       router.push(getRedirectUrl(ROUTES.ACCOUNT));
     } catch (error) {
       setErrorMessage(getErrorMessage(error));

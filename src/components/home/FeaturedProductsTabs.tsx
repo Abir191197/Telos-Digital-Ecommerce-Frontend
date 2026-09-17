@@ -7,6 +7,7 @@ import { products } from "@/data";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -33,9 +34,12 @@ const cardVariants: Variants = {
 };
 
 export function FeaturedProductsTabs() {
+  const { data: serverProducts } = useGetProductsQuery({ limit: 20 });
+  const allProducts = serverProducts?.data?.length ? serverProducts.data : products;
+
   const featuredProducts = React.useMemo(() => {
-    return products.filter((p) => p.isFeatured).slice(0, 10);
-  }, []);
+    return allProducts.slice(0, 10);
+  }, [allProducts]);
 
   return (
     <LazyMotion features={domAnimation}>

@@ -46,6 +46,7 @@ interface CartActions {
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
+  setServerItems: (items: CartItem[]) => void;
 
   // Promo code
   applyCoupon: (code: string) => boolean;
@@ -135,6 +136,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => set({ items: [], appliedCoupon: null, couponError: null }),
+      setServerItems: (items) => set({ items }),
 
       applyCoupon: (code) => {
         const cleanCode = code.trim().toUpperCase();

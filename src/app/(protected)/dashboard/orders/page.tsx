@@ -1,15 +1,16 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { PageLoader } from "@/components/common";
+import { ROUTES } from "@/constants";
 import {
   AdminOrdersView,
   AdminPendingDispatchView,
-  AdminCustomerCartsView,
 } from "@/components/admin";
 
 export const metadata: Metadata = {
   title: "Orders & Fulfillment | Admin Portal",
-  description: "Track live customer orders, fulfillment workflows, and abandoned carts.",
+  description: "Track live customer orders, fulfillment workflows, and customer demand.",
 };
 
 interface AdminOrdersPageProps {
@@ -21,19 +22,21 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
   const status = typeof resolvedParams.status === "string" ? resolvedParams.status : undefined;
   const tab = typeof resolvedParams.tab === "string" ? resolvedParams.tab : undefined;
 
+  if (tab === "carts") {
+    redirect(ROUTES.ADMIN_CARTS);
+  }
+
   return (
     <Suspense
       fallback={
         <PageLoader
           title="Loading Orders..."
-          description="Fetching customer orders, dispatch schedules, and shopping carts."
+          description="Fetching customer orders and dispatch schedules."
           badgeText="Orders Hub"
         />
       }
     >
-      {tab === "carts" ? (
-        <AdminCustomerCartsView />
-      ) : status === "pending" ? (
+      {status === "pending" ? (
         <AdminPendingDispatchView />
       ) : (
         <AdminOrdersView />

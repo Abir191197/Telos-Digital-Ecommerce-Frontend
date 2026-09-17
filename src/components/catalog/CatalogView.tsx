@@ -14,6 +14,7 @@ import { CatalogIntroHeader } from "./CatalogIntroHeader";
 import { CatalogProductGrid } from "./CatalogProductGrid";
 import { CatalogPagination } from "./CatalogPagination";
 import { CatalogMobileDrawer } from "./CatalogMobileDrawer";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 interface CatalogViewProps {
   initialProducts: Product[];
@@ -36,6 +37,18 @@ export function CatalogView({
 }: CatalogViewProps) {
   const searchParams = useSearchParams();
   const brandParam = searchParams.get("brand");
+
+  const { data: serverProductsData } = useGetProductsQuery({
+    limit: 100,
+    categoryId: category?.id,
+  });
+
+  const allProducts = useMemo(() => {
+    if (serverProductsData?.data && serverProductsData.data.length > 0) {
+      return serverProductsData.data;
+    }
+    return initialProducts;
+  }, [serverProductsData, initialProducts]);
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -70,26 +83,26 @@ export function CatalogView({
   // Compute available brands & overall price bounds
   const availableBrands = useMemo(() => {
     const map = new Map<string, number>();
-    initialProducts.forEach((p) => {
+    allProducts.forEach((p) => {
       map.set(p.brand, (map.get(p.brand) || 0) + 1);
     });
     return Array.from(map.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-  }, [initialProducts]);
+  }, [allProducts]);
 
   const priceBounds = useMemo(() => {
-    if (initialProducts.length === 0) return { min: 0, max: 100000 };
-    const prices = initialProducts.map((p) => p.price);
+    if (allProducts.length === 0) return { min: 0, max: 100000 };
+    const prices = allProducts.map((p) => p.price);
     return {
       min: Math.min(...prices),
       max: Math.max(...prices),
     };
-  }, [initialProducts]);
+  }, [allProducts]);
 
   // Filter and Sort Engine
   const filteredProducts = useMemo(() => {
-    let list = [...initialProducts];
+    let list = [...allProducts];
 
     // 0. Keyword search
     if (searchQuery.trim()) {

@@ -13,6 +13,7 @@ interface WishlistActions {
   toggleItem: (product: Product) => boolean; // returns true if now added, false if removed
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
+  setServerItems: (items: Product[]) => void;
   getCount: () => number;
 }
 
@@ -52,6 +53,7 @@ export const useWishlistStore = create<WishlistStore>()(
       },
 
       clearWishlist: () => set({ items: [] }),
+      setServerItems: (items) => set({ items }),
 
       getCount: () => get().items.length,
     }),

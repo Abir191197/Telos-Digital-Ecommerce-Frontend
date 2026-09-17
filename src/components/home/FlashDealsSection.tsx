@@ -7,6 +7,7 @@ import { ROUTES } from "@/constants";
 import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { products } from "@/data";
 import { ProductCard } from "@/components/common";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -42,6 +43,9 @@ export function FlashDealsSection() {
     seconds: 19,
   });
 
+  const { data: serverProducts } = useGetProductsQuery({ limit: 12 });
+  const allProducts = serverProducts?.data?.length ? serverProducts.data : products;
+
   React.useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -62,10 +66,8 @@ export function FlashDealsSection() {
 
   // Filter flash deal or high discount items
   const flashProducts = React.useMemo(() => {
-    return products
-      .filter((p) => p.isFlashDeal || (p.discountPercentage && p.discountPercentage >= 15))
-      .slice(0, 5);
-  }, []);
+    return allProducts.slice(0, 5);
+  }, [allProducts]);
 
   if (flashProducts.length === 0) return null;
 

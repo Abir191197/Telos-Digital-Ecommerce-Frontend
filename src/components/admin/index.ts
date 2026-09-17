@@ -19,3 +19,6 @@ export * from "./AdminActivityView";
 export * from "./activity";
 export * from "./AdminCustomerCartsView";
 export * from "./carts";
+
+export * from "./AdminCartsListView";
+export * from "./AdminWishlistsListView";

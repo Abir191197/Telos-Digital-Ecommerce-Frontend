@@ -12,6 +12,8 @@ import {
   Sliders,
   Settings,
   LucideIcon,
+  ShoppingCart,
+  Heart,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 
@@ -54,12 +56,17 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
             href: "/dashboard/orders?status=pending",
             badge: "2",
           },
-          {
-            title: "Active Carts",
-            href: "/dashboard/orders?tab=carts",
-            badge: "Live",
-          },
         ],
+      },
+      {
+        title: "Customer Carts",
+        href: ROUTES.ADMIN_CARTS,
+        icon: ShoppingCart,
+      },
+      {
+        title: "Customer Wishlists",
+        href: ROUTES.ADMIN_WISHLISTS,
+        icon: Heart,
       },
     ],
   },

@@ -1,4 +1,4 @@
-// ── RTK Query Cache Tag Types ──────────────────────────
+// 🏷️ RTK Query Cache Tag Types 🏷️
 // All tag types must be registered here centrally.
 // Feature endpoint files reference these for providesTags / invalidatesTags.
 
@@ -16,6 +16,8 @@ export const TAG_TYPES = [
   "Brand",
   "Address",
   "Product",
+  "Cart",
+  "Wishlist",
 ] as const;
 
 export type TagType = (typeof TAG_TYPES)[number];

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Heart,
   ShoppingCart,
@@ -12,9 +13,14 @@ import {
 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
 import { ROUTES } from "@/constants";
-import { useCartStore, useWishlistStore } from "@/stores";
+import { useCartStore, useWishlistStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { cn } from "@/lib/utils";
+import { useAddToCartMutation } from "@/services/api/cart/cartApi";
+import {
+  useAddToWishlistMutation,
+  useRemoveWishlistItemMutation,
+} from "@/services/api/wishlist/wishlistApi";
 
 interface ProductCardProps {
   product: Product;
@@ -22,24 +28,66 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const mounted = useMounted();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const addItem = useCartStore((state) => state.addItem);
   const toggleWishlist = useWishlistStore((state) => state.toggleItem);
   const isInWishlistStore = useWishlistStore((state) => state.isInWishlist(product.id));
   const isWishlisted = mounted ? isInWishlistStore : false;
 
+  const [addToCartMutation] = useAddToCartMutation();
+  const [addToWishlistMutation] = useAddToWishlistMutation();
+  const [removeWishlistItemMutation] = useRemoveWishlistItemMutation();
+
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const isUuid = (id?: string) =>
+    Boolean(id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-cart&productId=${product.id}&quantity=1`;
+      router.push(redirectUrl);
+      return;
+    }
+
     setIsAdding(true);
     addItem(product, 1);
+    if (isUuid(product.id)) {
+      try {
+        await addToCartMutation({ productId: product.id, quantity: 1 }).unwrap();
+      } catch (err) {
+        console.error("Failed to add to cart on server:", err);
+      }
+    }
     setTimeout(() => setIsAdding(false), 600);
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-wishlist&productId=${product.id}`;
+      router.push(redirectUrl);
+      return;
+    }
+
+    const willBeWishlisted = !isWishlisted;
     toggleWishlist(product);
+    if (isUuid(product.id)) {
+      try {
+        if (willBeWishlisted) {
+          await addToWishlistMutation({ productId: product.id }).unwrap();
+        } else {
+          await removeWishlistItemMutation(product.id).unwrap();
+        }
+      } catch (err) {
+        console.error("Failed to toggle wishlist on server:", err);
+      }
+    }
   };
 
   const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);
@@ -105,7 +153,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </span>
         </div>
 
-        {/* Title: fixed 2-line height so 1-line or 2-line titles never alter card height */}
+        {/* Title */}
         <div className="mt-1 h-10 flex items-start">
           <Link
             href={productUrl}

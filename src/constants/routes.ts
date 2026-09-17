@@ -36,6 +36,8 @@ export const ROUTES = {
   NOTIFICATIONS: "/notifications",
   PROFILE: "/account",
   ADMIN_PROFILE: "/dashboard/profile",
+  ADMIN_CARTS: "/dashboard/carts",
+  ADMIN_WISHLISTS: "/dashboard/wishlists",
   ACCOUNT_HUB: "/account",
   SETTINGS: "/settings",
   REVIEWS: "/dashboard/reviews",
@@ -75,4 +77,6 @@ export const PROTECTED_ROUTES = [
   ROUTES.PROFILE,
   ROUTES.ACCOUNT_HUB,
   ROUTES.SETTINGS,
+  ROUTES.ADMIN_CARTS,
+  ROUTES.ADMIN_WISHLISTS,
 ] as const;
