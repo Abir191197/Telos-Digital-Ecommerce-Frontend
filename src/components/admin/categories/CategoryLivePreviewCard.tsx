@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { ArrowRight, LayoutGrid, Sparkles, Layers, Eye } from "lucide-react";
-import { CATEGORY_ICON_MAP } from "@/components/categories/categoryConfig";
+import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
 export interface CategoryLivePreviewCardProps {
   name: string;
@@ -26,7 +26,7 @@ export function CategoryLivePreviewCard({
 }: CategoryLivePreviewCardProps) {
   const [previewTab, setPreviewTab] = useState<"card" | "banner">("card");
 
-  const IconComponent = (icon && CATEGORY_ICON_MAP[icon]) || LayoutGrid;
+  const IconComponent = getCategoryIcon(icon);
   const fallbackBanner =
     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80";
   const displayBanner = bannerUrl || fallbackBanner;
@@ -81,6 +81,7 @@ export function CategoryLivePreviewCard({
                   alt={displayName}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-106"
+                  unoptimized
                 />
 
                 {/* Minimal Floating Category Icon */}
@@ -146,6 +147,7 @@ export function CategoryLivePreviewCard({
                 alt={displayName}
                 fill
                 className="object-cover"
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/30 p-4 flex flex-col justify-end text-white">
                 <div className="flex items-center gap-2 mb-1.5">

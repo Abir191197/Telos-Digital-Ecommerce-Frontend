@@ -7,51 +7,13 @@ import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { categories } from "@/data";
 import { ROUTES } from "@/constants";
 import {
-  Smartphone,
-  Laptop,
-  Gamepad2,
-  Headphones,
-  Watch,
-  Tv,
-  Home as HomeIcon,
-  Shirt,
-  Sparkles,
   LayoutGrid,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Camera,
-  Cpu,
-  Footprints,
-  Gem,
-  Wifi,
-  Printer,
-  Dumbbell,
-  Car,
-  BookOpen,
-} from "lucide-react";
-
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Smartphone,
-  Laptop,
-  Gamepad2,
-  Headphones,
-  Watch,
-  Tv,
-  Home: HomeIcon,
-  Shirt,
-  Accessories: Sparkles,
   Sparkles,
-  Camera,
-  Cpu,
-  Footprints,
-  Gem,
-  Wifi,
-  Printer,
-  Dumbbell,
-  Car,
-  BookOpen,
-};
+} from "lucide-react";
+import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
 // Subtle ambient accent themes per category slot
 const THEME_ACCENTS = [
@@ -200,7 +162,7 @@ export function QuickCategoryBar() {
           className="flex lg:grid lg:grid-cols-8 gap-3 sm:gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none scroll-smooth snap-x snap-mandatory"
         >
           {topCategories.map((cat, idx) => {
-            const Icon = (cat.icon && ICON_MAP[cat.icon]) || LayoutGrid;
+            const Icon = getCategoryIcon(cat.icon);
             const theme = THEME_ACCENTS[idx % THEME_ACCENTS.length];
 
             return (

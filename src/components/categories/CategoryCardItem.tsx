@@ -7,7 +7,7 @@ import { m } from "framer-motion";
 import { LayoutGrid, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import type { Category } from "@/types/ecommerce.types";
-import { CATEGORY_ICON_MAP } from "./categoryConfig";
+import { getCategoryIcon } from "./categoryConfig";
 
 interface CategoryCardItemProps {
   category: Category;
@@ -15,8 +15,7 @@ interface CategoryCardItemProps {
 }
 
 export function CategoryCardItem({ category, index }: CategoryCardItemProps) {
-  const IconComponent =
-    (category.icon && CATEGORY_ICON_MAP[category.icon]) || LayoutGrid;
+  const IconComponent = getCategoryIcon(category.icon);
 
   return (
     <m.div

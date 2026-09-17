@@ -10,12 +10,14 @@ import {
   CheckCircle2,
   FolderTree,
   X,
+  AlertOctagon,
 } from "lucide-react";
 import type { Category } from "@/types/ecommerce.types";
 import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "@/services/api/categories/categoryApi";
+import { PageLoader } from "@/components/common";
 import { CategoryDesktopTable } from "./CategoryDesktopTable";
 import { CategoryMobileList } from "./CategoryMobileList";
 import { CategoryCardGrid } from "./CategoryCardGrid";
@@ -40,17 +42,6 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  // Close three-dot action menu when clicking outside
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!target?.closest("[data-action-menu]")) {
-        setActiveMenuId(null);
-      }
-    };
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
-  }, []);
 
   // Confirmation Dialog State
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
@@ -145,16 +136,26 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
 
   if (isLoading) {
     return (
-      <div className="rounded-3xl bg-card p-10 text-sm font-bold text-muted-foreground">
-        Loading categories...
-      </div>
+      <PageLoader
+        title="Loading Categories..."
+        description="Fetching the latest category taxonomies, icons, and hierarchy settings."
+        badgeText="Admin Catalog"
+      />
     );
   }
 
   if (isError) {
     return (
-      <div className="rounded-3xl bg-card p-10 text-sm font-bold text-rose-500">
-        Categories could not be loaded. Please check your admin session.
+      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 rounded-3xl bg-card border border-rose-500/20 my-6 space-y-3">
+        <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500">
+          <AlertOctagon className="h-6 w-6" />
+        </div>
+        <h3 className="text-base font-extrabold text-foreground">
+          Categories Could Not Be Loaded
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-sm">
+          Please check your admin connection or session and refresh the page.
+        </p>
       </div>
     );
   }

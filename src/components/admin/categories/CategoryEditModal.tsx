@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import type { Category } from "@/types/ecommerce.types";
 import { POPULAR_CATEGORY_ICONS } from "./CategoryPropertiesFormCard";
+import {
+  normalizeCategoryIconName,
+  getCategoryIcon,
+} from "@/components/categories/categoryConfig";
 
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -40,7 +44,7 @@ export function CategoryEditModal({
   const [name, setName] = useState(category.name);
   const [slug, setSlug] = useState(category.slug);
   const [description, setDescription] = useState(category.description || "");
-  const [icon, setIcon] = useState(category.icon || "Smartphone");
+  const [icon, setIcon] = useState(normalizeCategoryIconName(category.icon));
   const [image, setImage] = useState(category.image || "");
   const [fileError, setFileError] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -103,7 +107,7 @@ export function CategoryEditModal({
       name: name.trim(),
       slug: slug.trim() || category.slug,
       description: description.trim(),
-      icon,
+      icon: normalizeCategoryIconName(icon),
       image: image.trim() || undefined,
       itemCount: Number(itemCount) || 0,
       featured,
@@ -332,32 +336,45 @@ export function CategoryEditModal({
           </div>
 
           {/* Icon Selector Grid */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-foreground">
-              Visual Icon
-            </label>
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 max-h-36 overflow-y-auto p-2 rounded-xl border border-border/60 bg-muted/20">
-              {POPULAR_CATEGORY_ICONS.map((item) => {
-                const isSelected = icon === item.name;
-                const IconComp = item.Icon;
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => setIcon(item.name)}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl border text-center transition-all cursor-pointer ${
-                      isSelected
-                        ? "border-amber-500 bg-amber-500/10 text-amber-500 shadow-2xs font-bold"
-                        : "border-border/60 bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <IconComp className="h-4 w-4" />
-                    <span className="text-[10px] truncate w-full">{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {(() => {
+            const selectedCanonical = normalizeCategoryIconName(icon);
+            const SelectedIconComp = getCategoryIcon(icon);
+
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-foreground">
+                    Visual Icon
+                  </label>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                    <SelectedIconComp className="h-3.5 w-3.5" />
+                    <span>{selectedCanonical}</span>
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 max-h-36 overflow-y-auto p-2 rounded-xl border border-border/60 bg-muted/20">
+                  {POPULAR_CATEGORY_ICONS.map((item) => {
+                    const isSelected = selectedCanonical === item.name;
+                    const IconComp = item.Icon;
+                    return (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => setIcon(item.name)}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-amber-500 bg-amber-500/10 text-amber-500 shadow-2xs font-bold ring-1 ring-amber-500"
+                            : "border-border/60 bg-background hover:bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <IconComp className="h-4 w-4" />
+                        <span className="text-[10px] truncate w-full">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Metrics & Badges Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center p-3.5 rounded-2xl bg-muted/30 border border-border/60">

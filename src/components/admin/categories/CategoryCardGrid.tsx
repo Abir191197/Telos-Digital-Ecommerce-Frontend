@@ -13,7 +13,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import type { Category } from "@/types/ecommerce.types";
-import { CATEGORY_ICON_MAP } from "@/components/categories/categoryConfig";
+import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
 export interface CategoryCardGridProps {
   categories: Category[];
@@ -33,8 +33,7 @@ export function CategoryCardGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {categories.map((category) => {
-        const IconComponent =
-          (category.icon && CATEGORY_ICON_MAP[category.icon]) || LayoutGrid;
+        const IconComponent = getCategoryIcon(category.icon);
 
         return (
           <div
@@ -133,7 +132,7 @@ export function CategoryCardGrid({
                 <div className="flex items-center gap-2">
                   {/* Large Edit Button */}
                   <Link
-                    href={`/dashboard/categories?action=edit&id=${category.id}`}
+                    href={`/dashboard/categories/${category.slug}/edit`}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 dark:text-blue-400 hover:text-white text-xs font-bold transition-all shadow-xs active:scale-95"
                     title="Edit Category Details"
                   >

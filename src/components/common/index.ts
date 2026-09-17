@@ -4,7 +4,8 @@ export type { ButtonProps } from "./Button";
 export { Input } from "./Input";
 export type { InputProps } from "./Input";
 
-export { Loader } from "./Loader";
+export { Loader, PageLoader } from "./Loader";
+export type { LoaderProps } from "./Loader";
 export { EmptyState } from "./EmptyState";
 
 export {
@@ -22,4 +23,10 @@ export { Logo } from "./Logo";
 export { ThemeToggle } from "./ThemeToggle";
 export { PaymentMethodsGrid } from "./PaymentMethodsGrid";
 export { ProductCard } from "./ProductCard";
+export { ConfirmationModal } from "./ConfirmationModal";
+export type {
+  ConfirmationDialogState,
+  ConfirmationVariant,
+  ConfirmationModalProps,
+} from "./ConfirmationModal";
 

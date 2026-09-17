@@ -4,7 +4,7 @@ import { Grid, ArrowRight, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
 import type { Category } from "@/types/ecommerce.types";
-import { CATEGORY_ICON_MAP } from "./megaMenuConfig";
+import { getCategoryIcon } from "./megaMenuConfig";
 
 interface MegaMenuCategoryListProps {
   categories: Category[];
@@ -37,8 +37,7 @@ export function MegaMenuCategoryList({
       </div>
       <div className="space-y-1 mt-1">
         {categories.map((cat) => {
-          const IconComponent =
-            (cat.icon && CATEGORY_ICON_MAP[cat.icon]) || LayoutGrid;
+          const IconComponent = getCategoryIcon(cat.icon);
           const isActive = cat.slug === activeCategorySlug;
 
           return (

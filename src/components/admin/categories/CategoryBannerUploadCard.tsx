@@ -74,6 +74,7 @@ export function CategoryBannerUploadCard({
             alt="Category banner preview"
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-103"
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 

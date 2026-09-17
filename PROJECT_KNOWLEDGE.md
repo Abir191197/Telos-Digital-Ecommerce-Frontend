@@ -246,6 +246,73 @@ When building or extending Admin interfaces (such as `/dashboard/products`):
 - Bulk actions on mobile are triggered via product checkboxes and render as a borderless, floating glassy pill (`fixed bottom-20 inset-x-3.5 z-40 bg-zinc-950/75 dark:bg-zinc-900/80 backdrop-blur-2xl rounded-full shadow-2xl border-none`).
 - Floating pill docks safely above the bottom nav (`bottom-20`) containing selected item count, `Cancel` action, and destructive confirmation trigger.
 
+### E. Universal Reusable Confirmation & Creation Modal Pattern
+- **Component Location**: [`src/components/common/ConfirmationModal.tsx`](file:///c:/Telos%20Digital/Telos%20Digital%20Ecommerce%20Frontend/src/components/common/ConfirmationModal.tsx) (also exported via `@/components/common` and backward-compatible alias `ProductConfirmDialog` in `@/components/admin/products/ProductConfirmDialog`).
+- **Core Purpose**: Standardize all confirmation, deletion, and post-creation success dialogues with uniform high-end glassmorphic styling, avoiding fragmented custom modal designs.
+- **Design Specifications**:
+  - **Backdrop**: `fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200`.
+  - **Card Container**: `w-full max-w-md rounded-2xl sm:rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200`.
+  - **Variants**:
+    - `danger`: Destructive actions (Delete Category, Delete Product, Delete Brand). Displays `AlertOctagon` in `bg-rose-500/15 text-rose-600 border-rose-500/20` with a solid rose confirm button.
+    - `success`: Creation / Update success announcements (Category Created, Product Saved). Displays `CheckCircle2` in `bg-emerald-500/15 text-emerald-600 border-emerald-500/20` with a solid emerald primary button.
+    - `warning`: Cautionary triggers. Displays `AlertTriangle` in amber.
+    - `primary`: Standard informational confirmations with amber/zinc buttons.
+  - **Actions & Navigation**:
+    - Configurable `confirmLabel` and `cancelLabel`.
+    - Optional `hideCancel` for purely informative confirmation modals.
+    - Custom `onConfirm` and `onCancel` callbacks.
+- **Form Reset Rule on Creation**:
+  - Whenever an entity is successfully published/created (e.g. `CreateCategoryView`), all form inputs, subcategory arrays, banner states, and file buffers **must be reset/deleted** immediately upon mutation resolution (`unwrap()`), ensuring a clean slate before presenting the success modal with "Create Another" and "View List" actions.
+
+### F. Universal Reusable Centered Loading Pattern (`PageLoader` & `Loader`)
+- **Component Location**: [`src/components/common/Loader.tsx`](file:///c:/Telos%20Digital/Telos%20Digital%20Ecommerce%20Frontend/src/components/common/Loader.tsx) (exported as `Loader`, `PageLoader`, and `type LoaderProps` from `@/components/common`).
+- **Core Rule**: **Never use unstyled or plain text loading indicators** (e.g., `<div className="p-10">Loading...</div>`). All page and view loading states must occupy the **vertical and horizontal center** of the viewport with a high-end luxury animated spinner.
+- **Design Specifications**:
+  - **Centered Viewport (`variant="page"` / `PageLoader`)**: Takes `min-h-[60vh]` with vertical and horizontal centering.
+  - **Ambient Glow Ring**: Pulsating outer halo (`bg-amber-500/20 blur-xl animate-pulse`) behind a rotating dual-color gradient border spinner.
+  - **Centered Icon**: Inner brand badge with rotating `Loader2` indicator.
+  - **Structured Hierarchy**: Optional pill badge (`badgeText`), bold title (`title`), and helpful status subtitle (`description`).
+  - **Card Container (`variant="card"`)**: Takes `min-h-[360px]` with `rounded-3xl border border-border/70 bg-card/60 backdrop-blur-md` for sub-sections or tables.
+  - **Inline (`variant="inline"`)**: Ultra-compact spinner for buttons and interactive badges.
+- **How to Use**:
+  ```tsx
+  import { PageLoader } from "@/components/common";
+
+  // In page views (e.g., AdminCategoriesListView, CreateCategoryView):
+  if (isLoading) {
+    return (
+      <PageLoader
+        title="Loading Categories..."
+        description="Fetching the latest category taxonomies, icons, and hierarchy settings."
+        badgeText="Admin Catalog"
+      />
+    );
+  }
+  ```
+- **Next.js Route Loaders (`loading.tsx`)**:
+  - Place `loading.tsx` in route folders (e.g., `src/app/(protected)/dashboard/categories/loading.tsx`) returning `<PageLoader ... />` for instant streaming transitions.
+
+### G. Universal Category Icon Contract & Normalization System
+- **Core Utility Location**: [`src/components/categories/categoryConfig.ts`](file:///c:/Telos%20Digital/Telos%20Digital%20Ecommerce%20Frontend/src/components/categories/categoryConfig.ts) (exported as `CATEGORY_ICON_MAP`, `getCategoryIcon`, `normalizeCategoryIconName`).
+- **Core Problem Solved**: The backend stores category icons as string identifiers (e.g., `"Smartphone"`, `"Laptop"`, `"Gamepad2"`), but responses may contain varied casing (`"smartphone"`), kebab-case (`"gamepad-2"`, `"shield-check"`), or category slugs (`"smartphones-tablets"`). In the past, fragmented dictionaries and direct dictionary lookups (`CATEGORY_ICON_MAP[category.icon]`) failed on casing differences or unrecognized keys, causing icons to disappear or fallback unpredictably.
+- **Architectural Rules**:
+  1. **Canonical Key Registry (`CATEGORY_ICON_MAP`)**: Central registry in `categoryConfig.ts` mapped to official Lucide React components, including `LayoutGrid` as safe fallback.
+  2. **Alias & Slug Normalization (`normalizeCategoryIconName`)**:
+     - Strips hyphens, underscores, spaces, and normalizes casing.
+     - Resolves semantic aliases (e.g., `"audio"` -> `"Headphones"`, `"gaming"` -> `"Gamepad2"`, `"shoes"` -> `"Footprints"`, `"jewelry"` -> `"Gem"`, `"smartphones-tablets"` -> `"Smartphone"`).
+     - Returns verified canonical key string, with `"LayoutGrid"` fallback.
+  3. **Safe Component Resolution (`getCategoryIcon`)**:
+     - Always returns a valid React component: `getCategoryIcon(category.icon)`.
+     - Guaranteed never to return `undefined` or crash during render.
+  4. **API Boundary Ingestion (`categoryApi.ts`)**:
+     - Incoming backend data in `normalizeCategory` passes `category.icon` through `normalizeCategoryIconName` so all queries receive clean canonical keys.
+     - Outgoing creation and update mutations normalize the icon before appending to `FormData`.
+  5. **Admin Form & Edit Modal**:
+     - In `CategoryPropertiesFormCard.tsx` and `CategoryEditModal.tsx`, active icon detection uses `normalizeCategoryIconName(values.icon) === normalizeCategoryIconName(name)`.
+     - Shows a live badge preview with the selected icon next to the picker.
+  6. **Re-export Compatibility**:
+     - `megaMenuConfig.ts` re-exports `CATEGORY_ICON_MAP`, `getCategoryIcon`, and `normalizeCategoryIconName` from `categoryConfig.ts` to maintain single-source-of-truth without breaking external imports.
+
 ---
 
 ## 7. Guidelines for AI Sessions

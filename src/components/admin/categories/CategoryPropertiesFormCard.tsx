@@ -23,9 +23,18 @@ import {
   BookOpen,
   Luggage,
   Glasses,
+  Baby,
+  UtensilsCrossed,
+  Dog,
+  ShoppingBag,
+  Tag,
   Plus,
   X,
 } from "lucide-react";
+import {
+  normalizeCategoryIconName,
+  getCategoryIcon,
+} from "@/components/categories/categoryConfig";
 
 export interface CategoryFormValues {
   name: string;
@@ -57,6 +66,11 @@ export const POPULAR_CATEGORY_ICONS = [
   { label: "Books", name: "BookOpen", Icon: BookOpen },
   { label: "Travel", name: "Luggage", Icon: Luggage },
   { label: "Eyewear", name: "Glasses", Icon: Glasses },
+  { label: "Baby", name: "Baby", Icon: Baby },
+  { label: "Dining", name: "UtensilsCrossed", Icon: UtensilsCrossed },
+  { label: "Pets", name: "Dog", Icon: Dog },
+  { label: "Retail", name: "ShoppingBag", Icon: ShoppingBag },
+  { label: "Deals", name: "Tag", Icon: Tag },
 ];
 
 export interface CategoryPropertiesFormCardProps {
@@ -117,62 +131,67 @@ export function CategoryPropertiesFormCard({
 
       <div className="space-y-5">
         {/* Category Name */}
-        <div>
-          {/* Category Name */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-foreground flex items-center gap-1">
-              <span>Category Title</span>
-              <span className="text-amber-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={values.name}
-              onChange={handleNameChange}
-              placeholder="e.g. Smart Watches & Wearables"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-foreground flex items-center gap-1">
+            <span>Category Title</span>
+            <span className="text-amber-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={values.name}
+            onChange={handleNameChange}
+            placeholder="e.g. Smart Watches & Wearables"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium"
+          />
         </div>
 
         {/* Icon Selection */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-foreground flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <span>Category Icon</span>
-              <span className="text-[10px] text-muted-foreground font-normal">
-                (Storefront badge & mobile menus)
-              </span>
-            </span>
-            <span className="text-[11px] font-bold text-amber-500">
-              Selected: {values.icon}
-            </span>
-          </label>
+        {(() => {
+          const selectedCanonical = normalizeCategoryIconName(values.icon);
+          const SelectedIconComp = getCategoryIcon(values.icon);
 
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 max-h-44 overflow-y-auto p-2 rounded-2xl border border-border/70 bg-muted/15">
-            {POPULAR_CATEGORY_ICONS.map(({ label, name, Icon }) => {
-              const isSelected = values.icon === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => onChange("icon", name)}
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl text-center gap-1 transition-all duration-150 cursor-pointer ${
-                    isSelected
-                      ? "bg-amber-500 text-zinc-950 font-bold shadow-md shadow-amber-500/20 scale-102"
-                      : "bg-background/80 hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/60"
-                  }`}
-                  title={label}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="text-[10px] truncate max-w-full">
-                    {label}
+          return (
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span>Category Icon</span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    (Storefront badge & mobile menus)
                   </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                  <SelectedIconComp className="h-3.5 w-3.5" />
+                  <span>Selected: {selectedCanonical}</span>
+                </span>
+              </label>
+
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 max-h-44 overflow-y-auto p-2 rounded-2xl border border-border/70 bg-muted/15">
+                {POPULAR_CATEGORY_ICONS.map(({ label, name, Icon }) => {
+                  const isSelected = selectedCanonical === name;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => onChange("icon", name)}
+                      className={`flex flex-col items-center justify-center p-2 rounded-xl text-center gap-1 transition-all duration-150 cursor-pointer ${
+                        isSelected
+                          ? "bg-amber-500 text-zinc-950 font-bold shadow-md shadow-amber-500/20 scale-102 ring-2 ring-amber-500/40"
+                          : "bg-background/80 hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/60"
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="text-[10px] truncate max-w-full">
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Description */}
         <div className="space-y-1.5">

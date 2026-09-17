@@ -1,6 +1,7 @@
 import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
 import type { Category, Subcategory } from "@/types/ecommerce.types";
+import { normalizeCategoryIconName } from "@/components/categories/categoryConfig";
 
 type BackendMeta = {
   page: number;
@@ -47,8 +48,8 @@ export const normalizeCategory = (category: Category): Category => {
   return {
     ...category,
     description: category.description || "",
-    icon: category.icon || "LayoutGrid",
-    itemCount: category.itemCount || 0,
+    icon: normalizeCategoryIconName(category.icon),
+    itemCount: subCategories.length,
     featured: category.featured ?? Boolean(category.isFeaturedHomepage),
     isFeaturedHomepage:
       category.isFeaturedHomepage ?? Boolean(category.featured),
@@ -71,7 +72,11 @@ const buildCategoryFormData = (payload: CategoryFormPayload) => {
 
   appendOptional(formData, "name", payload.name);
   appendOptional(formData, "description", payload.description);
-  appendOptional(formData, "icon", payload.icon);
+  appendOptional(
+    formData,
+    "icon",
+    payload.icon ? normalizeCategoryIconName(payload.icon) : undefined
+  );
   if (payload.subCategories) {
     formData.append("subCategories", JSON.stringify(payload.subCategories));
   }

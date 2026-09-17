@@ -12,7 +12,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import type { Category } from "@/types/ecommerce.types";
-import { CATEGORY_ICON_MAP } from "@/components/categories/categoryConfig";
+import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
 export interface CategoryMobileListProps {
   categories: Category[];
@@ -32,8 +32,7 @@ export function CategoryMobileList({
   return (
     <div className="block md:hidden space-y-3.5">
       {categories.map((category) => {
-        const IconComponent =
-          (category.icon && CATEGORY_ICON_MAP[category.icon]) || LayoutGrid;
+        const IconComponent = getCategoryIcon(category.icon);
 
         return (
           <div
@@ -102,7 +101,7 @@ export function CategoryMobileList({
 
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/dashboard/categories?action=edit&id=${category.id}`}
+                  href={`/dashboard/categories/${category.slug}/edit`}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 dark:text-blue-400 hover:text-white text-xs font-bold transition-all shadow-xs active:scale-95"
                 >
                   <Edit3 className="h-3.5 w-3.5" />

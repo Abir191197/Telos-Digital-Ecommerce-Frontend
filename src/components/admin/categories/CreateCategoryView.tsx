@@ -2,12 +2,19 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
 import {
   useCreateCategoryMutation,
+  useGetCategoriesQuery,
   useGetCategoryByIdQuery,
   useUpdateCategoryMutation,
 } from "@/services/api/categories/categoryApi";
+import {
+  ConfirmationModal,
+  PageLoader,
+  type ConfirmationDialogState,
+} from "@/components/common";
 import {
   CategoryBannerUploadCard,
   CategoryPropertiesFormCard,
@@ -15,6 +22,7 @@ import {
   type CategoryFormValues,
 } from "./";
 import { AdminCategoriesListView } from "./AdminCategoriesListView";
+import { normalizeCategoryIconName } from "@/components/categories/categoryConfig";
 
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -22,16 +30,30 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 export interface CreateCategoryViewProps {
   initialTab?: "create" | "list";
   categoryId?: string;
+  /** Slug-based lookup — resolves to ID from the categories list */
+  categorySlug?: string;
 }
 
-export function CreateCategoryView({ initialTab = "create", categoryId }: CreateCategoryViewProps) {
+export function CreateCategoryView({ initialTab = "create", categoryId, categorySlug }: CreateCategoryViewProps) {
+  const router = useRouter();
+  const [confirmModal, setConfirmModal] = useState<ConfirmationDialogState | null>(null);
   const [currentView, setCurrentView] = useState<"create" | "list">(initialTab);
+
+  // Resolve slug → ID if categorySlug is provided
+  const { data: allCategoriesResponse } = useGetCategoriesQuery(
+    { limit: 200 },
+    { skip: !categorySlug }
+  );
+  const resolvedId = categorySlug
+    ? (allCategoriesResponse?.data ?? []).find((c) => c.slug === categorySlug)?.id
+    : categoryId;
+
   const {
     data: editingCategory,
     isLoading: isLoadingCategory,
     error: categoryLoadError,
-  } = useGetCategoryByIdQuery(categoryId || "", {
-    skip: !categoryId,
+  } = useGetCategoryByIdQuery(resolvedId || "", {
+    skip: !resolvedId,
   });
   const [createCategory] = useCreateCategoryMutation();
   const [updateCategory] = useUpdateCategoryMutation();
@@ -44,7 +66,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
       return {
         name: editingCategory.name,
         description: editingCategory.description || "",
-        icon: editingCategory.icon || "Smartphone",
+        icon: normalizeCategoryIconName(editingCategory.icon),
         featured: Boolean(editingCategory.featured),
         isActive: editingCategory.isActive ?? true,
       };
@@ -81,7 +103,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
       setFormValues({
         name: editingCategory.name,
         description: editingCategory.description || "",
-        icon: editingCategory.icon || "Smartphone",
+        icon: normalizeCategoryIconName(editingCategory.icon),
         featured: Boolean(editingCategory.featured),
         isActive: editingCategory.isActive ?? true,
       });
@@ -137,7 +159,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
       setFormValues({
         name: editingCategory.name,
         description: editingCategory.description || "",
-        icon: editingCategory.icon || "Smartphone",
+        icon: normalizeCategoryIconName(editingCategory.icon),
         featured: Boolean(editingCategory.featured),
         isActive: editingCategory.isActive ?? true,
       });
@@ -191,7 +213,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
       const payload = {
         name: formValues.name.trim(),
         description: formValues.description.trim(),
-        icon: formValues.icon,
+        icon: normalizeCategoryIconName(formValues.icon),
         subCategories: subcategories.map((name) => ({
           name,
           isActive: true,
@@ -202,13 +224,63 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
         removeImage: isEditMode && !bannerUrl && Boolean(editingCategory?.image),
       };
 
+      const submittedCategoryName = formValues.name.trim();
+
       if (isEditMode && editingCategory) {
         await updateCategory({ id: editingCategory.id, payload }).unwrap();
+        setConfirmModal({
+          isOpen: true,
+          title: "Category Updated Successfully!",
+          message: `"${submittedCategoryName}" and its settings have been updated in the catalog.`,
+          confirmLabel: "View Categories",
+          cancelLabel: "Keep Editing",
+          variant: "success",
+          onConfirm: () => {
+            setConfirmModal(null);
+            setCurrentView("list");
+            router.push("/dashboard/categories");
+          },
+          onCancel: () => {
+            setConfirmModal(null);
+          },
+        });
       } else {
         await createCategory(payload).unwrap();
+
+        // Reset all form fields completely ("all form delete")
+        setFormValues({
+          name: "",
+          description: "",
+          icon: "Smartphone",
+          featured: false,
+          isActive: true,
+        });
+        setSubcategories([]);
+        setBannerUrl(null);
+        setSelectedBannerFile(null);
+        setBannerError(null);
+        setFormError(null);
+
+        // Open Success Confirmation Modal (matches delete modal look & feel)
+        setConfirmModal({
+          isOpen: true,
+          title: "Category Created Successfully!",
+          message: `"${submittedCategoryName}" has been published and added to your store's live catalog.`,
+          confirmLabel: "View Categories",
+          cancelLabel: "Create Another",
+          variant: "success",
+          onConfirm: () => {
+            setConfirmModal(null);
+            setCurrentView("list");
+            router.push("/dashboard/categories");
+          },
+          onCancel: () => {
+            setConfirmModal(null);
+          },
+        });
       }
 
-      setLastCreatedCategory(formValues.name);
+      setLastCreatedCategory(submittedCategoryName);
       setSuccessToast(true);
       setSelectedBannerFile(null);
     } catch (error) {
@@ -220,16 +292,32 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
 
   if (categoryId && isLoadingCategory) {
     return (
-      <div className="rounded-3xl bg-card p-8 text-sm font-bold text-muted-foreground">
-        Loading category details...
-      </div>
+      <PageLoader
+        title="Loading Category Details..."
+        description="Fetching category properties, subcategories, and banner configuration."
+        badgeText="Category Editor"
+      />
     );
   }
 
   if (categoryId && categoryLoadError) {
     return (
-      <div className="rounded-3xl bg-card p-8 text-sm font-bold text-rose-500">
-        Category could not be loaded.
+      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8 rounded-3xl bg-card border border-rose-500/20 my-6 space-y-3">
+        <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500">
+          <ArrowLeft className="h-6 w-6" />
+        </div>
+        <h3 className="text-base font-extrabold text-foreground">
+          Category Could Not Be Loaded
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-sm">
+          The requested category could not be found or you do not have permission to view it.
+        </p>
+        <Link
+          href="/dashboard/categories"
+          className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-zinc-950 text-xs font-bold shadow-xs hover:bg-amber-400 transition-all"
+        >
+          Back to Categories
+        </Link>
       </div>
     );
   }
@@ -366,6 +454,14 @@ export function CreateCategoryView({ initialTab = "create", categoryId }: Create
       ) : (
         /* VIEW 2: ALL CATEGORIES LIST */
         <AdminCategoriesListView onSwitchToCreate={() => setCurrentView("create")} />
+      )}
+
+      {/* Reusable Confirmation / Creation Done Modal */}
+      {confirmModal && (
+        <ConfirmationModal
+          dialog={confirmModal}
+          onClose={() => setConfirmModal(null)}
+        />
       )}
     </div>
   );

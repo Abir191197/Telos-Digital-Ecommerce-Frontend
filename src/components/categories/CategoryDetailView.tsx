@@ -10,31 +10,6 @@ import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import {
-  Smartphone,
-  Laptop,
-  Gamepad2,
-  Headphones,
-  Watch,
-  Camera,
-  Cpu,
-  Tv,
-  Home as HomeIcon,
-  Shirt,
-  Sparkles,
-  Footprints,
-  Sparkle,
-  Gem,
-  ShieldCheck,
-  Wifi,
-  Printer,
-  Dumbbell,
-  Car,
-  BookOpen,
-  Luggage,
-  Baby,
-  Glasses,
-  UtensilsCrossed,
-  Dog,
   LayoutGrid,
   ChevronRight,
   Package,
@@ -44,40 +19,13 @@ import {
   Compass,
   ArrowUpRight,
 } from "lucide-react";
+import { getCategoryIcon } from "./categoryConfig";
 
 interface CategoryDetailViewProps {
   category: Category;
   initialProducts: Product[];
   sisterCategories?: Category[];
 }
-
-const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Smartphone,
-  Laptop,
-  Gamepad2,
-  Headphones,
-  Watch,
-  Camera,
-  Cpu,
-  Tv,
-  Home: HomeIcon,
-  Shirt,
-  Sparkles,
-  Footprints,
-  Sparkle,
-  Gem,
-  ShieldCheck,
-  Wifi,
-  Printer,
-  Dumbbell,
-  Car,
-  BookOpen,
-  Luggage,
-  Baby,
-  Glasses,
-  UtensilsCrossed,
-  Dog,
-};
 
 const heroFadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -93,7 +41,7 @@ export function CategoryDetailView({
   initialProducts,
   sisterCategories = [],
 }: CategoryDetailViewProps) {
-  const IconComponent = (category.icon && CATEGORY_ICON_MAP[category.icon]) || LayoutGrid;
+  const IconComponent = getCategoryIcon(category.icon);
   const subcategories = category.subcategories || [];
 
   return (
@@ -225,8 +173,7 @@ export function CategoryDetailView({
               {/* Rich Visual Cards Grid with Real Imagery & Ambient Hover Depth */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 {sisterCategories.map((sister) => {
-                  const SisterIcon =
-                    (sister.icon && CATEGORY_ICON_MAP[sister.icon]) || LayoutGrid;
+                  const SisterIcon = getCategoryIcon(sister.icon);
 
                   return (
                     <Link
