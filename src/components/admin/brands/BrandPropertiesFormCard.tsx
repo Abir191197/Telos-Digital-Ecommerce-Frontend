@@ -6,10 +6,9 @@ import { Sparkles } from "lucide-react";
 
 export interface BrandFormValues {
   name: string;
-  slug: string;
-  tag: string;
-  customTag: string;
-  featured: boolean;
+  tagline: string;
+  customTagline: string;
+  isFeaturedMarquee: boolean;
   description: string;
 }
 
@@ -19,7 +18,6 @@ interface BrandPropertiesFormCardProps {
   isSubmitting: boolean;
   submitLabel?: string;
   onFieldChange: <K extends keyof BrandFormValues>(key: K, value: BrandFormValues[K]) => void;
-  onNameChange: (name: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -29,7 +27,6 @@ export function BrandPropertiesFormCard({
   isSubmitting,
   submitLabel,
   onFieldChange,
-  onNameChange,
   onSubmit,
 }: BrandPropertiesFormCardProps) {
   return (
@@ -48,27 +45,8 @@ export function BrandPropertiesFormCard({
               required
               placeholder="e.g. Sony, Anker, Razer"
               value={values.name}
-              onChange={(e) => onNameChange(e.target.value)}
+              onChange={(e) => onFieldChange("name", e.target.value)}
               className="w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-foreground focus:border-amber-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-bold text-foreground">
-                Slug identifier
-              </label>
-              <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
-                Auto
-              </span>
-            </div>
-            <input
-              type="text"
-              readOnly
-              tabIndex={-1}
-              placeholder="auto-generated"
-              value={values.slug ? `/${values.slug}` : ""}
-              className="w-full rounded-xl border border-border/60 bg-muted/60 px-3.5 py-2.5 text-xs sm:text-sm font-mono text-muted-foreground cursor-not-allowed select-none focus:outline-none"
             />
           </div>
         </div>
@@ -83,11 +61,11 @@ export function BrandPropertiesFormCard({
                 key={t}
                 type="button"
                 onClick={() => {
-                  onFieldChange("tag", t);
-                  onFieldChange("customTag", "");
+                  onFieldChange("tagline", t);
+                  onFieldChange("customTagline", "");
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  values.tag === t && !values.customTag
+                  values.tagline === t && !values.customTagline
                     ? "bg-amber-500 text-zinc-950 shadow-xs"
                     : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
                 }`}
@@ -99,8 +77,8 @@ export function BrandPropertiesFormCard({
           <input
             type="text"
             placeholder="Or type custom badge tagline..."
-            value={values.customTag}
-            onChange={(e) => onFieldChange("customTag", e.target.value)}
+            value={values.customTagline}
+            onChange={(e) => onFieldChange("customTagline", e.target.value)}
             className="w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2 text-xs font-medium text-foreground focus:border-amber-500 focus:outline-none"
           />
         </div>
@@ -130,8 +108,8 @@ export function BrandPropertiesFormCard({
         <label className="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
-            checked={values.featured}
-            onChange={(e) => onFieldChange("featured", e.target.checked)}
+            checked={values.isFeaturedMarquee}
+            onChange={(e) => onFieldChange("isFeaturedMarquee", e.target.checked)}
             className="sr-only peer"
           />
           <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500" />

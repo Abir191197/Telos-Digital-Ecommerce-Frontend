@@ -11,35 +11,39 @@ import {
   Award,
   X,
 } from "lucide-react";
-import { useAdminStore } from "@/stores";
+import { useGetBrandsQuery, useDeleteBrandMutation } from "@/services/api/brands/brandApi";
 import type { Brand } from "@/types/ecommerce.types";
 import {
   ProductConfirmDialog,
   type ConfirmationDialogState,
 } from "@/components/admin/products/ProductConfirmDialog";
+import { PageLoader } from "@/components/common";
 import { BrandCardGrid } from "./BrandCardGrid";
 import { BrandDesktopTable } from "./BrandDesktopTable";
 import { BrandMobileList } from "./BrandMobileList";
 import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
 
 export function AdminBrandsListView() {
-  const { brands, products, deleteBrand } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
   const [viewMode, setViewMode] = useState<"card" | "table">("table");
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 8;
 
-  // Close three-dot action menu when clicking outside
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!target?.closest("[data-action-menu]")) {
-        setActiveMenuId(null);
-      }
-    };
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
-  }, []);
+  const { data, isLoading } = useGetBrandsQuery({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    searchTerm: searchTerm || undefined,
+    isFeaturedMarquee: filterFeatured === "featured" ? true : undefined,
+  });
+
+  const [deleteBrand] = useDeleteBrandMutation();
+
+  const brands = data?.data || [];
+  const totalItems = data?.meta?.total || 0;
+  const totalPages = data?.meta?.totalPage || 1;
+
 
   // Confirmation Dialog State
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
@@ -60,49 +64,38 @@ export function AdminBrandsListView() {
     }, 2800);
   };
 
-  const getProductCount = (brandName: string) => {
-    return products.filter(
-      (p) => p.brand.toLowerCase() === brandName.toLowerCase()
-    ).length;
-  };
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 8;
-
-  const filteredBrands = brands.filter((b) => {
-    const matchSearch =
-      b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchFeatured = filterFeatured === "all" || b.featured;
-    return matchSearch && matchFeatured;
-  });
-
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterFeatured]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredBrands.length / PAGE_SIZE));
-  const paginatedBrands = filteredBrands.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
 
   const handleDeleteRequest = (brand: Brand) => {
     setConfirmDialog({
       isOpen: true,
       title: "Delete Brand?",
-      message: `Are you sure you want to permanently delete "${brand.name}" (/brand/${brand.slug})? Linked products will remain in store.`,
+      message: `Are you sure you want to permanently delete "${brand.name}"? Linked products will remain in store.`,
       confirmLabel: "Delete Brand",
       variant: "danger",
-      onConfirm: () => {
-        deleteBrand(brand.id);
-        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-        showToast(`Brand "${brand.name}" removed successfully.`);
+      onConfirm: async () => {
+        try {
+          await deleteBrand(brand.id).unwrap();
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          showToast(`Brand "${brand.name}" removed successfully.`);
+        } catch (error) {
+          console.error("Failed to delete brand:", error);
+        }
       },
     });
   };
+
+  if (isLoading) {
+    return (
+      <PageLoader
+        title="Loading Brands..."
+        description="Fetching brand partnerships, logos, and marquee showcase settings."
+        badgeText="Brand Catalog"
+      />
+    );
+  }
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -123,7 +116,7 @@ export function AdminBrandsListView() {
             </span>
             <span className="text-xs text-muted-foreground">•</span>
             <span className="text-xs text-muted-foreground font-medium">
-              {brands.length} Brands Total
+              {totalItems} Brands Total
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mt-0.5">
@@ -132,7 +125,7 @@ export function AdminBrandsListView() {
         </div>
 
         <Link
-          href="/dashboard/brands?action=create"
+          href="/dashboard/brands/create"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
@@ -177,7 +170,7 @@ export function AdminBrandsListView() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                All ({brands.length})
+                All ({totalItems})
               </button>
               <button
                 type="button"
@@ -188,7 +181,7 @@ export function AdminBrandsListView() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Featured ({brands.filter((b) => b.featured).length})
+                Featured
               </button>
             </div>
 
@@ -226,7 +219,7 @@ export function AdminBrandsListView() {
       </div>
 
       {/* Empty State */}
-      {filteredBrands.length === 0 ? (
+      {brands.length === 0 ? (
         <div className="rounded-3xl border-none bg-card p-12 text-center space-y-3 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)]">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
             <Award className="h-6 w-6" />
@@ -236,7 +229,7 @@ export function AdminBrandsListView() {
             Try adjusting your search criteria or register a new brand partner.
           </p>
           <Link
-            href="/dashboard/brands?action=create"
+            href="/dashboard/brands/create"
             className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -248,8 +241,7 @@ export function AdminBrandsListView() {
           {/* Mobile view: Mobile List */}
           <div className="block md:hidden">
             <BrandMobileList
-              brands={paginatedBrands}
-              getProductCount={getProductCount}
+              brands={brands}
               onDelete={handleDeleteRequest}
             />
           </div>
@@ -258,28 +250,26 @@ export function AdminBrandsListView() {
           <div className="hidden md:block">
             {viewMode === "card" ? (
               <BrandCardGrid
-                brands={paginatedBrands}
-                getProductCount={getProductCount}
+                brands={brands}
                 onDelete={handleDeleteRequest}
               />
             ) : (
               <BrandDesktopTable
-                brands={paginatedBrands}
+                brands={brands}
                 activeMenuId={activeMenuId}
                 setActiveMenuId={setActiveMenuId}
-                getProductCount={getProductCount}
                 onDelete={handleDeleteRequest}
               />
             )}
           </div>
 
           {/* Pagination */}
-          {filteredBrands.length > 0 && (
+          {brands.length > 0 && (
             <CategoryPagination
               currentPage={currentPage}
               totalPages={totalPages}
               pageSize={PAGE_SIZE}
-              totalItems={filteredBrands.length}
+              totalItems={totalItems}
               onPageChange={setCurrentPage}
             />
           )}

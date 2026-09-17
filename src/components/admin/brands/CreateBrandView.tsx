@@ -3,9 +3,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useAdminStore } from "@/stores";
-import type { Brand } from "@/types/ecommerce.types";
+import { ArrowLeft } from "lucide-react";
+import {
+  useGetBrandByIdQuery,
+  useGetBrandBySlugQuery,
+  useCreateBrandMutation,
+  useUpdateBrandMutation,
+} from "@/services/api/brands/brandApi";
+import {
+  ConfirmationModal,
+  PageLoader,
+  type ConfirmationDialogState,
+} from "@/components/common";
 import {
   BrandLogoUploadCard,
   BrandPropertiesFormCard,
@@ -16,17 +25,6 @@ import {
 const MAX_FILE_SIZE_MB = 4;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-const PRESET_COLORS = [
-  "#000000",
-  "#1428A0",
-  "#4285F4",
-  "#E11D48",
-  "#D97706",
-  "#059669",
-  "#7C3AED",
-  "#0284C7",
-];
-
 const PRESET_TAGS = [
   "Official Flagship",
   "Authorized Hub",
@@ -35,88 +33,87 @@ const PRESET_TAGS = [
   "Direct Distributor",
 ];
 
+const EMPTY_FORM: BrandFormValues = {
+  name: "",
+  tagline: PRESET_TAGS[0],
+  customTagline: "",
+  isFeaturedMarquee: true,
+  description: "",
+};
+
 export interface CreateBrandViewProps {
   brandId?: string;
+  /** Slug-based lookup — uses the dedicated /brands/slug/:slug backend endpoint */
+  brandSlug?: string;
 }
 
-export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
+export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {}) {
   const router = useRouter();
-  const { brands, addBrand, updateBrand } = useAdminStore();
 
-  const editingBrand = React.useMemo(() => {
-    if (!brandId) return null;
-    return brands.find((b) => b.id === brandId || b.slug === brandId) || null;
-  }, [brandId, brands]);
+  // Slug-based lookup (preferred — clean URLs)
+  const { data: brandBySlug, isLoading: isLoadingBySlug } = useGetBrandBySlugQuery(
+    brandSlug || "",
+    { skip: !brandSlug }
+  );
+  // ID-based lookup (fallback / direct)
+  const { data: brandById, isLoading: isLoadingById } = useGetBrandByIdQuery(
+    brandId || "",
+    { skip: !brandId }
+  );
 
-  const isEditMode = Boolean(editingBrand);
+  const existingBrand = brandBySlug ?? brandById;
+  const isLoading = isLoadingBySlug || isLoadingById;
+  const resolvedId = existingBrand?.id ?? brandId;
+  const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation();
+  const [updateBrand, { isLoading: isUpdating }] = useUpdateBrandMutation();
+
+  const isEditMode = Boolean(brandSlug || brandId) && Boolean(existingBrand);
+  const isSubmitting = isCreating || isUpdating;
 
   // Form State
   const [formValues, setFormValues] = useState<BrandFormValues>(() => {
-    if (editingBrand) {
-      const isPreset = PRESET_TAGS.includes(editingBrand.tag);
+    if (existingBrand) {
+      const isPreset = PRESET_TAGS.includes(existingBrand.tagline || "");
       return {
-        name: editingBrand.name,
-        slug: editingBrand.slug,
-        tag: isPreset ? editingBrand.tag : PRESET_TAGS[0],
-        customTag: isPreset ? "" : editingBrand.tag,
-        featured: Boolean(editingBrand.featured),
-        description: editingBrand.description || "",
+        name: existingBrand.name,
+        tagline: isPreset ? existingBrand.tagline || "" : PRESET_TAGS[0],
+        customTagline: isPreset ? "" : existingBrand.tagline || "",
+        isFeaturedMarquee: Boolean(existingBrand.isFeaturedMarquee),
+        description: existingBrand.description || "",
       };
     }
-    return {
-      name: "",
-      slug: "",
-      tag: PRESET_TAGS[0],
-      customTag: "",
-      featured: true,
-      description: "",
-    };
+    return EMPTY_FORM;
   });
 
   // Logo / Asset State
-  const [logoUrl, setLogoUrl] = useState<string | null>(() => editingBrand?.logo || null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => existingBrand?.image || null);
   const [logoError, setLogoError] = useState<string | null>(null);
 
-  // Status
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successToast, setSuccessToast] = useState(false);
+  // Success Modal
+  const [confirmModal, setConfirmModal] = useState<ConfirmationDialogState | null>(null);
+  const [lastSavedName, setLastSavedName] = useState("");
 
-  // Sync state if editingBrand changes
+  // Sync state if existingBrand changes
   React.useEffect(() => {
-    if (editingBrand) {
-      const isPreset = PRESET_TAGS.includes(editingBrand.tag);
+    if (existingBrand) {
+      const isPreset = PRESET_TAGS.includes(existingBrand.tagline || "");
       setFormValues({
-        name: editingBrand.name,
-        slug: editingBrand.slug,
-        tag: isPreset ? editingBrand.tag : PRESET_TAGS[0],
-        customTag: isPreset ? "" : editingBrand.tag,
-        featured: Boolean(editingBrand.featured),
-        description: editingBrand.description || "",
+        name: existingBrand.name,
+        tagline: isPreset ? existingBrand.tagline || "" : PRESET_TAGS[0],
+        customTagline: isPreset ? "" : existingBrand.tagline || "",
+        isFeaturedMarquee: Boolean(existingBrand.isFeaturedMarquee),
+        description: existingBrand.description || "",
       });
-      setLogoUrl(editingBrand.logo || null);
+      setLogoUrl(existingBrand.image || null);
     }
-  }, [editingBrand]);
+  }, [existingBrand]);
 
   const handleFieldChange = <K extends keyof BrandFormValues>(
     key: K,
     value: BrandFormValues[K]
   ) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleNameChange = (val: string) => {
-    const generated = val
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_-]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    setFormValues((prev) => ({
-      ...prev,
-      name: val,
-      slug: generated,
-    }));
   };
 
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,70 +131,88 @@ export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
       return;
     }
 
+    setLogoFile(file);
     const preview = URL.createObjectURL(file);
     setLogoUrl(preview);
     e.target.value = "";
   };
 
   const handleRemoveLogo = () => {
+    setLogoFile(null);
     setLogoUrl(null);
     setLogoError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormValues(EMPTY_FORM);
+    setLogoFile(null);
+    setLogoUrl(null);
+    setLogoError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formValues.name.trim()) return;
 
-    setIsSubmitting(true);
+    const finalTagline = formValues.customTagline.trim() || formValues.tagline;
+    const savedName = formValues.name.trim();
 
-    const effectiveSlug =
-      formValues.slug.trim() ||
-      formValues.name
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/[\s_-]+/g, "-");
-
-    const finalTag = formValues.customTag.trim() || formValues.tag;
-
-    if (isEditMode && editingBrand) {
-      const updatedBrand: Partial<Brand> = {
-        name: formValues.name.trim(),
-        slug: effectiveSlug,
-        tag: finalTag,
-        icon: formValues.name.trim(),
-        featured: formValues.featured,
-        description: formValues.description.trim() || undefined,
-        logo: logoUrl || undefined,
-      };
-
-      updateBrand(editingBrand.id, updatedBrand);
-      setSuccessToast(true);
-
-      setTimeout(() => {
-        router.push("/dashboard/brands");
-      }, 900);
-      return;
-    }
-
-    const newBrand: Brand = {
-      id: `brand-${Date.now()}`,
-      name: formValues.name.trim(),
-      slug: effectiveSlug,
-      tag: finalTag,
-      icon: formValues.name.trim(),
-      featured: formValues.featured,
+    const payload = {
+      name: savedName,
+      tagline: finalTagline,
       description: formValues.description.trim() || undefined,
-      logo: logoUrl || undefined,
-      createdAt: new Date().toISOString(),
+      isFeaturedMarquee: formValues.isFeaturedMarquee,
+      image: logoFile || undefined,
     };
 
-    addBrand(newBrand);
-    setSuccessToast(true);
-
-    setTimeout(() => {
-      router.push("/dashboard/brands");
-    }, 900);
+    try {
+      if (isEditMode && resolvedId) {
+        await updateBrand({ id: resolvedId, payload }).unwrap();
+        setLastSavedName(savedName);
+        setConfirmModal({
+          isOpen: true,
+          title: "Brand Updated!",
+          message: `"${savedName}" has been successfully updated in your brand catalog.`,
+          confirmLabel: "View Brands",
+          cancelLabel: "Keep Editing",
+          variant: "success",
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.push("/dashboard/brands");
+          },
+        });
+      } else {
+        await createBrand(payload).unwrap();
+        setLastSavedName(savedName);
+        // Reset form immediately after successful creation
+        resetForm();
+        setConfirmModal({
+          isOpen: true,
+          title: "Brand Created!",
+          message: `"${savedName}" has been successfully registered to your brand catalog.`,
+          confirmLabel: "View Brands",
+          cancelLabel: "Create Another",
+          variant: "success",
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.push("/dashboard/brands");
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save brand:", error);
+    }
   };
+
+  if (brandId && isLoading) {
+    return (
+      <PageLoader
+        title="Loading Brand..."
+        description="Fetching brand details, logo, and partnership settings."
+        badgeText="Brand Catalog"
+      />
+    );
+  }
 
   return (
     <div className="w-full space-y-6 pb-24">
@@ -222,24 +237,11 @@ export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
               </span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              {isEditMode ? `Edit Brand: ${editingBrand?.name || "Brand"}` : "Create Brand"}
+              {isEditMode ? `Edit Brand: ${existingBrand?.name || "Brand"}` : "Create Brand"}
             </h1>
           </div>
         </div>
       </div>
-
-      {/* Success Toast Alert */}
-      {successToast && (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-          <div className="text-xs font-medium">
-            <strong className="font-bold">
-              {isEditMode ? "Brand Updated!" : "Brand Created!"}
-            </strong>{" "}
-            &ldquo;{formValues.name}&rdquo; {isEditMode ? "changes saved." : "registered to catalog."} Redirecting...
-          </div>
-        </div>
-      )}
 
       {/* Two-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -260,7 +262,6 @@ export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
               isSubmitting={isSubmitting}
               submitLabel={isEditMode ? "Save Brand Changes" : "Save & Register Brand"}
               onFieldChange={handleFieldChange}
-              onNameChange={handleNameChange}
               onSubmit={handleSubmit}
             />
           </form>
@@ -270,14 +271,24 @@ export function CreateBrandView({ brandId }: CreateBrandViewProps = {}) {
         <div className="lg:col-span-4 lg:sticky lg:top-20">
           <BrandLivePreviewCard
             name={formValues.name}
-            slug={formValues.slug}
-            tag={formValues.customTag.trim() || formValues.tag}
-            featured={formValues.featured}
+            tagline={formValues.customTagline.trim() || formValues.tagline}
+            isFeaturedMarquee={formValues.isFeaturedMarquee}
             description={formValues.description}
             logoUrl={logoUrl}
           />
         </div>
       </div>
+
+      {/* Success Confirmation Modal */}
+      {confirmModal && (
+        <ConfirmationModal
+          dialog={confirmModal}
+          onClose={() => {
+            setConfirmModal(null);
+            // "Create Another" — modal dismissed without going to list
+          }}
+        />
+      )}
     </div>
   );
 }

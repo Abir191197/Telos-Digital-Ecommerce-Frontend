@@ -213,7 +213,7 @@ export function OfficialBrandsSection() {
         {/* Scrolling Strip */}
         <div className="animate-marquee gap-3 sm:gap-4 select-none">
           {marqueeItems.map((brand, idx) => {
-            const Logo = LOGO_MAP[brand.icon] || AppleLogo;
+            const Logo = LOGO_MAP[brand.name] || AppleLogo;
             const matchingCount = products.filter(
               (p) => p.brand.toLowerCase() === brand.name.toLowerCase(),
             ).length;
@@ -244,7 +244,7 @@ export function OfficialBrandsSection() {
                     {brand.name}
                   </span>
                   <span className="text-[11px] font-medium text-muted-foreground/80">
-                    {matchingCount > 0 ? `${matchingCount} items` : brand.tag}
+                    {matchingCount > 0 ? `${matchingCount} items` : brand.tagline}
                   </span>
                 </div>
               </Link>

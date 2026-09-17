@@ -13,6 +13,7 @@ export const TAG_TYPES = [
   "Notification",
   "Dashboard",
   "Category",
+  "Brand",
 ] as const;
 
 export type TagType = (typeof TAG_TYPES)[number];

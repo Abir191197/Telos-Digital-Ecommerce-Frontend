@@ -313,13 +313,111 @@ When building or extending Admin interfaces (such as `/dashboard/products`):
   6. **Re-export Compatibility**:
      - `megaMenuConfig.ts` re-exports `CATEGORY_ICON_MAP`, `getCategoryIcon`, and `normalizeCategoryIconName` from `categoryConfig.ts` to maintain single-source-of-truth without breaking external imports.
 
+### H. Universal Rule — Slug-Based Admin Edit URLs (ALL Entities)
+- **Rule**: Every admin edit link must use the entity's **slug** in the URL — **never** a raw UUID or database ID.
+- **Pattern**: `/dashboard/[entity]/[slug]/edit`
+  - ✅ `/dashboard/categories/smartphones-tablets/edit`
+  - ✅ `/dashboard/brands/apple/edit`
+  - ❌ `/dashboard/categories/ce0e137b-ae50-4ad9-8124-1fb6b4380687/edit`
+  - ❌ `/dashboard/brands/edit/5ac9ea3d-bed1-4392-b7a4-dfa570bee0ca`
+
+#### Route File Convention
+Each entity's edit page lives at `src/app/(protected)/dashboard/[entity]/[slug]/edit/page.tsx`:
+```tsx
+// page.tsx
+export default async function EditEntityPage({ params }) {
+  const { slug } = await params;
+  return <CreateEntityView entitySlug={slug} />;
+}
+```
+
+#### Slug-to-ID Resolution (in the View component)
+**Preferred** — If the backend has a dedicated slug endpoint (e.g. `/brands/slug/:slug`):
+```tsx
+const { data: entity } = useGetEntityBySlugQuery(slug, { skip: !slug });
+const resolvedId = entity?.id;
+```
+**Fallback** — If no slug endpoint exists (e.g. categories), fetch all and find by slug:
+```tsx
+const { data: list } = useGetEntitiesQuery({ limit: 200 }, { skip: !slug });
+const resolvedId = list?.data.find(e => e.slug === slug)?.id;
+// Then pass resolvedId to useGetEntityByIdQuery
+```
+
+#### Link Generation Rule
+All "Edit" buttons/links in every admin view component must use the entity's slug:
+```tsx
+href={`/dashboard/categories/${category.slug}/edit`}
+href={`/dashboard/brands/${brand.slug}/edit`}
+// Future entities: href={`/dashboard/products/${product.slug}/edit`}
+```
+
+#### Next.js Constraint
+You **cannot** have two different dynamic segment names (e.g. `[id]` and `[slug]`) at the same path level. Use only `[slug]`. Delete any old `[id]` route folders to avoid the `'id' !== 'slug'` startup error.
+
+---
+
+### I. Admin Table Action Dropdown — Fixed-Position Portal Pattern
+- **Problem**: Table action dropdowns (`...` three-dot menus) inside `overflow-x-auto` containers get clipped, because CSS cannot mix `overflow-x: auto` and `overflow-y: visible` on the same element — both collapse to `auto`.
+- **Solution**: Use `position: fixed` with coordinates calculated from `getBoundingClientRect()` — the dropdown renders outside the overflow container entirely.
+- **Implementation** (see [`CategoryDesktopTable.tsx`](file:///c:/Telos Digital/Telos Digital Ecommerce Frontend/src/components/admin/categories/CategoryDesktopTable.tsx) and [`BrandDesktopTable.tsx`](file:///c:/Telos Digital/Telos Digital Ecommerce Frontend/src/components/admin/brands/BrandDesktopTable.tsx)):
+  ```tsx
+  const openMenu = (e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+    setActiveMenuId(id);
+  };
+
+  // Rendered as a sibling outside the table (not inside any td):
+  {activeMenuId && menuPos && (
+    <div ref={menuRef} style={{ position: "fixed", top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+      className="w-44 rounded-xl border border-border bg-popover p-1 shadow-xl ...">
+      {/* menu items */}
+    </div>
+  )}
+  ```
+- **Dismissal**: Two `useEffect` hooks inside the table component handle dismissal:
+  1. `mousedown` on document outside `menuRef` → closes menu.
+  2. `scroll` on `window` (capture phase) → closes menu so it doesn't float away from its trigger.
+- **Parent cleanup**: Remove any `data-action-menu` / `useEffect` outside-click handler from parent list views — the table owns its own dismissal.
+- **Rule**: Apply this same pattern to **every** new admin table that has a three-dot action menu inside a scrollable container.
+
+---
+
+### J. Brand Admin — Slug-Based URL Routing
+- **Edit URL**: `/dashboard/brands/[slug]/edit`
+- **Route**: [`src/app/(protected)/dashboard/brands/[slug]/edit/page.tsx`](file:///c:/Telos Digital/Telos Digital Ecommerce Frontend/src/app/(protected)/dashboard/brands/[slug]/edit/page.tsx) — passes `brandSlug` to `CreateBrandView`.
+- **Resolution**: Uses `useGetBrandBySlugQuery` directly (backend has `/brands/slug/:slug` endpoint) — no full list fetch needed.
+- **Links**: All edit links across `BrandDesktopTable`, `BrandMobileList`, `BrandCardGrid` use `brand.slug`.
+- **Old route deleted**: `edit/[id]` folder removed.
+
 ---
 
 ## 7. Guidelines for AI Sessions
 
+> **These are HARD RULES — not suggestions. Apply them to every new feature, component, or page.**
+
 1. **Check Existing Components First**: Before building new primitives, check `src/components/common/` to reuse existing components (`Button`, `Input`, `Table`, `Loader`, `EmptyState`).
-2. **Keep UI Primitives Clean**: Build UI components using native React + Tailwind CSS.
-3. **Keep `page.tsx` Focused**: Place business logic, state handling, and detailed layouts inside `features/<domain>/` or domain components, and keep route `page.tsx` as lightweight containers.
-4. **Centralize Routes**: Always reference `ROUTES` from `@/constants`.
-5. **Always Verify**: Ensure all TypeScript types and builds pass (`npx tsc --noEmit` or `npm run build`) without errors.
-6. **Maintain this Document**: If you create a new root folder, feature module, or architectural pattern, update this file so future AI sessions stay synchronized.
+
+2. **🔴 ALWAYS use `PageLoader` for loading states** — Never write plain loading text or a bare `<div>Loading...</div>`. Every data-fetching view must use `PageLoader` from `@/components/common` for its loading state:
+   ```tsx
+   import { PageLoader } from "@/components/common";
+   if (isLoading) return <PageLoader title="Loading X..." description="..." badgeText="Section" />;
+   ```
+   See §6.F for full design specs and `loading.tsx` conventions.
+
+3. **🔴 ALWAYS use slug-based edit URLs** — Admin edit links must never expose UUIDs or database IDs in the URL. Use `entity.slug` in `href` and a `[slug]/edit` route with slug-to-ID resolution in the view component. See §6.H for the full pattern.
+
+4. **🔴 ALWAYS use `ConfirmationModal` for create/delete feedback** — Never use inline toast banners or redirects without a modal for create/update success or delete confirmation. Import from `@/components/common`. See §6.E for variants.
+
+5. **🔴 ALWAYS use the fixed-position portal pattern for table dropdowns** — Any three-dot menu inside an `overflow-x-auto` table must render via `position: fixed` + `getBoundingClientRect()`. See §6.I.
+
+6. **Keep UI Primitives Clean**: Build UI components using native React + Tailwind CSS.
+
+7. **Keep `page.tsx` Focused**: Place business logic, state handling, and detailed layouts inside `features/<domain>/` or domain components, and keep route `page.tsx` as lightweight containers.
+
+8. **Centralize Routes**: Always reference `ROUTES` from `@/constants`.
+
+9. **Always Verify**: Ensure all TypeScript types and builds pass (`npx tsc --noEmit` or `npm run build`) without errors.
+
+10. **Maintain this Document**: If you create a new root folder, feature module, or architectural pattern, update this file so future AI sessions stay synchronized.

@@ -86,7 +86,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         title: "Brands",
         icon: Award,
         children: [
-          { title: "Create Brand", href: "/dashboard/brands?action=create" },
+          { title: "Create Brand", href: "/dashboard/brands/create" },
           { title: "Manage brand", href: "/dashboard/brands" },
         ],
       },

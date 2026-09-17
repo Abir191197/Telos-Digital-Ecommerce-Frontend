@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Order, OrderStatus } from "@/types/order.types";
-import type { Product, Category, Brand } from "@/types/ecommerce.types";
+import type { Product, Category } from "@/types/ecommerce.types";
 import { DEMO_ORDERS } from "@/data/mock-user";
 import { RICH_DEMO_ORDERS } from "@/data/rich-orders";
 import productsData from "@/data/products.json";
 import categoriesData from "@/data/categories.json";
-import brandsData from "@/data/brands.json";
 
 export interface AdminCustomer {
   id: string;
@@ -365,7 +364,6 @@ interface AdminState {
   orders: Order[];
   products: Product[];
   categories: Category[];
-  brands: Brand[];
   customers: AdminCustomer[];
   transactions: AdminPaymentTransaction[];
   reviews: AdminReview[];
@@ -381,9 +379,6 @@ interface AdminActions {
   addCategory: (category: Category) => void;
   updateCategory: (categoryId: string, updates: Partial<Category>) => void;
   deleteCategory: (categoryId: string) => void;
-  addBrand: (brand: Brand) => void;
-  updateBrand: (brandId: string, updates: Partial<Brand>) => void;
-  deleteBrand: (brandId: string) => void;
   verifyTransaction: (transactionId: string, status: "verified" | "rejected") => void;
   toggleReviewVisibility: (reviewId: string, status?: "published" | "hidden" | "flagged") => void;
   deleteReview: (reviewId: string) => void;
@@ -397,7 +392,6 @@ export const useAdminStore = create<AdminStore>()(
       orders: RICH_DEMO_ORDERS,
       products: (productsData as unknown as Product[]).slice(0, 30),
       categories: (categoriesData as unknown as Category[]),
-      brands: (brandsData as unknown as Brand[]),
       customers: INITIAL_CUSTOMERS,
       transactions: INITIAL_TRANSACTIONS,
       reviews: INITIAL_ADMIN_REVIEWS,
@@ -473,26 +467,6 @@ export const useAdminStore = create<AdminStore>()(
       deleteCategory: (categoryId) => {
         set((state) => ({
           categories: state.categories.filter((c) => c.id !== categoryId),
-        }));
-      },
-
-      addBrand: (newBrand) => {
-        set((state) => ({
-          brands: [newBrand, ...state.brands],
-        }));
-      },
-
-      updateBrand: (brandId, updates) => {
-        set((state) => ({
-          brands: state.brands.map((b) =>
-            b.id === brandId ? { ...b, ...updates } : b
-          ),
-        }));
-      },
-
-      deleteBrand: (brandId) => {
-        set((state) => ({
-          brands: state.brands.filter((b) => b.id !== brandId),
         }));
       },
 

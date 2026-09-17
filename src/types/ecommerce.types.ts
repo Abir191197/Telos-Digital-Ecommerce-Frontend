@@ -70,12 +70,12 @@ export interface Brand {
   id: string;
   name: string;
   slug: string;
-  tag: string;
-  icon: string;
-  color?: string;
-  featured?: boolean;
-  description?: string;
-  website?: string;
-  logo?: string;
+  tagline?: string | null;
+  description?: string | null;
+  image?: string | null;
+  imageKey?: string | null;
+  isActive?: boolean;
+  isFeaturedMarquee?: boolean;
   createdAt?: string;
+  updatedAt?: string;
 }

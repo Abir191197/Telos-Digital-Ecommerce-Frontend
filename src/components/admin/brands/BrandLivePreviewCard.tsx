@@ -6,18 +6,16 @@ import { Tag, Award } from "lucide-react";
 
 interface BrandLivePreviewCardProps {
   name: string;
-  slug: string;
-  tag: string;
-  featured: boolean;
+  tagline: string;
+  isFeaturedMarquee: boolean;
   description: string;
   logoUrl: string | null;
 }
 
 export function BrandLivePreviewCard({
   name,
-  slug,
-  tag,
-  featured,
+  tagline,
+  isFeaturedMarquee,
   description,
   logoUrl,
 }: BrandLivePreviewCardProps) {
@@ -48,7 +46,7 @@ export function BrandLivePreviewCard({
           </div>
 
           <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            {tag}
+            {tagline}
           </span>
         </div>
 
@@ -64,8 +62,8 @@ export function BrandLivePreviewCard({
 
         {/* Meta tags */}
         <div className="mt-5 pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
-          <span>/{slug || "slug-url"}</span>
-          {featured && (
+          <span>{name || "Brand Name"}</span>
+          {isFeaturedMarquee && (
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               ★ Featured
             </span>
