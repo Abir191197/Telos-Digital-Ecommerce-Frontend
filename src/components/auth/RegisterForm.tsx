@@ -95,7 +95,7 @@ export function RegisterForm() {
         password,
       }).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      router.push(ROUTES.PROFILE);
+      router.push(ROUTES.ACCOUNT);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
@@ -106,7 +106,7 @@ export function RegisterForm() {
       setErrorMessage("");
       const response = await login(DEMO_CUSTOMER).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      router.push(ROUTES.PROFILE);
+      router.push(ROUTES.ACCOUNT);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }

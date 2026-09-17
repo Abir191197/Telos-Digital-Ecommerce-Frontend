@@ -25,7 +25,7 @@ const navItems = [
   { title: "Tracking", href: ROUTES.TRACKING, icon: MapPin },
   { title: "Reports", href: ROUTES.REPORTS, icon: BarChart3 },
   { title: "Notifications", href: ROUTES.NOTIFICATIONS, icon: Bell },
-  { title: "Profile", href: ROUTES.PROFILE, icon: User },
+  { title: "Profile", href: ROUTES.ADMIN_PROFILE, icon: User },
   { title: "Settings", href: ROUTES.SETTINGS, icon: Settings },
 ];
 

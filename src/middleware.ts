@@ -7,6 +7,7 @@ import type { NextRequest } from "next/server";
 
 // Routes that require authentication
 const protectedPaths = [
+  "/account",
   "/cart",
   "/checkout",
   "/dashboard",
@@ -14,7 +15,6 @@ const protectedPaths = [
   "/payments",
   "/reports",
   "/notifications",
-  "/profile",
   "/settings",
 ];
 
@@ -30,6 +30,11 @@ const authPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Redirect legacy /profile to /account
+  if (pathname === "/profile" || pathname.startsWith("/profile/")) {
+    return NextResponse.redirect(new URL("/account", request.url));
+  }
 
   // TODO: Replace with actual token check (cookie-based or header-based)
   // For now, this is a placeholder that allows all requests through.

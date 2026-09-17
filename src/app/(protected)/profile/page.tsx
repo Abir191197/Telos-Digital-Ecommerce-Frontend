@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import { CustomerAccountHub } from "@/components/account";
+import { redirect } from "next/navigation";
+import { ROUTES } from "@/constants";
 
-export const metadata: Metadata = {
-  title: "My Account & Orders | Telos Cart",
-  description: "View order history, track live shipments, and manage delivery addresses.",
-};
-
-export default function ProfilePage() {
-  return <CustomerAccountHub />;
+export default function ProfileRedirectPage() {
+  redirect(ROUTES.ACCOUNT);
 }
 

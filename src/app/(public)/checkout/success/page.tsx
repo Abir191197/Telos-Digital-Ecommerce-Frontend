@@ -293,7 +293,7 @@ export default function CheckoutSuccessPage() {
           </Link>
 
           <Link
-            href={ROUTES.PROFILE}
+            href={`${ROUTES.ACCOUNT}?tab=orders`}
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-border/80 bg-card hover:bg-muted text-foreground text-xs sm:text-sm font-bold transition-all"
           >
             <span>View All Orders in Account</span>

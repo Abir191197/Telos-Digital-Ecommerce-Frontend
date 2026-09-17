@@ -100,7 +100,7 @@ export function LoginForm() {
           : { phone: identifier, password },
       ).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      router.push(getRedirectUrl(ROUTES.PROFILE));
+      router.push(getRedirectUrl(ROUTES.ACCOUNT));
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
