@@ -11,3 +11,5 @@ export * from "./CreateProductView";
 export * from "./ProductPhotosUploadCard";
 export * from "./ProductLivePreviewCard";
 export * from "./ProductDetailsFormCard";
+
+export * from "./RichTextEditor";

@@ -44,6 +44,11 @@ export interface Product {
   categoryId: string;
   categorySlug: string;
   categoryName: string;
+  subCategoryId?: string;
+  subCategoryName?: string;
+  subCategorySlug?: string;
+  brandId?: string;
+  costPrice?: number;
   price: number;
   originalPrice?: number;
   discountPercentage?: number;
@@ -64,6 +69,7 @@ export interface Product {
   variants?: ProductVariant[];
   tags: string[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Brand {

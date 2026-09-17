@@ -71,7 +71,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         icon: Package,
         children: [
           { title: "Manage products", href: "/dashboard/products" },
-          { title: "Create Product", href: "/dashboard/products?action=create" },
+          { title: "Create Product", href: "/dashboard/products/create" },
         ],
       },
       {

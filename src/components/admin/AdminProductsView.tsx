@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAdminStore } from "@/stores";
 import { Product } from "@/types/ecommerce.types";
 import {
   Search,
@@ -16,28 +15,29 @@ import {
   AlertOctagon,
   Layers,
   X,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageLoader } from "@/components/common";
 import { KpiCard } from "./dashboard/KpiCard";
+import {
+  useGetAdminProductsQuery,
+  useDeleteProductMutation,
+} from "@/services/api/products/productApi";
 import {
   ConfirmationDialogState,
   ProductConfirmDialog,
   ProductManageModal,
-  ProductFormModal,
   ProductMobileFilterModal,
   ProductFloatingFilterFab,
   ProductFloatingActionPill,
   ProductDesktopTable,
   ProductCardItem,
   ProductFilterDock,
-  ProductFormValues,
 } from "./products";
 
 export function AdminProductsView() {
   const router = useRouter();
-  const { products, addProduct, deleteProduct, updateProduct } =
-    useAdminStore();
-
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -53,9 +53,7 @@ export function AdminProductsView() {
   // Custom Thematic Dropdown States
   const [openDropdown, setOpenDropdown] = useState<"category" | "stock" | "sort" | null>(null);
 
-  // Modals & Confirmation Popups
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  // Confirmation Popups
   const [confirmDialog, setConfirmDialog] = useState<ConfirmationDialogState>({
     isOpen: false,
     title: "",
@@ -65,35 +63,35 @@ export function AdminProductsView() {
     onConfirm: () => {},
   });
 
+  // Toast Notification
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // New product form state
-  const [formData, setFormData] = useState<ProductFormValues>({
-    title: "",
-    brand: "Apple",
-    categorySlug: "smartphones",
-    shortDesc: "",
-    price: "",
-    originalPrice: "",
-    stock: 10,
-    badge: "",
-    warranty: "",
-    hasVoucher: false,
-    voucherType: "percentage",
-    voucherValue: "",
-    voucherCode: "",
-    showVoucherOnCard: false,
-    sku: "",
-    description: "",
-    isFeatured: false,
-    isFlashDeal: false,
+  // Real Backend Data
+  const {
+    data: adminProductsResponse,
+    isLoading: isProductsLoading,
+    refetch: refetchProducts,
+  } = useGetAdminProductsQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    searchTerm: searchQuery || undefined,
   });
 
-  const [formImages, setFormImages] = useState<string[]>([
-    "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80",
-  ]);
+  const [deleteProductMutation] = useDeleteProductMutation();
+
+  // Resolved entities
+  const products: Product[] = adminProductsResponse?.data || [];
+  const backendTotal = adminProductsResponse?.meta?.total || products.length;
 
   // Mobile Manage Sheet/Modal Product State
   const [managingProduct, setManagingProduct] = useState<Product | null>(null);
@@ -167,210 +165,141 @@ export function AdminProductsView() {
 
   // KPI Calculations
   const metrics = useMemo(() => {
-    const total = products.length;
+    const total = backendTotal;
     const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 5).length;
     const outOfStock = products.filter((p) => p.stock <= 0).length;
     const activeCategories = new Set(
       products.map((p) => p.categoryName).filter(Boolean)
     ).size;
     return { total, lowStock, outOfStock, activeCategories };
-  }, [products]);
+  }, [products, backendTotal]);
 
   const categories = useMemo(() => {
-    return Array.from(
-      new Set(products.map((p) => p.categoryName).filter(Boolean))
-    );
+    const unique = new Set<string>();
+    products.forEach((p) => {
+      if (p.categoryName) unique.add(p.categoryName);
+    });
+    return Array.from(unique);
   }, [products]);
 
-  // Filtering & Sorting
+  // Client Filter & Sort Logic
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
-        const matchesCat =
-          categoryFilter === "all" || p.categoryName === categoryFilter;
+        const matchesCategory =
+          categoryFilter === "all" ||
+          p.categoryName?.toLowerCase() === categoryFilter.toLowerCase() ||
+          p.categorySlug === categoryFilter;
 
-        let matchesStock = true;
-        if (stockStatusFilter === "in-stock") matchesStock = p.stock > 5;
-        if (stockStatusFilter === "low-stock")
-          matchesStock = p.stock > 0 && p.stock <= 5;
-        if (stockStatusFilter === "out-stock") matchesStock = p.stock <= 0;
+        const matchesStock =
+          stockStatusFilter === "all" ||
+          (stockStatusFilter === "in-stock" && p.stock > 5) ||
+          (stockStatusFilter === "low-stock" && p.stock > 0 && p.stock <= 5) ||
+          (stockStatusFilter === "out-of-stock" && p.stock <= 0);
 
-        const q = searchQuery.toLowerCase().trim();
-        const matchesSearch =
-          !q ||
-          p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.sku?.toLowerCase().includes(q);
-
-        return matchesCat && matchesStock && matchesSearch;
+        return matchesCategory && matchesStock;
       })
       .sort((a, b) => {
+        if (sortBy === "name") return a.name.localeCompare(b.name);
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
         if (sortBy === "stock-asc") return a.stock - b.stock;
         if (sortBy === "stock-desc") return b.stock - a.stock;
-        return a.name.localeCompare(b.name);
+        return 0;
       });
-  }, [products, categoryFilter, stockStatusFilter, searchQuery, sortBy]);
+  }, [products, categoryFilter, stockStatusFilter, sortBy]);
 
-  // Paginated View
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+  // Pagination Slice
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredProducts.slice(start, start + itemsPerPage);
   }, [filteredProducts, currentPage, itemsPerPage]);
 
-  const handleSelectAll = () => {
-    if (selectedIds.length === paginatedProducts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(paginatedProducts.map((p) => p.id));
-    }
-  };
-
+  // Selection Handlers
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
-  // Warning Confirmation for Single Delete
+  const handleSelectAll = () => {
+    if (selectedIds.length === paginatedProducts.length && paginatedProducts.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(paginatedProducts.map((p) => p.id));
+    }
+  };
+
+  // Delete Action Handlers
   const requestDeleteProduct = (product: Product) => {
     setActiveMenuId(null);
     setConfirmDialog({
       isOpen: true,
-      title: "Delete Product Listing",
-      message: `Are you sure you want to permanently delete "${product.name}"? This action cannot be undone and will remove it from all storefront listings.`,
-      confirmLabel: "Yes, Delete Product",
+      title: "Confirm Deletion",
+      message: `Are you sure you want to permanently delete "${product.name}"? This action cannot be undone.`,
+      confirmLabel: "Delete Product",
       variant: "danger",
-      onConfirm: () => {
-        deleteProduct(product.id);
-        setSelectedIds((prev) => prev.filter((id) => id !== product.id));
+      onConfirm: async () => {
+        try {
+          await deleteProductMutation(product.id).unwrap();
+          showToast(`"${product.name}" deleted successfully.`);
+          refetchProducts();
+        } catch (err: any) {
+          showToast(err?.data?.message || "Failed to delete product.");
+        }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
     });
   };
 
-  // Warning Confirmation for Bulk Delete
   const requestBulkDelete = () => {
-    if (selectedIds.length === 0) return;
     setConfirmDialog({
       isOpen: true,
-      title: "Delete Selected Products",
-      message: `You are about to permanently delete ${selectedIds.length} product(s). This will immediately purge their catalog listings and inventory records.`,
+      title: `Delete ${selectedIds.length} Selected Products?`,
+      message: `Are you sure you want to delete ${selectedIds.length} products? This will archive them immediately.`,
       confirmLabel: `Delete ${selectedIds.length} Items`,
       variant: "danger",
-      onConfirm: () => {
-        selectedIds.forEach((id) => deleteProduct(id));
-        setSelectedIds([]);
+      onConfirm: async () => {
+        try {
+          await Promise.all(selectedIds.map((id) => deleteProductMutation(id).unwrap()));
+          showToast(`${selectedIds.length} products deleted successfully.`);
+          setSelectedIds([]);
+          refetchProducts();
+        } catch (err: any) {
+          showToast(err?.data?.message || "Failed to complete bulk deletion.");
+        }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
     });
   };
 
-  const handleOpenAddModal = () => {
-    router.push("/dashboard/products?action=create");
+  // Clean Route Navigation to dedicated editor pages (NO MODALS)
+  const handleOpenEdit = (product: Product) => {
+    router.push(`/dashboard/products/${product.slug || product.id}/edit`);
   };
 
-  const handleOpenEditModal = (product: Product) => {
-    setActiveMenuId(null);
-    router.push(`/dashboard/products?action=edit&id=${product.id}`);
-  };
-
-  // Warning Popup on Form Save
-  const handleSaveProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title || !formData.price || Number(formData.price) <= 0) return;
-
-    const categoryName = formData.categorySlug.replace(/-/g, " ");
-    const thumbnail = formImages[0] || "";
-
-    if (editingProduct) {
-      setConfirmDialog({
-        isOpen: true,
-        title: "Save Product Updates",
-        message: `Confirm updating "${formData.title}"? Price will be set to ৳${Number(
-          formData.price
-        ).toLocaleString()} with stock set to ${formData.stock} units.`,
-        confirmLabel: "Save Changes",
-        variant: "primary",
-        onConfirm: () => {
-          updateProduct(editingProduct.id, {
-            name: formData.title,
-            categoryName: categoryName,
-            categorySlug: formData.categorySlug,
-            price: Number(formData.price),
-            originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
-            stock: Number(formData.stock),
-            inStock: Number(formData.stock) > 0,
-            brand: formData.brand,
-            sku: formData.sku,
-            thumbnail: thumbnail,
-            images: formImages,
-            shortDescription: formData.shortDesc,
-            description: formData.description,
-            isFeatured: formData.isFeatured,
-            isFlashDeal: formData.isFlashDeal,
-            specifications: {
-              ...(editingProduct.specifications || {}),
-              Brand: formData.brand,
-              Warranty: formData.warranty || "1 Year Brand Warranty",
-            }
-          });
-          setShowAddModal(false);
-          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-        },
-      });
-    } else {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-
-      const created: Product = {
-        id: `prod-${Date.now()}`,
-        slug: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.title,
-        shortDescription: formData.shortDesc || `Authentic ${formData.title} with official brand warranty.`,
-        description: formData.description || `Premium authentic ${formData.title} with verified warranty.`,
-        categoryId: "cat-general",
-        categorySlug: formData.categorySlug,
-        categoryName: categoryName,
-        price: Number(formData.price),
-        originalPrice: formData.originalPrice ? Number(formData.originalPrice) : Number(formData.price),
-        discountPercentage: 0,
-        currency: "BDT",
-        rating: 4.9,
-        reviewCount: 1,
-        stock: Number(formData.stock),
-        inStock: Number(formData.stock) > 0,
-        isFeatured: formData.isFeatured,
-        isFlashDeal: formData.isFlashDeal,
-        isNewArrival: true,
-        images: formImages,
-        thumbnail: thumbnail,
-        brand: formData.brand,
-        sku:
-          formData.sku ||
-          `TELOS-${formData.brand.slice(0, 3).toUpperCase()}-${Math.floor(
-            1000 + Math.random() * 9000
-          )}`,
-        specifications: {
-          Brand: formData.brand,
-          Warranty: formData.warranty || "1 Year Brand Warranty",
-        },
-        tags: formData.badge ? [formData.badge.toLowerCase()] : ["official-store", "tech"],
-        createdAt: new Date().toISOString(),
-      };
-
-      addProduct(created);
-      setShowAddModal(false);
-    }
-  };
+  if (isProductsLoading && products.length === 0) {
+    return (
+      <PageLoader
+        title="Loading Products..."
+        description="Fetching product inventory, stock levels, and pricing data from warehouse."
+        badgeText="Inventory Catalog"
+      />
+    );
+  }
 
   return (
     <div className="w-full space-y-5 sm:space-y-6">
-      {/* ── Mobile Dedicated Search Bar & Add Action ── */}
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[10000] flex items-center gap-2.5 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 animate-in slide-in-from-bottom-5 duration-200">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          <p className="text-xs font-bold">{toastMessage}</p>
+        </div>
+      )}
+
+      {/* Mobile Dedicated Search Bar & Add Action */}
       <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 sm:-mt-6 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -395,16 +324,16 @@ export function AdminProductsView() {
           )}
         </div>
         <Link
-          href="/dashboard/products?action=create"
-          className="h-10 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shrink-0 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all"
-          title="Add New Product"
+          href="/dashboard/products/create"
+          className="h-10 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shrink-0 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+          title="Create New Product"
         >
           <Plus className="h-4 w-4" />
           <span>Add</span>
         </Link>
       </div>
 
-      {/* ── Top Header Banner (Hidden on mobile, desktop only) ── */}
+      {/* Top Header Banner */}
       <div className="hidden sm:block relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/70 bg-gradient-to-br from-card via-card/95 to-muted/20 p-4 sm:p-7 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -414,7 +343,7 @@ export function AdminProductsView() {
                 Catalog &amp; Warehouse
               </span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
               Manage Products
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
@@ -424,23 +353,23 @@ export function AdminProductsView() {
 
           <div className="flex items-center gap-2.5 flex-wrap self-stretch sm:self-auto">
             <Link
-              href="/dashboard/products?action=create"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+              href="/dashboard/products/create"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>Add New Product</span>
+              <span>Create Product</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* ── 4 Essential Clean KPI Cards (Horizontal Swipe Carousel on mobile, Grid on desktop) ── */}
+      {/* 4 Essential KPI Cards */}
       <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-2 sm:pb-0 sm:mx-0 sm:px-0 sm:overflow-visible sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
           <KpiCard
-            title="Catalog SKUs"
+            title="Total Products"
             rawValue={metrics.total}
-            change="Total items"
+            change="Catalog items"
             isPositive={true}
             icon={Boxes}
           />
@@ -456,7 +385,7 @@ export function AdminProductsView() {
         </div>
         <div className="shrink-0 w-[68vw] max-w-[260px] snap-start sm:w-auto sm:max-w-none sm:h-full">
           <KpiCard
-            title="Low Stock (≤5)"
+            title="Low Stock (<=5)"
             rawValue={metrics.lowStock}
             change={metrics.lowStock > 0 ? "Restock needed" : "Healthy levels"}
             isPositive={metrics.lowStock === 0}
@@ -474,7 +403,7 @@ export function AdminProductsView() {
         </div>
       </div>
 
-      {/* ── Desktop Filter, Search & View Toggle Dock ── */}
+      {/* Desktop Filter, Search & View Toggle Dock */}
       <ProductFilterDock
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -492,7 +421,7 @@ export function AdminProductsView() {
         onResetPage={() => setCurrentPage(1)}
       />
 
-      {/* ── PRODUCTS CONTENT: Mobile & Grid Views ── */}
+      {/* Products Content: Grid View */}
       <div
         className={cn(
           "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4",
@@ -516,7 +445,7 @@ export function AdminProductsView() {
               isMenuOpen={activeMenuId === prod.id}
               onToggleSelect={handleToggleSelect}
               onToggleMenu={(id) => setActiveMenuId(activeMenuId === id ? null : id)}
-              onOpenEdit={handleOpenEditModal}
+              onOpenEdit={handleOpenEdit}
               onRequestDelete={requestDeleteProduct}
               onManageMobile={setManagingProduct}
             />
@@ -524,7 +453,7 @@ export function AdminProductsView() {
         )}
       </div>
 
-      {/* ── TABLE VIEW: Full Desktop Table (Rendered if viewMode === 'table') ── */}
+      {/* Table View */}
       {viewMode === "table" && (
         <ProductDesktopTable
           products={paginatedProducts}
@@ -533,12 +462,12 @@ export function AdminProductsView() {
           setActiveMenuId={setActiveMenuId}
           onToggleSelect={handleToggleSelect}
           onSelectAll={handleSelectAll}
-          onOpenEdit={handleOpenEditModal}
+          onOpenEdit={handleOpenEdit}
           onRequestDelete={requestDeleteProduct}
         />
       )}
 
-      {/* Desktop Pagination Strip (when in table mode) */}
+      {/* Desktop Pagination Strip */}
       {viewMode === "table" && (
         <div className="hidden md:flex p-4 border border-border/40 bg-card rounded-2xl items-center justify-between text-xs text-muted-foreground">
           <p>
@@ -570,7 +499,7 @@ export function AdminProductsView() {
         </div>
       )}
 
-      {/* Mobile Pagination (Always shown on mobile or card view) */}
+      {/* Mobile Pagination */}
       <div
         className={cn(
           "p-4 border border-border/60 bg-card rounded-2xl flex items-center justify-between text-xs text-muted-foreground",
@@ -602,28 +531,28 @@ export function AdminProductsView() {
         </div>
       </div>
 
-      {/* ── Confirmation Modal ── */}
+      {/* Confirmation Modal */}
       <ProductConfirmDialog
         dialog={confirmDialog}
         onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
       />
 
-      {/* ── Mobile Product Management Sheet/Modal ── */}
+      {/* Mobile Product Management Sheet/Modal */}
       <ProductManageModal
         product={managingProduct}
         onClose={() => setManagingProduct(null)}
-        onEdit={handleOpenEditModal}
+        onEdit={handleOpenEdit}
         onDelete={requestDeleteProduct}
       />
 
-      {/* ── Mobile Floating Bulk Action Pill ── */}
+      {/* Mobile Floating Bulk Action Pill */}
       <ProductFloatingActionPill
         selectedCount={selectedIds.length}
         onCancel={() => setSelectedIds([])}
         onDelete={requestBulkDelete}
       />
 
-      {/* ── Mobile Draggable Floating Filter Button ── */}
+      {/* Mobile Draggable Floating Filter Button */}
       <ProductFloatingFilterFab
         position={fabPosition}
         onPointerDown={handlePointerDown}
@@ -632,7 +561,7 @@ export function AdminProductsView() {
         isFiltered={categoryFilter !== "all" || stockStatusFilter !== "all" || sortBy !== "name"}
       />
 
-      {/* ── Mobile Fullscreen Filters Modal ── */}
+      {/* Mobile Fullscreen Filters Modal */}
       <ProductMobileFilterModal
         isOpen={showMobileFilters}
         onClose={() => setShowMobileFilters(false)}

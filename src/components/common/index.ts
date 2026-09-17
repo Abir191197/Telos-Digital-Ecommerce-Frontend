@@ -30,3 +30,6 @@ export type {
   ConfirmationModalProps,
 } from "./ConfirmationModal";
 
+
+export { ThematicSelect } from "./ThematicSelect";
+export type { ThematicSelectOption, ThematicSelectProps } from "./ThematicSelect";

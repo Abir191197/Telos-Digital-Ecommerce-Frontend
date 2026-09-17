@@ -564,7 +564,7 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Updated Phone:</span>
                 <span className="font-bold font-mono text-foreground">
-                  {profilePhone || "None"}
+                  {user?.phone || "None"}
                 </span>
               </div>
             </div>

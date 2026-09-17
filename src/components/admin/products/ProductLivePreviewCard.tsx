@@ -9,11 +9,11 @@ interface ProductLivePreviewCardProps {
   categoryName: string;
   shortDesc: string;
   badge: string;
-  warranty: string;
+  warranty?: string;
   stock: number;
   numericPrice: number;
-  numericOriginal: number;
-  discountPercent: number;
+  numericOriginal?: number;
+  discountPercent?: number;
   previewThumbnail: string;
   hasImages: boolean;
   hasVoucher: boolean;
@@ -33,7 +33,7 @@ export function ProductLivePreviewCard({
   stock,
   numericPrice,
   numericOriginal,
-  discountPercent,
+  discountPercent = 0,
   previewThumbnail,
   hasImages,
   hasVoucher,
@@ -109,8 +109,8 @@ export function ProductLivePreviewCard({
               5.0
             </span>
           </div>
-          <span className="text-[10px] text-muted-foreground">(New SKU)</span>
-          <span className="text-muted-foreground/60">·</span>
+          <span className="text-[10px] text-muted-foreground">(Catalog Item)</span>
+          <span className="text-muted-foreground/60">•</span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
             {stock > 0 ? `In Stock (${stock})` : "Out of Stock"}
           </span>
@@ -122,16 +122,22 @@ export function ProductLivePreviewCard({
             <span className="text-base font-extrabold text-foreground">
               ৳{numericPrice > 0 ? numericPrice.toLocaleString() : "0"}
             </span>
-            {numericOriginal > numericPrice && (
+            {Boolean(numericOriginal && numericOriginal > numericPrice) && (
               <span className="ml-2 text-xs line-through text-muted-foreground">
-                ৳{numericOriginal.toLocaleString()}
+                ৳{numericOriginal?.toLocaleString()}
               </span>
             )}
           </div>
 
-          <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
-            {warranty ? warranty.split(" ")[0] : "1"} Yr Warranty
-          </span>
+          {warranty ? (
+            <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+              {warranty.split(" ")[0]} Yr Warranty
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+              Official Item
+            </span>
+          )}
         </div>
 
         {/* Live Voucher Pill in Preview */}

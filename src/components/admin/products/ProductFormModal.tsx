@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Save } from "lucide-react";
+import { X, Save, Loader2 } from "lucide-react";
 import { Product } from "@/types/ecommerce.types";
 import { ProductDetailsFormCard, ProductFormValues } from "./ProductDetailsFormCard";
 import { ProductPhotosUploadCard } from "./ProductPhotosUploadCard";
@@ -13,8 +13,11 @@ interface ProductFormModalProps {
   setFormData: React.Dispatch<React.SetStateAction<ProductFormValues>>;
   images: string[];
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
+  fileObjects?: File[];
+  setFileObjects?: React.Dispatch<React.SetStateAction<File[]>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  isSubmitting?: boolean;
 }
 
 export function ProductFormModal({
@@ -24,8 +27,11 @@ export function ProductFormModal({
   setFormData,
   images,
   setImages,
+  fileObjects,
+  setFileObjects,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: ProductFormModalProps) {
   if (!isOpen) return null;
 
@@ -40,6 +46,7 @@ export function ProductFormModal({
 
     setImageError(null);
     const validUrls: string[] = [];
+    const validFiles: File[] = [];
     const oversizedFileNames: string[] = [];
 
     Array.from(files).forEach((file) => {
@@ -49,6 +56,7 @@ export function ProductFormModal({
       } else {
         const url = URL.createObjectURL(file);
         validUrls.push(url);
+        validFiles.push(file);
       }
     });
 
@@ -61,12 +69,18 @@ export function ProductFormModal({
     if (validUrls.length > 0) {
       setImages((prev) => [...prev, ...validUrls]);
     }
+    if (setFileObjects && validFiles.length > 0) {
+      setFileObjects((prev) => [...prev, ...validFiles]);
+    }
 
     e.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    if (setFileObjects) {
+      setFileObjects((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleFormChange = <K extends keyof ProductFormValues>(
@@ -122,17 +136,28 @@ export function ProductFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl border border-border/70 font-bold text-muted-foreground hover:bg-muted transition-colors cursor-pointer text-xs sm:text-sm"
+            disabled={isSubmitting}
+            className="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl border border-border/70 font-bold text-muted-foreground hover:bg-muted transition-colors cursor-pointer text-xs sm:text-sm disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="w-full sm:w-auto px-8 py-2.5 sm:py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm"
+            disabled={isSubmitting}
+            className="w-full sm:w-auto px-8 py-2.5 sm:py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm disabled:opacity-50"
           >
-            <Save className="h-4 w-4" />
-            <span>{editingProduct ? "Save Changes" : "Create Product"}</span>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                <span>{editingProduct ? "Save Changes" : "Create Product"}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

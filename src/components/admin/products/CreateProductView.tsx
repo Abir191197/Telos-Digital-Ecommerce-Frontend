@@ -1,13 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
-import { useAdminStore } from "@/stores";
-import categoriesData from "@/data/categories.json";
-import brandsData from "@/data/brands.json";
-import type { Product } from "@/types/ecommerce.types";
+import { ArrowLeft, Sparkles, CheckCircle2, Loader2, Save } from "lucide-react";
+import {
+  useGetProductByIdQuery,
+  useGetProductBySlugQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+} from "@/services/api/products/productApi";
+import { useGetCategoriesQuery } from "@/services/api/categories/categoryApi";
+import { useGetBrandsQuery } from "@/services/api/brands/brandApi";
+import {
+  ConfirmationModal,
+  PageLoader,
+  type ConfirmationDialogState,
+} from "@/components/common";
 import {
   ProductPhotosUploadCard,
   ProductLivePreviewCard,
@@ -20,79 +29,171 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 interface CreateProductViewProps {
   productId?: string;
+  productSlug?: string;
 }
 
-export function CreateProductView({ productId }: CreateProductViewProps = {}) {
+export function CreateProductView({ productId, productSlug }: CreateProductViewProps = {}) {
   const router = useRouter();
-  const { products, addProduct, updateProduct } = useAdminStore();
 
-  const editingProduct = productId
-    ? products.find((p) => p.id === productId || p.slug === productId)
-    : null;
+  // Queries & Mutations (support either slug or direct id)
+  const { data: productBySlug, isLoading: isLoadingBySlug } = useGetProductBySlugQuery(
+    productSlug || "",
+    { skip: !productSlug }
+  );
 
-  // Form State
-  const [formValues, setFormValues] = useState<ProductFormValues>(() => {
-    if (editingProduct) {
-      return {
-        title: editingProduct.name,
-        brand: editingProduct.brand || brandsData[0]?.name || "Apple",
-        categorySlug: editingProduct.categorySlug || categoriesData[0]?.slug || "smartphones-tablets",
-        shortDesc: editingProduct.shortDescription || "",
-        price: editingProduct.price,
-        originalPrice: editingProduct.originalPrice || editingProduct.price,
-        stock: editingProduct.stock,
-        badge: editingProduct.badge || editingProduct.tags?.[0] || "New",
-        warranty: editingProduct.specifications?.Warranty || "1 Year Official Brand Warranty",
-        hasVoucher: false,
-        voucherType: "percentage",
-        voucherValue: 10,
-        voucherCode: "TELOS10",
-        showVoucherOnCard: true,
-        sku: editingProduct.sku || "",
-        description: editingProduct.description || "",
-        isFeatured: editingProduct.isFeatured || false,
-        isFlashDeal: editingProduct.isFlashDeal || false,
-      };
+  const { data: productById, isLoading: isLoadingById } = useGetProductByIdQuery(
+    productId || "",
+    { skip: !productId }
+  );
+
+  const existingProduct = productBySlug || productById;
+  const isLoadingProduct =
+    (Boolean(productSlug) && isLoadingBySlug) || (Boolean(productId) && isLoadingById);
+
+  // Live Category and Brand GET APIs
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useGetCategoriesQuery({ limit: 100 });
+  const { data: brandsResponse, isLoading: isLoadingBrands } = useGetBrandsQuery({ limit: 100 });
+
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+
+  const isSubmitting = isCreating || isUpdating;
+  const isEditMode = Boolean((productId || productSlug) && existingProduct);
+
+  const categoriesList = useMemo(() => {
+    if (Array.isArray(categoriesResponse?.data) && categoriesResponse.data.length > 0) {
+      return categoriesResponse.data;
     }
-
-    return {
-      title: "",
-      brand: brandsData[0]?.name || "Apple",
-      categorySlug: categoriesData[0]?.slug || "smartphones-tablets",
-      shortDesc: "",
-      price: 95000,
-      originalPrice: 105000,
-      stock: 15,
-      badge: "New",
-      warranty: "1 Year Official Brand Warranty",
-      hasVoucher: false,
-      voucherType: "percentage",
-      voucherValue: 10,
-      voucherCode: "TELOS10",
-      showVoucherOnCard: true,
-      sku: "",
-      description: "",
-      isFeatured: false,
-      isFlashDeal: false,
-    };
-  });
-
-  // Photos State
-  const [images, setImages] = useState<string[]>(() => {
-    if (editingProduct) {
-      return editingProduct.images && editingProduct.images.length > 0
-        ? editingProduct.images
-        : editingProduct.thumbnail
-        ? [editingProduct.thumbnail]
-        : [];
+    if (Array.isArray(categoriesResponse) && (categoriesResponse as any).length > 0) {
+      return categoriesResponse as any;
     }
     return [];
-  });
+  }, [categoriesResponse]);
+
+  const brandsList = useMemo(() => {
+    if (Array.isArray(brandsResponse?.data) && brandsResponse.data.length > 0) {
+      return brandsResponse.data;
+    }
+    if (Array.isArray(brandsResponse) && (brandsResponse as any).length > 0) {
+      return brandsResponse as any;
+    }
+    return [];
+  }, [brandsResponse]);
+
+  // Clean empty defaults (no hardcoded prices or mock selections)
+  const defaultFormValues: ProductFormValues = {
+    title: "",
+    brandId: "",
+    categoryId: "",
+    subCategoryId: "",
+    shortDesc: "",
+    price: "",
+    costPrice: "",
+    stock: "",
+    badge: "",
+    hasVoucher: false,
+    voucherType: "percentage",
+    voucherValue: "",
+    voucherCode: "",
+    showVoucherOnCard: false,
+    hasVariants: false,
+    variants: [],
+    description: "",
+    isFeatured: false,
+    isFlashDeal: false,
+  };
+
+  const [formValues, setFormValues] = useState<ProductFormValues>(defaultFormValues);
+  const [images, setImages] = useState<string[]>([]);
+  const [fileObjects, setFileObjects] = useState<File[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  // Status
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successToast, setSuccessToast] = useState(false);
+  // Success Modal Dialog State
+  const [confirmModal, setConfirmModal] = useState<ConfirmationDialogState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "View All Products",
+    cancelLabel: "Create Another",
+    variant: "success",
+    onConfirm: () => router.push("/dashboard/products"),
+    onCancel: () => {
+      setFormValues(defaultFormValues);
+      setImages([]);
+      setFileObjects([]);
+      setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+    },
+  });
+
+  // Populate form if editing existing product
+  useEffect(() => {
+    if (existingProduct) {
+      const existingCost =
+        (existingProduct as any).costPrice !== undefined &&
+        (existingProduct as any).costPrice !== null &&
+        (existingProduct as any).costPrice !== ""
+          ? Number((existingProduct as any).costPrice)
+          : "";
+      const existingBrandId =
+        (existingProduct as any).brandId ||
+        (existingProduct as any).brand?.id ||
+        "";
+      const existingCategoryId =
+        (existingProduct as any).categoryId ||
+        (existingProduct as any).category?.id ||
+        "";
+      const existingSubCategoryId =
+        (existingProduct as any).subCategoryId ||
+        (existingProduct as any).subCategory?.id ||
+        "";
+      const existingHasVariants = Boolean(
+        (existingProduct as any).hasVariants ||
+          ((existingProduct as any).variants && (existingProduct as any).variants.length > 0)
+      );
+      const existingVariants =
+        (existingProduct as any).variants && (existingProduct as any).variants.length > 0
+          ? (existingProduct as any).variants.map((v: any) => ({
+              id: v.id,
+              color: v.color || "",
+              size: v.size || "",
+              weight: v.weight || "",
+              price: v.price ? Number(v.price) : "",
+              costPrice: v.costPrice ? Number(v.costPrice) : "",
+              stock: v.stock !== undefined ? v.stock : "",
+            }))
+          : [];
+
+      setFormValues({
+        title: existingProduct.name,
+        brandId: existingBrandId,
+        categoryId: existingCategoryId,
+        subCategoryId: existingSubCategoryId,
+        shortDesc: existingProduct.shortDescription || "",
+        price: existingProduct.price || "",
+        costPrice: existingCost,
+        stock: existingProduct.stock !== undefined ? existingProduct.stock : "",
+        badge: (existingProduct as any).storefrontBadgeText || existingProduct.badge || "",
+        hasVoucher: (existingProduct as any).hasVoucher || false,
+        voucherType: ((existingProduct as any).voucherDiscountType || "PERCENTAGE").toLowerCase() as any,
+        voucherValue: (existingProduct as any).voucherDiscountValue ? Number((existingProduct as any).voucherDiscountValue) : "",
+        voucherCode: (existingProduct as any).voucherCouponCode || "",
+        showVoucherOnCard: (existingProduct as any).showVoucherBadge || false,
+        hasVariants: existingHasVariants,
+        variants: existingVariants,
+        description: existingProduct.description || "",
+        isFeatured: existingProduct.isFeatured || false,
+        isFlashDeal: existingProduct.isFlashDeal || false,
+      });
+
+      const initialImgs =
+        existingProduct.images && existingProduct.images.length > 0
+          ? existingProduct.images
+          : existingProduct.thumbnail
+          ? [existingProduct.thumbnail]
+          : [];
+      setImages(initialImgs);
+    }
+  }, [existingProduct]);
 
   // Form Field Change Handler
   const handleFieldChange = <K extends keyof ProductFormValues>(
@@ -109,6 +210,7 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
 
     setImageError(null);
     const validUrls: string[] = [];
+    const validFiles: File[] = [];
     const oversizedFileNames: string[] = [];
 
     Array.from(files).forEach((file) => {
@@ -118,6 +220,7 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
       } else {
         const url = URL.createObjectURL(file);
         validUrls.push(url);
+        validFiles.push(file);
       }
     });
 
@@ -129,6 +232,7 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
 
     if (validUrls.length > 0) {
       setImages((prev) => [...prev, ...validUrls]);
+      setFileObjects((prev) => [...prev, ...validFiles]);
     }
 
     e.target.value = "";
@@ -136,19 +240,21 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    setFileObjects((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Category & Calculations
-  const selectedCategory =
-    categoriesData.find((c) => c.slug === formValues.categorySlug) ||
-    categoriesData[0];
+  const selectedCategory = useMemo(() => {
+    return categoriesList.find((c: any) => c.id === formValues.categoryId);
+  }, [categoriesList, formValues.categoryId]);
+
+  const selectedBrand = useMemo(() => {
+    return brandsList.find((b: any) => b.id === formValues.brandId);
+  }, [brandsList, formValues.brandId]);
 
   const numericPrice = Number(formValues.price) || 0;
-  const numericOriginal = Number(formValues.originalPrice) || 0;
-  const discountPercent =
-    numericOriginal > numericPrice && numericPrice > 0
-      ? Math.round(((numericOriginal - numericPrice) / numericOriginal) * 100)
-      : 0;
+  const numericCost = Number(formValues.costPrice) || 0;
+  const numericStock = Number(formValues.stock) || 0;
 
   const previewThumbnail =
     images.length > 0
@@ -156,141 +262,213 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
       : "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80";
 
   // Form Submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formValues.title.trim() || !formValues.price || numericPrice <= 0) return;
+    setImageError(null);
 
-    setIsSubmitting(true);
-
-    const slug = formValues.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-    const generatedSku =
-      formValues.sku.trim() ||
-      `TELOS-${formValues.brand.slice(0, 3).toUpperCase()}-${Math.floor(
-        1000 + Math.random() * 9000
-      )}`;
-
-    if (editingProduct) {
-      updateProduct(editingProduct.id, {
-        name: formValues.title.trim(),
-        shortDescription: formValues.shortDesc.trim() || editingProduct.shortDescription,
-        description: formValues.description.trim() || editingProduct.description,
-        categoryId: selectedCategory.id,
-        categorySlug: selectedCategory.slug,
-        categoryName: selectedCategory.name,
-        price: numericPrice,
-        originalPrice: numericOriginal > numericPrice ? numericOriginal : numericPrice,
-        discountPercentage: discountPercent,
-        stock: Number(formValues.stock),
-        inStock: Number(formValues.stock) > 0,
-        isFeatured: formValues.isFeatured,
-        isFlashDeal: formValues.isFlashDeal,
-        badge: (formValues.badge as any) || undefined,
-        images: images.length > 0 ? images : [previewThumbnail],
-        thumbnail: previewThumbnail,
-        brand: formValues.brand,
-        sku: formValues.sku.trim() || editingProduct.sku,
-        specifications: {
-          ...(editingProduct.specifications || {}),
-          Brand: formValues.brand,
-          Warranty: formValues.warranty || "1 Year Official Warranty",
-        },
-      });
-    } else {
-      const newProduct: Product = {
-        id: `prod-${Date.now()}`,
-        slug: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formValues.title.trim(),
-        shortDescription:
-          formValues.shortDesc.trim() ||
-          `Authentic ${formValues.brand} ${formValues.title.trim()} backed with official Bangladesh manufacturer warranty.`,
-        description:
-          formValues.description.trim() ||
-          `Authentic ${formValues.title.trim()} from ${formValues.brand}. Includes official verified importer coverage.`,
-        categoryId: selectedCategory.id,
-        categorySlug: selectedCategory.slug,
-        categoryName: selectedCategory.name,
-        price: numericPrice,
-        originalPrice: numericOriginal > numericPrice ? numericOriginal : numericPrice,
-        discountPercentage: discountPercent,
-        currency: "BDT",
-        rating: 5.0,
-        reviewCount: 0,
-        stock: Number(formValues.stock),
-        inStock: Number(formValues.stock) > 0,
-        isFeatured: formValues.isFeatured,
-        isFlashDeal: formValues.isFlashDeal,
-        isNewArrival: true,
-        badge: (formValues.badge as any) || undefined,
-        images: images.length > 0 ? images : [previewThumbnail],
-        thumbnail: previewThumbnail,
-        brand: formValues.brand,
-        sku: generatedSku,
-        specifications: {
-          Brand: formValues.brand,
-          Warranty: formValues.warranty || "1 Year Official Warranty",
-        },
-        tags: ["official-store", "bangladesh-tech"],
-        createdAt: new Date().toISOString(),
-      };
-
-      addProduct(newProduct);
+    if (!formValues.title.trim()) {
+      setImageError("Please enter a product title.");
+      return;
+    }
+    if (!formValues.brandId) {
+      setImageError("Please select a brand.");
+      return;
+    }
+    if (!formValues.categoryId) {
+      setImageError("Please select a category.");
+      return;
+    }
+    if (formValues.price === "" || numericPrice <= 0) {
+      setImageError("Please specify a valid selling price greater than 0.");
+      return;
     }
 
-    setSuccessToast(true);
+    const payloadFormData = new FormData();
+    payloadFormData.append("name", formValues.title.trim());
+    payloadFormData.append("price", String(numericPrice));
+    if (formValues.costPrice !== "" && numericCost >= 0) {
+      payloadFormData.append("costPrice", String(numericCost));
+    }
+    payloadFormData.append("stock", String(numericStock));
+    payloadFormData.append("categoryId", formValues.categoryId);
+    if (formValues.brandId) payloadFormData.append("brandId", formValues.brandId);
+    if (formValues.subCategoryId) payloadFormData.append("subCategoryId", formValues.subCategoryId);
 
-    setTimeout(() => {
-      router.push("/dashboard/products");
-    }, 900);
+    if (formValues.shortDesc) payloadFormData.append("shortDescription", formValues.shortDesc.trim());
+    if (formValues.description) payloadFormData.append("description", formValues.description.trim());
+
+    // Storefront Badge
+    if (formValues.badge) {
+      payloadFormData.append("showStorefrontBadge", "true");
+      payloadFormData.append("storefrontBadgeText", formValues.badge);
+    } else {
+      payloadFormData.append("showStorefrontBadge", "false");
+    }
+
+    // Voucher Promo Ribbon
+    payloadFormData.append("hasVoucher", String(Boolean(formValues.hasVoucher)));
+    if (formValues.hasVoucher) {
+      payloadFormData.append("voucherDiscountType", formValues.voucherType === "flat" ? "FLAT" : "PERCENTAGE");
+      if (formValues.voucherValue !== "") {
+        payloadFormData.append("voucherDiscountValue", String(Number(formValues.voucherValue)));
+      }
+      if (formValues.voucherCode) {
+        payloadFormData.append("voucherCouponCode", formValues.voucherCode.trim());
+      }
+      payloadFormData.append("showVoucherBadge", String(Boolean(formValues.showVoucherOnCard)));
+    }
+
+    // Variants (Color, Size, Weight)
+    payloadFormData.append("hasVariants", String(Boolean(formValues.hasVariants)));
+    if (formValues.hasVariants && formValues.variants.length > 0) {
+      const formattedVariants = formValues.variants.map((v) => ({
+        ...(v.id ? { id: v.id } : {}),
+        color: v.color.trim() || undefined,
+        size: v.size.trim() || undefined,
+        weight: v.weight.trim() || undefined,
+        price: v.price !== "" ? Number(v.price) : numericPrice,
+        costPrice:
+          v.costPrice !== ""
+            ? Number(v.costPrice)
+            : formValues.costPrice !== ""
+            ? numericCost
+            : undefined,
+        stock: Number(v.stock) || 0,
+      }));
+      payloadFormData.append("variants", JSON.stringify(formattedVariants));
+    }
+
+    payloadFormData.append("isFeatured", String(Boolean(formValues.isFeatured)));
+    payloadFormData.append("isFlashDeal", String(Boolean(formValues.isFlashDeal)));
+    payloadFormData.append("isActive", "true");
+
+    // Specifications
+    const specificationsObj: Record<string, any> = {
+      ...(selectedBrand?.name ? { Brand: selectedBrand.name } : {}),
+    };
+    payloadFormData.append("specifications", JSON.stringify(specificationsObj));
+
+    // Append Image Files
+    if (fileObjects.length > 0) {
+      payloadFormData.append("thumbnail", fileObjects[0]);
+      fileObjects.slice(1).forEach((file) => {
+        payloadFormData.append("images", file);
+      });
+    }
+
+    const targetProductId = existingProduct?.id || productId;
+    try {
+      if (targetProductId) {
+        await updateProduct({ id: targetProductId, payload: payloadFormData }).unwrap();
+        setConfirmModal({
+          isOpen: true,
+          title: "Product Updated",
+          message: `"${formValues.title}" has been updated successfully in the store catalog.`,
+          confirmLabel: "View All Products",
+          cancelLabel: "Continue Editing",
+          variant: "success",
+          onConfirm: () => router.push("/dashboard/products"),
+          onCancel: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+        });
+      } else {
+        await createProduct(payloadFormData).unwrap();
+        setConfirmModal({
+          isOpen: true,
+          title: "Product Published",
+          message: `"${formValues.title}" is now active in the TelosCart store catalog.`,
+          confirmLabel: "View All Products",
+          cancelLabel: "Create Another",
+          variant: "success",
+          onConfirm: () => router.push("/dashboard/products"),
+          onCancel: () => {
+            setFormValues(defaultFormValues);
+            setImages([]);
+            setFileObjects([]);
+            setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+          },
+        });
+      }
+    } catch (err: any) {
+      setImageError(err?.data?.message || "Failed to save product. Please check required fields.");
+    }
   };
 
+  if (isLoadingProduct && (productId || productSlug)) {
+    return (
+      <PageLoader
+        title="Loading Product..."
+        description="Fetching catalog item details, pricing tiers, and media gallery."
+        badgeText="Product Catalog"
+      />
+    );
+  }
+
   return (
-    <div className="w-full space-y-5 pb-24">
-      {/* Top Header */}
-      <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
+    <div className="w-full space-y-6 pb-20">
+      {/* Top Breadcrumb & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/products"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors shadow-2xs"
-            title="Back to Product Catalog"
+            className="p-2.5 rounded-xl border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-                Admin Catalog
-              </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">
-                {editingProduct ? "Edit Product" : "Quick Entry"}
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[11px] font-mono font-bold tracking-widest text-amber-500 uppercase">
+                {productId || productSlug ? "Catalog Editor" : "New Inventory Item"}
               </span>
             </div>
-            <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
-              {editingProduct ? `Edit "${editingProduct.name}"` : "Add New Product"}
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              {productId || productSlug ? "Edit Product Listing" : "Create New Product"}
             </h1>
           </div>
         </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/products"
+            className="px-4 py-2.5 rounded-xl border border-border/70 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            Discard
+          </Link>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-amber-400 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
+            ) : isEditMode ? (
+              <Save className="h-4 w-4" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            <span>{isSubmitting ? "Saving..." : isEditMode ? "Save Changes" : "Publish Listing"}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Success Alert */}
-      {successToast && (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-          <div className="text-xs font-medium">
-            <strong className="font-bold">Product saved!</strong> &ldquo;{formValues.title}&rdquo;{" "}
-            {editingProduct ? "updated successfully." : "added to live inventory."} Redirecting...
-          </div>
+      {imageError && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center justify-between">
+          <span>{imageError}</span>
+          <button
+            onClick={() => setImageError(null)}
+            className="underline text-[11px] hover:opacity-80"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* Main Two-Column Structure */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT (8 cols): Photo Upload + Form Inputs */}
-        <div className="lg:col-span-8 space-y-6">
+      {/* Main Grid: Left Upload & Details, Right Sticky Preview */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Form Area (7 cols on lg, 8 on xl) */}
+        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+          {/* Photos Upload Card */}
           <ProductPhotosUploadCard
             images={images}
             imageError={imageError}
@@ -299,45 +477,35 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
             onClearError={() => setImageError(null)}
           />
 
-          <form id="unified-product-form" onSubmit={handleSubmit} className="space-y-6">
-            <ProductDetailsFormCard
-              values={formValues}
-              onChange={handleFieldChange}
-            />
-
-            {/* Bottom Actions */}
-            <div className="pt-2 flex items-center justify-end gap-2.5">
-              <Link
-                href="/dashboard/products"
-                className="px-4 py-2.5 rounded-xl border border-border/80 bg-card text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span>{isSubmitting ? "Saving..." : "Save Product"}</span>
-              </button>
-            </div>
-          </form>
+          {/* Details Form Card */}
+          <ProductDetailsFormCard
+            values={formValues}
+            onChange={handleFieldChange}
+            categories={categoriesList}
+            brands={brandsList}
+            isLoadingTaxonomy={isLoadingCategories || isLoadingBrands}
+          />
         </div>
 
-        {/* RIGHT (4 cols): Real-Time Live Preview Card */}
-        <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-3">
+        {/* Right Live Customer Preview (5 cols on lg, 4 on xl) */}
+        <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              Storefront Preview
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+              <CheckCircle2 className="h-3 w-3" /> Live Sync
+            </span>
+          </div>
+
           <ProductLivePreviewCard
             title={formValues.title}
-            brand={formValues.brand}
-            categoryName={selectedCategory.name}
+            brand={selectedBrand?.name || "Brand"}
+            categoryName={selectedCategory?.name || "Product Category"}
             shortDesc={formValues.shortDesc}
             badge={formValues.badge}
-            warranty={formValues.warranty}
-            stock={Number(formValues.stock)}
+            stock={numericStock}
             numericPrice={numericPrice}
-            numericOriginal={numericOriginal}
-            discountPercent={discountPercent}
             previewThumbnail={previewThumbnail}
             hasImages={images.length > 0}
             hasVoucher={formValues.hasVoucher}
@@ -347,14 +515,22 @@ export function CreateProductView({ productId }: CreateProductViewProps = {}) {
             voucherValue={formValues.voucherValue}
           />
 
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-3 text-[11px] text-muted-foreground space-y-1">
-            <p className="font-bold text-foreground">💡 How customers see it</p>
-            <p>
-              This preview matches your storefront product card layout. Updates change instantly as you type.
+          <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
+              Real-time Customer View
+            </h4>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              This interactive preview renders exactly how your customers will see this item on the storefront cards and promotional listings.
             </p>
           </div>
         </div>
-      </div>
+      </form>
+
+      {/* Success Confirmation Modal */}
+      <ConfirmationModal
+        dialog={confirmModal}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
