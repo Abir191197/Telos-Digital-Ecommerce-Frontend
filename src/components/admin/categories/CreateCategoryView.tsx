@@ -90,6 +90,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
   });
   const [selectedBannerFile, setSelectedBannerFile] = useState<File | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
+  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(() => editingCategory?.image || null);
 
   // Submission / Toast
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,6 +109,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
         isActive: editingCategory.isActive ?? true,
       });
       setBannerUrl(editingCategory.image || null);
+      setBannerImageUrl(editingCategory.image || null);
       setSelectedBannerFile(null);
       setSubcategories(editingCategory.subcategories?.map((sub) => sub.name) || []);
     }
@@ -138,12 +140,21 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
     const previewUrl = URL.createObjectURL(file);
     setSelectedBannerFile(file);
     setBannerUrl(previewUrl);
+    setBannerImageUrl(null);
     e.target.value = "";
+  };
+
+  const handleBannerUrlSet = (url: string) => {
+    setSelectedBannerFile(null);
+    setBannerUrl(url);
+    setBannerImageUrl(url);
+    setBannerError(null);
   };
 
   const handleBannerRemove = () => {
     setSelectedBannerFile(null);
     setBannerUrl(null);
+    setBannerImageUrl(null);
   };
 
   const handleAddSubcategory = (name: string) => {
@@ -164,6 +175,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
         isActive: editingCategory.isActive ?? true,
       });
       setBannerUrl(editingCategory.image || null);
+      setBannerImageUrl(editingCategory.image || null);
       setSelectedBannerFile(null);
       setSubcategories(editingCategory.subcategories?.map((sub) => sub.name) || []);
     } else {
@@ -175,6 +187,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
         isActive: true,
       });
       setBannerUrl(null);
+      setBannerImageUrl(null);
       setSelectedBannerFile(null);
       setSubcategories([]);
     }
@@ -201,7 +214,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
     e.preventDefault();
     if (!formValues.name.trim()) return;
 
-    if (formValues.featured && !selectedBannerFile && !editingCategory?.image) {
+    if (formValues.featured && !selectedBannerFile && !bannerUrl) {
       setBannerError("Featured homepage categories require an uploaded image.");
       return;
     }
@@ -221,6 +234,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
         isActive: formValues.isActive,
         isFeaturedHomepage: formValues.featured,
         image: selectedBannerFile,
+        imageUrl: !selectedBannerFile && bannerImageUrl ? bannerImageUrl : undefined,
         removeImage: isEditMode && !bannerUrl && Boolean(editingCategory?.image),
       };
 
@@ -257,6 +271,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
         });
         setSubcategories([]);
         setBannerUrl(null);
+        setBannerImageUrl(null);
         setSelectedBannerFile(null);
         setBannerError(null);
         setFormError(null);

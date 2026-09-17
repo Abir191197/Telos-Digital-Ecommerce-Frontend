@@ -23,6 +23,7 @@ export type CategoryFormPayload = {
   isFeaturedHomepage?: boolean;
   removeImage?: boolean;
   image?: File | null;
+  imageUrl?: string | null;
 };
 
 export type CategoryQueryParams = {
@@ -87,6 +88,7 @@ const buildCategoryFormData = (payload: CategoryFormPayload) => {
     payload.isFeaturedHomepage,
   );
   appendOptional(formData, "removeImage", payload.removeImage);
+  appendOptional(formData, "imageUrl", payload.imageUrl);
 
   if (payload.image) {
     formData.append("image", payload.image);

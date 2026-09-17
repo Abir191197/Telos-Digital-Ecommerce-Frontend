@@ -89,6 +89,7 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(() => existingBrand?.image || null);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(() => existingBrand?.image || null);
 
   // Success Modal
   const [confirmModal, setConfirmModal] = useState<ConfirmationDialogState | null>(null);
@@ -106,6 +107,7 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
         description: existingBrand.description || "",
       });
       setLogoUrl(existingBrand.image || null);
+      setLogoImageUrl(existingBrand.image || null);
     }
   }, [existingBrand]);
 
@@ -134,12 +136,21 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
     setLogoFile(file);
     const preview = URL.createObjectURL(file);
     setLogoUrl(preview);
+    setLogoImageUrl(null);
     e.target.value = "";
+  };
+
+  const handleLogoUrlSet = (url: string) => {
+    setLogoFile(null);
+    setLogoUrl(url);
+    setLogoImageUrl(url);
+    setLogoError(null);
   };
 
   const handleRemoveLogo = () => {
     setLogoFile(null);
     setLogoUrl(null);
+    setLogoImageUrl(null);
     setLogoError(null);
   };
 
@@ -147,6 +158,7 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
     setFormValues(EMPTY_FORM);
     setLogoFile(null);
     setLogoUrl(null);
+    setLogoImageUrl(null);
     setLogoError(null);
   };
 
@@ -163,6 +175,8 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
       description: formValues.description.trim() || undefined,
       isFeaturedMarquee: formValues.isFeaturedMarquee,
       image: logoFile || undefined,
+      imageUrl: !logoFile && logoImageUrl ? logoImageUrl : undefined,
+      removeImage: isEditMode && !logoUrl && Boolean(existingBrand?.image),
     };
 
     try {
@@ -252,7 +266,9 @@ export function CreateBrandView({ brandId, brandSlug }: CreateBrandViewProps = {
               logoUrl={logoUrl}
               logoError={logoError}
               maxFileSizeMb={MAX_FILE_SIZE_MB}
+              isExternalUrl={Boolean(logoImageUrl)}
               onLogoSelect={handleLogoSelect}
+              onLogoUrlSet={handleLogoUrlSet}
               onRemoveLogo={handleRemoveLogo}
             />
 

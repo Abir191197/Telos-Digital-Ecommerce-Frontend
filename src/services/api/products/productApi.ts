@@ -53,7 +53,9 @@ export type ProductFormPayload = {
   isFlashDeal?: boolean;
   isActive?: boolean;
 
-  // Files
+  // Media URLs & Files
+  thumbnailUrl?: string;
+  imageUrls?: string[];
   thumbnail?: File | null;
   images?: File[];
   removeThumbnail?: boolean;
@@ -189,6 +191,10 @@ export const buildProductFormData = (payload: ProductFormPayload): FormData => {
   appendOptional(formData, "isFlashDeal", payload.isFlashDeal);
   appendOptional(formData, "isActive", payload.isActive ?? true);
   appendOptional(formData, "removeThumbnail", payload.removeThumbnail);
+  appendOptional(formData, "thumbnailUrl", payload.thumbnailUrl);
+  if (payload.imageUrls && payload.imageUrls.length > 0) {
+    formData.append("imageUrls", JSON.stringify(payload.imageUrls));
+  }
 
   if (payload.specifications) {
     formData.append("specifications", JSON.stringify(payload.specifications));

@@ -21,6 +21,7 @@ export type BrandFormPayload = {
   isFeaturedMarquee?: boolean;
   removeImage?: boolean;
   image?: File | null;
+  imageUrl?: string | null;
 };
 
 export type BrandQueryParams = {
@@ -51,6 +52,7 @@ const buildBrandFormData = (payload: BrandFormPayload) => {
   appendOptional(formData, "isActive", payload.isActive);
   appendOptional(formData, "isFeaturedMarquee", payload.isFeaturedMarquee);
   appendOptional(formData, "removeImage", payload.removeImage);
+  appendOptional(formData, "imageUrl", payload.imageUrl);
 
   if (payload.image) {
     formData.append("image", payload.image);

@@ -22,6 +22,7 @@ import {
   ProductLivePreviewCard,
   ProductDetailsFormCard,
   type ProductFormValues,
+  type ProductPhotoItem,
 } from "@/components/admin/products";
 
 const MAX_FILE_SIZE_MB = 5;
@@ -104,8 +105,7 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
   };
 
   const [formValues, setFormValues] = useState<ProductFormValues>(defaultFormValues);
-  const [images, setImages] = useState<string[]>([]);
-  const [fileObjects, setFileObjects] = useState<File[]>([]);
+  const [mediaItems, setMediaItems] = useState<ProductPhotoItem[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
 
   // Success Modal Dialog State
@@ -119,8 +119,7 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
     onConfirm: () => router.push("/dashboard/products"),
     onCancel: () => {
       setFormValues(defaultFormValues);
-      setImages([]);
-      setFileObjects([]);
+      setMediaItems([]);
       setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     },
   });
@@ -185,13 +184,32 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
         isFlashDeal: existingProduct.isFlashDeal || false,
       });
 
-      const initialImgs =
-        existingProduct.images && existingProduct.images.length > 0
-          ? existingProduct.images
-          : existingProduct.thumbnail
-          ? [existingProduct.thumbnail]
-          : [];
-      setImages(initialImgs);
+      const loadedMedia: ProductPhotoItem[] = [];
+      const seenUrls = new Set<string>();
+
+      if (existingProduct.thumbnail) {
+        loadedMedia.push({
+          id: "thumb-" + existingProduct.id,
+          url: existingProduct.thumbnail,
+          isUrl: true,
+        });
+        seenUrls.add(existingProduct.thumbnail);
+      }
+
+      if (Array.isArray(existingProduct.images)) {
+        existingProduct.images.forEach((img: any, idx: number) => {
+          const u = typeof img === "string" ? img : img.url;
+          if (u && !seenUrls.has(u)) {
+            seenUrls.add(u);
+            loadedMedia.push({
+              id: img.id || `img-${idx}`,
+              url: u,
+              isUrl: true,
+            });
+          }
+        });
+      }
+      setMediaItems(loadedMedia);
     }
   }, [existingProduct]);
 
@@ -203,14 +221,13 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
     setFormValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Image Upload handler
+  // Image Handlers (Files & Direct URLs)
   const handleFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setImageError(null);
-    const validUrls: string[] = [];
-    const validFiles: File[] = [];
+    const newItems: ProductPhotoItem[] = [];
     const oversizedFileNames: string[] = [];
 
     Array.from(files).forEach((file) => {
@@ -219,8 +236,12 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
         oversizedFileNames.push(`"${file.name}" (${sizeMb}MB)`);
       } else {
         const url = URL.createObjectURL(file);
-        validUrls.push(url);
-        validFiles.push(file);
+        newItems.push({
+          id: crypto.randomUUID(),
+          url,
+          file,
+          isUrl: false,
+        });
       }
     });
 
@@ -230,17 +251,38 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
       );
     }
 
-    if (validUrls.length > 0) {
-      setImages((prev) => [...prev, ...validUrls]);
-      setFileObjects((prev) => [...prev, ...validFiles]);
+    if (newItems.length > 0) {
+      setMediaItems((prev) => [...prev, ...newItems]);
     }
 
     e.target.value = "";
   };
 
+  const handleAddImageUrl = (url: string) => {
+    setImageError(null);
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    setMediaItems((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        url: trimmed,
+        isUrl: true,
+      },
+    ]);
+  };
+
   const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-    setFileObjects((prev) => prev.filter((_, i) => i !== index));
+    setMediaItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSetMainImage = (index: number) => {
+    setMediaItems((prev) => {
+      if (index <= 0 || index >= prev.length) return prev;
+      const target = prev[index];
+      const remaining = prev.filter((_, i) => i !== index);
+      return [target, ...remaining];
+    });
   };
 
   // Category & Calculations
@@ -257,8 +299,8 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
   const numericStock = Number(formValues.stock) || 0;
 
   const previewThumbnail =
-    images.length > 0
-      ? images[0]
+    mediaItems.length > 0
+      ? mediaItems[0].url
       : "https://images.unsplash.com/photo-1511707171634-5f897ff0259f?auto=format&fit=crop&w=800&q=80";
 
   // Form Submit
@@ -348,12 +390,30 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
     };
     payloadFormData.append("specifications", JSON.stringify(specificationsObj));
 
-    // Append Image Files
-    if (fileObjects.length > 0) {
-      payloadFormData.append("thumbnail", fileObjects[0]);
-      fileObjects.slice(1).forEach((file) => {
-        payloadFormData.append("images", file);
+    // Append Media (Files & Direct URLs)
+    const fileItems = mediaItems.filter((m) => !m.isUrl && m.file);
+    const urlItems = mediaItems.filter((m) => m.isUrl).map((m) => m.url);
+
+    if (mediaItems.length > 0) {
+      const firstItem = mediaItems[0];
+      if (firstItem.isUrl) {
+        payloadFormData.append("thumbnailUrl", firstItem.url);
+      } else if (firstItem.file) {
+        payloadFormData.append("thumbnail", firstItem.file);
+      }
+
+      // Other files for gallery
+      const otherFileItems = mediaItems.slice(1).filter((m) => !m.isUrl && m.file);
+      otherFileItems.forEach((item) => {
+        if (item.file) {
+          payloadFormData.append("images", item.file);
+        }
       });
+
+      // Pass all direct image URLs
+      if (urlItems.length > 0) {
+        payloadFormData.append("imageUrls", JSON.stringify(urlItems));
+      }
     }
 
     const targetProductId = existingProduct?.id || productId;
@@ -382,8 +442,7 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
           onConfirm: () => router.push("/dashboard/products"),
           onCancel: () => {
             setFormValues(defaultFormValues);
-            setImages([]);
-            setFileObjects([]);
+            setMediaItems([]);
             setConfirmModal((prev) => ({ ...prev, isOpen: false }));
           },
         });
@@ -470,10 +529,12 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
         <div className="lg:col-span-7 xl:col-span-8 space-y-6">
           {/* Photos Upload Card */}
           <ProductPhotosUploadCard
-            images={images}
+            images={mediaItems}
             imageError={imageError}
             onFilesSelect={handleFilesSelect}
+            onAddImageUrl={handleAddImageUrl}
             onRemoveImage={handleRemoveImage}
+            onSetMainImage={handleSetMainImage}
             onClearError={() => setImageError(null)}
           />
 
@@ -507,7 +568,7 @@ export function CreateProductView({ productId, productSlug }: CreateProductViewP
             stock={numericStock}
             numericPrice={numericPrice}
             previewThumbnail={previewThumbnail}
-            hasImages={images.length > 0}
+            hasImages={mediaItems.length > 0}
             hasVoucher={formValues.hasVoucher}
             showVoucherOnCard={formValues.showVoucherOnCard}
             voucherCode={formValues.voucherCode}
