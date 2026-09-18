@@ -96,6 +96,7 @@ export function OrderSummarySticky({
                     src={item.product.thumbnail}
                     alt={item.product.name}
                     fill
+                    sizes="56px"
                     className="object-cover"
                   />
                 </div>

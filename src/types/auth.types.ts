@@ -11,7 +11,7 @@ export interface User {
 }
 
 export type UserRole = "admin" | "manager" | "user";
-export type BackendUserRole = "SUPER_ADMIN" | "CUSTOMER";
+export type BackendUserRole = "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "admin" | (string & {});
 
 export interface LoginRequest {
   email?: string;

@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useCartStore } from "@/stores";
+import { useCartStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
+import {
+  useUpdateCartItemMutation,
+  useRemoveCartItemMutation,
+  useClearCartMutation,
+} from "@/services/api/cart/cartApi";
 import {
   DrawerHeader,
   DrawerFreeShippingBar,
@@ -12,6 +17,11 @@ import {
 } from "./drawer";
 
 export function CartDrawer() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [updateCartItemMutation] = useUpdateCartItemMutation();
+  const [removeCartItemMutation] = useRemoveCartItemMutation();
+  const [clearCartMutation] = useClearCartMutation();
+
   const {
     items,
     isOpen,
@@ -30,6 +40,40 @@ export function CartDrawer() {
     getFreeShippingRemaining,
     getItemCount,
   } = useCartStore();
+
+  const handleUpdateQuantity = async (id: string, qty: number) => {
+    updateQuantity(id, qty);
+    if (isAuthenticated) {
+      try {
+        await updateCartItemMutation({ id, quantity: qty }).unwrap();
+      } catch (err) {
+        console.error("Failed to update cart quantity on server:", err);
+      }
+    }
+  };
+
+  const handleRemoveItem = async (id: string) => {
+    removeItem(id);
+    if (isAuthenticated) {
+      try {
+        await removeCartItemMutation(id).unwrap();
+      } catch (err) {
+        console.error("Failed to remove cart item on server:", err);
+      }
+    }
+  };
+
+  const handleClearCart = async () => {
+    clearCart();
+    setShowClearConfirm(false);
+    if (isAuthenticated) {
+      try {
+        await clearCartMutation().unwrap();
+      } catch (err) {
+        console.error("Failed to clear cart on server:", err);
+      }
+    }
+  };
 
   const [promoInput, setPromoInput] = useState("");
   const [promoSuccess, setPromoSuccess] = useState(false);
@@ -101,7 +145,7 @@ export function CartDrawer() {
           hasItems={items.length > 0}
           showClearConfirm={showClearConfirm}
           onShowClearConfirm={setShowClearConfirm}
-          onClearCart={clearCart}
+          onClearCart={handleClearCart}
           onCloseCart={closeCart}
         />
 
@@ -113,15 +157,15 @@ export function CartDrawer() {
         {/* Line Items Scroll Area */}
         <div className="flex-1 overflow-y-auto px-5 py-3 divide-y divide-border/40 scrollbar-thin">
           {items.length === 0 ? (
-            <DrawerEmpty onCloseCart={closeCart} />
+            <DrawerEmpty onCloseCart={closeCart} isAuthenticated={isAuthenticated} />
           ) : (
             <div className="divide-y divide-border/40">
               {items.map((item) => (
                 <DrawerItem
                   key={item.id}
                   item={item}
-                  onUpdateQuantity={updateQuantity}
-                  onRemoveItem={removeItem}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemoveItem={handleRemoveItem}
                   onCloseCart={closeCart}
                 />
               ))}

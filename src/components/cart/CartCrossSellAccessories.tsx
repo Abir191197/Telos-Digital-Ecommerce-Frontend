@@ -43,6 +43,7 @@ export function CartCrossSellAccessories({
                   src={rec.thumbnail}
                   alt={rec.name}
                   fill
+                  sizes="56px"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>

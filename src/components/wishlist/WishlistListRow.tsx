@@ -57,6 +57,7 @@ export function WishlistListRow({
                       src={product.thumbnail}
                       alt={product.name}
                       fill
+                      sizes="88px"
                       className="object-cover"
                     />
                   ) : (

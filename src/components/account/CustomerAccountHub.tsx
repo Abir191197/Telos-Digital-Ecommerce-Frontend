@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, useWishlistStore, useCartStore } from "@/stores";
 import { useMounted } from "@/hooks";
+import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { CustomerSidebar } from "./CustomerSidebar";
 import {
@@ -142,6 +143,12 @@ export function CustomerAccountHub() {
     (r) => r.status === "pending_review",
   ).length;
 
+  useEffect(() => {
+    if (mounted && user?.role === "admin") {
+      router.replace(ROUTES.DASHBOARD);
+    }
+  }, [mounted, user, router]);
+
   if (!mounted) {
     return (
       <div className="container py-12 animate-pulse space-y-6">
@@ -149,6 +156,11 @@ export function CustomerAccountHub() {
         <div className="h-64 rounded-3xl bg-muted/40" />
       </div>
     );
+  }
+
+  // Fallback when admin visits customer account
+  if (user?.role === "admin") {
+    return null;
   }
 
   // Fallback when unauthenticated

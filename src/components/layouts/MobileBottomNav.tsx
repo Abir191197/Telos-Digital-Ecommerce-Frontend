@@ -9,6 +9,7 @@ import {
   Heart,
   ShoppingCart,
   User,
+  Shield,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { useCartStore, useWishlistStore, useAuthStore } from "@/stores";
@@ -27,9 +28,9 @@ export function MobileBottomNav() {
   const rawWishlistCount = useWishlistStore((state) => state.items.length);
   const authUser = useAuthStore((state) => state.user);
 
-  const cartCount = mounted ? rawCartCount : 0;
-  const wishlistCount = mounted ? rawWishlistCount : 0;
   const user = mounted ? authUser : null;
+  const cartCount = mounted && user ? rawCartCount : 0;
+  const wishlistCount = mounted && user ? rawWishlistCount : 0;
 
   return (
     <nav
@@ -103,36 +104,55 @@ export function MobileBottomNav() {
           <span className="text-[11px] tracking-tight">Wishlist</span>
         </Link>
 
-        {/* 4. Cart Button (Toggles Drawer & Minimizes) */}
-        <button
-          type="button"
-          onClick={toggleCart}
-          aria-expanded={isCartOpen}
-          aria-label="Shopping Cart"
-          className={cn(
-            "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none cursor-pointer",
-            isCartOpen
-              ? "text-amber-600 font-semibold"
-              : "text-muted-foreground hover:text-foreground font-medium"
-          )}
-        >
-          {isCartOpen && (
-            <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
-          )}
-          <div className="relative flex items-center justify-center">
-            <ShoppingCart className={cn("h-5 w-5 transition-transform duration-200", isCartOpen && "scale-110 stroke-[2.4]")} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white shadow-xs animate-in zoom-in">
-                {cartCount}
-              </span>
+        {/* 4. Cart Button or Admin Dashboard Link */}
+        {user?.role === "admin" ? (
+          <Link
+            href={ROUTES.DASHBOARD}
+            onClick={closeCart}
+            className={cn(
+              "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
+              pathname.startsWith(ROUTES.DASHBOARD)
+                ? "text-amber-600 font-semibold"
+                : "text-muted-foreground hover:text-foreground font-medium"
             )}
-          </div>
-          <span className="text-[11px] tracking-tight">Cart</span>
-        </button>
+          >
+            {pathname.startsWith(ROUTES.DASHBOARD) && (
+              <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
+            )}
+            <Shield className={cn("h-5 w-5 transition-transform duration-200", pathname.startsWith(ROUTES.DASHBOARD) && "scale-110 stroke-[2.4]")} />
+            <span className="text-[11px] tracking-tight">Admin</span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={toggleCart}
+            aria-expanded={isCartOpen}
+            aria-label="Shopping Cart"
+            className={cn(
+              "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none cursor-pointer",
+              isCartOpen
+                ? "text-amber-600 font-semibold"
+                : "text-muted-foreground hover:text-foreground font-medium"
+            )}
+          >
+            {isCartOpen && (
+              <span className="absolute top-0 h-0.5 w-7 rounded-full bg-amber-500 transition-all duration-200" />
+            )}
+            <div className="relative flex items-center justify-center">
+              <ShoppingCart className={cn("h-5 w-5 transition-transform duration-200", isCartOpen && "scale-110 stroke-[2.4]")} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white shadow-xs animate-in zoom-in">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] tracking-tight">Cart</span>
+          </button>
+        )}
 
         {/* 5. Account */}
         <Link
-          href={user ? ROUTES.ACCOUNT : ROUTES.LOGIN}
+          href={user?.role === "admin" ? ROUTES.DASHBOARD : user ? ROUTES.ACCOUNT : ROUTES.LOGIN}
           onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
@@ -152,7 +172,7 @@ export function MobileBottomNav() {
             <User className="h-5 w-5" />
           )}
           <span className="text-[11px] tracking-tight">
-            {user ? user.name.split(" ")[0] : "Account"}
+            {user?.role === "admin" ? "Portal" : user ? user.name.split(" ")[0] : "Account"}
           </span>
         </Link>
       </div>

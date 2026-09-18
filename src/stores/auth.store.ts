@@ -4,6 +4,8 @@ import { persist } from "zustand/middleware";
 import type { BackendAuthUser, User } from "@/types/auth.types";
 import type { Address, Order } from "@/types/order.types";
 import { DEMO_USER, DEMO_ORDERS } from "@/data/mock-user";
+import { useCartStore } from "./cart.store";
+import { useWishlistStore } from "./wishlist.store";
 
 export interface CustomerUser extends User {
   phone: string;
@@ -42,7 +44,12 @@ export const mapBackendUserToCustomerUser = (
   email: backendUser.email,
   phone: backendUser.phone ?? "",
   avatar: backendUser.avatar ?? undefined,
-  role: backendUser.role === "SUPER_ADMIN" ? "admin" : "user",
+  role:
+    backendUser.role === "SUPER_ADMIN" ||
+    backendUser.role === "ADMIN" ||
+    backendUser.role === "admin"
+      ? "admin"
+      : "user",
   createdAt: backendUser.createdAt,
   updatedAt: backendUser.updatedAt,
   addresses:
@@ -243,8 +250,19 @@ export const useAuthStore = create<AuthStore>()(
         }));
       },
 
-      logout: () =>
-        set({ user: null, accessToken: null, isAuthenticated: false }),
+      logout: () => {
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("telos-cart-storage");
+            localStorage.removeItem("telos-wishlist-storage");
+          } catch {
+            // ignore
+          }
+        }
+        useCartStore.getState().clearCart();
+        useWishlistStore.getState().clearWishlist();
+        set({ user: null, accessToken: null, isAuthenticated: false });
+      },
     }),
     {
       name: "telos-auth-storage",

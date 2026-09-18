@@ -127,8 +127,15 @@ export function LoginForm() {
           : { phone: identifier, password },
       ).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      await handlePendingAction();
-      router.push(getRedirectUrl(ROUTES.ACCOUNT));
+      const userRole = response.data.user.role;
+      const isAdmin =
+        userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "admin";
+      if (isAdmin) {
+        router.push(ROUTES.DASHBOARD);
+      } else {
+        await handlePendingAction();
+        router.push(getRedirectUrl(ROUTES.ACCOUNT));
+      }
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }

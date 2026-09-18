@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Star,
   ShieldCheck,
+  Shield,
   Zap,
 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
@@ -32,6 +33,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const pathname = usePathname();
   const mounted = useMounted();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "admin";
 
   const addItem = useCartStore((state) => state.addItem);
   const toggleWishlist = useWishlistStore((state) => state.toggleItem);
@@ -49,6 +52,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (user?.role === "admin") {
+      router.push("/dashboard/products");
+      return;
+    }
+
     if (!isAuthenticated) {
       const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-cart&productId=${product.id}&quantity=1`;
       router.push(redirectUrl);
@@ -69,6 +77,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (isAdmin) {
+      return;
+    }
     if (!isAuthenticated) {
       const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-wishlist&productId=${product.id}`;
       router.push(redirectUrl);
@@ -84,8 +96,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
         } else {
           await removeWishlistItemMutation(product.id).unwrap();
         }
-      } catch (err) {
-        console.error("Failed to toggle wishlist on server:", err);
+      } catch (err: any) {
+        console.error(
+          "Failed to toggle wishlist on server:",
+          err?.data?.message || err?.message || err
+        );
       }
     }
   };
@@ -101,7 +116,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     >
       {/* Top Media Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted/40 dark:bg-zinc-900/60">
-        <Link href={productUrl} className="block h-full w-full">
+        <Link href={productUrl} className="relative block h-full w-full">
           <Image
             src={product.thumbnail}
             alt={product.name}
@@ -124,21 +139,23 @@ export function ProductCard({ product, className }: ProductCardProps) {
         ) : null}
 
         {/* Wishlist Quick Button */}
-        <button
-          type="button"
-          onClick={handleToggleWishlist}
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          className={cn(
-            "absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 backdrop-blur-md shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer",
-            isWishlisted
-              ? "text-rose-600 bg-rose-500/15"
-              : "text-muted-foreground hover:text-rose-500 hover:bg-background"
-          )}
-        >
-          <Heart
-            className={cn("h-4 w-4 transition-transform", isWishlisted && "fill-rose-500 text-rose-500 scale-110")}
-          />
-        </button>
+        {!isAdmin && (
+          <button
+            type="button"
+            onClick={handleToggleWishlist}
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            className={cn(
+              "absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 backdrop-blur-md shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer",
+              isWishlisted
+                ? "text-rose-600 bg-rose-500/15"
+                : "text-muted-foreground hover:text-rose-500 hover:bg-background"
+            )}
+          >
+            <Heart
+              className={cn("h-4 w-4 transition-transform", isWishlisted && "fill-rose-500 text-rose-500 scale-110")}
+            />
+          </button>
+        )}
       </div>
 
       {/* Product Content Body */}
@@ -195,16 +212,28 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
-            aria-label="Add to cart"
+            aria-label={user?.role === "admin" ? "Manage in Admin Dashboard" : "Add to cart"}
+            title={user?.role === "admin" ? "Admin Mode: Manage product in Dashboard" : undefined}
             className={cn(
               "shrink-0 flex h-7 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-4 text-[10px] sm:text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer",
-              isAdding
+              user?.role === "admin"
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/25"
+                : isAdding
                 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                 : "bg-foreground text-background hover:bg-amber-500 hover:text-zinc-950 hover:shadow-md hover:shadow-amber-500/25 hover:scale-105 shadow-sm"
             )}
           >
-            <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.3]" />
-            <span>{isAdding ? "Added" : "Add"}</span>
+            {user?.role === "admin" ? (
+              <>
+                <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.3]" />
+                <span>Admin</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.3]" />
+                <span>{isAdding ? "Added" : "Add"}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

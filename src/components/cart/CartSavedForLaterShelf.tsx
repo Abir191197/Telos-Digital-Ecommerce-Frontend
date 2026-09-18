@@ -48,6 +48,7 @@ export function CartSavedForLaterShelf({
                 src={savedProduct.thumbnail}
                 alt={savedProduct.name}
                 fill
+                sizes="56px"
                 className="object-cover"
               />
             </div>

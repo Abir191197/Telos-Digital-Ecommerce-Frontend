@@ -9,6 +9,7 @@ import {
   CheckoutFormValues,
 } from "@/validations/checkout.schema";
 import { useCartStore, useAuthStore } from "@/stores";
+import { useClearCartMutation } from "@/services/api/cart/cartApi";
 import { useMounted } from "@/hooks";
 import { Address, Order } from "@/types/order.types";
 import { ROUTES } from "@/constants";
@@ -24,6 +25,7 @@ import { OtpVerificationModal } from "@/components/auth/OtpVerificationModal";
 export function CheckoutView() {
   const router = useRouter();
   const mounted = useMounted();
+  const [clearCartMutation] = useClearCartMutation();
 
   const {
     items,
@@ -171,6 +173,11 @@ export function CheckoutView() {
 
       // Empty cart
       clearCart();
+      try {
+        await clearCartMutation().unwrap();
+      } catch (e) {
+        console.error("Failed to clear server cart on checkout:", e);
+      }
 
       // Redirect to confirmation page
       router.push(`/checkout/success?orderId=${generatedOrderId}`);
@@ -180,21 +187,17 @@ export function CheckoutView() {
     }
   };
 
-  // Safe client render check
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <CheckoutHeader />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mx-auto" />
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!mounted) return;
+    if (user?.role === "admin") {
+      router.replace(ROUTES.DASHBOARD);
+    } else if (!user) {
+      router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CHECKOUT)}`);
+    }
+  }, [mounted, user, router]);
 
-  // Restrict checkout without login
-  if (!user) {
-    router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CHECKOUT)}`);
+  // Safe client render check or redirecting
+  if (!mounted || user?.role === "admin" || !user) {
     return (
       <div className="min-h-screen bg-background">
         <CheckoutHeader />

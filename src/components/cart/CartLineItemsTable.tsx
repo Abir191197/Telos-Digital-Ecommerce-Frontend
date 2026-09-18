@@ -47,6 +47,7 @@ export function CartLineItemsTable({
                   src={item.product.thumbnail}
                   alt={item.product.name}
                   fill
+                  sizes="80px"
                   className="object-cover"
                 />
               </Link>

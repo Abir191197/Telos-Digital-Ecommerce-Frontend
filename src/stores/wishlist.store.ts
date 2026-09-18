@@ -59,9 +59,12 @@ export const useWishlistStore = create<WishlistStore>()(
     }),
     {
       name: "telos-wishlist-storage",
-      partialize: (state) => ({
-        items: state.items,
-      }),
+      partialize: () => ({}),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.items = [];
+        }
+      },
     }
   )
 );

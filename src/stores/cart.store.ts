@@ -198,8 +198,7 @@ export const useCartStore = create<CartStore>()(
         const shipping = get().getShippingFee();
         return Math.max(0, subtotal - discount + shipping);
       },
-
-      getFreeShippingRemaining: () => {
+      getFreeShippingRemaining: () => {
         const subtotal = get().getSubtotal();
         return Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
       },
@@ -207,9 +206,13 @@ export const useCartStore = create<CartStore>()(
     {
       name: "telos-cart-storage",
       partialize: (state) => ({
-        items: state.items,
         appliedCoupon: state.appliedCoupon,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.items = [];
+        }
+      },
     }
   )
 );

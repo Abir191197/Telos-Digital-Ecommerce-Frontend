@@ -1,11 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Phone, Tag, Truck, Info } from "lucide-react";
+import { Phone, Tag, Truck, Info, Copy, Check } from "lucide-react";
 import { ROUTES } from "@/constants";
 
 export function TopUtilityBar() {
+  const [copied, setCopied] = useState(false);
+  const VOUCHER_CODE = "TELOS20";
+
+  const handleCopyVoucher = async () => {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(VOUCHER_CODE);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
+    } catch (err) {
+      console.error("Failed to copy voucher code:", err);
+    }
+  };
+
   return (
     <div className="border-b border-zinc-800 bg-[#0c0d0e] text-xs text-zinc-300 dark:bg-[#08090a] dark:border-zinc-800/80 transition-colors">
       <div className="container flex h-9 items-center justify-between gap-3 px-4 sm:px-6">
@@ -23,17 +38,33 @@ export function TopUtilityBar() {
           </a>
         </div>
 
-        {/* Center: Discount Promotion Announcement */}
+        {/* Center: Discount Promotion Announcement with Click-to-Copy Voucher */}
         <div className="hidden md:flex items-center gap-2 overflow-hidden text-center truncate text-xs sm:text-sm">
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300 tracking-wide">
             <Tag className="h-3 w-3" />
             HOT DEAL
           </span>
-          <span className="truncate text-zinc-200">
-            Free delivery on orders over ৳2,000 | Use code{" "}
-            <strong className="text-amber-400 font-mono tracking-wider underline underline-offset-2">
-              TELOS20
-            </strong>{" "}
+          <span className="truncate text-zinc-200 flex items-center gap-1.5">
+            Free delivery on orders over ৳2,000 | Use code
+            <button
+              type="button"
+              onClick={handleCopyVoucher}
+              title="Click to copy voucher code"
+              aria-label="Copy voucher code TELOS20"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono font-bold tracking-wider text-xs border border-dashed transition-all cursor-pointer select-none bg-amber-500/15 border-amber-400/60 text-amber-300 hover:bg-amber-500/25 hover:border-amber-400 active:scale-95"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                  <span className="text-emerald-400 font-sans text-[11px] font-bold">COPIED!</span>
+                </>
+              ) : (
+                <>
+                  <span className="underline underline-offset-2">{VOUCHER_CODE}</span>
+                  <Copy className="h-2.5 w-2.5 opacity-80" />
+                </>
+              )}
+            </button>
             for 20% OFF
           </span>
         </div>

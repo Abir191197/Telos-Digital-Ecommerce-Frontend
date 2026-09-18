@@ -36,7 +36,7 @@ export function WishlistCardGrid({
             <div className="relative aspect-square w-full overflow-hidden bg-muted/20">
               <Link
                 href={ROUTES.PRODUCT_DETAIL(product.slug)}
-                className="block h-full w-full"
+                className="block relative h-full w-full"
               >
                 <Image
                   src={product.thumbnail}

@@ -31,15 +31,28 @@ export function CartWishlistSync() {
     refetchOnMountOrArgChange: true,
   });
 
+  // Clear client cart and wishlist immediately if session is unauthenticated or admin
+  useEffect(() => {
+    if (!isCustomerSession) {
+      useCartStore.getState().setServerItems([]);
+      useWishlistStore.getState().setServerItems([]);
+    }
+  }, [isCustomerSession]);
+
   useEffect(() => {
     if (isCustomerSession && cartResponse?.data?.items) {
       const serverItems: CartItem[] = cartResponse.data.items.map((it) => {
+        const productThumbnail =
+          it.product.thumbnail ||
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80";
+
         const product: Product = {
           ...it.product,
+          thumbnail: productThumbnail,
           description: (it.product as any).description || "",
           category: (it.product.category?.name || "General") as any,
           brand: (it.product.brand?.name || "Standard") as any,
-          images: it.product.thumbnail ? [it.product.thumbnail] : [],
+          images: productThumbnail ? [productThumbnail] : [],
           tags: [],
           isFeatured: false,
           isNew: false,

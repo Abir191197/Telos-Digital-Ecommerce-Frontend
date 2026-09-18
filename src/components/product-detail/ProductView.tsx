@@ -2,10 +2,16 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { ROUTES } from "@/constants";
-import { useCartStore, useWishlistStore, useRecentlyViewedStore } from "@/stores";
+import { useCartStore, useWishlistStore, useRecentlyViewedStore, useAuthStore } from "@/stores";
+import { useAddToCartMutation } from "@/services/api/cart/cartApi";
+import {
+  useAddToWishlistMutation,
+  useRemoveWishlistItemMutation,
+} from "@/services/api/wishlist/wishlistApi";
 import { useMounted } from "@/hooks";
 import { SupportAndHelpstrip, TrustGuaranteeCards } from "@/components/shared";
 import type { Product } from "@/types/ecommerce.types";
@@ -28,7 +34,7 @@ interface ProductViewProps {
 }
 
 const sectionFadeUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
@@ -38,6 +44,15 @@ const sectionFadeUp: Variants = {
 
 export function ProductView({ product, relatedProducts = [] }: ProductViewProps) {
   const mounted = useMounted();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "admin";
+
+  const [addToCartMutation] = useAddToCartMutation();
+  const [addToWishlistMutation] = useAddToWishlistMutation();
+  const [removeWishlistItemMutation] = useRemoveWishlistItemMutation();
 
   // Stores
   const addItem = useCartStore((state) => state.addItem);
@@ -88,14 +103,45 @@ export function ProductView({ product, relatedProducts = [] }: ProductViewProps)
     }
   }, [product, addRecentlyViewed]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (isAdmin) return;
+    if (!isAuthenticated) {
+      const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-cart&productId=${product.id}&quantity=${quantity}${selectedVariant ? `&variantId=${selectedVariant.id}` : ""}`;
+      router.push(redirectUrl);
+      return;
+    }
+
     setIsAdding(true);
     addItem(product, quantity, selectedVariant);
+    try {
+      await addToCartMutation({
+        productId: product.id,
+        quantity,
+        variantId: selectedVariant?.id,
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to add to cart on server:", err);
+    }
     setTimeout(() => setIsAdding(false), 900);
   };
 
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = async () => {
+    if (isAdmin) return;
+    if (!isAuthenticated) {
+      const redirectUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}&action=add-to-wishlist&productId=${product.id}`;
+      router.push(redirectUrl);
+      return;
+    }
     toggleWishlist(product);
+    try {
+      if (isInWishlistStore) {
+        await removeWishlistItemMutation(product.id).unwrap();
+      } else {
+        await addToWishlistMutation({ productId: product.id }).unwrap();
+      }
+    } catch (err) {
+      console.error("Failed to toggle wishlist on server:", err);
+    }
   };
 
   const handleShare = () => {
@@ -152,6 +198,7 @@ export function ProductView({ product, relatedProducts = [] }: ProductViewProps)
               onToggleWishlist={handleToggleWishlist}
               onShare={handleShare}
               showShareToast={showShareToast}
+              isAdmin={isAdmin}
             />
 
             {/* Right Column: Buying Decision Hub (6 cols on lg) */}
@@ -173,6 +220,7 @@ export function ProductView({ product, relatedProducts = [] }: ProductViewProps)
                   isAdding={isAdding}
                   onAddToCart={handleAddToCart}
                   onOpenNotifyStock={() => setShowNotifyStock(false)}
+                  isAdmin={isAdmin}
                 />
 
                 <ProductDeliveryTrustStrip />

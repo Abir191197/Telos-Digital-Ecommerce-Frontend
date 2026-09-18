@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Minus, Plus, ShoppingCart, Zap, BellRing } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Zap, BellRing, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/common";
 import { cn } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types/ecommerce.types";
@@ -15,6 +15,7 @@ interface ProductActionsProps {
   isAdding: boolean;
   onAddToCart: () => void;
   onOpenNotifyStock: () => void;
+  isAdmin?: boolean;
 }
 
 export function ProductActions({
@@ -25,7 +26,30 @@ export function ProductActions({
   isAdding,
   onAddToCart,
   onOpenNotifyStock,
+  isAdmin = false,
 }: ProductActionsProps) {
+  if (isAdmin) {
+    return (
+      <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-3.5">
+        <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400 font-bold text-sm">
+          <ShieldCheck className="h-5 w-5 shrink-0" />
+          <span>Administrator Preview Mode</span>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          You are currently logged in with an Administrative account. Shopping bag and checkout operations are reserved exclusively for customer profiles. You can manage product inventory, pricing, and stock directly from the Admin Portal.
+        </p>
+        <div className="flex flex-wrap gap-2.5 pt-1">
+          <Button asChild variant="amber" size="sm" className="rounded-xl font-bold">
+            <Link href="/dashboard/products">
+              <LayoutDashboard className="h-4 w-4 mr-1.5" />
+              Manage in Admin Portal
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const activeStock = selectedVariant ? selectedVariant.stock : product.stock;
   const isOutOfStock = activeStock <= 0;
 

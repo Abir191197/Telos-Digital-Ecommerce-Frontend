@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { useWishlistStore, useCartStore } from "@/stores";
+import { useRouter } from "next/navigation";
+import { useWishlistStore, useCartStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
+import { ROUTES } from "@/constants";
 import { products } from "@/data";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation, type Variants } from "framer-motion";
@@ -30,10 +32,20 @@ const fadeUpAnim: Variants = {
 
 export function WishlistView() {
   const mounted = useMounted();
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "admin";
+
   const items = useWishlistStore((state) => state.items);
   const removeItem = useWishlistStore((state) => state.removeItem);
   const clearWishlist = useWishlistStore((state) => state.clearWishlist);
   const addToCart = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    if (mounted && isAdmin) {
+      router.replace(ROUTES.DASHBOARD);
+    }
+  }, [mounted, isAdmin, router]);
 
   // State
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
@@ -128,7 +140,7 @@ export function WishlistView() {
       .slice(0, 5);
   }, []);
 
-  if (!mounted) {
+  if (!mounted || (mounted && isAdmin)) {
     return (
       <div className="container py-12">
         <div className="h-44 rounded-3xl bg-muted/40 animate-pulse" />

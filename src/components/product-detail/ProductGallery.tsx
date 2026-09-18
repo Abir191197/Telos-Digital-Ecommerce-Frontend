@@ -21,6 +21,7 @@ interface ProductGalleryProps {
   onToggleWishlist: () => void;
   onShare: () => void;
   showShareToast: boolean;
+  isAdmin?: boolean;
 }
 
 export function ProductGallery({
@@ -30,6 +31,7 @@ export function ProductGallery({
   onToggleWishlist,
   onShare,
   showShareToast,
+  isAdmin = false,
 }: ProductGalleryProps) {
   const rawImages =
     product.images && product.images.length > 0
@@ -173,17 +175,19 @@ export function ProductGallery({
           >
             <Share2 className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={onToggleWishlist}
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
-              isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
-            )}
-          >
-            <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
-          </button>
+          {!isAdmin && (
+            <button
+              type="button"
+              onClick={onToggleWishlist}
+              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
+                isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
+              )}
+            >
+              <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
+            </button>
+          )}
         </div>
 
         {/* Mobile Floating Pagination / Photo Count Pill Indicator */}
@@ -295,17 +299,19 @@ export function ProductGallery({
             >
               <Share2 className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              onClick={onToggleWishlist}
-              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
-                isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
-              )}
-            >
-              <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                onClick={onToggleWishlist}
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-xs transition-all cursor-pointer",
+                  isWishlisted ? "text-rose-600" : "text-muted-foreground hover:text-rose-600"
+                )}
+              >
+                <Heart className={cn("h-4 w-4", isWishlisted && "fill-rose-600 text-rose-600")} />
+              </button>
+            )}
           </div>
 
           {/* Share copied toast indicator */}

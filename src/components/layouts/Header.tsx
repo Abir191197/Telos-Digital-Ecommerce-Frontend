@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Shield } from "lucide-react";
 import { Logo } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { useMounted } from "@/hooks";
@@ -29,9 +29,9 @@ export function Header() {
   const authUser = useAuthStore((state) => state.user);
   const storeLogout = useAuthStore((state) => state.logout);
 
-  const cartCount = mounted ? rawCartCount : 0;
-  const wishlistCount = mounted ? rawWishlistCount : 0;
   const user = mounted ? authUser : null;
+  const cartCount = mounted && user ? rawCartCount : 0;
+  const wishlistCount = mounted && user ? rawWishlistCount : 0;
 
   const handleLogout = () => {
     document.cookie =
@@ -82,32 +82,44 @@ export function Header() {
 
         {/* Right Utilities */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-          <Link
-            href={ROUTES.WISHLIST}
-            aria-label="Wishlist"
-            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-          >
-            <Heart className="h-5 w-5" />
-            {wishlistCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
+          {user?.role === "admin" ? (
+            <Link
+              href={ROUTES.DASHBOARD}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3.5 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-500/25 transition-colors"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span>Admin Dashboard</span>
+            </Link>
+          ) : (
+            <>
+              <Link
+                href={ROUTES.WISHLIST}
+                aria-label="Wishlist"
+                className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
 
-          <button
-            type="button"
-            onClick={openCart}
-            aria-label="Shopping Cart"
-            className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
-                {cartCount}
-              </span>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={openCart}
+                aria-label="Shopping Cart"
+                className="hidden md:flex relative h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white shadow-xs animate-in zoom-in">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </>
+          )}
 
           <HeaderUserMenu
             user={user}

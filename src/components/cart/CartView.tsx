@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore, useWishlistStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants";
-import { ChevronRight, Trash2, ArrowLeft } from "lucide-react";
+import { ChevronRight, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
-import { products } from "@/data";
+import {
+  useGetMyCartQuery,
+  useUpdateCartItemMutation,
+  useRemoveCartItemMutation,
+  useClearCartMutation,
+  useAddToCartMutation,
+} from "@/services/api/cart/cartApi";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 import type { CartItem } from "@/types/cart.types";
 import type { Product } from "@/types/ecommerce.types";
 
@@ -47,6 +54,20 @@ export function CartView() {
     addItem: addToWishlist,
     removeItem: removeFromWishlist,
   } = useWishlistStore();
+
+  // Backend Cart API hooks
+  const { isLoading: isCartLoading } = useGetMyCartQuery(undefined, {
+    skip: !user,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const [updateCartItemMutation] = useUpdateCartItemMutation();
+  const [removeCartItemMutation] = useRemoveCartItemMutation();
+  const [clearCartMutation] = useClearCartMutation();
+  const [addToCartMutation] = useAddToCartMutation();
+
+  // Real catalog products for cross-sell recommendations
+  const { data: productsData } = useGetProductsQuery({ limit: 6 });
 
   // Local state
   const [promoInput, setPromoInput] = useState("");
@@ -90,37 +111,80 @@ export function CartView() {
     }
   };
 
+  const handleUpdateQuantity = async (id: string, qty: number) => {
+    updateQuantity(id, qty);
+    try {
+      await updateCartItemMutation({ id, quantity: qty }).unwrap();
+    } catch (err) {
+      console.error("Failed to update cart quantity on server:", err);
+    }
+  };
+
+  const handleRemoveItem = async (id: string) => {
+    removeItem(id);
+    try {
+      await removeCartItemMutation(id).unwrap();
+    } catch (err) {
+      console.error("Failed to remove cart item on server:", err);
+    }
+  };
+
+  const handleClearCart = async () => {
+    clearCart();
+    setShowClearConfirm(false);
+    try {
+      await clearCartMutation().unwrap();
+    } catch (err) {
+      console.error("Failed to clear cart on server:", err);
+    }
+  };
+
   const handleSaveForLater = (item: CartItem) => {
     addToWishlist(item.product);
-    removeItem(item.id);
+    handleRemoveItem(item.id);
     setSaveToast(`Moved "${item.product.name}" to your Saved for Later shelf.`);
     setTimeout(() => setSaveToast(null), 3000);
   };
 
-  const handleMoveBackToCart = (product: Product) => {
+  const handleMoveBackToCart = async (product: Product) => {
     addItem(product, 1);
     removeFromWishlist(product.id);
     setSaveToast(`Moved "${product.name}" back into your Cart.`);
     setTimeout(() => setSaveToast(null), 3000);
+    try {
+      await addToCartMutation({ productId: product.id, quantity: 1 }).unwrap();
+    } catch (err) {
+      console.error("Failed to add to cart on server:", err);
+    }
   };
 
-  // Cross-sell items
+  const handleAddCrossSell = async (product: Product) => {
+    addItem(product, 1);
+    try {
+      await addToCartMutation({ productId: product.id, quantity: 1 }).unwrap();
+    } catch (err) {
+      console.error("Failed to add accessory to server cart:", err);
+    }
+  };
+
+  // Cross-sell items from real catalog products
   const crossSellAccessories = useMemo(() => {
-    return products
+    const catalog = productsData?.data || [];
+    return catalog
       .filter((p) => !items.some((item) => item.product.id === p.id))
       .slice(0, 3);
-  }, [items]);
+  }, [productsData, items]);
 
-  if (!mounted) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!mounted) return;
+    if (user?.role === "admin") {
+      router.replace(ROUTES.DASHBOARD);
+    } else if (!user) {
+      router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CART)}`);
+    }
+  }, [mounted, user, router]);
 
-  if (!user) {
-    router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CART)}`);
+  if (!mounted || user?.role === "admin" || !user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
@@ -179,10 +243,7 @@ export function CartView() {
                   <span className="text-xs font-semibold text-destructive">Clear all items?</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      clearCart();
-                      setShowClearConfirm(false);
-                    }}
+                    onClick={handleClearCart}
                     className="rounded-lg bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground hover:bg-destructive/90 transition-colors cursor-pointer"
                   >
                     Yes, Clear
@@ -210,7 +271,12 @@ export function CartView() {
         </div>
 
         {/* ── Empty State ── */}
-        {items.length === 0 ? (
+        {isCartLoading && items.length === 0 ? (
+          <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
+            <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+            <p className="text-xs font-semibold text-muted-foreground">Loading your cart from server...</p>
+          </div>
+        ) : items.length === 0 ? (
           <CartEmptyState wishlistCount={wishlistItems.length} />
         ) : (
           /* ── Content Stage (Line Items + Summary) ── */
@@ -227,8 +293,8 @@ export function CartView() {
               {/* 2. Primary Line Items Table */}
               <CartLineItemsTable
                 items={items}
-                onUpdateQuantity={updateQuantity}
-                onRemoveItem={removeItem}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemoveItem={handleRemoveItem}
                 onSaveForLater={handleSaveForLater}
               />
 
@@ -249,7 +315,7 @@ export function CartView() {
               {/* 4. Frequently Paired Tech Accessories */}
               <CartCrossSellAccessories
                 products={crossSellAccessories}
-                onAddToCart={(p) => addItem(p, 1)}
+                onAddToCart={handleAddCrossSell}
               />
 
               {/* 5. Saved for Later Shelf */}
