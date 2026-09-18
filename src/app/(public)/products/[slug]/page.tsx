@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { products, getProductBySlug, getProductsByCategory } from "@/data";
-import { ProductView } from "@/components/product-detail";
+import { ProductDetailView } from "./ProductDetailView";
 
 interface ProductPageProps {
   params: Promise<{
@@ -9,50 +7,19 @@ interface ProductPageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
-}
-
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
-
-  if (!product) {
-    return {
-      title: "Product Not Found | Telos Cart",
-    };
-  }
+  const formattedTitle = slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   return {
-    title: `${product.name} | Telos Cart BD`,
-    description: product.shortDescription,
-    openGraph: {
-      title: product.name,
-      description: product.shortDescription,
-      images: [product.thumbnail],
-    },
+    title: `${formattedTitle} | TelosCart Bangladesh`,
+    description: `Buy genuine ${formattedTitle} online in Bangladesh with official brand warranty and instant Dhaka delivery on TelosCart.`,
   };
 }
 
-export default async function ProductDetailPage({ params }: ProductPageProps) {
-  const { slug } = await params;
-  const product = getProductBySlug(slug);
-
-  if (!product) {
-    notFound();
-  }
-
-  // Related products in the same category excluding the current one
-  const relatedProducts = getProductsByCategory(product.categorySlug).filter(
-    (p) => p.id !== product.id
-  );
-
-  return (
-    <ProductView
-      product={product}
-      relatedProducts={relatedProducts}
-    />
-  );
+export default function ProductDetailPage({ params }: ProductPageProps) {
+  return <ProductDetailView params={params} />;
 }

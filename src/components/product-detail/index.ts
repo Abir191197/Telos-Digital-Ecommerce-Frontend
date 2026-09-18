@@ -3,6 +3,7 @@ export { ProductInfo } from "./ProductInfo";
 export { ProductActions } from "./ProductActions";
 export { ProductDeliveryTrustStrip } from "./ProductDeliveryTrustStrip";
 export { ProductSpecifications } from "./ProductSpecifications";
+export { ProductReviewsSection } from "./ProductReviewsSection";
 export { RelatedProducts } from "./RelatedProducts";
 export { RecentlyViewedProducts } from "./RecentlyViewedProducts";
 export { NotifyStockModal } from "./NotifyStockModal";

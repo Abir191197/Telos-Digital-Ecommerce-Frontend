@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { m, AnimatePresence } from "framer-motion";
 import {
@@ -16,6 +16,7 @@ import type { Product } from "@/types/ecommerce.types";
 
 interface ProductGalleryProps {
   product: Product;
+  activeImageUrl?: string;
   isWishlisted: boolean;
   onToggleWishlist: () => void;
   onShare: () => void;
@@ -24,16 +25,33 @@ interface ProductGalleryProps {
 
 export function ProductGallery({
   product,
+  activeImageUrl,
   isWishlisted,
   onToggleWishlist,
   onShare,
   showShareToast,
 }: ProductGalleryProps) {
-  const images =
+  const rawImages =
     product.images && product.images.length > 0
       ? product.images
       : [product.thumbnail];
+
+  // If variant image is provided and not in images array, prepend it
+  const images =
+    activeImageUrl && !rawImages.includes(activeImageUrl)
+      ? [activeImageUrl, ...rawImages]
+      : rawImages;
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (activeImageUrl) {
+      const idx = images.findIndex((img) => img === activeImageUrl);
+      if (idx !== -1) {
+        setActiveImageIndex(idx);
+      }
+    }
+  }, [activeImageUrl, images]);
 
   const touchStartXRef = useRef<number | null>(null);
   const touchEndXRef = useRef<number | null>(null);
@@ -72,7 +90,7 @@ export function ProductGallery({
 
   return (
     <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
-      {/* ── Mobile View: Swipeable Carousel Stage ── */}
+      {/* 📱 Mobile View: Swipeable Carousel Stage 📱 */}
       <div
         className="block lg:hidden relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20 select-none touch-pan-y"
         onTouchStart={handleTouchStart}
@@ -205,10 +223,10 @@ export function ProductGallery({
         )}
       </div>
 
-      {/* ── Desktop View: Traditional Media Stage + Thumbnails (Hidden on Mobile) ── */}
+      {/* 🖥️ Desktop View: Traditional Media Stage + Thumbnails (Hidden on Mobile) 🖥️ */}
       <div className="hidden lg:block space-y-4">
         {/* Main Stage Image */}
-        <div className="group relative aspect-square w-full overflow-hidden rounded-3xl">
+        <div className="group relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20 border border-border/60">
           <AnimatePresence mode="wait">
             <m.div
               key={activeImageIndex}
@@ -300,24 +318,24 @@ export function ProductGallery({
 
         {/* Thumbnail Strip */}
         {images.length > 1 && (
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar p-2">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar p-1">
             {images.map((img, idx) => (
               <button
                 key={img + idx}
                 type="button"
                 onClick={() => setActiveImageIndex(idx)}
                 className={cn(
-                  "relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer border-2",
+                  "relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer border-2 bg-muted/20",
                   activeImageIndex === idx
-                    ? "border-amber-500 shadow-sm opacity-100 scale-105"
-                    : "border-transparent opacity-60 hover:opacity-100 hover:border-border/60"
+                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
+                    : "border-border/60 hover:border-border opacity-70 hover:opacity-100"
                 )}
               >
                 <Image
                   src={img}
-                  alt={`${product.name} thumb ${idx + 1}`}
+                  alt={`Thumbnail ${idx + 1}`}
                   fill
-                  sizes="72px"
+                  sizes="80px"
                   className="object-cover object-center"
                 />
               </button>

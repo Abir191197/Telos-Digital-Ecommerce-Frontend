@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Star, X, Upload, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Star, X, Upload, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomerReview } from "./accountNavData";
+import { useCreateReviewMutation } from "@/services/api/reviews/reviewApi";
 
 interface WriteReviewModalProps {
   item: {
@@ -30,31 +30,52 @@ export function WriteReviewModal({
   onClose,
   onSubmitReview,
 }: WriteReviewModalProps) {
+  const [createReviewMutation] = useCreateReviewMutation();
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
   const [mockPhotoUploaded, setMockPhotoUploaded] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen || !item) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      onSubmitReview({
-        productId: item.productId,
-        productName: item.productName,
-        productThumbnail: item.productThumbnail,
-        rating,
-        comment,
-        hasPhoto: mockPhotoUploaded,
-      });
-      setIsSubmitting(false);
-      onClose();
-    }, 400);
+    setErrorMsg(null);
+
+    try {
+      if (item.productId) {
+        await createReviewMutation({
+          productId: item.productId,
+          rating,
+          comment: comment.trim(),
+        }).unwrap();
+      }
+    } catch (err: any) {
+      console.warn("Backend review submission notice:", err);
+      // If backend throws an error, we display it or fall back gracefully
+      if (err?.data?.message) {
+        setErrorMsg(err.data.message);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    onSubmitReview({
+      productId: item.productId,
+      productName: item.productName,
+      productThumbnail: item.productThumbnail,
+      rating,
+      comment,
+      hasPhoto: mockPhotoUploaded,
+    });
+
+    setIsSubmitting(false);
+    onClose();
   };
 
   const ratingDescriptions = [
@@ -76,7 +97,7 @@ export function WriteReviewModal({
               <span>Verified Customer Review</span>
             </div>
             <h3 className="text-base font-bold text-foreground">
-              Rate & Review Product
+              Rate & Review Delivered Item
             </h3>
           </div>
           <button
@@ -91,6 +112,13 @@ export function WriteReviewModal({
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 overscroll-contain">
+          {errorMsg && (
+            <div className="p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           {/* Product mini card */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-border/70">
             <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
@@ -105,8 +133,9 @@ export function WriteReviewModal({
               <p className="text-xs font-bold text-foreground truncate">
                 {item.productName}
               </p>
-              <p className="text-[10px] text-muted-foreground">
-                Official BD Warranty Unit
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                Delivered & Verified Purchase
               </p>
             </div>
           </div>
@@ -150,7 +179,7 @@ export function WriteReviewModal({
               rows={4}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="How is the build quality, performance, and battery life? Your feedback helps fellow shoppers in Bangladesh..."
+              placeholder="How is the quality, performance, and durability? Your feedback helps fellow shoppers in Bangladesh..."
               className="w-full rounded-2xl border border-border/80 bg-background p-3 text-xs text-foreground focus:border-amber-500 focus:outline-none resize-none leading-relaxed"
             />
           </div>
@@ -182,7 +211,7 @@ export function WriteReviewModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !comment.trim()}
               className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? "Publishing..." : "Submit Review"}

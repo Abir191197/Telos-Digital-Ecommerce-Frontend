@@ -19,18 +19,25 @@ interface ProductDesktopTableProps {
 }
 
 function formatDate(dateStr?: string) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   try {
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "—";
+    if (isNaN(d.getTime())) return "-";
     return d.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
   } catch {
-    return "—";
+    return "-";
   }
+}
+
+function formatShortTitle(title: string, wordLimit = 12): string {
+  if (!title) return "";
+  const words = title.trim().split(/\s+/);
+  if (words.length <= wordLimit) return title;
+  return words.slice(0, wordLimit).join(" ") + "...";
 }
 
 export function ProductDesktopTable({
@@ -92,7 +99,7 @@ export function ProductDesktopTable({
                     ? Number((prod as any).costPrice)
                     : null;
                 const subCat = prod.subCategoryName || (prod as any).subCategory?.name;
-                const brandName = prod.brand || (prod as any).brand?.name || "—";
+                const brandName = prod.brand || (prod as any).brand?.name || "-";
                 const profitMargin =
                   costPrice !== null && sellingPrice > costPrice
                     ? sellingPrice - costPrice
@@ -126,10 +133,14 @@ export function ProductDesktopTable({
                       </button>
                     </td>
 
-                    {/* Product Thumbnail & Name */}
+                    {/* Product Thumbnail & Name - Clickable directly to /products/[slug] */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-11 w-11 rounded-xl overflow-hidden border border-border/60 shrink-0 bg-muted/30">
+                        <Link
+                          href={`/products/${prod.slug}`}
+                          className="relative h-11 w-11 rounded-xl overflow-hidden border border-border/60 shrink-0 bg-muted/30 hover:opacity-85 transition-opacity block cursor-pointer"
+                          title="View live product"
+                        >
                           {prod.thumbnail ? (
                             <Image
                               src={prod.thumbnail}
@@ -143,12 +154,16 @@ export function ProductDesktopTable({
                               No Pic
                             </div>
                           )}
-                        </div>
-                        <div className="min-w-0 max-w-xs xl:max-w-sm">
-                          <p className="font-extrabold text-foreground truncate" title={prod.name}>
-                            {prod.name}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground font-mono">
+                        </Link>
+                        <div className="min-w-0 max-w-[220px] lg:max-w-[280px] xl:max-w-[340px]">
+                          <Link
+                            href={`/products/${prod.slug}`}
+                            className="font-extrabold text-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-2 block text-xs leading-snug cursor-pointer"
+                            title={prod.name}
+                          >
+                            {formatShortTitle(prod.name, 12)}
+                          </Link>
+                          <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5">
                             SKU: {prod.sku || "N/A"}
                           </p>
                         </div>
@@ -170,76 +185,87 @@ export function ProductDesktopTable({
                         </span>
                         {subCat && (
                           <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium mt-0.5 whitespace-nowrap">
-                            <span className="text-amber-500 font-bold">&rsaquo;</span>
+                            <span>↳</span>
                             <span>{subCat}</span>
                           </span>
                         )}
                       </div>
                     </td>
 
-                    {/* Separate Column: Selling Price */}
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <span className="font-mono font-black text-foreground text-sm">
+                    {/* Selling Price */}
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono">
+                      <span className="font-black text-foreground">
                         ৳{sellingPrice.toLocaleString()}
                       </span>
+                      {prod.originalPrice && prod.originalPrice > sellingPrice && (
+                        <div className="text-[10px] text-muted-foreground line-through">
+                          ৳{prod.originalPrice.toLocaleString()}
+                        </div>
+                      )}
                     </td>
 
-                    {/* Separate Column: Purchase Price / Cost */}
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                    {/* Purchase Price & Margin */}
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono">
                       {costPrice !== null ? (
                         <div className="flex flex-col items-end">
-                          <span className="font-mono font-bold text-foreground/80 text-xs">
+                          <span className="text-foreground/90 font-bold">
                             ৳{costPrice.toLocaleString()}
                           </span>
                           {profitMargin !== null && (
-                            <span className="text-[9.5px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                              +{profitPercent}% margin
+                            <span
+                              className={cn(
+                                "text-[10px] font-semibold mt-0.5 px-1.5 py-0.2 rounded-sm",
+                                profitMargin >= 0
+                                  ? "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10"
+                                  : "text-rose-700 dark:text-rose-400 bg-rose-500/10"
+                              )}
+                            >
+                              +{profitPercent}%
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground text-xs font-mono">—</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </td>
 
-                    {/* Stock Column */}
+                    {/* Stock Status */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <span
-                        className={cn(
-                          "font-mono font-bold text-xs px-2.5 py-1 rounded-lg inline-block",
-                          prod.stock <= 0
-                            ? "text-rose-600 dark:text-rose-400 bg-rose-500/10"
-                            : prod.stock <= 5
-                            ? "text-amber-600 dark:text-amber-400 bg-amber-500/10"
-                            : "text-foreground bg-muted/50"
-                        )}
-                      >
-                        {prod.stock} units
-                      </span>
-                    </td>
-
-                    {/* Stock Health Badge */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
                       {prod.stock <= 0 ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-600 px-2.5 py-0.5 text-[10px] font-bold uppercase">
-                          Out of Stock
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 px-2.5 py-0.5 text-[10px] font-bold">
+                          0 units
                         </span>
                       ) : prod.stock <= 5 ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 px-2.5 py-0.5 text-[10px] font-bold uppercase">
-                          Low Stock
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2.5 py-0.5 text-[10px] font-bold font-mono">
+                          {prod.stock} units
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 text-[10px] font-bold uppercase">
-                          In Stock
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 text-[10px] font-bold font-mono">
+                          {prod.stock} units
                         </span>
                       )}
                     </td>
 
-                    {/* Separate Column: Created / Updated Info */}
+                    {/* Status Pill */}
                     <td className="py-3.5 px-4 whitespace-nowrap">
-                      <div className="flex flex-col text-[11px] leading-tight space-y-0.5">
-                        <div className="flex items-center gap-1.5 text-foreground font-medium">
-                          <span className="text-[9.5px] uppercase font-bold text-muted-foreground tracking-wider">
+                      {prod.isActive ?? true ? (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Published
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                          Draft
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Timestamps */}
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div className="flex flex-col text-[11px]">
+                        <div className="flex items-center gap-1.5 text-foreground/80">
+                          <span className="text-[9.5px] uppercase font-bold text-muted-foreground/80 tracking-wider">
                             Created:
                           </span>
                           <span className="font-mono">{formatDate(prod.createdAt)}</span>

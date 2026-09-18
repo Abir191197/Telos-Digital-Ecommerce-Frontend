@@ -1,6 +1,6 @@
 import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
-import type { Product } from "@/types/ecommerce.types";
+import type { Product, ProductVariant, ProductReview } from "@/types/ecommerce.types";
 
 export type ProductVariantPayload = {
   id?: string;
@@ -111,6 +111,62 @@ export const normalizeProduct = (item: any): Product => {
 
   const images = rawImages.length > 0 ? rawImages : [thumbnail];
 
+  // Normalize variants
+  const variants: ProductVariant[] = Array.isArray(item.variants)
+    ? item.variants.map((v: any) => {
+        const vPrice = v.price !== null && v.price !== undefined ? Number(v.price) : price;
+        const vOriginalPrice = v.originalPrice !== null && v.originalPrice !== undefined ? Number(v.originalPrice) : originalPrice;
+        const vCostPrice = v.costPrice !== null && v.costPrice !== undefined ? Number(v.costPrice) : undefined;
+        const vStock = Number(v.stock) || 0;
+        const labels = [v.color, v.size, v.weight].filter(Boolean);
+        const name = v.name || (labels.length > 0 ? labels.join(" / ") : "Standard Edition");
+
+        return {
+          id: v.id,
+          productId: v.productId || item.id,
+          sku: v.sku || item.sku || "",
+          name,
+          color: v.color || null,
+          size: v.size || null,
+          weight: v.weight || null,
+          price: vPrice,
+          originalPrice: vOriginalPrice,
+          costPrice: vCostPrice,
+          stock: vStock,
+          inStock: vStock > 0,
+          image: v.image || null,
+          imageKey: v.imageKey || null,
+          isDeleted: Boolean(v.isDeleted),
+          createdAt: v.createdAt ? String(v.createdAt) : undefined,
+          updatedAt: v.updatedAt ? String(v.updatedAt) : undefined,
+        };
+      })
+    : [];
+
+  // Normalize reviews
+  const reviews: ProductReview[] = Array.isArray(item.reviews)
+    ? item.reviews.map((r: any) => ({
+        id: r.id,
+        productId: r.productId || item.id,
+        customerId: r.customerId,
+        rating: Number(r.rating) || 5,
+        title: r.title || null,
+        comment: r.comment || null,
+        isVerifiedPurchase: Boolean(r.isVerifiedPurchase),
+        createdAt: r.createdAt ? String(r.createdAt) : new Date().toISOString(),
+        updatedAt: r.updatedAt ? String(r.updatedAt) : undefined,
+        customer: r.customer
+          ? {
+              id: r.customer.id,
+              name: r.customer.name || "Verified Customer",
+              avatar: r.customer.avatar || null,
+            }
+          : undefined,
+      }))
+    : [];
+
+  const hasVariants = Boolean(item.hasVariants || variants.length > 0);
+
   return {
     ...item,
     id: item.id,
@@ -130,19 +186,36 @@ export const normalizeProduct = (item: any): Product => {
     originalPrice,
     discountPercentage,
     currency: "BDT",
-    rating: item.rating || 5.0,
-    reviewCount: item.reviewCount || 0,
+    rating: Number(item.rating) || 5.0,
+    reviewCount: Number(item.reviewCount) || reviews.length,
     stock: Number(item.stock) || 0,
     inStock: (Number(item.stock) || 0) > 0,
+    stockStatus: item.stockStatus,
+    lowStockThreshold: item.lowStockThreshold ? Number(item.lowStockThreshold) : 5,
     isFeatured: Boolean(item.isFeatured),
     isFlashDeal: Boolean(item.isFlashDeal),
     isNewArrival: Boolean(item.isNewArrival ?? true),
+    hasVariants,
+    hasVoucher: Boolean(item.hasVoucher),
+    voucherDiscountType: item.voucherDiscountType,
+    voucherDiscountValue: item.voucherDiscountValue ? Number(item.voucherDiscountValue) : null,
+    voucherCouponCode: item.voucherCouponCode,
+    showVoucherBadge: Boolean(item.showVoucherBadge),
+    showStorefrontBadge: Boolean(item.showStorefrontBadge),
+    storefrontBadgeText: item.storefrontBadgeText || null,
     badge: item.storefrontBadgeText || item.badge || undefined,
     images,
     thumbnail,
+    thumbnailKey: item.thumbnailKey || null,
     brand: item.brand?.name || (typeof item.brand === "string" ? item.brand : "Brand"),
+    brandSlug: item.brand?.slug,
+    brandImage: item.brand?.image,
     sku: item.sku || "",
     specifications: item.specifications || {},
+    warranty: item.warranty || null,
+    variants,
+    reviews,
+    tags: Array.isArray(item.tags) ? item.tags : [],
     createdAt: item.createdAt ? String(item.createdAt) : new Date().toISOString(),
     updatedAt: item.updatedAt ? String(item.updatedAt) : undefined,
   };

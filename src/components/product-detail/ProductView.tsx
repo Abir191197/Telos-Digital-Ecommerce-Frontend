@@ -5,9 +5,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { ROUTES } from "@/constants";
-import { useAddToCartMutation } from "@/services/api/cart/cartApi";
-import { useAddToWishlistMutation, useRemoveWishlistItemMutation } from "@/services/api/wishlist/wishlistApi";
-import { useCartStore, useWishlistStore, useRecentlyViewedStore, useAuthStore } from "@/stores";
+import { useCartStore, useWishlistStore, useRecentlyViewedStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { SupportAndHelpstrip, TrustGuaranteeCards } from "@/components/shared";
 import type { Product } from "@/types/ecommerce.types";
@@ -18,6 +16,7 @@ import {
   ProductActions,
   ProductDeliveryTrustStrip,
   ProductSpecifications,
+  ProductReviewsSection,
   RelatedProducts,
   RecentlyViewedProducts,
   NotifyStockModal,
@@ -25,7 +24,7 @@ import {
 
 interface ProductViewProps {
   product: Product;
-  relatedProducts: Product[];
+  relatedProducts?: Product[];
 }
 
 const sectionFadeUp: Variants = {
@@ -37,7 +36,7 @@ const sectionFadeUp: Variants = {
   },
 };
 
-export function ProductView({ product, relatedProducts }: ProductViewProps) {
+export function ProductView({ product, relatedProducts = [] }: ProductViewProps) {
   const mounted = useMounted();
 
   // Stores
@@ -48,18 +47,34 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
   const addRecentlyViewed = useRecentlyViewedStore((state) => state.addProduct);
   const rawRecentlyViewed = useRecentlyViewedStore((state) => state.items);
 
-  // Variant state
-  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
-    product.variants?.[0]?.id
-  );
-  const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId);
-  const currentPrice = selectedVariant?.price || product.price;
+  // Variant state: Auto-select the first in-stock variant, or the first variant
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(() => {
+    if (!product.variants || product.variants.length === 0) return undefined;
+    const inStockVariant = product.variants.find((v) => (v.stock ?? 0) > 0);
+    return inStockVariant ? inStockVariant.id : product.variants[0]?.id;
+  });
+
+  const selectedVariant = useMemo(() => {
+    if (!product.variants || product.variants.length === 0) return undefined;
+    return product.variants.find((v) => v.id === selectedVariantId) || product.variants[0];
+  }, [product.variants, selectedVariantId]);
+
+  const currentPrice = selectedVariant?.price ?? product.price;
+  const activeImageUrl = selectedVariant?.image || undefined;
 
   // Quantity & action state
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
   const [showNotifyStock, setShowNotifyStock] = useState(false);
+
+  // Keep quantity capped if variant stock changes
+  useEffect(() => {
+    const maxStock = selectedVariant ? selectedVariant.stock : product.stock;
+    if (maxStock > 0 && quantity > maxStock) {
+      setQuantity(maxStock);
+    }
+  }, [selectedVariant, product.stock, quantity]);
 
   // Recently viewed excluding current product
   const recentlyViewed = useMemo(() => {
@@ -94,7 +109,7 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen bg-background text-foreground pb-20">
-        {/* ── Breadcrumb Navigation ── */}
+        {/* 🧭 Breadcrumb Navigation 🧭 */}
         <nav aria-label="Breadcrumb" className="border-b border-border/40 bg-muted/10 py-3">
           <div className="container px-3 sm:px-6">
             <ol className="flex items-center gap-1.5 text-xs text-muted-foreground overflow-x-auto no-scrollbar whitespace-nowrap">
@@ -105,8 +120,8 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
               </li>
               <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
               <li>
-                <Link href={ROUTES.CATEGORIES} className="hover:text-foreground transition-colors">
-                  Categories
+                <Link href={ROUTES.PRODUCTS} className="hover:text-foreground transition-colors">
+                  Products
                 </Link>
               </li>
               <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/40" />
@@ -126,12 +141,13 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
           </div>
         </nav>
 
-        {/* ── Main Product Stage ── */}
+        {/* 🌟 Main Product Stage 🌟 */}
         <div className="container px-3 sm:px-6 py-6 sm:py-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-14 items-start">
             {/* Left Column: Media Gallery (6 cols on lg, sticky) */}
             <ProductGallery
               product={product}
+              activeImageUrl={activeImageUrl}
               isWishlisted={isWishlisted}
               onToggleWishlist={handleToggleWishlist}
               onShare={handleShare}
@@ -144,17 +160,19 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
                 <ProductInfo
                   product={product}
                   selectedVariantId={selectedVariantId}
+                  selectedVariant={selectedVariant}
                   onSelectVariant={setSelectedVariantId}
                   currentPrice={currentPrice}
                 />
 
                 <ProductActions
                   product={product}
+                  selectedVariant={selectedVariant}
                   quantity={quantity}
                   onQuantityChange={setQuantity}
                   isAdding={isAdding}
                   onAddToCart={handleAddToCart}
-                  onOpenNotifyStock={() => setShowNotifyStock(true)}
+                  onOpenNotifyStock={() => setShowNotifyStock(false)}
                 />
 
                 <ProductDeliveryTrustStrip />
@@ -162,26 +180,36 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
             </div>
           </div>
 
-          {/* ── Detailed Specifications & Description ── */}
+          {/* 📄 Detailed Specifications & Description 📄 */}
           <ProductSpecifications
             product={product}
             sectionFadeUp={sectionFadeUp}
           />
 
-          {/* ── Related Products from Same Aisle ── */}
-          <RelatedProducts
-            categorySlug={product.categorySlug}
-            relatedProducts={relatedProducts}
+          {/* ⭐ Customer Reviews & Ratings Section ⭐ */}
+          <ProductReviewsSection
+            product={product}
             sectionFadeUp={sectionFadeUp}
           />
 
-          {/* ── Recently Viewed Products Shelf ── */}
-          <RecentlyViewedProducts
-            recentlyViewed={recentlyViewed}
-            sectionFadeUp={sectionFadeUp}
-          />
+          {/* 📦 Related Products from Same Category 📦 */}
+          {relatedProducts.length > 0 && (
+            <RelatedProducts
+              categorySlug={product.categorySlug}
+              relatedProducts={relatedProducts}
+              sectionFadeUp={sectionFadeUp}
+            />
+          )}
 
-          {/* ── High-Density BD Trust & Guarantee Cards Strip ── */}
+          {/* 🕒 Recently Viewed Products Shelf 🕒 */}
+          {recentlyViewed.length > 0 && (
+            <RecentlyViewedProducts
+              recentlyViewed={recentlyViewed}
+              sectionFadeUp={sectionFadeUp}
+            />
+          )}
+
+          {/* 🛡️ High-Density BD Trust & Guarantee Cards Strip 🛡️ */}
           <m.section
             variants={sectionFadeUp}
             initial="hidden"
@@ -192,7 +220,7 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
             <TrustGuaranteeCards />
           </m.section>
 
-          {/* ── Customer Help & Dhaka Support Strip ── */}
+          {/* 📞 Customer Help & Dhaka Support Strip 📞 */}
           <m.section
             variants={sectionFadeUp}
             initial="hidden"
@@ -205,7 +233,7 @@ export function ProductView({ product, relatedProducts }: ProductViewProps) {
         </div>
       </div>
 
-      {/* ── Notify Me When In Stock Modal ── */}
+      {/* 🔔 Notify Me When In Stock Modal 🔔 */}
       <NotifyStockModal
         productName={product.name}
         productSlug={product.slug}

@@ -19,18 +19,25 @@ interface ProductCardItemProps {
 }
 
 function formatDate(dateStr?: string) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   try {
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "—";
+    if (isNaN(d.getTime())) return "-";
     return d.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
   } catch {
-    return "—";
+    return "-";
   }
+}
+
+function formatShortTitle(title: string, wordLimit = 12): string {
+  if (!title) return "";
+  const words = title.trim().split(/\s+/);
+  if (words.length <= wordLimit) return title;
+  return words.slice(0, wordLimit).join(" ") + "...";
 }
 
 export function ProductCardItem({
@@ -58,7 +65,7 @@ export function ProductCardItem({
         isSelected && "ring-2 ring-amber-500 bg-amber-500/[0.02]"
       )}
     >
-      {/* ── MOBILE VIEW: Compact Horizontal Card Layout ── */}
+      {/* 📱 MOBILE VIEW: Compact Horizontal Card Layout 📱 */}
       <div className="flex flex-col md:hidden gap-3">
         <div className="flex gap-3.5 items-center">
           {/* Left: Checkbox + Square Thumbnail with Stock Tag */}
@@ -76,14 +83,24 @@ export function ProductCardItem({
               )}
             </button>
 
-            <div className="relative h-20 w-20 rounded-2xl overflow-hidden bg-muted/40 shadow-xs">
-              <Image
-                src={product.thumbnail}
-                alt={product.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="80px"
-              />
+            <Link
+              href={`/products/${product.slug}`}
+              className="relative h-20 w-20 rounded-2xl overflow-hidden bg-muted/40 shadow-xs block shrink-0 cursor-pointer"
+              title="View live product"
+            >
+              {product.thumbnail ? (
+                <Image
+                  src={product.thumbnail}
+                  alt={product.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="80px"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-muted/60 text-[10px] font-bold text-muted-foreground">
+                  No Pic
+                </div>
+              )}
               {product.stock <= 0 ? (
                 <span className="absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-black uppercase tracking-wider bg-rose-600/90 text-white backdrop-blur-xs">
                   Out
@@ -93,7 +110,7 @@ export function ProductCardItem({
                   Low
                 </span>
               ) : null}
-            </div>
+            </Link>
           </div>
 
           {/* Right Info: Category & Subcategory, Title, Price, Cost, Stock */}
@@ -101,16 +118,20 @@ export function ProductCardItem({
             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span className="truncate max-w-[140px] font-medium">
                 {product.categoryName}
-                {subCat ? " › " + subCat : ""}
+                {subCat ? " > " + subCat : ""}
               </span>
               <span className="font-mono text-[10px] uppercase font-bold text-amber-500">
                 {brandName}
               </span>
             </div>
 
-            <h3 className="font-extrabold text-foreground text-sm leading-tight truncate">
-              {product.name}
-            </h3>
+            <Link
+              href={`/products/${product.slug}`}
+              className="font-extrabold text-foreground hover:text-amber-600 dark:hover:text-amber-400 text-sm leading-tight line-clamp-2 block transition-colors cursor-pointer"
+              title={product.name}
+            >
+              {formatShortTitle(product.name, 12)}
+            </Link>
 
             <div className="flex items-center justify-between pt-0.5 text-xs">
               <div className="flex flex-col">
@@ -179,17 +200,29 @@ export function ProductCardItem({
         </div>
       </div>
 
-      {/* ── DESKTOP VIEW: High-End Visual Card Format ── */}
+      {/* 💻 DESKTOP VIEW: High-End Visual Card Format 💻 */}
       <div className="hidden md:flex flex-col space-y-3.5">
         {/* Cover Image + Checkbox + Brand Badge */}
         <div className="relative h-44 w-full rounded-2xl overflow-hidden bg-muted/30">
-          <Image
-            src={product.thumbnail}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
-            sizes="(max-width: 768px) 100vw, 350px"
-          />
+          <Link
+            href={`/products/${product.slug}`}
+            className="block h-full w-full cursor-pointer"
+            title="View live product"
+          >
+            {product.thumbnail ? (
+              <Image
+                src={product.thumbnail}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
+                sizes="(max-width: 768px) 100vw, 350px"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-muted/60 text-xs font-bold text-muted-foreground">
+                No Picture
+              </div>
+            )}
+          </Link>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
@@ -217,20 +250,24 @@ export function ProductCardItem({
           </div>
 
           {/* Bottom Overlay Info: Category, Subcategory and SKU */}
-          <div className="absolute bottom-2.5 inset-x-3 flex items-center justify-between text-[10px] text-white/90 font-mono">
+          <div className="absolute bottom-2.5 inset-x-3 flex items-center justify-between text-[10px] text-white/90 font-mono pointer-events-none">
             <span className="font-semibold truncate max-w-[65%]">
               {product.categoryName}
-              {subCat ? " › " + subCat : ""}
+              {subCat ? " > " + subCat : ""}
             </span>
             <span className="opacity-80">SKU: {product.sku || "N/A"}</span>
           </div>
         </div>
 
-        {/* Product Title */}
+        {/* Product Title - Clickable directly to /products/[slug] */}
         <div>
-          <h3 className="font-extrabold text-foreground text-sm leading-snug line-clamp-2" title={product.name}>
-            {product.name}
-          </h3>
+          <Link
+            href={`/products/${product.slug}`}
+            className="font-extrabold text-foreground hover:text-amber-600 dark:hover:text-amber-400 text-sm leading-snug line-clamp-2 block transition-colors cursor-pointer"
+            title={product.name}
+          >
+            {formatShortTitle(product.name, 12)}
+          </Link>
         </div>
 
         {/* Desktop Card Separate Selling & Cost Price */}
@@ -249,7 +286,7 @@ export function ProductCardItem({
               Purchase Price
             </span>
             <span className="font-mono font-bold text-xs text-foreground/80">
-              {costPrice !== null ? "৳" + costPrice.toLocaleString() : "—"}
+              {costPrice !== null ? "৳" + costPrice.toLocaleString() : "-"}
             </span>
           </div>
         </div>
