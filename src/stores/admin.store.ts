@@ -35,9 +35,11 @@ export interface AdminReview {
   id: string;
   productId: string;
   productName: string;
+  productSlug?: string;
   productThumbnail: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string | null;
   rating: number; // 1 to 5
   title?: string;
   comment: string;

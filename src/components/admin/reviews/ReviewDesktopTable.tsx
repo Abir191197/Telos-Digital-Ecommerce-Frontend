@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   MoreVertical,
   Eye,
@@ -9,6 +10,8 @@ import {
   Trash2,
   CheckCircle2,
   Flag,
+  ExternalLink,
+  FileText,
 } from "lucide-react";
 import type { AdminReview } from "@/stores";
 import { RatingStars, ReviewStatusBadge } from "./ReviewBadges";
@@ -20,6 +23,7 @@ interface ReviewDesktopTableProps {
   setActiveMenuId: (id: string | null) => void;
   onToggleVisibility: (id: string, status?: "published" | "hidden" | "flagged") => void;
   onDelete: (id: string) => void;
+  onViewReview?: (review: AdminReview) => void;
 }
 
 export function ReviewDesktopTable({
@@ -28,6 +32,7 @@ export function ReviewDesktopTable({
   setActiveMenuId,
   onToggleVisibility,
   onDelete,
+  onViewReview,
 }: ReviewDesktopTableProps) {
   return (
     <div className="hidden md:block rounded-3xl bg-card border-none overflow-visible shadow-[0_8px_24px_-4px_rgba(0,0,0,0.06),0_16px_40px_-8px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.45),0_18px_50px_-8px_rgba(0,0,0,0.35)]">
@@ -56,6 +61,9 @@ export function ReviewDesktopTable({
             ) : (
               reviews.map((rev) => {
                 const isMenuOpen = activeMenuId === rev.id;
+                const productHref = rev.productSlug
+                  ? `/products/${rev.productSlug}`
+                  : `/products/${rev.productId}`;
 
                 return (
                   <tr
@@ -65,26 +73,39 @@ export function ReviewDesktopTable({
                       rev.status === "hidden" && "opacity-75 bg-muted/10"
                     )}
                   >
-                    {/* Product */}
+                    {/* Product: Clickable Link to Storefront Product Page */}
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-11 w-11 rounded-xl overflow-hidden bg-muted/40 shrink-0 border border-border/50">
-                          <Image
-                            src={rev.productThumbnail}
-                            alt={rev.productName}
-                            fill
-                            className="object-cover"
-                          />
+                      <Link
+                        href={productHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/prod flex items-center gap-3 cursor-pointer"
+                        title={`View ${rev.productName} in storefront (opens in new tab)`}
+                      >
+                        <div className="relative h-11 w-11 rounded-xl overflow-hidden bg-muted/40 shrink-0 border border-border/50 group-hover/prod:border-amber-500/50 transition-colors">
+                          {rev.productThumbnail ? (
+                            <Image
+                              src={rev.productThumbnail}
+                              alt={rev.productName}
+                              fill
+                              className="object-cover group-hover/prod:scale-105 transition-transform duration-200"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-[9px] text-muted-foreground font-bold">
+                              No Pic
+                            </div>
+                          )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-foreground truncate max-w-[180px]">
-                            {rev.productName}
+                          <p className="font-bold text-foreground truncate max-w-[180px] group-hover/prod:text-amber-600 dark:group-hover/prod:text-amber-400 flex items-center gap-1 transition-colors">
+                            <span className="truncate">{rev.productName}</span>
+                            <ExternalLink className="h-3 w-3 shrink-0 opacity-0 group-hover/prod:opacity-100 text-amber-500 transition-opacity" />
                           </p>
-                          <p className="text-[10px] font-mono text-muted-foreground">
-                            ID: {rev.productId}
+                          <p className="text-[10px] font-mono text-muted-foreground truncate max-w-[180px]">
+                            {rev.productSlug ? `/${rev.productSlug}` : `ID: ${rev.productId}`}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
 
                     {/* Customer */}
@@ -105,12 +126,16 @@ export function ReviewDesktopTable({
                       </p>
                     </td>
 
-                    {/* Rating & Review */}
+                    {/* Rating & Review (Click to view full review) */}
                     <td className="py-3.5 px-4">
-                      <div className="space-y-1">
+                      <div
+                        onClick={() => onViewReview?.(rev)}
+                        className="space-y-1 cursor-pointer group/rev"
+                        title="Click to view full review details"
+                      >
                         <RatingStars rating={rev.rating} />
                         {rev.title && (
-                          <p className="font-bold text-foreground text-xs">
+                          <p className="font-bold text-foreground text-xs group-hover/rev:text-amber-600 dark:group-hover/rev:text-amber-400 transition-colors">
                             {rev.title}
                           </p>
                         )}
@@ -150,6 +175,21 @@ export function ReviewDesktopTable({
 
                       {isMenuOpen && (
                         <div className="absolute right-4 top-10 z-40 w-44 rounded-2xl border border-border/80 bg-popover/95 backdrop-blur-xl p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-left">
+                          {/* View Full Review in Modal */}
+                          {onViewReview && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onViewReview(rev);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/80 rounded-xl transition-colors text-left cursor-pointer"
+                            >
+                              <FileText className="h-3.5 w-3.5 text-amber-500" />
+                              <span>View Full Review</span>
+                            </button>
+                          )}
+
                           {rev.status === "hidden" ? (
                             <button
                               type="button"

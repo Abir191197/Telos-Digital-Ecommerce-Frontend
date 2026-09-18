@@ -5,3 +5,4 @@ export * from "./ReviewDesktopTable";
 export * from "./ReviewCardGrid";
 export * from "./ReviewMobileList";
 export * from "./ReviewMobileFilterModal";
+export * from "./ReviewDetailModal";

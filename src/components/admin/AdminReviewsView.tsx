@@ -10,8 +10,11 @@ import {
   Eye,
   EyeOff,
   Filter,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
-import { useAdminStore, AdminReview } from "@/stores";
+import type { AdminReview } from "@/stores";
 import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
 import { PaymentFloatingFilterFab } from "@/components/admin/payments/PaymentFloatingFilterFab";
 import {
@@ -21,16 +24,24 @@ import {
   ReviewCardGrid,
   ReviewMobileList,
   ReviewMobileFilterModal,
+  ReviewDetailModal,
 } from "./reviews";
 import {
   ProductConfirmDialog,
   type ConfirmationDialogState,
 } from "@/components/admin/products/ProductConfirmDialog";
+import {
+  useGetAdminReviewsQuery,
+  useGetAdminReviewsSummaryQuery,
+  useToggleReviewVisibilityMutation,
+  useDeleteReviewMutation,
+  AdminReviewsQueryParams,
+} from "@/services/api/reviews/reviewApi";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 8;
 
 export function AdminReviewsView() {
-  const { reviews, toggleReviewVisibility, deleteReview } = useAdminStore();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<
@@ -39,6 +50,103 @@ export function AdminReviewsView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
+
+  // Selected review for the Detail Modal
+  const [viewingReview, setViewingReview] = useState<AdminReview | null>(null);
+
+  // Toast feedback state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  // Build real query params for backend
+  const queryParams: AdminReviewsQueryParams = useMemo(() => {
+    const params: AdminReviewsQueryParams = {
+      page: currentPage,
+      limit: PAGE_SIZE,
+      searchTerm: searchQuery.trim() || undefined,
+    };
+
+    if (statusFilter !== "all") {
+      params.status = statusFilter.toUpperCase();
+    }
+
+    if (ratingFilter !== "all") {
+      params.rating = Number(ratingFilter);
+    }
+
+    if (sortBy === "rating-desc") {
+      params.sortBy = "rating";
+      params.sortOrder = "desc";
+    } else if (sortBy === "rating-asc") {
+      params.sortBy = "rating";
+      params.sortOrder = "asc";
+    } else if (sortBy === "date-asc") {
+      params.sortBy = "createdAt";
+      params.sortOrder = "asc";
+    } else {
+      params.sortBy = "createdAt";
+      params.sortOrder = "desc";
+    }
+
+    return params;
+  }, [currentPage, searchQuery, statusFilter, ratingFilter, sortBy]);
+
+  // RTK Query hooks connecting to real PostgreSQL database
+  const {
+    data: reviewsResponse,
+    isLoading: isReviewsLoading,
+    isFetching,
+  } = useGetAdminReviewsQuery(queryParams);
+
+  const {
+    data: summaryData,
+    isLoading: isSummaryLoading,
+  } = useGetAdminReviewsSummaryQuery();
+
+  const [toggleVisibilityMutation] = useToggleReviewVisibilityMutation();
+  const [deleteReviewMutation] = useDeleteReviewMutation();
+
+  const backendReviews = reviewsResponse?.data || [];
+  const totalItems = reviewsResponse?.meta?.total ?? 0;
+  const totalPages = Math.max(1, reviewsResponse?.meta?.totalPage ?? 1);
+
+  // Map backend structure to the UI components' expected AdminReview interface
+  const reviews: AdminReview[] = useMemo(() => {
+    return backendReviews.map((r) => ({
+      id: r.id,
+      productId: r.productId,
+      productName: r.product?.name || "Product",
+      productSlug: r.product?.slug || "",
+      productThumbnail: r.product?.thumbnail || "",
+      customerName: r.customer?.name || "Customer",
+      customerEmail: r.customer?.email || "",
+      customerPhone: r.customer?.phone || null,
+      rating: r.rating,
+      title: r.title || undefined,
+      comment: r.comment || "",
+      date: r.createdAt,
+      verifiedPurchase: r.isVerifiedPurchase,
+      status: (r.status?.toLowerCase() || (r.isVisible ? "published" : "hidden")) as
+        | "published"
+        | "hidden"
+        | "flagged",
+    }));
+  }, [backendReviews]);
+
+  // Keep viewingReview updated if its status changed in live queries
+  useEffect(() => {
+    if (viewingReview) {
+      const updated = reviews.find((r) => r.id === viewingReview.id);
+      if (updated) {
+        setViewingReview(updated);
+      }
+    }
+  }, [reviews]);
 
   // Desktop view mode toggle (Table vs Cards)
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -144,84 +252,72 @@ export function AdminReviewsView() {
     }
   }, [openDropdown, activeMenuId]);
 
-  // Review List Filter & Sort Logic
-  const filteredReviews = useMemo(() => {
-    return reviews
-      .filter((r) => {
-        const matchesStatus =
-          statusFilter === "all" || r.status === statusFilter;
-        const matchesRating =
-          ratingFilter === "all" || r.rating.toString() === ratingFilter;
-        const q = searchQuery.toLowerCase().trim();
-        const matchesSearch =
-          !q ||
-          r.productName.toLowerCase().includes(q) ||
-          r.customerName.toLowerCase().includes(q) ||
-          r.customerEmail.toLowerCase().includes(q) ||
-          r.comment.toLowerCase().includes(q) ||
-          r.title?.toLowerCase().includes(q);
-
-        return matchesStatus && matchesRating && matchesSearch;
-      })
-      .sort((a, b) => {
-        if (sortBy === "date-desc") {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }
-        if (sortBy === "date-asc") {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        }
-        if (sortBy === "rating-desc") {
-          return b.rating - a.rating;
-        }
-        if (sortBy === "rating-asc") {
-          return a.rating - b.rating;
-        }
-        return 0;
-      });
-  }, [reviews, statusFilter, ratingFilter, searchQuery, sortBy]);
-
-  const totalPages = Math.ceil(filteredReviews.length / PAGE_SIZE) || 1;
-  const paginatedReviews = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredReviews.slice(start, start + PAGE_SIZE);
-  }, [filteredReviews, currentPage]);
-
-  // KPI Calculations
-  const avgRating = useMemo(() => {
-    if (reviews.length === 0) return 5.0;
-    const total = reviews.reduce((sum, r) => sum + r.rating, 0);
-    return total / reviews.length;
-  }, [reviews]);
-
-  const hiddenCount = useMemo(() => {
-    return reviews.filter((r) => r.status === "hidden").length;
-  }, [reviews]);
-
-  const flaggedCount = useMemo(() => {
-    return reviews.filter((r) => r.status === "flagged").length;
-  }, [reviews]);
+  // KPI Calculations directly from PostgreSQL database summary
+  const totalCount = summaryData?.totalCount ?? totalItems;
+  const avgRating = summaryData?.avgRating ?? 5.0;
+  const hiddenCount = summaryData?.hiddenCount ?? 0;
+  const flaggedCount = summaryData?.flaggedCount ?? 0;
 
   const isFiltered =
     statusFilter !== "all" || ratingFilter !== "all" || sortBy !== "date-desc";
+
+  // Action Handlers
+  const handleToggleVisibility = async (
+    reviewId: string,
+    targetStatus?: "published" | "hidden" | "flagged"
+  ) => {
+    try {
+      const normalizedStatus = targetStatus
+        ? (targetStatus.toUpperCase() as "PUBLISHED" | "HIDDEN" | "FLAGGED")
+        : undefined;
+      await toggleVisibilityMutation({
+        id: reviewId,
+        status: normalizedStatus,
+      }).unwrap();
+
+      showToast("Review visibility updated successfully.");
+    } catch (err: any) {
+      showToast(err?.data?.message || "Failed to update review visibility.");
+    }
+  };
 
   const handleDeletePrompt = (reviewId: string) => {
     const target = reviews.find((r) => r.id === reviewId);
     setConfirmDialog({
       isOpen: true,
       title: "Delete Review Permanently",
-      message: `Are you sure you want to delete the review by "${target?.customerName || "customer"}" on "${target?.productName}"? This action cannot be reversed.`,
+      message: `Are you sure you want to delete the review by "${
+        target?.customerName || "customer"
+      }" on "${target?.productName}"? This action cannot be reversed.`,
       confirmLabel: "Delete Review",
       variant: "danger",
-      onConfirm: () => {
-        deleteReview(reviewId);
-        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      onConfirm: async () => {
+        try {
+          await deleteReviewMutation(reviewId).unwrap();
+          if (viewingReview?.id === reviewId) {
+            setViewingReview(null);
+          }
+          showToast("Review deleted successfully.");
+        } catch (err: any) {
+          showToast(err?.data?.message || "Failed to delete review.");
+        } finally {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        }
       },
     });
   };
 
   return (
     <div className="w-full space-y-5 sm:space-y-6">
-      {/* ── Mobile Dedicated Sticky Search Bar ── */}
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[10000] flex items-center gap-2.5 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 animate-in slide-in-from-bottom-5 duration-200">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          <p className="text-xs font-bold">{toastMessage}</p>
+        </div>
+      )}
+
+      {/* Mobile Dedicated Sticky Search Bar */}
       <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 sm:-mt-6 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
         <div className="relative w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -247,7 +343,7 @@ export function AdminReviewsView() {
         </div>
       </div>
 
-      {/* ── Desktop Top Header Banner (Hidden on Mobile) ── */}
+      {/* Desktop Top Header Banner (Hidden on Mobile) */}
       <div className="hidden sm:flex flex-row items-center justify-between gap-4 border-b border-border/70 pb-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2.5">
@@ -267,15 +363,15 @@ export function AdminReviewsView() {
         </div>
       </div>
 
-      {/* ── KPI Cards Strip (Mobile Swipe / Desktop 4-Grid) ── */}
+      {/* KPI Cards Strip (Mobile Swipe / Desktop 4-Grid) */}
       <ReviewKpiStrip
-        totalCount={reviews.length}
+        totalCount={totalCount}
         avgRating={avgRating}
         hiddenCount={hiddenCount}
         flaggedCount={flaggedCount}
       />
 
-      {/* ── Thematic Desktop Filter Dock (rounded-3xl) ── */}
+      {/* Thematic Desktop Filter Dock (rounded-3xl) */}
       <ReviewFilterDock
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -292,44 +388,55 @@ export function AdminReviewsView() {
         onResetPage={() => setCurrentPage(1)}
       />
 
-      {/* ── Desktop Table or Card Grid View ── */}
+      {/* Loading Overlay State indicator */}
+      {isFetching && (
+        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground py-1">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
+          <span>Synchronizing reviews with database...</span>
+        </div>
+      )}
+
+      {/* Desktop Table or Card Grid View */}
       <div className="hidden md:block">
         {viewMode === "table" ? (
           <ReviewDesktopTable
-            reviews={paginatedReviews}
+            reviews={reviews}
             activeMenuId={activeMenuId}
             setActiveMenuId={setActiveMenuId}
-            onToggleVisibility={toggleReviewVisibility}
+            onToggleVisibility={handleToggleVisibility}
             onDelete={handleDeletePrompt}
+            onViewReview={(rev) => setViewingReview(rev)}
           />
         ) : (
           <ReviewCardGrid
-            reviews={paginatedReviews}
+            reviews={reviews}
             activeMenuId={activeMenuId}
             setActiveMenuId={setActiveMenuId}
-            onToggleVisibility={toggleReviewVisibility}
+            onToggleVisibility={handleToggleVisibility}
             onDelete={handleDeletePrompt}
+            onViewReview={(rev) => setViewingReview(rev)}
           />
         )}
       </div>
 
-      {/* ── Mobile Card List View ── */}
+      {/* Mobile Card List View */}
       <ReviewMobileList
-        reviews={paginatedReviews}
-        onToggleVisibility={toggleReviewVisibility}
+        reviews={reviews}
+        onToggleVisibility={handleToggleVisibility}
         onDelete={handleDeletePrompt}
+        onViewReview={(rev) => setViewingReview(rev)}
       />
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       <CategoryPagination
         currentPage={currentPage}
         totalPages={totalPages}
         pageSize={PAGE_SIZE}
-        totalItems={filteredReviews.length}
+        totalItems={totalItems}
         onPageChange={(page) => setCurrentPage(page)}
       />
 
-      {/* ── Mobile Draggable Floating Filter Button ── */}
+      {/* Mobile Draggable Floating Filter Button */}
       <PaymentFloatingFilterFab
         position={fabPosition}
         onPointerDown={handlePointerDown}
@@ -338,7 +445,7 @@ export function AdminReviewsView() {
         isFiltered={isFiltered}
       />
 
-      {/* ── Mobile Fullscreen Filters Modal ── */}
+      {/* Mobile Fullscreen Filters Modal */}
       <ReviewMobileFilterModal
         isOpen={showMobileFilters}
         onClose={() => setShowMobileFilters(false)}
@@ -357,7 +464,7 @@ export function AdminReviewsView() {
           setSortBy(sort);
           setCurrentPage(1);
         }}
-        totalResults={filteredReviews.length}
+        totalResults={totalItems}
         openDropdown={openDropdown}
         setOpenDropdown={setOpenDropdown}
         onReset={() => {
@@ -368,7 +475,16 @@ export function AdminReviewsView() {
         }}
       />
 
-      {/* ── Confirmation Modal for Review Delete ── */}
+      {/* Small Detail Modal for Viewing Full Review */}
+      <ReviewDetailModal
+        review={viewingReview}
+        isOpen={Boolean(viewingReview)}
+        onClose={() => setViewingReview(null)}
+        onToggleVisibility={handleToggleVisibility}
+        onDelete={handleDeletePrompt}
+      />
+
+      {/* Confirmation Dialog for Destructive Actions */}
       <ProductConfirmDialog
         dialog={confirmDialog}
         onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
