@@ -1,4 +1,4 @@
-export * from "./AdminLayout";
+﻿export * from "./AdminLayout";
 export * from "./AdminSidebar";
 export * from "./AdminHeader";
 export * from "./DashboardOverview";
@@ -22,3 +22,5 @@ export * from "./carts";
 
 export * from "./AdminCartsListView";
 export * from "./AdminWishlistsListView";
+
+export * from "./inventory";

@@ -102,12 +102,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         icon: Boxes,
         children: [
           { title: "Stock Overview", href: "/dashboard/inventory" },
-          {
-            title: "Low Stock Watchlist",
-            href: "/dashboard/inventory?filter=low",
-            badge: "5",
-          },
-          { title: "Warehouse Logs", href: "/dashboard/inventory?tab=warehouse" },
+          { title: "Stock Audit Logs", href: "/dashboard/inventory/audit" },
         ],
       },
     ],

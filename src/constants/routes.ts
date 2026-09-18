@@ -1,4 +1,4 @@
-// ── Application Route Constants ────────────────────────
+﻿// ── Application Route Constants ────────────────────────
 
 export const ROUTES = {
   // Public
@@ -42,6 +42,8 @@ export const ROUTES = {
   SETTINGS: "/settings",
   REVIEWS: "/dashboard/reviews",
   ACTIVITY: "/dashboard/activity",
+  ADMIN_INVENTORY: "/dashboard/inventory",
+  ADMIN_INVENTORY_AUDIT: "/dashboard/inventory/audit",
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -78,5 +80,6 @@ export const PROTECTED_ROUTES = [
   ROUTES.ACCOUNT_HUB,
   ROUTES.SETTINGS,
   ROUTES.ADMIN_CARTS,
-  ROUTES.ADMIN_WISHLISTS,
+  ROUTES.ADMIN_INVENTORY,
+  ROUTES.ADMIN_INVENTORY_AUDIT,
 ] as const;

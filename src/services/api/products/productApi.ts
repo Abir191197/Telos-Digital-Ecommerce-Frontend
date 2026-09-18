@@ -1,4 +1,4 @@
-import { baseApi } from "@/lib/rtk-query/baseApi";
+﻿import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
 import type { Product, ProductVariant, ProductReview } from "@/types/ecommerce.types";
 
@@ -78,6 +78,9 @@ export type ProductQueryParams = {
   isActive?: boolean;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  stockFilter?: string;
+  minStock?: number;
+  maxStock?: number;
 };
 
 type BackendMeta = {
@@ -326,6 +329,18 @@ export const productApi = baseApi.injectEndpoints({
       providesTags: ["Product"],
     }),
 
+    getInventorySummary: builder.query<{
+      total: number;
+      outOfStock: number;
+      criticalLow: number;
+      reserveLow: number;
+      inStock: number;
+    }, void>({
+      query: () => "/products/admin/inventory-summary",
+      transformResponse: (response: ApiResponse<any>) => response.data,
+      providesTags: ["Product"],
+    }),
+
     getProductBySlug: builder.query<Product, string>({
       query: (slug) => `/products/slug/${slug}`,
       transformResponse: (response: ApiResponse<any>) => normalizeProduct(response.data),
@@ -373,6 +388,7 @@ export const productApi = baseApi.injectEndpoints({
 export const {
   useGetProductsQuery,
   useGetAdminProductsQuery,
+  useGetInventorySummaryQuery,
   useGetProductBySlugQuery,
   useGetProductByIdQuery,
   useCreateProductMutation,
