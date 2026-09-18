@@ -44,6 +44,7 @@ export const ROUTES = {
   ACTIVITY: "/dashboard/activity",
   ADMIN_INVENTORY: "/dashboard/inventory",
   ADMIN_INVENTORY_AUDIT: "/dashboard/inventory/audit",
+  CUSTOMERS: "/dashboard/customers",
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -82,4 +83,5 @@ export const PROTECTED_ROUTES = [
   ROUTES.ADMIN_CARTS,
   ROUTES.ADMIN_INVENTORY,
   ROUTES.ADMIN_INVENTORY_AUDIT,
+  ROUTES.CUSTOMERS,
 ] as const;

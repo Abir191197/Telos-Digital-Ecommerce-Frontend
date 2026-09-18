@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  Users,
   ShoppingBag,
   Package,
   FolderTree,
@@ -44,6 +45,11 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         title: "Overview",
         href: ROUTES.DASHBOARD,
         icon: LayoutDashboard,
+      },
+      {
+        title: "Customers",
+        href: "/dashboard/customers",
+        icon: Users,
       },
       {
         title: "Orders",
