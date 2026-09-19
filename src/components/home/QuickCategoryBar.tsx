@@ -171,7 +171,7 @@ export function QuickCategoryBar() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
-          className="flex lg:grid lg:grid-cols-8 gap-3 sm:gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none scroll-smooth snap-x snap-mandatory"
+          className="flex lg:grid lg:grid-cols-8 gap-3 sm:gap-4 overflow-x-auto lg:overflow-visible pb-8 pt-2 px-1 scrollbar-none scroll-smooth snap-x snap-mandatory"
         >
           {topCategories.map((cat, idx) => {
             const Icon = getCategoryIcon(cat.icon);
@@ -187,7 +187,7 @@ export function QuickCategoryBar() {
               >
                 <Link
                   href={ROUTES.CATEGORY_DETAIL(cat.slug)}
-                  className="group relative flex flex-col items-center justify-between p-4 h-[160px] sm:h-[175px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-all duration-300 overflow-hidden text-center select-none"
+                  className="group relative flex flex-col items-center justify-between p-4 h-[160px] sm:h-[175px] rounded-3xl bg-card text-card-foreground shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.5),0_6px_10px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_35px_-8px_rgba(0,0,0,0.12),0_10px_15px_-6px_rgba(245,158,11,0.08)] dark:hover:shadow-[0_22px_40px_-8px_rgba(0,0,0,0.7),0_10px_20px_-6px_rgba(245,158,11,0.15)] transition-all duration-300 overflow-hidden text-center select-none"
                 >
                   {/* Subtle organic ambient backlight on hover - borderless design */}
                   <div
