@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { useGetMyOrderByIdQuery } from "@/services/api/orders/orderApi";
 import { Order } from "@/types/order.types";
 import { ROUTES } from "@/constants";
 import {
@@ -65,27 +65,26 @@ function ConfettiEffect() {
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId") || "TC-DEMO";
-  const { orders } = useAuthStore();
+  const orderId = searchParams.get("orderId") || "";
+  const { data: backendOrderData } = useGetMyOrderByIdQuery(orderId, {
+    skip: !orderId,
+  });
 
   const [order, setOrder] = useState<Order | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   useEffect(() => {
-    // 1. Try finding in store
-    const found = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
-    if (found) {
-      setOrder(found);
+    if (backendOrderData?.data) {
+      setOrder(backendOrderData.data);
       return;
     }
 
-    // 2. Try session storage fallback
     if (typeof window !== "undefined") {
       const stored = sessionStorage.getItem("last_order");
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (parsed.id === orderId || parsed.orderNumber === orderId) {
+          if (!orderId || parsed.id === orderId || parsed.orderNumber === orderId) {
             setOrder(parsed);
           }
         } catch (e) {
@@ -93,7 +92,7 @@ export default function CheckoutSuccessPage() {
         }
       }
     }
-  }, [orderId, orders]);
+  }, [orderId, backendOrderData]);
 
   const handlePrintInvoice = () => {
     if (typeof window !== "undefined") {

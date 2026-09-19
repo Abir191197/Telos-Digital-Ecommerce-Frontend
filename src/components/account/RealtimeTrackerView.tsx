@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { useGetMyOrdersQuery, useGetMyOrderByIdQuery } from "@/services/api/orders/orderApi";
 import { Order } from "@/types/order.types";
 import { OrderTrackingTimeline } from "./OrderTrackingTimeline";
 import {
@@ -25,20 +25,20 @@ export function RealtimeTrackerView() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("orderId") || "";
 
-  const { orders } = useAuthStore();
+    const { data: myOrdersData } = useGetMyOrdersQuery();
   const [query, setQuery] = useState(initialQuery);
-  const [searchedOrder, setSearchedOrder] = useState<Order | null>(() => {
-    if (!initialQuery) return null;
-    return (
-      orders.find(
-        (o) =>
-          o.id.toLowerCase() === initialQuery.toLowerCase() ||
-          o.orderNumber.toLowerCase() === initialQuery.toLowerCase() ||
-          o.trackingNumber?.toLowerCase() === initialQuery.toLowerCase()
-      ) || null
-    );
-  });
+  const [searchedOrder, setSearchedOrder] = useState<Order | null>(null);
   const [hasSearched, setHasSearched] = useState(Boolean(initialQuery));
+
+  const { data: directOrderData } = useGetMyOrderByIdQuery(query, {
+    skip: !query || query.length < 3,
+  });
+
+  React.useEffect(() => {
+    if (directOrderData?.data) {
+      setSearchedOrder(directOrderData.data);
+    }
+  }, [directOrderData]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,15 +46,22 @@ export function RealtimeTrackerView() {
     if (!clean) return;
 
     setHasSearched(true);
-    const found = orders.find(
+    const ordersList = myOrdersData?.data || [];
+    const found = ordersList.find(
       (o) =>
         o.id.toLowerCase() === clean ||
         o.orderNumber.toLowerCase() === clean ||
         o.orderNumber.toLowerCase().includes(clean) ||
         o.trackingNumber?.toLowerCase() === clean ||
-        o.shippingAddress.phone.replace(/\D/g, "").includes(clean.replace(/\D/g, ""))
+        o.shippingAddress?.phone?.replace(/\D/g, "").includes(clean.replace(/\D/g, ""))
     );
-    setSearchedOrder(found || null);
+    if (found) {
+      setSearchedOrder(found);
+    } else if (directOrderData?.data) {
+      setSearchedOrder(directOrderData.data);
+    } else {
+      setSearchedOrder(null);
+    }
   };
 
   return (
@@ -107,25 +114,7 @@ export function RealtimeTrackerView() {
             </button>
           </form>
 
-          {/* Quick Demo Pill Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground pt-1">
-            <span className="text-[11px]">Quick samples:</span>
-            {orders.slice(0, 3).map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                onClick={() => {
-                  setQuery(o.orderNumber);
-                  setSearchedOrder(o);
-                  setHasSearched(true);
-                }}
-                className="font-mono text-[11px] font-bold bg-muted/50 hover:bg-amber-500 hover:text-zinc-950 px-2.5 py-1 rounded-full border border-border/60 transition-all cursor-pointer"
-              >
-                #{o.orderNumber}
-              </button>
-            ))}
           </div>
-        </div>
       </section>
 
       {/* ── Main Content Container ── */}

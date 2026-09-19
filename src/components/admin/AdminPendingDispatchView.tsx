@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Order } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
+import { useGetAllOrdersQuery, useAssignCourierTrackingMutation, useUpdateOrderStatusMutation } from "@/services/api/orders/orderApi";
 import { KpiCard } from "./dashboard/KpiCard";
 import {
   DispatchCardItem,
@@ -32,7 +33,12 @@ import {
 } from "./dispatch";
 
 export function AdminPendingDispatchView() {
-  const { orders, updateOrderStatus, assignCourierTracking } = useAdminStore();
+    const { updateOrderStatus, assignCourierTracking } = useAdminStore();
+  const { data: backendOrdersData } = useGetAllOrdersQuery();
+  const [assignCourierTrackingMutation] = useAssignCourierTrackingMutation();
+  const [updateOrderStatusMutation] = useUpdateOrderStatusMutation();
+
+  const orders = backendOrdersData?.data ?? [];
 
   const [viewMode, setViewMode] = useState<"card" | "table">("table");
   const [searchQuery, setSearchQuery] = useState("");

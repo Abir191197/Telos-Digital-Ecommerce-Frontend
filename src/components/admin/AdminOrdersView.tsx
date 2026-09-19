@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { useAdminStore } from "@/stores";
@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Order, OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
+import { useGetAllOrdersQuery, useGetOrderStatsQuery, useUpdateOrderStatusMutation, useAssignCourierTrackingMutation } from "@/services/api/orders/orderApi";
 import { KpiCard } from "./dashboard/KpiCard";
 import {
   OrderCardItem,
@@ -34,13 +35,22 @@ export function AdminOrdersView() {
   const searchParams = useSearchParams();
   const initialStatus = searchParams?.get("status") || "all";
 
-  const { orders, updateOrderStatus, assignCourierTracking } = useAdminStore();
-
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
+
+  const { updateOrderStatus, assignCourierTracking } = useAdminStore();
+  const { data: backendOrdersData } = useGetAllOrdersQuery({
+    searchTerm: searchQuery || undefined,
+    status: statusFilter !== "all" ? (statusFilter.toUpperCase() as any) : undefined,
+  });
+  const { data: statsData } = useGetOrderStatsQuery();
+  const [updateOrderStatusMutation] = useUpdateOrderStatusMutation();
+  const [assignCourierTrackingMutation] = useAssignCourierTrackingMutation();
+
+  const orders = backendOrdersData?.data ?? [];
 
   // Mobile Draggable Floating Filter State
   const [showMobileFilters, setShowMobileFilters] = useState(false);

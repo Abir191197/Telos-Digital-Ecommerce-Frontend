@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import Link from "next/link";
 import { User, ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
@@ -21,7 +21,7 @@ export function AccountUnauthenticatedState() {
           href={ROUTES.LOGIN}
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-6 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
         >
-          <span>Sign In with 1-Tap Demo</span>
+          <span>Sign In to Your Account</span>
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>

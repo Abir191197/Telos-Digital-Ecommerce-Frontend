@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +7,7 @@ import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { CustomerSidebar } from "./CustomerSidebar";
+import { useGetMyOrdersQuery, useCancelMyOrderMutation } from "@/services/api/orders/orderApi";
 import {
   INITIAL_REVIEWS,
   type AccountTabKey,
@@ -52,8 +53,6 @@ export function CustomerAccountHub() {
   const mounted = useMounted();
 
   const user = useAuthStore((state) => state.user);
-  const orders = useAuthStore((state) => state.orders);
-  const cancelOrder = useAuthStore((state) => state.cancelOrder);
   const updateUser = useAuthStore((state) => state.updateUser);
   const storeLogout = useAuthStore((state) => state.logout);
   const addAddress = useAuthStore((state) => state.addAddress);
@@ -72,7 +71,14 @@ export function CustomerAccountHub() {
     : "overview";
 
   const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
-  const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
+    const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
+
+  const { data: myOrdersData } = useGetMyOrdersQuery(undefined, {
+    skip: !user,
+  });
+  const [cancelMyOrderMutation] = useCancelMyOrderMutation();
+
+  const displayOrders = myOrdersData?.data ?? [];
 
   // Return tickets and Reviews state
   const [returnTickets, setReturnTickets] = useState<ReturnTicketData[]>([]);
@@ -180,7 +186,7 @@ export function CustomerAccountHub() {
         ) : (
           <AccountMobileMenu
             user={user}
-            orders={orders}
+            orders={displayOrders}
             wishlistCount={wishlistItems.length}
             pendingReviewCount={pendingReviewCount}
             onSelectTab={handleSelectTab}
@@ -197,7 +203,7 @@ export function CustomerAccountHub() {
             user={user}
             activeTab={activeTab}
             onSelectTab={handleSelectTab}
-            orderCount={orders.length}
+            orderCount={displayOrders.length}
             wishlistCount={wishlistItems.length}
             pendingReviewCount={pendingReviewCount}
             onLogout={logout}
@@ -214,7 +220,7 @@ export function CustomerAccountHub() {
           <AccountTabContent
             activeTab={activeTab}
             user={user}
-            orders={orders}
+            orders={displayOrders}
             wishlistItems={wishlistItems}
             reviews={reviews}
             returnTickets={returnTickets}
@@ -224,9 +230,13 @@ export function CustomerAccountHub() {
             onUpdateAddress={updateAddress}
             onDeleteAddress={deleteAddress}
             onSetDefaultAddress={setDefaultAddress}
-            onCancelOrder={(orderNumber, reason) =>
-              cancelOrder(orderNumber, reason)
-            }
+            onCancelOrder={async (orderNumber, reason) => {
+              try {
+                await cancelMyOrderMutation({ id: orderNumber, reason }).unwrap();
+              } catch (err) {
+                console.error("Cancel order error:", err);
+              }
+            }}
             onAddReturnTicket={(ticket) => {
               setReturnTickets((prev) => [ticket, ...prev]);
               handleSelectTab("returns");

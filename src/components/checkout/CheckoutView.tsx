@@ -10,6 +10,7 @@ import {
 } from "@/validations/checkout.schema";
 import { useCartStore, useAuthStore } from "@/stores";
 import { useClearCartMutation } from "@/services/api/cart/cartApi";
+import { useCreateOrderMutation, CreateOrderPayload } from "@/services/api/orders/orderApi";
 import { useMounted } from "@/hooks";
 import { Address, Order } from "@/types/order.types";
 import { ROUTES } from "@/constants";
@@ -26,6 +27,7 @@ export function CheckoutView() {
   const router = useRouter();
   const mounted = useMounted();
   const [clearCartMutation] = useClearCartMutation();
+  const [createOrderMutation] = useCreateOrderMutation();
 
   const {
     items,
@@ -37,7 +39,7 @@ export function CheckoutView() {
     clearCart,
   } = useCartStore();
 
-  const { user, addOrder } = useAuthStore();
+  const { user } = useAuthStore();
 
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,58 +122,47 @@ export function CheckoutView() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call & payment processing
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const generatedOrderId = `TC-${Math.floor(10000 + Math.random() * 90000)}`;
-
-      const newOrder: Order = {
-        id: generatedOrderId,
-        orderNumber: generatedOrderId,
-        createdAt: new Date().toISOString(),
-        status: "pending",
+      const orderPayload: CreateOrderPayload = {
         items: items.map((item) => ({
-          id: item.id,
           productId: item.product.id,
+          variantId: item.variant?.id,
           productName: item.product.name,
           productThumbnail: item.product.thumbnail,
+          productSku: item.product.sku,
           variantName: item.variant?.name,
-          quantity: item.quantity,
           unitPrice: item.unitPrice,
-          subtotal: item.subtotal,
+          quantity: item.quantity,
         })),
-        shippingAddress: {
-          id: "addr-" + Date.now(),
+        customerDetails: {
           name: values.fullName,
           phone: values.phone,
+          email: values.email || user?.email || undefined,
           street: values.street,
           area: values.city,
           city: values.city,
           zone: values.zone,
           postalCode: values.postalCode || "1200",
-          isDefault: false,
           label: "Home",
+          deliveryNote: values.deliveryNote || undefined,
         },
-        paymentMethod: values.paymentMethod,
-        paymentStatus: values.paymentMethod === "cod" ? "unpaid" : "paid",
-        subtotal,
+        transaction: {
+          paymentMethod: values.paymentMethod,
+          trxId: values.trxId || undefined,
+          mfsNumber: values.mfsNumber || undefined,
+          amount: totalPayable,
+        },
         deliveryFee: shippingFee,
         discount: discountAmount,
-        total: totalPayable,
-        trackingNumber: `TRK-${Math.floor(100000 + Math.random() * 900000)}`,
-        courierName: values.zone === "inside-dhaka" ? "Telos Express BD" : "Steadfast Courier",
-        estimatedDelivery: values.zone === "inside-dhaka" ? "Tomorrow (within 24h)" : "Within 2–3 Days",
+        couponCode: appliedCoupon?.code || undefined,
       };
 
-      // Add to store
-      addOrder(newOrder);
+      const result = await createOrderMutation(orderPayload).unwrap();
+      const placedOrder = result.data;
 
-      // Save latest order ID in session storage for quick confirmation lookup
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("last_order", JSON.stringify(newOrder));
+        sessionStorage.setItem("last_order", JSON.stringify(placedOrder));
       }
 
-      // Empty cart
       clearCart();
       try {
         await clearCartMutation().unwrap();
@@ -179,10 +170,11 @@ export function CheckoutView() {
         console.error("Failed to clear server cart on checkout:", e);
       }
 
-      // Redirect to confirmation page
-      router.push(`/checkout/success?orderId=${generatedOrderId}`);
-    } catch (err) {
-      console.error(err);
+      const targetOrderId = placedOrder?.orderNumber || placedOrder?.id || "";
+      router.push(targetOrderId ? `/checkout/success?orderId=${targetOrderId}` : "/checkout/success");
+    } catch (err: any) {
+      console.error("Order placement error:", err);
+      alert(err?.data?.message || err?.message || "Order placement failed. Please try again.");
       setIsSubmitting(false);
     }
   };
