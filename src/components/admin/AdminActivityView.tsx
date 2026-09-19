@@ -11,6 +11,11 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { INITIAL_ACTIVITY_LOGS, ActivityLog } from "@/data/activity-logs";
+import {
+  useGetActivityLogsQuery,
+  useGetActivitySummaryQuery,
+} from "@/services/api/activity/activityApi";
+import { Loader2 } from "lucide-react";
 import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
 import { PaymentFloatingFilterFab } from "@/components/admin/payments/PaymentFloatingFilterFab";
 import {
@@ -25,7 +30,22 @@ import {
 const PAGE_SIZE = 8;
 
 export function AdminActivityView() {
-  const [logs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+  // Live RTK Query Activity Stream & Summary
+  const {
+    data: activityResponse,
+    isFetching,
+    refetch,
+  } = useGetActivityLogsQuery({
+    limit: 100,
+  });
+  const { data: summaryResponse } = useGetActivitySummaryQuery();
+
+  const logs = useMemo(() => {
+    if (activityResponse?.data && activityResponse.data.length > 0) {
+      return activityResponse.data;
+    }
+    return INITIAL_ACTIVITY_LOGS;
+  }, [activityResponse]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
