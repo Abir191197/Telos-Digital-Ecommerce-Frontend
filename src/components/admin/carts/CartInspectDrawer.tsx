@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { AdminCustomerCart } from "@/data/customer-carts";
+import { AdminCustomerCart } from "@/types/customer-cart.types";
 import { CartStatusBadge } from "./CartStatusBadge";
 import { X, Mail, Phone, MapPin, Tag, ShoppingBag, Send } from "lucide-react";
 

@@ -1,6 +1,6 @@
 import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
-import type { ActivityLog } from "@/data/activity-logs";
+import type { ActivityLog } from "@/types/activity.types";
 
 export interface ActivityLogQueryParams {
   page?: number;

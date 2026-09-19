@@ -42,10 +42,10 @@ export default function ForgotPasswordPage() {
 
               <div className="pt-3 space-y-2">
                 <Link
-                  href={`${ROUTES.RESET_PASSWORD}?token=demo_security_token_bd_${Date.now()}`}
+                  href={ROUTES.LOGIN}
                   className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all"
                 >
-                  <span>Open Reset Link (Simulate)</span>
+                  <span>Return to Sign In</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 

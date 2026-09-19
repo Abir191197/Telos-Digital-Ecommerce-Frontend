@@ -1,5 +1,4 @@
-import React from "react";
-import { CustomerCartStatus } from "@/data/customer-carts";
+import { CustomerCartStatus } from "@/types/customer-cart.types";
 import { ShoppingBag, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 

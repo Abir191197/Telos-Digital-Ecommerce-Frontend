@@ -80,30 +80,3 @@ export interface CustomerReview {
   status: "published" | "pending_review";
 }
 
-export const INITIAL_REVIEWS: CustomerReview[] = [
-  {
-    id: "rev-1",
-    productId: "prod-0001",
-    productName: "Apple iPhone 16 Pro Max 256GB",
-    productThumbnail:
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
-    rating: 5,
-    date: "Sep 06, 2026",
-    comment:
-      "Original BTRC approved set. Delivery inside Dhaka took less than 24 hours with Steadfast. Camera and battery backup outstanding!",
-    verifiedPurchase: true,
-    status: "published",
-  },
-  {
-    id: "rev-2",
-    productId: "prod-0004",
-    productName: "Sony WH-1000XM5 Wireless Headphones",
-    productThumbnail:
-      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
-    rating: 0,
-    date: "Sep 08, 2026",
-    comment: "",
-    verifiedPurchase: true,
-    status: "pending_review",
-  },
-];

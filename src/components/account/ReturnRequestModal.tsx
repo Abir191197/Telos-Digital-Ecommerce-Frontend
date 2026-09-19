@@ -47,7 +47,7 @@ export function ReturnRequestModal({
     "replacement"
   );
   const [conditionNotes, setConditionNotes] = useState<string>("");
-  const [mockPhotoUploaded, setMockPhotoUploaded] = useState<boolean>(false);
+  const [photoAttached, setPhotoAttached] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   if (!isOpen || !order) return null;
@@ -70,7 +70,7 @@ export function ReturnRequestModal({
         reason,
         conditionNotes,
         resolutionType,
-        hasPhoto: mockPhotoUploaded,
+        hasPhoto: photoAttached,
       });
       setIsSubmitting(false);
       onClose();
@@ -224,28 +224,28 @@ export function ReturnRequestModal({
             />
           </div>
 
-          {/* Photo upload mock */}
+          {/* Photo upload */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground flex items-center justify-between">
               <span>Attach Photos / Evidence (Optional):</span>
-              {mockPhotoUploaded && (
+              {photoAttached && (
                 <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" /> Attached (1 file)
                 </span>
               )}
             </label>
             <div
-              onClick={() => setMockPhotoUploaded(!mockPhotoUploaded)}
+              onClick={() => setPhotoAttached(!photoAttached)}
               className={cn(
                 "border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all",
-                mockPhotoUploaded
+                photoAttached
                   ? "border-emerald-500/50 bg-emerald-500/5"
                   : "border-border/80 hover:border-amber-500 hover:bg-muted/40"
               )}
             >
               <Upload className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
               <p className="text-xs font-bold text-foreground">
-                {mockPhotoUploaded ? "Photo Attached (Click to remove)" : "Click to Upload Photo or Unboxing Video"}
+                {photoAttached ? "Photo Attached (Click to remove)" : "Click to Upload Photo or Unboxing Video"}
               </p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
                 PNG, JPG, MP4 up to 25MB

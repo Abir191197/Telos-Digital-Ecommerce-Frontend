@@ -34,7 +34,7 @@ export function WriteReviewModal({
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
-  const [mockPhotoUploaded, setMockPhotoUploaded] = useState<boolean>(false);
+  const [photoAttached, setPhotoAttached] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -71,7 +71,7 @@ export function WriteReviewModal({
       productThumbnail: item.productThumbnail,
       rating,
       comment,
-      hasPhoto: mockPhotoUploaded,
+      hasPhoto: photoAttached,
     });
 
     setIsSubmitting(false);
@@ -186,17 +186,17 @@ export function WriteReviewModal({
 
           {/* Photo attachment */}
           <div
-            onClick={() => setMockPhotoUploaded(!mockPhotoUploaded)}
+            onClick={() => setPhotoAttached(!photoAttached)}
             className={cn(
               "border-2 border-dashed rounded-2xl p-3 text-center cursor-pointer transition-all",
-              mockPhotoUploaded
+              photoAttached
                 ? "border-emerald-500/50 bg-emerald-500/5"
                 : "border-border/80 hover:border-amber-500 hover:bg-muted/40"
             )}
           >
             <Upload className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
             <span className="text-xs font-bold text-foreground block">
-              {mockPhotoUploaded ? "Photo Attached ✓ (Click to remove)" : "Add Unboxing Photo (Optional)"}
+              {photoAttached ? "Photo Attached ✓ (Click to remove)" : "Add Unboxing Photo (Optional)"}
             </span>
           </div>
 

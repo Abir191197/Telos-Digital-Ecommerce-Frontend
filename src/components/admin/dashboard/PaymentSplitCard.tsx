@@ -16,45 +16,6 @@ const CHANNEL_ICONS: Record<string, typeof Smartphone> = {
   card: CreditCard,
 };
 
-const EMPTY_CHANNELS = [
-  {
-    name: "Cash on Delivery",
-    method: "cod",
-    volume: "৳0",
-    rawVolume: 0,
-    pct: 0,
-    color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    barColor: "bg-amber-500",
-  },
-  {
-    name: "bKash MFS",
-    method: "bkash",
-    volume: "৳0",
-    rawVolume: 0,
-    pct: 0,
-    color: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
-    barColor: "bg-pink-500",
-  },
-  {
-    name: "Nagad Wallet",
-    method: "nagad",
-    volume: "৳0",
-    rawVolume: 0,
-    pct: 0,
-    color: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
-    barColor: "bg-orange-500",
-  },
-  {
-    name: "Visa / Mastercard",
-    method: "card",
-    volume: "৳0",
-    rawVolume: 0,
-    pct: 0,
-    color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-    barColor: "bg-blue-500",
-  },
-];
-
 export function PaymentSplitCard() {
   const [dateFilter, setDateFilter] = useState<DateFilterValue>({
     preset: "all_time",
@@ -68,11 +29,7 @@ export function PaymentSplitCard() {
 
   const paymentData = response?.data;
 
-  const channels =
-    paymentData?.channels && paymentData.channels.length > 0
-      ? paymentData.channels
-      : EMPTY_CHANNELS;
-
+  const channels = paymentData?.channels ?? [];
   const cashlessPct = paymentData?.cashlessPercentage ?? 0;
   const activeChannelsWithPct = channels.filter((p) => p.pct > 0);
 
@@ -142,42 +99,48 @@ export function PaymentSplitCard() {
         </div>
 
         {/* Channels List - Only Verified Payments from PostgreSQL */}
-        <div className="space-y-2 pt-2">
-          {channels.map((p) => {
-            const Icon = CHANNEL_ICONS[p.method] || Smartphone;
-            return (
-              <div
-                key={p.name}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-muted/60 transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-lg",
-                      p.color
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
+        {channels.length === 0 ? (
+          <div className="py-8 text-center text-xs text-muted-foreground">
+            No payment distribution data found
+          </div>
+        ) : (
+          <div className="space-y-2 pt-2">
+            {channels.map((p) => {
+              const Icon = CHANNEL_ICONS[p.method] || Smartphone;
+              return (
+                <div
+                  key={p.name}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-muted/60 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-lg",
+                        p.color
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground leading-none">
+                        {p.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                        {p.volume}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-foreground leading-none">
-                      {p.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                      {p.volume}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="text-right">
-                  <span className="font-mono font-bold text-xs text-foreground">
-                    {p.pct}%
-                  </span>
+                  <div className="text-right">
+                    <span className="font-mono font-bold text-xs text-foreground">
+                      {p.pct}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Footer Insight Note */}

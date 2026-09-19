@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ActivityLog } from "@/data/activity-logs";
+import { ActivityLog } from "@/types/activity.types";
 import { ActivitySeverityBadge, ActivityCategoryPill } from "./ActivityBadges";
 import { Clock, Globe, Laptop } from "lucide-react";
 import { cn } from "@/lib/utils";

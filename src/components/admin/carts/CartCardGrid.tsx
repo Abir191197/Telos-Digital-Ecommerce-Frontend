@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { AdminCustomerCart } from "@/data/customer-carts";
+import { AdminCustomerCart } from "@/types/customer-cart.types";
 import { CartStatusBadge } from "./CartStatusBadge";
 import { Clock, Eye, MapPin, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";

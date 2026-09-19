@@ -9,7 +9,7 @@ import {
   Box,
 } from "lucide-react";
 import Link from "next/link";
-import { INITIAL_CUSTOMER_CARTS, AdminCustomerCart } from "@/data/customer-carts";
+import { AdminCustomerCart } from "@/types/customer-cart.types";
 import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
 import { PaymentFloatingFilterFab } from "@/components/admin/payments/PaymentFloatingFilterFab";
 import {
@@ -24,7 +24,7 @@ import {
 const PAGE_SIZE = 8;
 
 export function AdminCustomerCartsView() {
-  const [carts] = useState<AdminCustomerCart[]>(INITIAL_CUSTOMER_CARTS);
+  const [carts] = useState<AdminCustomerCart[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "amount-desc" | "amount-asc">("date-desc");

@@ -5,16 +5,6 @@ import { TrendingUp, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetRevenueAnalyticsQuery } from "@/services/api/dashboard/dashboardApi";
 
-const FALLBACK_DAILY = [
-  { label: "Mon", revenue: 42000, orders: 4, secondary: 35000 },
-  { label: "Tue", revenue: 68000, orders: 7, secondary: 50000 },
-  { label: "Wed", revenue: 54000, orders: 5, secondary: 48000 },
-  { label: "Thu", revenue: 92000, orders: 9, secondary: 70000 },
-  { label: "Fri", revenue: 145000, orders: 14, secondary: 110000 },
-  { label: "Sat", revenue: 180000, orders: 18, secondary: 130000 },
-  { label: "Sun", revenue: 125000, orders: 11, secondary: 95000 },
-];
-
 export function RevenueChartCard() {
   const [viewMode, setViewMode] = useState<"daily" | "monthly">("daily");
   const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
@@ -22,12 +12,12 @@ export function RevenueChartCard() {
   const { data: response } = useGetRevenueAnalyticsQuery(viewMode);
   const analyticsData = response?.data;
 
-  const dataset = analyticsData?.data && analyticsData.data.length > 0 ? analyticsData.data : FALLBACK_DAILY;
-  const pace = analyticsData?.pace || "+24.6% Pace";
+  const dataset = analyticsData?.data && analyticsData.data.length > 0 ? analyticsData.data : [];
+  const pace = analyticsData?.pace || "0.0% Pace";
   const totalRevenue = analyticsData?.totalSales || dataset.reduce((acc, curr) => acc + curr.revenue, 0);
 
-  const maxRevenue = Math.max(...dataset.map((d) => d.revenue), 1000);
-  const minRevenue = Math.min(...dataset.map((d) => d.revenue), 0);
+  const maxRevenue = dataset.length > 0 ? Math.max(...dataset.map((d) => d.revenue), 1000) : 1000;
+  const minRevenue = dataset.length > 0 ? Math.min(...dataset.map((d) => d.revenue), 0) : 0;
 
   // SVG dimensions
   const width = 800;
@@ -40,18 +30,21 @@ export function RevenueChartCard() {
   const chartHeight = height - paddingTop - paddingBottom;
 
   // Coordinate mapping
-  const points = dataset.map((d, index) => {
-    const x = paddingX + (index / (dataset.length - 1)) * chartWidth;
-    const y =
-      height -
-      paddingBottom -
-      ((d.revenue - minRevenue) / (maxRevenue - minRevenue || 1)) * chartHeight;
-    const secondaryY =
-      height -
-      paddingBottom -
-      (((d.secondary || d.revenue * 0.8) - minRevenue) / (maxRevenue - minRevenue || 1)) * chartHeight;
-    return { ...d, x, y, secondaryY };
-  });
+  const points =
+    dataset.length > 0
+      ? dataset.map((d, index) => {
+          const x = paddingX + (index / (dataset.length > 1 ? dataset.length - 1 : 1)) * chartWidth;
+          const y =
+            height -
+            paddingBottom -
+            ((d.revenue - minRevenue) / (maxRevenue - minRevenue || 1)) * chartHeight;
+          const secondaryY =
+            height -
+            paddingBottom -
+            (((d.secondary || d.revenue * 0.8) - minRevenue) / (maxRevenue - minRevenue || 1)) * chartHeight;
+          return { ...d, x, y, secondaryY };
+        })
+      : [];
 
   // Generate smooth SVG bezier path
   const generateBezier = (pts: { x: number; y: number }[]) => {
@@ -186,124 +179,132 @@ export function RevenueChartCard() {
 
       {/* Neon Cyan/Indigo Wave SVG Canvas */}
       <div className="relative w-full overflow-hidden flex-1 min-h-[240px] pt-1">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-full overflow-visible"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient id="cyberCyanGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.32" />
-              <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-            </linearGradient>
+        {dataset.length === 0 ? (
+          <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center p-6">
+            <Activity className="h-8 w-8 text-muted-foreground/30 mb-2" />
+            <p className="text-xs font-semibold text-muted-foreground">No revenue records found</p>
+            <p className="text-[11px] text-muted-foreground/60 mt-0.5">Live metrics will plot automatically once transactions settle.</p>
+          </div>
+        ) : (
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="w-full h-full overflow-visible"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="cyberCyanGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.32" />
+                <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.12" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+              </linearGradient>
 
-            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#06b6d4" floodOpacity="0.35" />
-            </filter>
-          </defs>
+              <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#06b6d4" floodOpacity="0.35" />
+              </filter>
+            </defs>
 
-          {[0.25, 0.5, 0.75].map((ratio) => {
-            const y = height - paddingBottom - ratio * chartHeight;
-            return (
-              <g key={ratio}>
-                <line
-                  x1={paddingX}
-                  y1={y}
-                  x2={width - paddingX}
-                  y2={y}
-                  stroke="currentColor"
-                  strokeOpacity="0.07"
-                  strokeDasharray="4 6"
-                />
-              </g>
-            );
-          })}
-
-          <path
-            d={secondaryLine}
-            fill="none"
-            stroke="currentColor"
-            strokeOpacity="0.25"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
-            className="text-muted-foreground"
-          />
-
-          <path
-            d={primaryArea}
-            fill="url(#cyberCyanGlow)"
-          />
-
-          <path
-            d={primaryLine}
-            fill="none"
-            stroke="#06b6d4"
-            strokeWidth="3"
-            strokeLinecap="round"
-            filter="url(#neonGlow)"
-            className="transition-all duration-300"
-          />
-
-          {points.map((p, idx) => {
-            const isHovered = activePointIndex === idx || (activePointIndex === null && idx === points.length - 1);
-            return (
-              <g
-                key={p.label}
-                className="cursor-pointer"
-                onMouseEnter={() => setActivePointIndex(idx)}
-              >
-                {isHovered && (
+            {[0.25, 0.5, 0.75].map((ratio) => {
+              const y = height - paddingBottom - ratio * chartHeight;
+              return (
+                <g key={ratio}>
                   <line
-                    x1={p.x}
-                    y1={paddingTop}
-                    x2={p.x}
-                    y2={height - paddingBottom}
-                    stroke="#06b6d4"
-                    strokeOpacity="0.45"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 3"
+                    x1={paddingX}
+                    y1={y}
+                    x2={width - paddingX}
+                    y2={y}
+                    stroke="currentColor"
+                    strokeOpacity="0.07"
+                    strokeDasharray="4 6"
                   />
-                )}
+                </g>
+              );
+            })}
 
-                {isHovered && (
+            <path
+              d={secondaryLine}
+              fill="none"
+              stroke="currentColor"
+              strokeOpacity="0.25"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="text-muted-foreground"
+            />
+
+            <path
+              d={primaryArea}
+              fill="url(#cyberCyanGlow)"
+            />
+
+            <path
+              d={primaryLine}
+              fill="none"
+              stroke="#06b6d4"
+              strokeWidth="3"
+              strokeLinecap="round"
+              filter="url(#neonGlow)"
+              className="transition-all duration-300"
+            />
+
+            {points.map((p, idx) => {
+              const isHovered = activePointIndex === idx || (activePointIndex === null && idx === points.length - 1);
+              return (
+                <g
+                  key={p.label}
+                  className="cursor-pointer"
+                  onMouseEnter={() => setActivePointIndex(idx)}
+                >
+                  {isHovered && (
+                    <line
+                      x1={p.x}
+                      y1={paddingTop}
+                      x2={p.x}
+                      y2={height - paddingBottom}
+                      stroke="#06b6d4"
+                      strokeOpacity="0.45"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                    />
+                  )}
+
+                  {isHovered && (
+                    <circle
+                      cx={p.x}
+                      cy={p.y}
+                      r="9"
+                      fill="#06b6d4"
+                      fillOpacity="0.25"
+                      className="animate-pulse"
+                    />
+                  )}
+
                   <circle
                     cx={p.x}
                     cy={p.y}
-                    r="9"
-                    fill="#06b6d4"
-                    fillOpacity="0.25"
-                    className="animate-pulse"
+                    r={isHovered ? "5" : "3.5"}
+                    fill={isHovered ? "#06b6d4" : "#ffffff"}
+                    stroke="#06b6d4"
+                    strokeWidth="2.5"
+                    className="transition-all duration-150 shadow-xs"
                   />
-                )}
 
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={isHovered ? "5" : "3.5"}
-                  fill={isHovered ? "#06b6d4" : "#ffffff"}
-                  stroke="#06b6d4"
-                  strokeWidth="2.5"
-                  className="transition-all duration-150 shadow-xs"
-                />
-
-                <text
-                  x={p.x}
-                  y={height - 12}
-                  textAnchor="middle"
-                  className={cn(
-                    "text-[12px] transition-all select-none",
-                    isHovered
-                      ? "fill-cyan-500 dark:fill-cyan-400 font-bold"
-                      : "fill-muted-foreground font-medium"
-                  )}
-                >
-                  {p.label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+                  <text
+                    x={p.x}
+                    y={height - 12}
+                    textAnchor="middle"
+                    className={cn(
+                      "text-[12px] transition-all select-none",
+                      isHovered
+                        ? "fill-cyan-500 dark:fill-cyan-400 font-bold"
+                        : "fill-muted-foreground font-medium"
+                    )}
+                  >
+                    {p.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        )}
       </div>
     </div>
   );

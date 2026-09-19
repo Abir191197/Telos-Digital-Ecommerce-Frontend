@@ -10,7 +10,7 @@ import {
   RotateCcw,
   ShieldCheck,
 } from "lucide-react";
-import { INITIAL_ACTIVITY_LOGS, ActivityLog } from "@/data/activity-logs";
+import { ActivityLog } from "@/types/activity.types";
 import {
   useGetActivityLogsQuery,
   useGetActivitySummaryQuery,
@@ -41,11 +41,9 @@ export function AdminActivityView() {
   const { data: summaryResponse } = useGetActivitySummaryQuery();
 
   const logs = useMemo(() => {
-    if (activityResponse?.data && activityResponse.data.length > 0) {
-      return activityResponse.data;
-    }
-    return INITIAL_ACTIVITY_LOGS;
+    return activityResponse?.data ?? [];
   }, [activityResponse]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");

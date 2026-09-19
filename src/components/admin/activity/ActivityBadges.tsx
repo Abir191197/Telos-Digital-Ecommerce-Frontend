@@ -1,5 +1,4 @@
-import React from "react";
-import { ActivitySeverity, ActivityCategory } from "@/data/activity-logs";
+import { ActivitySeverity, ActivityCategory } from "@/types/activity.types";
 import {
   ShieldAlert,
   ShieldCheck,

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { CustomerSidebar } from "./CustomerSidebar";
 import { useGetMyOrdersQuery, useCancelMyOrderMutation } from "@/services/api/orders/orderApi";
 import {
-  INITIAL_REVIEWS,
   type AccountTabKey,
   type CustomerReview,
 } from "./accountNavData";
@@ -82,7 +81,7 @@ export function CustomerAccountHub() {
 
   // Return tickets and Reviews state
   const [returnTickets, setReturnTickets] = useState<ReturnTicketData[]>([]);
-  const [reviews, setReviews] = useState<CustomerReview[]>(INITIAL_REVIEWS);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
 
   // Sync state whenever URL query params change (Next.js router or browser back/forward)
   useEffect(() => {

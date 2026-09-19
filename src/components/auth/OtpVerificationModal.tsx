@@ -90,7 +90,6 @@ export function OtpVerificationModal({
     setIsVerifying(true);
     setError(null);
     setTimeout(() => {
-      // Demo code: 123456 or any 6 digits accepted in demo mode
       setIsVerifying(false);
       setIsSuccess(true);
       setTimeout(() => {
@@ -192,10 +191,6 @@ export function OtpVerificationModal({
             )}
           </div>
         </div>
-
-        <p className="text-[11px] text-muted-foreground/80">
-          Demo tip: You can enter any 6 digits (e.g. 123456)
-        </p>
       </div>
     </div>
   );

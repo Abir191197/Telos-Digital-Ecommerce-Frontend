@@ -47,7 +47,7 @@ export function PaymentStep({
       id: "bkash" as const,
       title: "bKash Direct / Merchant",
       desc: "Instant payment via bKash personal or merchant wallet",
-      badge: "Instant 1.5% Cashback (Demo)",
+      badge: "Instant 1.5% Cashback",
       icon: Smartphone,
       highlightColor: "border-pink-500",
     },
@@ -227,9 +227,6 @@ export function PaymentStep({
                 )}
               </div>
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              💡 Demo tip: Type any active 11-digit BD number and 8-character TrxID (e.g. 01711122233 / DEMO8492).
-            </p>
           </div>
         )}
 

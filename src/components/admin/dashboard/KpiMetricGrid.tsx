@@ -13,48 +13,48 @@ interface KpiMetricGridProps {
 }
 
 export function KpiMetricGrid({
-  grossRevenue: fallbackRevenue,
-  totalOrders: fallbackOrders,
-  avgOrderValue: fallbackAov,
-  pendingOrders: fallbackPending,
+  grossRevenue: propRevenue,
+  totalOrders: propOrders,
+  avgOrderValue: propAov,
+  pendingOrders: propPending,
 }: KpiMetricGridProps) {
   const { data: response, isLoading } = useGetDashboardKpisQuery();
   const kpis = response?.data;
 
-  const grossRevenue = kpis ? kpis.grossRevenue : (fallbackRevenue ?? 34170);
-  const totalOrders = kpis ? kpis.completedOrders : (fallbackOrders ?? 3);
-  const avgOrderValue = kpis ? kpis.avgOrderValue : (fallbackAov ?? 11390);
-  const pendingOrders = kpis ? kpis.pendingOrders : (fallbackPending ?? 2);
+  const grossRevenue = kpis ? kpis.grossRevenue : (propRevenue ?? 0);
+  const totalOrders = kpis ? kpis.completedOrders : (propOrders ?? 0);
+  const avgOrderValue = kpis ? kpis.avgOrderValue : (propAov ?? 0);
+  const pendingOrders = kpis ? kpis.pendingOrders : (propPending ?? 0);
 
   const metrics = [
     {
       title: "Gross Revenue",
       rawValue: grossRevenue,
       prefix: "৳",
-      change: kpis ? kpis.grossRevenueChange : "+18.4%",
-      isPositive: kpis ? kpis.grossRevenuePositive : true,
+      change: kpis?.grossRevenueChange || "0.0%",
+      isPositive: kpis?.grossRevenuePositive ?? true,
       icon: DollarSign,
     },
     {
       title: "Completed Orders",
       rawValue: totalOrders,
-      change: kpis ? kpis.completedOrdersChange : "+12.2%",
-      isPositive: kpis ? kpis.completedOrdersPositive : true,
+      change: kpis?.completedOrdersChange || "0.0%",
+      isPositive: kpis?.completedOrdersPositive ?? true,
       icon: ShoppingBag,
     },
     {
       title: "Avg Order Value",
       rawValue: avgOrderValue,
       prefix: "৳",
-      change: kpis ? kpis.avgOrderValueChange : "+6.8%",
-      isPositive: kpis ? kpis.avgOrderValuePositive : true,
+      change: kpis?.avgOrderValueChange || "0.0%",
+      isPositive: kpis?.avgOrderValuePositive ?? true,
       icon: TrendingUp,
     },
     {
       title: "Pending Dispatch",
       rawValue: pendingOrders,
-      change: kpis ? kpis.pendingOrdersChange : (pendingOrders > 0 ? "+3 Queue" : "All Clear"),
-      isPositive: kpis ? kpis.pendingOrdersPositive : (pendingOrders === 0),
+      change: kpis?.pendingOrdersChange || (pendingOrders > 0 ? `${pendingOrders} Queue` : "All Clear"),
+      isPositive: kpis?.pendingOrdersPositive ?? (pendingOrders === 0),
       icon: Truck,
     },
   ];
