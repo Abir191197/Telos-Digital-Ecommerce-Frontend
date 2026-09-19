@@ -15,6 +15,7 @@ import {
   LucideIcon,
   ShoppingCart,
   Heart,
+  Flame,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 
@@ -86,6 +87,12 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
           { title: "Manage products", href: "/dashboard/products" },
           { title: "Create Product", href: "/dashboard/products/create" },
         ],
+      },
+      {
+        title: "Flash Deals",
+        href: ROUTES.ADMIN_FLASH_DEALS,
+        icon: Flame,
+        badge: "Live",
       },
       {
         title: "Category",

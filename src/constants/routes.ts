@@ -1,4 +1,4 @@
-﻿// ── Application Route Constants ────────────────────────
+// ── Application Route Constants ────────────────────────
 
 export const ROUTES = {
   // Public
@@ -10,6 +10,7 @@ export const ROUTES = {
   PRODUCTS: "/products",
   PRODUCT_DETAIL: (slug: string) => `/products/${slug}`,
   FLASH_DEALS: "/flash-deals",
+  DEALS: "/deals",
   ABOUT: "/about",
   CONTACT: "/contact",
   PRIVACY_POLICY: "/privacy-policy",
@@ -45,6 +46,7 @@ export const ROUTES = {
   ADMIN_INVENTORY: "/dashboard/inventory",
   ADMIN_INVENTORY_AUDIT: "/dashboard/inventory/audit",
   CUSTOMERS: "/dashboard/customers",
+  ADMIN_FLASH_DEALS: "/dashboard/flashdeal",
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -53,6 +55,7 @@ export const PUBLIC_ROUTES = [
   ROUTES.BRANDS,
   ROUTES.PRODUCTS,
   ROUTES.FLASH_DEALS,
+  ROUTES.DEALS,
   ROUTES.ABOUT,
   ROUTES.CONTACT,
   ROUTES.PRIVACY_POLICY,
@@ -84,4 +87,5 @@ export const PROTECTED_ROUTES = [
   ROUTES.ADMIN_INVENTORY,
   ROUTES.ADMIN_INVENTORY_AUDIT,
   ROUTES.CUSTOMERS,
+  ROUTES.ADMIN_FLASH_DEALS,
 ] as const;

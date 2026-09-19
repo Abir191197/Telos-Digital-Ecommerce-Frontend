@@ -20,6 +20,7 @@ import {
 import { ROUTES } from "@/constants";
 import { products } from "@/data";
 import { ProductCard } from "@/components/common";
+import { FlashDealCard } from "./FlashDealCard";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 
 const containerVariants: Variants = {
@@ -245,7 +246,7 @@ export function FlashDealsView() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {displayedProducts.map((product) => (
               <div key={product.id} className="animate-in fade-in-50 duration-300">
-                <ProductCard product={product} />
+                <FlashDealCard product={product} />
               </div>
             ))}
           </div>
