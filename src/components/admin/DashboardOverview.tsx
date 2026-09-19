@@ -1,57 +1,35 @@
 "use client";
 
 import React from "react";
-import { useAdminStore } from "@/stores";
-import { useGetOrderStatsQuery, useGetAllOrdersQuery } from "@/services/api/orders/orderApi";
+import { useGetAllOrdersQuery } from "@/services/api/orders/orderApi";
 import {
   DashboardHeader,
+  ActionCenterCard,
   KpiMetricGrid,
   RevenueChartCard,
   PaymentSplitCard,
   RecentOrdersFeed,
   InventoryAlertList,
+  TopProductsCard,
+  RecentActivityCard,
 } from "./dashboard";
 
 export function DashboardOverview() {
-  const { orders, products, updateOrderStatus } = useAdminStore();
-  const { data: statsData } = useGetOrderStatsQuery();
-  const { data: allOrdersData } = useGetAllOrdersQuery({ limit: 10 });
-  const liveOrders = allOrdersData?.data ?? orders;
-  const backendStats = statsData?.data;
-
-  // Key KPI metrics calculations
-  const grossRevenue = backendStats ? backendStats.totalRevenue : liveOrders.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = backendStats ? backendStats.totalOrders : liveOrders.length;
-  const pendingOrders = backendStats ? backendStats.pendingDispatchCount : liveOrders.filter(
-    (o) => o.status === "pending" || o.status === "processing"
-  ).length;
-  const avgOrderValue = totalOrders > 0 ? Math.round(grossRevenue / totalOrders) : 0;
-
-  // Visual sales trend points
-  const salesTrend = [
-    { day: "Mon", revenue: 42000, orders: 4 },
-    { day: "Tue", revenue: 68000, orders: 7 },
-    { day: "Wed", revenue: 54000, orders: 5 },
-    { day: "Thu", revenue: 92000, orders: 9 },
-    { day: "Fri", revenue: 145000, orders: 14 },
-    { day: "Sat", revenue: 180000, orders: 18 },
-    { day: "Sun", revenue: 125000, orders: 11 },
-  ];
+  const { data: allOrdersData } = useGetAllOrdersQuery({ limit: 8 });
+  const liveOrders = allOrdersData?.data ?? [];
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      {/* Header bar with live pulse */}
+    <div className="space-y-5 sm:space-y-6 pb-8">
+      {/* 1. Header bar with live pulse */}
       <DashboardHeader />
 
-      {/* 4 Essential KPI Cards (2x2 on mobile, 4x1 on desktop) */}
-      <KpiMetricGrid
-        grossRevenue={grossRevenue}
-        totalOrders={totalOrders}
-        avgOrderValue={avgOrderValue}
-        pendingOrders={pendingOrders}
-      />
+      {/* 2. Urgent Action Center (Bottlenecks & Queues) */}
+      <ActionCenterCard />
 
-      {/* Revenue curve & payment methods split */}
+      {/* 3. 4 Essential KPI Cards - Connected independently to /dashboard/kpis */}
+      <KpiMetricGrid />
+
+      {/* 4. Revenue curve & payment channels distribution */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
         <div className="xl:col-span-7">
           <RevenueChartCard />
@@ -61,13 +39,23 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Live recent orders & inventory watchlist */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-2">
+      {/* 5. Live Recent Orders Table & Top Bestsellers */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-7">
           <RecentOrdersFeed orders={liveOrders} />
         </div>
-        <div>
-          <InventoryAlertList products={products} />
+        <div className="xl:col-span-5">
+          <TopProductsCard />
+        </div>
+      </div>
+
+      {/* 6. Stock Alerts & Live Admin Activity Audit Stream */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-5">
+          <InventoryAlertList />
+        </div>
+        <div className="xl:col-span-7">
+          <RecentActivityCard />
         </div>
       </div>
     </div>
