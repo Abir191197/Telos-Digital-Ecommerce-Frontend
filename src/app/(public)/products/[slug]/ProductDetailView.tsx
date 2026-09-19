@@ -4,9 +4,9 @@ import React, { use } from "react";
 import Link from "next/link";
 import { PackageX, ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { PageLoader, Button } from "@/components/common";
+import { Button } from "@/components/common";
 import { useGetProductBySlugQuery, useGetProductsQuery } from "@/services/api/products/productApi";
-import { ProductView } from "@/components/product-detail";
+import { ProductView, ProductDetailSkeleton } from "@/components/product-detail";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,13 +25,7 @@ export function ProductDetailView({ params }: Props) {
   const relatedProducts = (relatedResponse?.data || []).filter((p) => p.id !== product?.id);
 
   if (isLoading) {
-    return (
-      <PageLoader
-        title="Loading Product Details..."
-        description="Fetching high-resolution imagery, variants, stock, and customer reviews."
-        badgeText="Product Catalog"
-      />
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (isError || !product) {

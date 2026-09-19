@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, type Variants } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -45,27 +45,61 @@ export function ProductGallery({
       : rawImages;
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+
+  const selectImage = (newIndex: number, dir?: 1 | -1) => {
+    if (newIndex === activeImageIndex) return;
+    const determinedDir = dir ?? (newIndex > activeImageIndex ? 1 : -1);
+    setSlideDirection(determinedDir);
+    setActiveImageIndex(newIndex);
+  };
 
   useEffect(() => {
     if (activeImageUrl) {
       const idx = images.findIndex((img) => img === activeImageUrl);
-      if (idx !== -1) {
+      if (idx !== -1 && idx !== activeImageIndex) {
+        setSlideDirection(idx > activeImageIndex ? 1 : -1);
         setActiveImageIndex(idx);
       }
     }
-  }, [activeImageUrl, images]);
+  }, [activeImageUrl, images, activeImageIndex]);
 
   const touchStartXRef = useRef<number | null>(null);
   const touchEndXRef = useRef<number | null>(null);
 
   const handlePrevImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    const prevIdx = activeImageIndex > 0 ? activeImageIndex - 1 : images.length - 1;
+    selectImage(prevIdx, -1);
   };
 
   const handleNextImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    const nextIdx = activeImageIndex < images.length - 1 ? activeImageIndex + 1 : 0;
+    selectImage(nextIdx, 1);
+  };
+
+  const slideVariants: Variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? "100%" : "-100%",
+      opacity: 1,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        x: { type: "spring" as const, stiffness: 300, damping: 32 },
+        opacity: { duration: 0.2 },
+      },
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? "-100%" : "100%",
+      opacity: 1,
+      transition: {
+        x: { type: "spring" as const, stiffness: 300, damping: 32 },
+        opacity: { duration: 0.2 },
+      },
+    }),
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -91,7 +125,7 @@ export function ProductGallery({
   };
 
   return (
-    <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
+    <div className="w-full space-y-3">
       {/* 📱 Mobile View: Swipeable Carousel Stage 📱 */}
       <div
         className="block lg:hidden relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20 select-none touch-pan-y"
@@ -99,33 +133,37 @@ export function ProductGallery({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <m.div
-          key={activeImageIndex}
-          initial={{ opacity: 0.8 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          drag={images.length > 1 ? "x" : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={(_, info) => {
-            const threshold = 40;
-            if (info.offset.x < -threshold) {
-              handleNextImage();
-            } else if (info.offset.x > threshold) {
-              handlePrevImage();
-            }
-          }}
-          className="relative h-full w-full"
-        >
-          <Image
-            src={images[activeImageIndex] || product.thumbnail}
-            alt={`${product.name} - slide ${activeImageIndex + 1}`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center select-none pointer-events-none"
-          />
-        </m.div>
+        <AnimatePresence initial={false} custom={slideDirection}>
+          <m.div
+            key={activeImageIndex}
+            custom={slideDirection}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            drag={images.length > 1 ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              const threshold = 40;
+              if (info.offset.x < -threshold) {
+                handleNextImage();
+              } else if (info.offset.x > threshold) {
+                handlePrevImage();
+              }
+            }}
+            className="absolute inset-0 h-full w-full"
+          >
+            <Image
+              src={images[activeImageIndex] || product.thumbnail}
+              alt={`${product.name} - slide ${activeImageIndex + 1}`}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center select-none pointer-events-none"
+            />
+          </m.div>
+        </AnimatePresence>
 
         {/* Left/Right Carousel Nav Arrows on Mobile */}
         {images.length > 1 && (
@@ -206,7 +244,7 @@ export function ProductGallery({
               <button
                 key={`mobile-dot-${dotIdx}`}
                 type="button"
-                onClick={() => setActiveImageIndex(dotIdx)}
+                onClick={() => selectImage(dotIdx)}
                 aria-label={`Go to slide ${dotIdx + 1}`}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
@@ -231,14 +269,15 @@ export function ProductGallery({
       <div className="hidden lg:block space-y-4">
         {/* Main Stage Image */}
         <div className="group relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/20 border border-border/60">
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false} custom={slideDirection}>
             <m.div
               key={activeImageIndex}
-              initial={{ opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="relative h-full w-full"
+              custom={slideDirection}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="absolute inset-0 h-full w-full"
             >
               <Image
                 src={images[activeImageIndex] || product.thumbnail}
@@ -246,7 +285,7 @@ export function ProductGallery({
                 fill
                 priority
                 sizes="50vw"
-                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                className="object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
               />
             </m.div>
           </AnimatePresence>
@@ -324,16 +363,16 @@ export function ProductGallery({
 
         {/* Thumbnail Strip */}
         {images.length > 1 && (
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar p-1">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar p-0.5">
             {images.map((img, idx) => (
               <button
                 key={img + idx}
                 type="button"
-                onClick={() => setActiveImageIndex(idx)}
+                onClick={() => selectImage(idx)}
                 className={cn(
-                  "relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl transition-all cursor-pointer border-2 bg-muted/20",
+                  "relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl transition-all cursor-pointer border-2 bg-muted/20",
                   activeImageIndex === idx
-                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
+                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-sm"
                     : "border-border/60 hover:border-border opacity-70 hover:opacity-100"
                 )}
               >
@@ -341,7 +380,7 @@ export function ProductGallery({
                   src={img}
                   alt={`Thumbnail ${idx + 1}`}
                   fill
-                  sizes="80px"
+                  sizes="64px"
                   className="object-cover object-center"
                 />
               </button>

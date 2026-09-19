@@ -188,43 +188,43 @@ export function ProductView({ product, relatedProducts = [] }: ProductViewProps)
         </nav>
 
         {/* 🌟 Main Product Stage 🌟 */}
-        <div className="container px-3 sm:px-6 py-6 sm:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-14 items-start">
+        <div className="container px-3 sm:px-6 py-4 sm:py-6 lg:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-10 items-start">
             {/* Left Column: Media Gallery (6 cols on lg, sticky) */}
-            <ProductGallery
-              product={product}
-              activeImageUrl={activeImageUrl}
-              isWishlisted={isWishlisted}
-              onToggleWishlist={handleToggleWishlist}
-              onShare={handleShare}
-              showShareToast={showShareToast}
-              isAdmin={isAdmin}
-            />
+            <div className="lg:col-span-6 lg:sticky lg:top-20">
+              <ProductGallery
+                product={product}
+                activeImageUrl={activeImageUrl}
+                isWishlisted={isWishlisted}
+                onToggleWishlist={handleToggleWishlist}
+                onShare={handleShare}
+                showShareToast={showShareToast}
+                isAdmin={isAdmin}
+              />
+            </div>
 
             {/* Right Column: Buying Decision Hub (6 cols on lg) */}
-            <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
-              <div>
-                <ProductInfo
-                  product={product}
-                  selectedVariantId={selectedVariantId}
-                  selectedVariant={selectedVariant}
-                  onSelectVariant={setSelectedVariantId}
-                  currentPrice={currentPrice}
-                />
+            <div className="lg:col-span-6 flex flex-col justify-start space-y-4">
+              <ProductInfo
+                product={product}
+                selectedVariantId={selectedVariantId}
+                selectedVariant={selectedVariant}
+                onSelectVariant={setSelectedVariantId}
+                currentPrice={currentPrice}
+              />
 
-                <ProductActions
-                  product={product}
-                  selectedVariant={selectedVariant}
-                  quantity={quantity}
-                  onQuantityChange={setQuantity}
-                  isAdding={isAdding}
-                  onAddToCart={handleAddToCart}
-                  onOpenNotifyStock={() => setShowNotifyStock(false)}
-                  isAdmin={isAdmin}
-                />
+              <ProductActions
+                product={product}
+                selectedVariant={selectedVariant}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                isAdding={isAdding}
+                onAddToCart={handleAddToCart}
+                onOpenNotifyStock={() => setShowNotifyStock(false)}
+                isAdmin={isAdmin}
+              />
 
-                <ProductDeliveryTrustStrip />
-              </div>
+              <ProductDeliveryTrustStrip />
             </div>
           </div>
 

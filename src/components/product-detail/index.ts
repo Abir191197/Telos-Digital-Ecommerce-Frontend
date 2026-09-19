@@ -8,3 +8,4 @@ export { RelatedProducts } from "./RelatedProducts";
 export { RecentlyViewedProducts } from "./RecentlyViewedProducts";
 export { NotifyStockModal } from "./NotifyStockModal";
 export { ProductView } from "./ProductView";
+export { ProductDetailSkeleton } from "./ProductDetailSkeleton";

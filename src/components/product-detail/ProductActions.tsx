@@ -124,14 +124,14 @@ export function ProductActions({
             asChild
             variant="default"
             size="lg"
-            className="w-full rounded-2xl font-bold shadow-md hover:bg-primary/90"
+            className="w-full rounded-2xl font-bold shadow-md bg-zinc-900 text-white hover:bg-amber-500 hover:text-zinc-950 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-amber-500 dark:hover:text-zinc-950 transition-all duration-200 group"
           >
             <Link
               href={`/checkout?directProduct=${product.slug}&qty=${quantity}${
                 selectedVariant ? `&variantId=${selectedVariant.id}` : ""
               }`}
             >
-              <Zap className="h-4 w-4 fill-current text-amber-400" />
+              <Zap className="h-4 w-4 fill-amber-400 text-amber-400 group-hover:fill-zinc-950 group-hover:text-zinc-950 transition-colors" />
               <span>Buy Now (Instant)</span>
             </Link>
           </Button>

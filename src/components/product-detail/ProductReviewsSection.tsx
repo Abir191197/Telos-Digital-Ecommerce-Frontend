@@ -1,17 +1,21 @@
 "use client";
 
+import React, { useState, useEffect, useRef } from "react";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
 import { useGetProductReviewsQuery } from "@/services/api/reviews/reviewApi";
 import type { Product, ProductReview } from "@/types/ecommerce.types";
 import { m, type Variants } from "framer-motion";
-import { CheckCircle2, PackageCheck, Sparkles, Star } from "lucide-react";
+import { CheckCircle2, PackageCheck, Sparkles, Star, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 interface ProductReviewsSectionProps {
   product: Product;
   sectionFadeUp: Variants;
 }
+
+const INITIAL_REVIEWS_BATCH = 5;
+const REVIEWS_BATCH_INCREMENT = 5;
 
 export function ProductReviewsSection({
   product,
@@ -32,6 +36,41 @@ export function ProductReviewsSection({
   const getPercent = (count: number) =>
     totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
 
+  // Infinite Scroll State
+  const [visibleCount, setVisibleCount] = useState(INITIAL_REVIEWS_BATCH);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const hasMore = visibleCount < reviews.length;
+  const visibleReviews = reviews.slice(0, visibleCount);
+
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) =>
+              Math.min(prev + REVIEWS_BATCH_INCREMENT, reviews.length)
+            );
+            setIsLoadingMore(false);
+          }, 400);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    const el = loadMoreRef.current;
+    if (el) observer.observe(el);
+
+    return () => {
+      if (el) observer.unobserve(el);
+    };
+  }, [hasMore, isLoadingMore, reviews.length]);
+
   return (
     <m.section
       variants={sectionFadeUp}
@@ -46,7 +85,7 @@ export function ProductReviewsSection({
             Customer Feedback & Ratings
           </span>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            Verified Customer Reviews
+            Verified Customer Reviews ({reviews.length})
           </h2>
         </div>
       </div>
@@ -131,14 +170,14 @@ export function ProductReviewsSection({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reviews.map((rev) => (
+          <div className="space-y-4">
+            {visibleReviews.map((rev) => (
               <div
                 key={rev.id}
-                className="p-5 rounded-3xl border border-border/70 bg-card/60 backdrop-blur-xs space-y-3 flex flex-col justify-between hover:border-border transition-colors shadow-2xs">
-                <div>
-                  {/* Top Bar: Stars + Verified Badge */}
-                  <div className="flex items-center justify-between gap-2">
+                className="p-5 sm:p-6 rounded-3xl border border-border/70 bg-card/60 backdrop-blur-xs space-y-3.5 hover:border-border transition-colors shadow-2xs">
+                {/* Top Bar: Stars + Verified Badge + Date */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
@@ -154,35 +193,12 @@ export function ProductReviewsSection({
                     </div>
                     {rev.isVerifiedPurchase && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
-                        <CheckCircle2 className="h-2.5 w-2.5" /> Verified Buyer
+                        <CheckCircle2 className="h-2.5 w-2.5" /> Verified Purchase
                       </span>
                     )}
                   </div>
 
-                  {/* Title & Comment */}
-                  {rev.title && (
-                    <h4 className="mt-2 text-sm font-bold text-foreground leading-snug">
-                      {rev.title}
-                    </h4>
-                  )}
-                  {rev.comment && (
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {rev.comment}
-                    </p>
-                  )}
-                </div>
-
-                {/* Reviewer Footnote */}
-                <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center font-bold text-[10px] uppercase text-foreground">
-                      {rev.customer?.name?.[0] || "C"}
-                    </div>
-                    <span className="font-semibold text-foreground truncate max-w-[120px]">
-                      {rev.customer?.name || "Verified Customer"}
-                    </span>
-                  </div>
-                  <span>
+                  <span className="text-[11px] text-muted-foreground">
                     {rev.createdAt
                       ? new Date(rev.createdAt).toLocaleDateString("en-GB", {
                           day: "numeric",
@@ -192,8 +208,44 @@ export function ProductReviewsSection({
                       : "Recently"}
                   </span>
                 </div>
+
+                {/* Title & Comment */}
+                <div className="space-y-1.5">
+                  {rev.title && (
+                    <h4 className="text-sm sm:text-base font-bold text-foreground leading-snug">
+                      {rev.title}
+                    </h4>
+                  )}
+                  {rev.comment && (
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {rev.comment}
+                    </p>
+                  )}
+                </div>
+
+                {/* Reviewer Footnote */}
+                <div className="pt-2 border-t border-border/40 flex items-center gap-2.5 text-xs text-muted-foreground">
+                  <div className="h-6 w-6 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-[10px] uppercase">
+                    {rev.customer?.name?.[0] || "C"}
+                  </div>
+                  <span className="font-semibold text-foreground">
+                    {rev.customer?.name || "Verified Customer"}
+                  </span>
+                </div>
               </div>
             ))}
+
+            {/* Infinite Scroll Sentinel / Loading Spinner */}
+            {hasMore && (
+              <div
+                ref={loadMoreRef}
+                className="py-6 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+                <span className="text-xs font-medium">
+                  Loading more reviews ({visibleReviews.length} of {reviews.length})...
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

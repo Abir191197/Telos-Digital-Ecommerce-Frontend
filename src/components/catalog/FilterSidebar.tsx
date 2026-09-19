@@ -23,6 +23,7 @@ interface FilterSidebarProps {
   onSaleOnly: boolean;
   onToggleOnSale: () => void;
 
+  onResetAll?: () => void;
   hasActiveFilters: boolean;
   className?: string;
 }
