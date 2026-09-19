@@ -69,7 +69,7 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
 
   return (
     <div className="hidden md:block border-t border-border/60 bg-muted/20">
-      <div className="container flex h-12 items-center justify-between gap-4">
+      <div className="container flex h-12 items-center justify-between gap-4 px-3 sm:px-6">
         {/* Categories & Quick Highlights Container with Seamless Hover Mega Menu */}
         <div
           ref={categoriesRef}
@@ -205,7 +205,7 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
         </div>
 
         {/* Right link in nav row */}
-        <div className="hidden lg:flex items-center gap-4 text-sm font-semibold text-muted-foreground">
+        <div className="hidden lg:flex items-center text-sm font-semibold text-muted-foreground">
           <Link
             href={ROUTES.FLASH_DEALS}
             className="group flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"

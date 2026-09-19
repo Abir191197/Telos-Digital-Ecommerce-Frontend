@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { Phone, Tag, Truck, Info, Copy, Check } from "lucide-react";
 import { ROUTES } from "@/constants";
+import { Check, Copy, Info, Phone, Tag, Truck } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export function TopUtilityBar() {
   const [copied, setCopied] = useState(false);
@@ -32,8 +32,7 @@ export function TopUtilityBar() {
           </span>
           <a
             href="tel:+8801700000000"
-            className="font-medium text-zinc-100 hover:text-amber-400 transition-colors"
-          >
+            className="font-medium text-zinc-100 hover:text-amber-400 transition-colors">
             +880 1700-000000
           </a>
         </div>
@@ -49,18 +48,19 @@ export function TopUtilityBar() {
             <button
               type="button"
               onClick={handleCopyVoucher}
-              title="Click to copy voucher code"
-              aria-label="Copy voucher code TELOS20"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono font-bold tracking-wider text-xs border border-dashed transition-all cursor-pointer select-none bg-amber-500/15 border-amber-400/60 text-amber-300 hover:bg-amber-500/25 hover:border-amber-400 active:scale-95"
-            >
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono font-bold tracking-wider text-xs transition-all cursor-pointer select-none bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 active:scale-95">
               {copied ? (
                 <>
                   <Check className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
-                  <span className="text-emerald-400 font-sans text-[11px] font-bold">COPIED!</span>
+                  <span className="text-emerald-400 font-sans text-[11px] font-bold">
+                    COPIED!
+                  </span>
                 </>
               ) : (
                 <>
-                  <span className="underline underline-offset-2">{VOUCHER_CODE}</span>
+                  <span className="underline underline-offset-2">
+                    {VOUCHER_CODE}
+                  </span>
                   <Copy className="h-2.5 w-2.5 opacity-80" />
                 </>
               )}
@@ -73,16 +73,14 @@ export function TopUtilityBar() {
         <div className="flex items-center gap-4 text-xs font-medium text-zinc-300">
           <Link
             href={ROUTES.TRACKING}
-            className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
-          >
+            className="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
             <Truck className="h-3.5 w-3.5 text-amber-400" />
             <span className="hidden sm:inline">Track Order</span>
           </Link>
           <span className="h-3 w-px bg-zinc-800" />
           <Link
             href={ROUTES.ABOUT}
-            className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
-          >
+            className="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
             <Info className="h-3.5 w-3.5 text-amber-400" />
             <span className="hidden sm:inline">About Us</span>
           </Link>

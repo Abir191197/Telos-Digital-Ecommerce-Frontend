@@ -50,9 +50,9 @@ export function HeaderUserMenu({
     return (
       <Link
         href={ROUTES.LOGIN}
-        className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/30 hover:bg-muted/60 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:border-amber-500/50 transition-all active:scale-95"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/25 hover:bg-muted/60 px-3 py-1.5 text-xs font-semibold text-foreground hover:border-amber-500/50 transition-all active:scale-95 shadow-2xs"
       >
-        <UserIcon className="h-4 w-4 text-amber-500" />
+        <UserIcon className="h-3.5 w-3.5 text-amber-500" />
         <span>Sign In</span>
       </Link>
     );
@@ -67,39 +67,39 @@ export function HeaderUserMenu({
         aria-haspopup="true"
         aria-label="User account menu"
         className={cn(
-          "group flex items-center gap-2 rounded-full p-1 sm:pr-3 transition-all duration-200 cursor-pointer bg-card/60 hover:bg-card hover:shadow-md active:scale-98",
-          isOpen && "bg-card shadow-lg",
+          "group flex items-center gap-1.5 rounded-full p-0.5 sm:pr-2.5 transition-all duration-200 cursor-pointer bg-card/60 hover:bg-card hover:shadow-xs active:scale-98 border border-transparent hover:border-border/60",
+          isOpen && "bg-card shadow-sm border-border/80",
         )}
       >
         {/* Minimalist Avatar or Monogram Disc */}
         <div className="relative shrink-0">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 text-foreground font-bold text-xs shadow-inner overflow-hidden">
+          <div className="relative flex h-7 w-7 sm:h-7.5 sm:w-7.5 items-center justify-center rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 text-foreground font-bold text-xs shadow-inner overflow-hidden">
             {user.avatar ? (
               <Image
                 src={user.avatar}
                 alt={user.name}
                 fill
-                sizes="32px"
+                sizes="30px"
                 className="object-cover"
               />
             ) : (
-              <span className="text-[11px] font-extrabold tracking-tight text-zinc-100 uppercase">
+              <span className="text-[10px] font-extrabold tracking-tight text-zinc-100 uppercase">
                 {user.name ? user.name.slice(0, 2) : "U"}
               </span>
             )}
           </div>
-          {/* Active Session Dot (uncropped) */}
-          <span className="absolute -bottom-0.5 -right-0.5 z-10 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-background shadow-xs pointer-events-none" />
+          {/* Active Session Dot anchored seamlessly to avatar perimeter */}
+          <span className="absolute bottom-0 right-0 z-10 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card shadow-xs pointer-events-none" />
         </div>
 
         {/* Minimalist Clean First Name */}
-        <span className="hidden sm:inline-block max-w-[90px] truncate text-xs font-semibold text-foreground/90 group-hover:text-foreground">
+        <span className="hidden sm:inline-block max-w-[80px] truncate text-xs font-semibold text-foreground/90 group-hover:text-foreground">
           {user.name.split(" ")[0]}
         </span>
 
         <ChevronDown
           className={cn(
-            "hidden sm:block h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover:text-foreground",
+            "hidden sm:block h-3 w-3 text-muted-foreground transition-transform duration-200 group-hover:text-foreground",
             isOpen && "rotate-180 text-amber-500",
           )}
         />
