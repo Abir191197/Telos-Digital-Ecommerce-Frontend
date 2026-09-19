@@ -4,12 +4,13 @@ import React, { use } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ROUTES } from "@/constants";
-import { ChevronRight, Loader2, Award, ShieldCheck, Package, Truck } from "lucide-react";
+import { ChevronRight, Award, ShieldCheck, Package, Sparkles } from "lucide-react";
 import { useGetBrandBySlugQuery, useGetBrandsQuery } from "@/services/api/brands/brandApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { ProductCard } from "@/components/common";
-import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
+import { TrustGuaranteeCards, SupportAndHelpstrip, BrandLogoDisplay } from "@/components/shared";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { BrandDetailSkeleton } from "./BrandDetailSkeleton";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -55,17 +56,13 @@ export function BrandDetailView({ params }: Props) {
   ).slice(0, 6);
 
   if (brandLoading || !brand) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-      </div>
-    );
+    return <BrandDetailSkeleton />;
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-16">
       {/* ── Breadcrumb Navigation ── */}
-      <div className="border-b border-border/60 bg-muted/20 py-3">
+      <div className="border-b border-border/40 bg-muted/20 py-3 mb-6">
         <div className="container px-3 sm:px-6">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Link href={ROUTES.HOME} className="hover:text-foreground transition-colors">
@@ -82,83 +79,50 @@ export function BrandDetailView({ params }: Props) {
       </div>
 
       <LazyMotion features={domAnimation}>
-        <div className="space-y-8 sm:space-y-12">
-          {/* ── Brand Hero Banner ── */}
-          <section className="container px-3 sm:px-6 pt-4">
-            <m.div
-              variants={heroFadeUp}
-              initial="hidden"
-              animate="visible"
-              className="relative overflow-hidden rounded-3xl sm:rounded-[2rem] bg-card border border-border/60 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]"
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
-                {/* Left Column: Brand Info */}
-                <div className="lg:col-span-5 p-6 sm:p-8 lg:p-10 space-y-4 flex flex-col justify-center relative z-10">
-                  {/* Meta Badge Pills */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-400">
-                      <Award className="h-3.5 w-3.5" />
-                      <span>Official Store</span>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      <Package className="h-3.5 w-3.5 text-amber-500" />
-                      <span>{brandProducts.length} Products</span>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      <span>Official BD Warranty</span>
-                    </div>
-                  </div>
-
-                  {/* Brand Title */}
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-                      {brand.name}
-                    </h1>
-                    <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-                      {brand.description ||
-                        brand.tagline ||
-                        "Shop authentic products with manufacturer authorized warranty, genuine distributor packaging, and fast delivery across Bangladesh."}
-                    </p>
-                  </div>
-
-                  {/* Micro-Benefits Strip */}
-                  <div className="pt-3 border-t border-border/40 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span>Authorized Dealer</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      <span>Dhaka 24h Express</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>7-Day Return Policy</span>
-                    </div>
-                  </div>
+        <div className="space-y-8 sm:space-y-10">
+          {/* ── Compact Brand Header Bar ── */}
+          <section className="container px-3 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
+              <div className="flex items-center gap-4">
+                {/* Brand Logo Capsule */}
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/50 shadow-xs p-2">
+                  <BrandLogoDisplay
+                    name={brand.name}
+                    image={brand.image}
+                    className="h-8 sm:h-9 max-w-[60px] object-contain"
+                  />
                 </div>
 
-                {/* Right Column: Brand Image */}
-                {brand.image && (
-                  <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-full min-h-[280px] lg:min-h-[340px] w-full overflow-hidden">
-                    <div className="relative h-full w-full [mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.4)_18%,rgba(0,0,0,0.85)_38%,black_60%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.4)_18%,rgba(0,0,0,0.85)_38%,black_60%)]">
-                      <Image
-                        src={brand.image}
-                        alt={brand.name}
-                        fill
-                        priority
-                        sizes="(max-width: 1024px) 100vw, 60vw"
-                        className="object-contain object-center p-8 transition-transform duration-700 hover:scale-105"
-                      />
-                    </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                      {brand.name}
+                    </h1>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                      <Award className="h-3 w-3" />
+                      <span>Official Store</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <ShieldCheck className="h-3 w-3" />
+                      <span>Official BD Warranty</span>
+                    </span>
                   </div>
-                )}
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    {brand.description ||
+                      brand.tagline ||
+                      "Authorized dealer products with genuine distributor packaging and warranty."}
+                  </p>
+                </div>
               </div>
-            </m.div>
+
+              {/* Product Count Pill */}
+              <div className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-full bg-muted/60 px-3.5 py-1 text-xs font-semibold text-muted-foreground">
+                <Package className="h-3.5 w-3.5 text-amber-500" />
+                <span>{brandProducts.length} Products</span>
+              </div>
+            </div>
           </section>
+
 
           {/* ── Brand Products Grid ── */}
           <section className="container px-3 sm:px-6">
@@ -172,8 +136,24 @@ export function BrandDetailView({ params }: Props) {
             </div>
 
             {prodsLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 animate-pulse">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden"
+                  >
+                    <div className="aspect-square w-full bg-muted/60" />
+                    <div className="p-4 space-y-2.5">
+                      <div className="h-3 w-16 rounded bg-muted/60" />
+                      <div className="h-4 w-full rounded bg-muted/70" />
+                      <div className="h-3 w-20 rounded bg-muted/50" />
+                      <div className="pt-2 flex items-center justify-between">
+                        <div className="h-5 w-20 rounded bg-amber-500/20" />
+                        <div className="h-8 w-8 rounded-xl bg-muted/50" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : brandProducts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
