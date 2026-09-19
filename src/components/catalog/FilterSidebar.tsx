@@ -23,8 +23,8 @@ interface FilterSidebarProps {
   onSaleOnly: boolean;
   onToggleOnSale: () => void;
 
-  onResetAll: () => void;
   hasActiveFilters: boolean;
+  className?: string;
 }
 
 export function FilterSidebar({
@@ -43,9 +43,10 @@ export function FilterSidebar({
   onToggleOnSale,
   onResetAll,
   hasActiveFilters,
+  className,
 }: FilterSidebarProps) {
   return (
-    <aside className="w-full space-y-6">
+    <div className={cn("w-full space-y-6", className)}>
       {/* Header & Reset */}
       <div className="flex items-center justify-between pb-3 border-b border-border/70">
         <h3 className="text-sm font-black uppercase tracking-wider text-foreground">
@@ -232,6 +233,6 @@ export function FilterSidebar({
           })}
         </div>
       </div>
-    </aside>
+    </div>
   );
 }

@@ -273,8 +273,8 @@ export function CatalogView({
         {/* Main Catalog Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Faceted Filter Sidebar (Desktop) */}
-          <aside className="hidden lg:block lg:col-span-3 sticky top-24">
-            <div className="rounded-3xl bg-card p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+          <aside className="hidden lg:block lg:col-span-3 sticky top-[150px] self-start rounded-3xl bg-card border-0 shadow-[14px_18px_36px_-8px_rgba(0,0,0,0.08),24px_28px_50px_-12px_rgba(0,0,0,0.05)] dark:shadow-[14px_20px_42px_-8px_rgba(0,0,0,0.7),24px_30px_55px_-12px_rgba(0,0,0,0.55)]">
+            <div className="p-5 max-h-[calc(100vh-175px)] overflow-y-auto overscroll-contain scrollbar-none">
               <FilterSidebar
                 availableBrands={availableBrands}
                 selectedBrands={selectedBrands}
