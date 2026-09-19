@@ -3,8 +3,8 @@
 import React from "react";
 import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
-import { CategoriesView } from "@/components/categories";
-import { Layers, ShieldCheck, PackageCheck, Truck, Loader2 } from "lucide-react";
+import { CategoriesView, CategoriesPageSkeleton } from "@/components/categories";
+import { Layers, ShieldCheck, PackageCheck, Truck } from "lucide-react";
 
 export function CategoriesPageView() {
   const { data: categories = [], isLoading: catsLoading } = useGetCategoryTreeQuery();
@@ -17,11 +17,7 @@ export function CategoriesPageView() {
   const popularProducts = productsResponse?.data || [];
 
   if (catsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-      </div>
-    );
+    return <CategoriesPageSkeleton />;
   }
 
   const totalProducts = categories.reduce(
