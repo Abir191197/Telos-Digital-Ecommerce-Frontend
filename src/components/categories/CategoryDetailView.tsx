@@ -170,7 +170,7 @@ export function CategoryDetailView({
                 </Link>
               </div>
 
-              {/* Rich Visual Cards Grid with Real Imagery & Ambient Hover Depth */}
+              {/* Rich Visual Cards Grid with Real Imagery & Ambient Liquid Shadow */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 {sisterCategories.map((sister) => {
                   const SisterIcon = getCategoryIcon(sister.icon);
@@ -179,7 +179,7 @@ export function CategoryDetailView({
                     <Link
                       key={sister.id}
                       href={ROUTES.CATEGORY_DETAIL(sister.slug)}
-                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-muted/20 hover:bg-card border border-border/40 hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-1.5 shadow-2xs hover:shadow-[0_12px_28px_-6px_rgba(245,158,11,0.15)] dark:hover:shadow-[0_14px_32px_-8px_rgba(0,0,0,0.7)]"
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-card border border-border/70 hover:border-amber-500/40 transition-all duration-300 hover:-translate-y-1.5 shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_28px_-6px_rgba(245,158,11,0.15),0_4px_16px_-2px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_32px_-6px_rgba(245,158,11,0.28),0_8px_20px_-4px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_18px_36px_-6px_rgba(245,158,11,0.25),0_8px_24px_-4px_rgba(0,0,0,0.85)]"
                     >
                       {/* Image Thumbnail Container with Gradient Mask */}
                       <div className="relative h-24 sm:h-28 w-full overflow-hidden bg-muted/40">
@@ -195,8 +195,8 @@ export function CategoryDetailView({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
                         {/* Top-Right Arrow Micro-badge */}
-                        <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 backdrop-blur-md text-white/80 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-colors">
-                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-zinc-950 font-bold shadow-xs transition-transform duration-200 group-hover:scale-110">
+                          <ArrowUpRight className="h-3.5 w-3.5 stroke-[2.5]" />
                         </div>
 
                         {/* Floating Icon Over Image */}
@@ -210,10 +210,10 @@ export function CategoryDetailView({
                         <span className="block text-xs font-black text-foreground line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                           {sister.name}
                         </span>
-                        <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+                        <div className="mt-2 flex items-center justify-between gap-1 text-[11px] text-muted-foreground font-medium">
                           <span>{sister.itemCount} items</span>
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold group-hover:translate-x-0.5 transition-transform">
-                            View →
+                          <span className="inline-flex items-center justify-center rounded-lg bg-amber-500 text-zinc-950 px-2 py-0.5 text-[10px] font-bold shadow-xs group-hover:bg-amber-400 transition-colors">
+                            View
                           </span>
                         </div>
                       </div>
