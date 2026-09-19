@@ -46,25 +46,40 @@ export function EmptyCatalogState({ onResetFilters }: EmptyCatalogStateProps) {
   );
 }
 
-export function CatalogGridSkeleton({ count = 8 }: { count?: number }) {
+export function ProductCardSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-      {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden animate-pulse"
-        >
-          <div className="aspect-square w-full bg-muted/60" />
-          <div className="p-4 space-y-2.5">
-            <div className="h-3 w-16 rounded bg-muted/60" />
-            <div className="h-4 w-full rounded bg-muted/70" />
-            <div className="h-3 w-24 rounded bg-muted/50" />
-            <div className="pt-3 flex justify-between items-center">
-              <div className="h-4 w-20 rounded bg-muted/70" />
-              <div className="h-8 w-14 rounded-lg bg-muted/60" />
-            </div>
+    <div className="flex flex-col rounded-3xl border border-border/60 bg-card p-3 shadow-xs overflow-hidden animate-pulse">
+      {/* Aspect square image placeholder */}
+      <div className="relative aspect-square w-full rounded-2xl bg-muted/50 overflow-hidden">
+        <div className="absolute top-2.5 left-2.5 h-5 w-12 rounded-full bg-amber-500/20" />
+        <div className="absolute top-2.5 right-2.5 h-8 w-8 rounded-full bg-muted/60" />
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col px-1 pt-3 pb-1 space-y-2 justify-between">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="h-2.5 w-14 rounded bg-amber-500/20" />
+            <div className="h-2.5 w-12 rounded bg-muted/50" />
           </div>
+          <div className="h-3.5 w-full rounded bg-muted/80" />
+          <div className="h-3 w-2/3 rounded bg-muted/60" />
         </div>
+
+        <div className="pt-2 border-t border-border/40 flex justify-between items-center">
+          <div className="h-4 w-20 rounded bg-muted/80" />
+          <div className="h-8 w-8 rounded-full bg-amber-500/20" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CatalogGridSkeleton({ count = 8, className }: { count?: number; className?: string }) {
+  return (
+    <div className={className || "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5"}>
+      {Array.from({ length: count }).map((_, i) => (
+        <ProductCardSkeleton key={i} />
       ))}
     </div>
   );

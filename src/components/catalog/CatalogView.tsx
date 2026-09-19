@@ -6,7 +6,7 @@ import { Product, Category } from "@/types/ecommerce.types";
 import { GridViewMode } from "@/types/catalog.types";
 import { SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation } from "framer-motion";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFiltersBar } from "./ActiveFiltersBar";
@@ -346,24 +346,18 @@ export function CatalogView({
                 viewMode={viewMode}
                 cacheKey={`${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
                 onResetFilters={handleResetAll}
+                isLoadingMore={isLoadingMore}
+                skeletonCount={Math.min(BATCH_INCREMENT, filteredProducts.length - displayedProducts.length || BATCH_INCREMENT)}
               />
             )}
 
-            {/* Infinite Scroll Trigger Sentinel & Status Indicator */}
+            {/* Infinite Scroll Trigger Sentinel */}
             {!isLoading && hasMore && (
               <div
                 ref={loadMoreTriggerRef}
-                className="py-10 flex flex-col items-center justify-center gap-3 text-center"
-              >
-                {isLoadingMore ? (
-                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-card border border-border/80 shadow-xs text-xs sm:text-sm font-semibold text-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
-                    <span>Loading more verified products...</span>
-                  </div>
-                ) : (
-                  <div className="h-6 w-full" />
-                )}
-              </div>
+                aria-hidden="true"
+                className="h-8 w-full pointer-events-none"
+              />
             )}
 
             {!isLoading && !hasMore && filteredProducts.length > INITIAL_BATCH_SIZE && (

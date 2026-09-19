@@ -4,7 +4,7 @@ import React from "react";
 import { Product } from "@/types/ecommerce.types";
 import { GridViewMode } from "@/types/catalog.types";
 import { ProductCard } from "@/components/common";
-import { EmptyCatalogState } from "./CatalogStateViews";
+import { EmptyCatalogState, ProductCardSkeleton } from "./CatalogStateViews";
 import { cn } from "@/lib/utils";
 import { m, type Variants } from "framer-motion";
 
@@ -14,6 +14,8 @@ interface CatalogProductGridProps {
   viewMode: GridViewMode;
   cacheKey: string;
   onResetFilters: () => void;
+  isLoadingMore?: boolean;
+  skeletonCount?: number;
 }
 
 // Stable Framer Motion variants defined outside component for zero re-render overhead
@@ -46,6 +48,8 @@ export function CatalogProductGrid({
   viewMode,
   cacheKey,
   onResetFilters,
+  isLoadingMore = false,
+  skeletonCount = 8,
 }: CatalogProductGridProps) {
   if (totalFilteredCount === 0) {
     return <EmptyCatalogState onResetFilters={onResetFilters} />;
@@ -69,6 +73,13 @@ export function CatalogProductGrid({
           <ProductCard product={product} />
         </m.div>
       ))}
+
+      {/* Skeletons rendered directly inside the grid while fetching next batch */}
+      {isLoadingMore && (
+        Array.from({ length: skeletonCount }).map((_, i) => (
+          <ProductCardSkeleton key={`catalog-loading-skeleton-${i}`} />
+        ))
+      )}
     </m.div>
   );
 }
