@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { Send, CheckSquare, Printer, Eye, AlertCircle } from "lucide-react";
@@ -43,7 +44,7 @@ export function DispatchDesktopTable({
               </tr>
             ) : (
               orders.map((order) => {
-                const isUnassigned = !order.courierName;
+                const isUnassigned = !order.trackingNumber || !order.courierName;
 
                 return (
                   <tr

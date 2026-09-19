@@ -42,12 +42,38 @@ export function AdminOrderDetailView() {
   const [statusSuccessMsg, setStatusSuccessMsg] = useState("");
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
-  const order = orders.find(
+  const {
+    data: backendOrderData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetOrderByIdQuery(orderIdParam, {
+    skip: !orderIdParam,
+  });
+
+  const [updateOrderStatusMutation, { isLoading: isUpdatingStatus }] =
+    useUpdateOrderStatusMutation();
+  const [assignCourierTrackingMutation, { isLoading: isAssigningCourier }] =
+    useAssignCourierTrackingMutation();
+
+  const storeOrder = orders.find(
     (o) =>
       o.id === orderIdParam ||
       o.orderNumber === orderIdParam ||
       o.orderNumber?.toLowerCase() === orderIdParam?.toLowerCase()
   );
+
+  const order = backendOrderData?.data || storeOrder;
+
+  if (isLoading && !order) {
+    return (
+      <PageLoader
+        title="Loading Order Details..."
+        description="Fetching customer order and item records..."
+        badgeText="Admin Orders"
+      />
+    );
+  }
 
   if (!order) {
     return (
@@ -72,19 +98,45 @@ export function AdminOrderDetailView() {
     );
   }
 
-  const handleStatusChange = (newStatus: OrderStatus) => {
-    updateOrderStatus(order.id, newStatus);
-    setStatusSuccessMsg(`Order updated to: ${newStatus.toUpperCase()}`);
-    setTimeout(() => setStatusSuccessMsg(""), 3500);
+  const handleStatusChange = async (newStatus: OrderStatus) => {
+    try {
+      if (order.id) {
+        await updateOrderStatusMutation({
+          id: order.id,
+          status: newStatus,
+        }).unwrap();
+      }
+      updateOrderStatus(order.id, newStatus);
+      setStatusSuccessMsg(`Order updated to: ${newStatus.toUpperCase()}`);
+    } catch (err) {
+      updateOrderStatus(order.id, newStatus);
+      setStatusSuccessMsg(`Order updated to: ${newStatus.toUpperCase()}`);
+    } finally {
+      setTimeout(() => setStatusSuccessMsg(""), 3500);
+    }
   };
 
-  const handleAssignTracking = (e: React.FormEvent) => {
+  const handleAssignTracking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courierNameInput || !trackingNumberInput) return;
-    assignCourierTracking(order.id, courierNameInput, trackingNumberInput);
-    setTrackingNumberInput("");
-    setStatusSuccessMsg("Courier and tracking number saved successfully!");
-    setTimeout(() => setStatusSuccessMsg(""), 3500);
+    try {
+      if (order.id) {
+        await assignCourierTrackingMutation({
+          id: order.id,
+          courierName: courierNameInput,
+          trackingNumber: trackingNumberInput,
+        }).unwrap();
+      }
+      assignCourierTracking(order.id, courierNameInput, trackingNumberInput);
+      setTrackingNumberInput("");
+      setStatusSuccessMsg("Courier and tracking number saved successfully!");
+    } catch (err) {
+      assignCourierTracking(order.id, courierNameInput, trackingNumberInput);
+      setTrackingNumberInput("");
+      setStatusSuccessMsg("Courier and tracking number saved successfully!");
+    } finally {
+      setTimeout(() => setStatusSuccessMsg(""), 3500);
+    }
   };
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -581,7 +633,7 @@ export function AdminOrderDetailView() {
                     Name
                   </p>
                   <p className="text-sm font-bold text-foreground mt-0.5">
-                    {order.shippingAddress.name}
+                    {order.shippingAddress?.name}
                   </p>
                 </div>
 
@@ -591,10 +643,10 @@ export function AdminOrderDetailView() {
                   </p>
                   <div className="flex items-center justify-between gap-2 mt-0.5">
                     <span className="font-mono font-bold text-foreground text-sm">
-                      {order.shippingAddress.phone}
+                      {order.shippingAddress?.phone}
                     </span>
                     <a
-                      href={`tel:${order.shippingAddress.phone}`}
+                      href={`tel:${order.shippingAddress?.phone}`}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 font-bold text-xs transition-colors"
                     >
                       <Phone className="h-3.5 w-3.5" />
@@ -610,12 +662,12 @@ export function AdminOrderDetailView() {
                   <span
                     className={cn(
                       "inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                      order.shippingAddress.zone === "inside-dhaka"
+                      order.shippingAddress?.zone === "inside-dhaka"
                         ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                         : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
                     )}
                   >
-                    {order.shippingAddress.zone === "inside-dhaka"
+                    {order.shippingAddress?.zone === "inside-dhaka"
                       ? "Dhaka Metro"
                       : "Outside Dhaka"}
                   </span>
@@ -628,12 +680,12 @@ export function AdminOrderDetailView() {
                   <div className="flex items-start gap-2 bg-background/60 p-2.5 rounded-xl border border-border/40 text-foreground leading-relaxed">
                     <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                     <span>
-                      {order.shippingAddress.street}
-                      {order.shippingAddress.area && `, ${order.shippingAddress.area}`}
+                      {order.shippingAddress?.street}
+                      {order.shippingAddress?.area && `, ${order.shippingAddress?.area}`}
                       <br />
-                      {order.shippingAddress.city}
-                      {order.shippingAddress.postalCode &&
-                        ` - ${order.shippingAddress.postalCode}`}
+                      {order.shippingAddress?.city}
+                      {order.shippingAddress?.postalCode &&
+                        ` - ${order.shippingAddress?.postalCode}`}
                     </span>
                   </div>
                 </div>

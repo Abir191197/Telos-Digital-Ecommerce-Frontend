@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { Phone, MapPin, Box, Truck, AlertCircle, Send, CheckSquare, Printer, Eye } from "lucide-react";
@@ -19,7 +20,7 @@ export function DispatchCardItem({
   onPrintInvoice,
   onInspect,
 }: DispatchCardItemProps) {
-  const isUnassigned = !order.courierName;
+  const isUnassigned = !order.trackingNumber || !order.courierName;
 
   return (
     <div

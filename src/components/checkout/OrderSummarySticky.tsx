@@ -14,6 +14,7 @@ import {
   Truck,
   RotateCcw,
   Sparkles,
+  Lock,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ interface OrderSummaryStickyProps {
   onApplyCoupon: (code: string) => boolean;
   onRemoveCoupon: () => void;
   total: number;
+  isSubmitting?: boolean;
 }
 
 export function OrderSummarySticky({
@@ -41,6 +43,7 @@ export function OrderSummarySticky({
   onApplyCoupon,
   onRemoveCoupon,
   total,
+  isSubmitting = false,
 }: OrderSummaryStickyProps) {
   const [isItemsExpanded, setIsItemsExpanded] = useState(true);
   const [couponInput, setCouponInput] = useState("");
@@ -249,6 +252,28 @@ export function OrderSummarySticky({
           </div>
         </div>
       </div>
+
+      {/* Primary Confirm & Place Order Button */}
+      <Button
+        type="submit"
+        form="checkout-form"
+        variant="amber"
+        size="lg"
+        disabled={isSubmitting}
+        className="w-full h-13 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/25 active:scale-[0.99] transition-transform cursor-pointer"
+      >
+        {isSubmitting ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            <span>Placing Order...</span>
+          </span>
+        ) : (
+          <span className="flex items-center justify-center gap-2">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>Confirm Order • ৳{total.toLocaleString()}</span>
+          </span>
+        )}
+      </Button>
 
       {/* Trust guarantees strip */}
       <div className="pt-2 border-t border-border/60 space-y-2 text-[11px] text-muted-foreground">

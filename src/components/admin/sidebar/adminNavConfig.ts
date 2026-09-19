@@ -55,13 +55,11 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         title: "Orders",
         icon: ShoppingBag,
-        badge: "2",
         children: [
           { title: "All Orders", href: "/dashboard/orders" },
           {
             title: "Pending Dispatch",
             href: "/dashboard/orders?status=pending",
-            badge: "2",
           },
         ],
       },

@@ -9,25 +9,21 @@ import {
   CreditCard,
   ShieldCheck,
   CheckCircle2,
-  Lock,
   Zap,
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/common";
 
 interface PaymentStepProps {
   form: UseFormReturn<CheckoutFormValues>;
-  totalAmount: number;
-  onBack: () => void;
-  isSubmitting: boolean;
+  totalAmount?: number;
+  onBack?: () => void;
+  isSubmitting?: boolean;
 }
 
 export function PaymentStep({
   form,
-  totalAmount,
-  onBack,
-  isSubmitting,
+  totalAmount = 0,
 }: PaymentStepProps) {
   const {
     register,
@@ -88,7 +84,7 @@ export function PaymentStep({
           <div>
             <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-amber-500" />
-              <span>Select Payment Method</span>
+              <span>2. Select Payment Method</span>
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               Zero surcharge across all payment channels. Cash on delivery available nationwide.
@@ -257,34 +253,6 @@ export function PaymentStep({
             </p>
           </div>
         )}
-
-        {/* Buttons (Back & Submit) */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-border/50">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="w-full sm:w-auto h-12 px-5 font-semibold rounded-2xl shrink-0"
-          >
-            ← Back to Address
-          </Button>
-
-          <Button
-            type="submit"
-            variant="amber"
-            disabled={isSubmitting}
-            className="w-full sm:w-auto min-h-12 h-auto py-3 px-6 font-bold rounded-2xl shadow-lg shadow-amber-500/20 active:scale-[0.99] transition-transform text-xs sm:text-sm"
-          >
-            {isSubmitting ? (
-              <span>Placing Order...</span>
-            ) : (
-              <span className="flex items-center justify-center gap-2 text-center">
-                <Lock className="h-4 w-4 shrink-0" />
-                <span>Confirm & Place Order (৳{totalAmount.toLocaleString()})</span>
-              </span>
-            )}
-          </Button>
-        </div>
       </div>
     </div>
   );

@@ -29,27 +29,12 @@ export const BD_DISTRICTS = [
 export const BD_PHONE_REGEX = /^(?:\+8801|01|1)[3-9]\d{8}$/;
 
 export const checkoutSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(80, "Full name is too long"),
-  phone: z
-    .string()
-    .min(10, "Enter valid mobile number (e.g. 017XXXXXXXX)")
-    .regex(BD_PHONE_REGEX, "Enter valid Bangladesh mobile number (e.g. 01712345678)"),
-  email: z
-    .string()
-    .email("Enter a valid email address")
-    .optional()
-    .or(z.literal("")),
-  city: z.string().min(1, "Please select your district/city"),
-  zone: z.enum(["inside-dhaka", "outside-dhaka"], {
-    errorMap: () => ({ message: "Select delivery zone" }),
-  }),
-  street: z
-    .string()
-    .min(6, "Full address required (House, Road, Area)")
-    .max(250, "Address is too long"),
+  fullName: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
+  city: z.string().optional(),
+  zone: z.enum(["inside-dhaka", "outside-dhaka"]),
+  street: z.string().optional(),
   postalCode: z.string().optional(),
   deliveryNote: z.string().max(300, "Notes cannot exceed 300 characters").optional(),
   

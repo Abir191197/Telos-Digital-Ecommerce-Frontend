@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { ROUTES } from "@/constants";
+import { useGetOrderStatsQuery } from "@/services/api/orders/orderApi";
 import {
   ADMIN_NAV_GROUPS,
   NavGroupItem,
@@ -26,6 +27,27 @@ export function AdminSidebar() {
 
   // Check active routes
   const searchParams = useSearchParams();
+  const { data: statsData } = useGetOrderStatsQuery();
+  const pendingCount = statsData?.data?.pendingDispatchCount;
+
+  const dynamicNavGroups = React.useMemo(() => {
+    return ADMIN_NAV_GROUPS.map((section) => ({
+      ...section,
+      items: section.items.map((item) => {
+        if (item.title === "Orders") {
+          const badgeVal = pendingCount && pendingCount > 0 ? String(pendingCount) : null;
+          return {
+            ...item,
+            badge: badgeVal,
+            children: item.children?.map((sub) =>
+              sub.title === "Pending Dispatch" ? { ...sub, badge: badgeVal } : sub
+            ),
+          };
+        }
+        return item;
+      }),
+    }));
+  }, [pendingCount]);
 
   const isSubRouteActive = (href: string) => {
     const [path, query] = href.split("?");
@@ -131,7 +153,7 @@ export function AdminSidebar() {
 
         {/* Hierarchical Navigation List */}
         <nav className="relative flex-1 space-y-5 px-3 pt-4 pb-4 mt-2 overflow-y-auto subpixel-antialiased sidebar-scrollbar">
-          {ADMIN_NAV_GROUPS.map((section) => (
+          {dynamicNavGroups.map((section) => (
             <div key={section.group} className="space-y-1">
               {(isOpen || isMobileOpen) && (
                 <div className="px-3 pb-1 text-[11px] font-extrabold uppercase tracking-wider text-foreground/70 dark:text-zinc-400">

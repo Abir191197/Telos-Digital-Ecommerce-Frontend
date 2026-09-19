@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { X, MapPin } from "lucide-react";
@@ -76,6 +77,16 @@ export function DispatchDetailsDrawer({
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="pt-2">
+          <Link
+            href={`/dashboard/orders/${order.orderNumber}`}
+            className="w-full py-2.5 px-4 rounded-xl bg-foreground text-background text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            <span>Open Full Order Details</span>
+            <span className="font-mono text-[10px]">#{order.orderNumber}</span>
+          </Link>
         </div>
 
         {/* Destination */}

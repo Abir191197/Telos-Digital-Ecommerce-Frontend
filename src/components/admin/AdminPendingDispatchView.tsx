@@ -21,6 +21,7 @@ import { Order } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
 import { useGetAllOrdersQuery, useAssignCourierTrackingMutation, useUpdateOrderStatusMutation } from "@/services/api/orders/orderApi";
 import { KpiCard } from "./dashboard/KpiCard";
+import { PageLoader } from "@/components/common";
 import {
   DispatchCardItem,
   DispatchDesktopTable,
@@ -34,7 +35,7 @@ import {
 
 export function AdminPendingDispatchView() {
     const { updateOrderStatus, assignCourierTracking } = useAdminStore();
-  const { data: backendOrdersData } = useGetAllOrdersQuery();
+  const { data: backendOrdersData, isLoading } = useGetAllOrdersQuery();
   const [assignCourierTrackingMutation] = useAssignCourierTrackingMutation();
   const [updateOrderStatusMutation] = useUpdateOrderStatusMutation();
 
@@ -116,7 +117,7 @@ export function AdminPendingDispatchView() {
   // Logistics KPI Computations
   const awaitingPackingCount = pendingQueue.filter((o) => o.status === "pending").length;
   const qcReadyCount = pendingQueue.filter((o) => o.status === "processing").length;
-  const unassignedCourierCount = pendingQueue.filter((o) => !o.courierName).length;
+  const unassignedCourierCount = pendingQueue.filter((o) => !o.courierName || !o.trackingNumber).length;
   const urgentCount = pendingQueue.filter((o) => {
     const ageHours = (Date.now() - new Date(o.createdAt).getTime()) / (1000 * 60 * 60);
     return ageHours > 12;

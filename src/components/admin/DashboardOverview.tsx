@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAdminStore } from "@/stores";
+import { useGetOrderStatsQuery, useGetAllOrdersQuery } from "@/services/api/orders/orderApi";
 import {
   DashboardHeader,
   KpiMetricGrid,
@@ -13,11 +14,15 @@ import {
 
 export function DashboardOverview() {
   const { orders, products, updateOrderStatus } = useAdminStore();
+  const { data: statsData } = useGetOrderStatsQuery();
+  const { data: allOrdersData } = useGetAllOrdersQuery({ limit: 10 });
+  const liveOrders = allOrdersData?.data ?? orders;
+  const backendStats = statsData?.data;
 
   // Key KPI metrics calculations
-  const grossRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter(
+  const grossRevenue = backendStats ? backendStats.totalRevenue : liveOrders.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = backendStats ? backendStats.totalOrders : liveOrders.length;
+  const pendingOrders = backendStats ? backendStats.pendingDispatchCount : liveOrders.filter(
     (o) => o.status === "pending" || o.status === "processing"
   ).length;
   const avgOrderValue = totalOrders > 0 ? Math.round(grossRevenue / totalOrders) : 0;
@@ -59,7 +64,7 @@ export function DashboardOverview() {
       {/* Live recent orders & inventory watchlist */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2">
-          <RecentOrdersFeed orders={orders} />
+          <RecentOrdersFeed orders={liveOrders} />
         </div>
         <div>
           <InventoryAlertList products={products} />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,17 +11,21 @@ import {
 import { useCartStore, useAuthStore } from "@/stores";
 import { useClearCartMutation } from "@/services/api/cart/cartApi";
 import { useCreateOrderMutation, CreateOrderPayload } from "@/services/api/orders/orderApi";
+import {
+  useGetAddressesQuery,
+  useCreateAddressMutation,
+} from "@/services/api/address/addressApi";
 import { useMounted } from "@/hooks";
-import { Address, Order } from "@/types/order.types";
+import { Address } from "@/types/order.types";
 import { ROUTES } from "@/constants";
 import { CheckoutHeader } from "./CheckoutHeader";
-import { StepIndicator } from "./StepIndicator";
 import { AddressStep } from "./AddressStep";
+import { AddressSelectionModal } from "./AddressSelectionModal";
+import { AddressFormModal } from "@/components/account/tabs/AddressFormModal";
 import { PaymentStep } from "./PaymentStep";
 import { OrderSummarySticky } from "./OrderSummarySticky";
-import { ShoppingBag, ArrowLeft } from "lucide-react";
+import { ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { OtpVerificationModal } from "@/components/auth/OtpVerificationModal";
 
 export function CheckoutView() {
   const router = useRouter();
@@ -41,19 +45,37 @@ export function CheckoutView() {
 
   const { user } = useAuthStore();
 
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showOtpModal, setShowOtpModal] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [pendingCheckoutValues, setPendingCheckoutValues] =
-    useState<CheckoutFormValues | null>(null);
+
+  // Address Modals & Toast State
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Live Backend Address Query
+  const isDemo = !user || user.id.startsWith("demo");
+  const {
+    data: backendAddresses,
+    isLoading: isAddressesLoading,
+  } = useGetAddressesQuery(undefined, { skip: isDemo || !user });
+
+  const [createAddressMutation] = useCreateAddressMutation();
+
+  // Active addresses: live backend data prioritized, fallback to user store
+  const activeAddresses: Address[] = backendAddresses ?? user?.addresses ?? [];
 
   // Setup React Hook Form with Zod
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: user?.name || "",
-      phone: user?.phone ? user.phone.replace(/^\+880/, "") : "",
+      phone: user?.phone ? user.phone.replace(/^\+880/, "").replace(/^0/, "") : "",
       email: user?.email || "",
       city: "Dhaka",
       zone: "inside-dhaka",
@@ -84,42 +106,159 @@ export function CheckoutView() {
   const totalPayable = Math.max(0, subtotal - discountAmount + shippingFee);
 
   // Prepopulate form if user selects a saved address
-  const handleSelectSavedAddress = (addr: Address) => {
+  const handleSelectSavedAddress = useCallback((addr: Address) => {
     setSelectedAddressId(addr.id);
-    setValue("fullName", addr.name, { shouldValidate: true, shouldDirty: true });
-    // Strip leading +880 or leading 0 so it aligns with fixed +880 badge
-    const cleanPhone = addr.phone.replace(/^\+880\s?/, "").replace(/^0/, "");
-    setValue("phone", cleanPhone, { shouldValidate: true, shouldDirty: true });
-    setValue("city", addr.city, { shouldValidate: true, shouldDirty: true });
-    setValue("zone", addr.zone, { shouldValidate: true, shouldDirty: true });
-    setValue("street", addr.street, { shouldValidate: true, shouldDirty: true });
+    setValue("fullName", addr.name, { shouldValidate: false, shouldDirty: true });
+    const cleanPhone = addr.phone
+      ? addr.phone.replace(/^\+880\s?/, "").replace(/^0/, "").replace(/\s+|-/g, "")
+      : "";
+    setValue("phone", cleanPhone, { shouldValidate: false, shouldDirty: true });
+    setValue("city", addr.city, { shouldValidate: false, shouldDirty: true });
+    setValue("zone", addr.zone, { shouldValidate: false, shouldDirty: true });
+    setValue("street", addr.street, { shouldValidate: false, shouldDirty: true });
     if (addr.postalCode) setValue("postalCode", addr.postalCode, { shouldDirty: true });
+  }, [setValue]);
+
+  // Sync live backend addresses to auth store
+  useEffect(() => {
+    if (backendAddresses && Array.isArray(backendAddresses)) {
+      useAuthStore.setState((state) => {
+        if (!state.user) return state;
+        return {
+          user: {
+            ...state.user,
+            addresses: backendAddresses,
+          },
+        };
+      });
+    }
+  }, [backendAddresses]);
+
+  // Auto-select Default Address (or first address) on initial load
+  useEffect(() => {
+    if (activeAddresses.length > 0) {
+      const existing = activeAddresses.find((a) => a.id === selectedAddressId);
+      if (!existing) {
+        const defaultAddr =
+          activeAddresses.find((a) => a.isDefault) || activeAddresses[0];
+        if (defaultAddr) {
+          handleSelectSavedAddress(defaultAddr);
+        }
+      }
+    }
+  }, [activeAddresses, selectedAddressId, handleSelectSavedAddress]);
+
+  // Active address object
+  const selectedAddress =
+    activeAddresses.find((a) => a.id === selectedAddressId) ||
+    activeAddresses.find((a) => a.isDefault) ||
+    activeAddresses[0] ||
+    null;
+
+  // New Address Form State for Modal
+  const [newAddressFormData, setNewAddressFormData] = useState<Omit<Address, "id">>({
+    name: user?.name || "",
+    phone: user?.phone || "+880 1712-345678",
+    street: "",
+    area: "",
+    union: "",
+    city: "Dhaka",
+    zone: "inside-dhaka",
+    postalCode: "",
+    isDefault: activeAddresses.length === 0,
+    label: "Home",
+  });
+
+  const handleOpenAddModal = () => {
+    setNewAddressFormData({
+      name: user?.name || "",
+      phone: user?.phone || "+880 1712-345678",
+      street: "",
+      area: "",
+      union: "",
+      city: "Dhaka",
+      zone: "inside-dhaka",
+      postalCode: "",
+      isDefault: activeAddresses.length === 0,
+      label: "Home",
+    });
+    setIsAddModalOpen(true);
   };
 
-  // Step 1 -> Step 2 validation handler
-  const handleContinueToStep2 = async () => {
-    const isStep1Valid = await trigger([
-      "fullName",
-      "phone",
-      "email",
-      "city",
-      "zone",
-      "street",
-    ]);
-    if (isStep1Valid) {
-      setCurrentStep(2);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleSaveNewAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAddressFormData.street || !newAddressFormData.name) return;
+
+    try {
+      let created: Address;
+      if (!isDemo) {
+        created = await createAddressMutation({
+          name: newAddressFormData.name,
+          phone: newAddressFormData.phone,
+          title: newAddressFormData.label,
+          street: newAddressFormData.street,
+          city: newAddressFormData.city,
+          area: newAddressFormData.area,
+          union: newAddressFormData.union,
+          zone: newAddressFormData.zone,
+          postalCode: newAddressFormData.postalCode,
+          isDefault: newAddressFormData.isDefault,
+        }).unwrap();
+      } else {
+        created = {
+          ...newAddressFormData,
+          id: `demo-addr-${Date.now()}`,
+        };
+        useAuthStore.setState((state) => {
+          if (!state.user) return state;
+          return {
+            user: {
+              ...state.user,
+              addresses: [...(state.user.addresses || []), created],
+            },
+          };
+        });
+      }
+
+      handleSelectSavedAddress(created);
+      setIsAddModalOpen(false);
+      setIsSelectionModalOpen(false);
+      showToast("New delivery address added and selected!");
+    } catch (err: any) {
+      console.error("Failed to create address:", err);
+      alert(err?.data?.message || err?.message || "Failed to create address.");
     }
   };
 
-  // Final submit handler triggers SMS OTP verification for Bangladeshi orders
+  // Submit handler directly hits order placement
   const onSubmit = async (values: CheckoutFormValues) => {
-    setPendingCheckoutValues(values);
-    setShowOtpModal(true);
+    await finalizeOrderPlacement(values);
   };
 
   const finalizeOrderPlacement = async (values: CheckoutFormValues) => {
+    if (!selectedAddress && activeAddresses.length === 0) {
+      alert("Please add a delivery address first.");
+      handleOpenAddModal();
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const recipientName =
+      values.fullName || selectedAddress?.name || user?.name || "Customer";
+    const rawRecipientPhone =
+      values.phone ||
+      selectedAddress?.phone ||
+      user?.phone ||
+      "01712345678";
+    const recipientStreet =
+      values.street || selectedAddress?.street || "Delivery Address";
+    const recipientCity =
+      values.city || selectedAddress?.city || "Dhaka";
+    const recipientZone =
+      values.zone || selectedAddress?.zone || "inside-dhaka";
+    const recipientPostalCode =
+      values.postalCode || selectedAddress?.postalCode || "1200";
 
     try {
       const orderPayload: CreateOrderPayload = {
@@ -134,15 +273,19 @@ export function CheckoutView() {
           quantity: item.quantity,
         })),
         customerDetails: {
-          name: values.fullName,
-          phone: values.phone,
+          name: recipientName,
+          phone: rawRecipientPhone.startsWith("+880")
+            ? rawRecipientPhone
+            : rawRecipientPhone.startsWith("0")
+            ? `+88${rawRecipientPhone}`
+            : `+880${rawRecipientPhone}`,
           email: values.email || user?.email || undefined,
-          street: values.street,
-          area: values.city,
-          city: values.city,
-          zone: values.zone,
-          postalCode: values.postalCode || "1200",
-          label: "Home",
+          street: recipientStreet,
+          area: selectedAddress?.area || selectedAddress?.city || recipientCity,
+          city: recipientCity,
+          zone: recipientZone,
+          postalCode: recipientPostalCode,
+          label: selectedAddress?.label || "Home",
           deliveryNote: values.deliveryNote || undefined,
         },
         transaction: {
@@ -234,67 +377,85 @@ export function CheckoutView() {
       <CheckoutHeader />
 
       <main className="container py-6 sm:py-8 space-y-8">
-        {/* Step Indicator */}
-        <StepIndicator
-          currentStep={currentStep}
-          onStepChange={(step) => setCurrentStep(step)}
-          canNavigateToStep2={currentStep === 2}
-        />
-
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form id="checkout-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Flow Steps */}
+            {/* Left Column: Delivery Address & Payment Details */}
             <div className="lg:col-span-7 space-y-6">
-              {currentStep === 1 && (
-                <AddressStep
-                  form={form}
-                  savedAddresses={user?.addresses || []}
-                  selectedAddressId={selectedAddressId}
-                  onSelectSavedAddress={handleSelectSavedAddress}
-                  onContinue={handleContinueToStep2}
-                />
-              )}
+              {/* 1. Delivery Destination & Address */}
+              <AddressStep
+                form={form}
+                savedAddresses={activeAddresses}
+                selectedAddress={selectedAddress}
+                selectedAddressId={selectedAddressId}
+                isLoadingAddresses={isAddressesLoading}
+                onSelectSavedAddress={(addr) => {
+                  handleSelectSavedAddress(addr);
+                  showToast(`Selected ${addr.name} (${addr.label})`);
+                }}
+                onOpenChangeModal={() => setIsSelectionModalOpen(true)}
+                onOpenAddModal={handleOpenAddModal}
+              />
 
-              {currentStep === 2 && (
-                <PaymentStep
-                  form={form}
-                  totalAmount={totalPayable}
-                  onBack={() => setCurrentStep(1)}
-                  isSubmitting={isSubmitting}
-                />
-              )}
+              {/* 2. Payment Method & Details */}
+              <PaymentStep
+                form={form}
+                totalAmount={totalPayable}
+                isSubmitting={isSubmitting}
+              />
             </div>
 
             {/* Right Column: Sticky Order Summary */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 lg:sticky lg:top-24">
               <OrderSummarySticky
                 items={items}
                 subtotal={subtotal}
                 shippingFee={shippingFee}
-                deliveryZone={currentZone}
+                deliveryZone={(currentZone as "inside-dhaka" | "outside-dhaka") || "inside-dhaka"}
                 appliedCoupon={appliedCoupon}
                 couponError={couponError}
                 onApplyCoupon={applyCoupon}
                 onRemoveCoupon={removeCoupon}
                 total={totalPayable}
+                isSubmitting={isSubmitting}
               />
             </div>
           </div>
         </form>
       </main>
 
-      {/* ── SMS OTP Verification Modal ── */}
-      <OtpVerificationModal
-        phone={pendingCheckoutValues?.phone || form.getValues("phone")}
-        isOpen={showOtpModal}
-        onClose={() => setShowOtpModal(false)}
-        onVerified={() => {
-          if (pendingCheckoutValues) {
-            finalizeOrderPlacement(pendingCheckoutValues);
-          }
+      {/* ── Address Selection Modal ── */}
+      <AddressSelectionModal
+        isOpen={isSelectionModalOpen}
+        onClose={() => setIsSelectionModalOpen(false)}
+        addresses={activeAddresses}
+        selectedAddressId={selectedAddressId}
+        onSelectAddress={(addr) => {
+          handleSelectSavedAddress(addr);
+          showToast(`Delivering to ${addr.name} (${addr.label})`);
         }}
-        purpose="Verify phone number to confirm your order and courier dispatch"
+        onAddNewAddress={() => {
+          setIsSelectionModalOpen(false);
+          handleOpenAddModal();
+        }}
       />
+
+      {/* ── Add New Address Modal (Cascade District / Upazila / Union) ── */}
+      <AddressFormModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        isEditing={false}
+        formData={newAddressFormData}
+        setFormData={setNewAddressFormData}
+        onSubmit={handleSaveNewAddress}
+      />
+
+      {/* ── Quick Notification Toast Banner ── */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-zinc-900/95 dark:bg-white/95 text-white dark:text-zinc-950 text-xs font-bold shadow-2xl border border-white/10 dark:border-zinc-800 animate-in slide-in-from-bottom-5 duration-300">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 dark:text-emerald-600 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
