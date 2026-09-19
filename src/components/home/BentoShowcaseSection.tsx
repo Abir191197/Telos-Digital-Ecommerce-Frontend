@@ -129,10 +129,12 @@ export function BentoShowcaseSection() {
 
           <Link
             href={ROUTES.CATEGORIES}
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 dark:hover:text-zinc-950 shadow-xs transition-all duration-200 self-start sm:self-auto shrink-0 group"
+            className="inline-flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black px-4 py-2 text-xs sm:text-sm shadow-md shadow-amber-500/25 hover:shadow-lg hover:shadow-amber-500/35 transition-all duration-200 self-start sm:self-auto shrink-0 group active:scale-95"
           >
             <span>All 250+ Categories</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-950/10 group-hover:bg-zinc-950/15 transition-colors">
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 text-zinc-950" />
+            </span>
           </Link>
         </div>
 
@@ -152,7 +154,7 @@ export function BentoShowcaseSection() {
             >
               <Link
                 href={item.href}
-                className="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-border/60 bg-card p-5 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 dark:hover:shadow-black/60"
+                className="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border-0 bg-card p-5 sm:p-7 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.08),0_4px_12px_-4px_rgba(0,0,0,0.04)] dark:shadow-[0_14px_35px_-8px_rgba(0,0,0,0.6)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.2),0_12px_24px_-8px_rgba(245,158,11,0.14)] dark:hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.85),0_15px_30px_-8px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all duration-300 select-none"
               >
             {/* Background Image with Cinematic Overlay */}
             <div className="absolute inset-0 z-0 overflow-hidden bg-muted/50">

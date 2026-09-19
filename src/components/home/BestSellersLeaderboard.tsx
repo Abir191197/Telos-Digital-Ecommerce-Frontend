@@ -121,7 +121,7 @@ export function BestSellersLeaderboard() {
               return (
                 <div
                   key={product.id}
-                  className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-shadow duration-300"
+                  className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.5),0_6px_10px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_35px_-8px_rgba(0,0,0,0.12),0_10px_15px_-6px_rgba(245,158,11,0.08)] dark:hover:shadow-[0_22px_40px_-8px_rgba(0,0,0,0.7),0_10px_20px_-6px_rgba(245,158,11,0.15)] hover:-translate-y-1 transition-all duration-300 select-none"
                 >
                   {/* Rank Header Badge */}
                   <div className="flex items-center justify-between pb-3 border-b border-border/40">
@@ -137,8 +137,8 @@ export function BestSellersLeaderboard() {
                     </span>
                   </div>
 
-                  {/* Product Visual & Details */}
-                  <div className="flex items-center gap-3 pt-3.5">
+                  {/* Product Visual & Details - flex-1 for consistent height */}
+                  <div className="flex items-center gap-3 pt-3.5 flex-1">
                     <Link href={productUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/40 block">
                       <Image
                         src={product.thumbnail}
@@ -167,22 +167,26 @@ export function BestSellersLeaderboard() {
                     </div>
                   </div>
 
-                  {/* Price & Action */}
-                  <div className="mt-4 pt-3.5 border-t border-border/40 flex items-center justify-between">
+                  {/* Price & Action - anchored cleanly to bottom with mt-auto */}
+                  <div className="mt-auto pt-3.5 border-t border-border/40 flex items-center justify-between">
                     <div>
                       <div className="text-base font-black text-foreground">
                         ৳{product.price.toLocaleString()}
                       </div>
-                      {product.originalPrice && product.originalPrice > product.price && (
+                      {product.originalPrice && product.originalPrice > product.price ? (
                         <div className="text-[11px] text-muted-foreground line-through">
                           ৳{product.originalPrice.toLocaleString()}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                          Best price
                         </div>
                       )}
                     </div>
 
                     <Link
                       href={productUrl}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs transition-colors shrink-0"
                     >
                       <ShoppingCart className="h-3.5 w-3.5" />
                       <span>Buy</span>

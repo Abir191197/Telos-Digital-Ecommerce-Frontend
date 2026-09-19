@@ -208,22 +208,10 @@ export function OfficialBrandsSection() {
         </Link>
       </div>
 
-      {/* Infinite Marquee Track with Fade Masks */}
-      <div className="relative w-full overflow-hidden py-1">
-        {/* Left Fade Mask */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-background to-transparent"
-        />
-
-        {/* Right Fade Mask */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-background to-transparent"
-        />
-
+      {/* Infinite Marquee Track - unconstrained vertical padding for liquid shadow */}
+      <div className="relative w-full overflow-visible py-2 pb-8 pt-2">
         {/* Scrolling Strip */}
-        <div className="animate-marquee gap-3 sm:gap-4 select-none">
+        <div className="animate-marquee gap-3 sm:gap-4 select-none pb-2">
           {marqueeItems.map((brand, idx) => {
             const Logo = LOGO_MAP[brand.name] || AppleLogo;
 
@@ -231,7 +219,8 @@ export function OfficialBrandsSection() {
               <Link
                 key={`${brand.id}-${idx}`}
                 href={ROUTES.BRAND_DETAIL(brand.slug)}
-                className="group relative flex flex-col items-center justify-between w-[155px] sm:w-[180px] shrink-0 p-5 rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 text-center select-none overflow-hidden">
+                className="group relative flex flex-col items-center justify-between w-[155px] sm:w-[180px] shrink-0 p-5 rounded-3xl bg-card text-card-foreground shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.5),0_6px_10px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_35px_-8px_rgba(0,0,0,0.12),0_10px_15px_-6px_rgba(245,158,11,0.08)] dark:hover:shadow-[0_22px_40px_-8px_rgba(0,0,0,0.7),0_10px_20px_-6px_rgba(245,158,11,0.15)] hover:-translate-y-1 transition-all duration-300 text-center select-none overflow-hidden"
+              >
                 {/* Ambient glow on hover - borderless design */}
                 <div
                   aria-hidden="true"
