@@ -35,6 +35,7 @@ export interface NavGroupItem {
 
 export interface AdminNavGroup {
   group: string;
+  badge?: string | null;
   items: NavGroupItem[];
 }
 
@@ -157,33 +158,55 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   },
   {
     group: "Store Administration",
+    badge: "Coming Soon",
     items: [
       {
         title: "Customizations",
         icon: Sliders,
+        badge: "Later",
         children: [
           {
             title: "Banners & Promos",
             href: "/dashboard/customizations?tab=banners",
+            badge: "Later",
           },
           {
             title: "Homepage Layout",
             href: "/dashboard/customizations?tab=homepage",
+            badge: "Later",
           },
-          { title: "Theme Accent", href: "/dashboard/customizations?tab=theme" },
+          {
+            title: "Theme Accent",
+            href: "/dashboard/customizations?tab=theme",
+            badge: "Later",
+          },
         ],
       },
       {
         title: "Settings",
         icon: Settings,
+        badge: "Coming Soon",
         children: [
-          { title: "Store Profile", href: ROUTES.SETTINGS },
+          {
+            title: "Store Profile",
+            href: "/dashboard/settings?tab=profile",
+            badge: "Later",
+          },
           {
             title: "Shipping & Delivery",
             href: "/dashboard/settings?tab=shipping",
+            badge: "Later",
           },
-          { title: "Tax & Currencies", href: "/dashboard/settings?tab=tax" },
-          { title: "Staff & Permissions", href: "/dashboard/settings?tab=staff" },
+          {
+            title: "Tax & Currencies",
+            href: "/dashboard/settings?tab=tax",
+            badge: "Later",
+          },
+          {
+            title: "Staff & Permissions",
+            href: "/dashboard/settings?tab=staff",
+            badge: "Later",
+          },
         ],
       },
     ],

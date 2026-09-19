@@ -156,8 +156,13 @@ export function AdminSidebar() {
           {dynamicNavGroups.map((section) => (
             <div key={section.group} className="space-y-1">
               {(isOpen || isMobileOpen) && (
-                <div className="px-3 pb-1 text-[11px] font-extrabold uppercase tracking-wider text-foreground/70 dark:text-zinc-400">
-                  {section.group}
+                <div className="flex items-center justify-between px-3 pb-1 text-[11px] font-extrabold uppercase tracking-wider text-foreground/70 dark:text-zinc-400">
+                  <span>{section.group}</span>
+                  {section.badge && (
+                    <span className="text-[9px] px-2 py-0.5 rounded-full font-bold tracking-normal bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                      {section.badge}
+                    </span>
+                  )}
                 </div>
               )}
 

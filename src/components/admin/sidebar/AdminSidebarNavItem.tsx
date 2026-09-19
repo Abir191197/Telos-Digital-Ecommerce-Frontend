@@ -39,15 +39,19 @@ export function AdminSidebarNavItem({
             ? "bg-foreground text-background font-bold shadow-sm"
             : "text-zinc-800 dark:text-zinc-200 hover:bg-muted hover:text-foreground"
         )}
-        title={item.title}
+        title={item.badge ? `${item.title} (${item.badge})` : item.title}
       >
         <item.icon className="h-5 w-5 shrink-0 stroke-[2.2]" />
+        {item.badge && (
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-sidebar" />
+        )}
       </Link>
     );
   }
 
   // Expanded Item without children
   if (!hasChildren) {
+    const isSpecialBadge = item.badge?.toLowerCase().includes("soon") || item.badge?.toLowerCase().includes("later");
     return (
       <Link
         href={item.href || "#"}
@@ -71,9 +75,11 @@ export function AdminSidebarNavItem({
         {item.badge && (
           <span
             className={cn(
-              "rounded-md px-1.5 py-0.5 text-xs font-bold",
+              "px-1.5 py-0.5 text-[10px] font-bold tracking-tight rounded-full",
               isItemActive
                 ? "bg-background/20 text-background"
+                : isSpecialBadge
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                 : "bg-muted text-foreground border border-border"
             )}
           >
@@ -85,6 +91,7 @@ export function AdminSidebarNavItem({
   }
 
   // Collapsible parent with sub-items
+  const isParentSpecialBadge = item.badge?.toLowerCase().includes("soon") || item.badge?.toLowerCase().includes("later");
   return (
     <div className="space-y-0.5">
       <button
@@ -107,7 +114,14 @@ export function AdminSidebarNavItem({
         />
         <span className="truncate flex-1 font-semibold">{item.title}</span>
         {item.badge && (
-          <span className="rounded-md px-1.5 py-0.5 text-xs font-bold bg-muted text-foreground border border-border mr-1">
+          <span
+            className={cn(
+              "px-2 py-0.5 text-[10px] font-bold tracking-tight rounded-full mr-1",
+              isParentSpecialBadge
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                : "bg-muted text-foreground border border-border"
+            )}
+          >
             {item.badge}
           </span>
         )}
@@ -124,6 +138,7 @@ export function AdminSidebarNavItem({
         <div className="pl-5 pr-1 py-1 space-y-1 border-l-2 border-border ml-5 mt-0.5">
           {item.children!.map((sub) => {
             const isSubActive = isSubRouteActive(sub.href);
+            const isSubSpecialBadge = sub.badge?.toLowerCase().includes("soon") || sub.badge?.toLowerCase().includes("later");
             return (
               <Link
                 key={sub.title}
@@ -140,9 +155,11 @@ export function AdminSidebarNavItem({
                 {sub.badge && (
                   <span
                     className={cn(
-                      "rounded-md px-1.5 py-0.5 text-xs font-semibold",
+                      "px-1.5 py-0.5 text-[10px] font-semibold tracking-tight rounded-full",
                       isSubActive
                         ? "bg-background/25 text-background"
+                        : isSubSpecialBadge
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                         : "bg-muted text-foreground border border-border"
                     )}
                   >

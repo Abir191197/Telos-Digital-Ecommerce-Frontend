@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { AdminComingSoonView } from "@/components/admin";
 
 export const metadata: Metadata = {
-  title: "Settings | Store Administration",
-  description: "Configure store settings and administration.",
+  title: "Store Settings | Store Administration",
+  description: "Configure store profile, shipping policies, tax, and staff permissions.",
 };
 
-export default function SettingsPage() {
+export default function SettingsDashboardPage() {
   return (
     <AdminComingSoonView
       title="Store Settings & Configuration"
@@ -15,4 +15,3 @@ export default function SettingsPage() {
     />
   );
 }
-
