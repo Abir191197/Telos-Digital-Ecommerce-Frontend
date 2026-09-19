@@ -7,7 +7,7 @@ import { ChevronRight, Loader2 } from "lucide-react";
 import { useGetCategoryBySlugQuery } from "@/services/api/categories/categoryApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
-import { CategoryDetailView as CategoryDetailViewUI } from "@/components/categories";
+import { CategoryDetailView as CategoryDetailViewUI, CategoryDetailSkeleton } from "@/components/categories";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -26,11 +26,7 @@ export function CategoryDetailView({ params }: Props) {
   const sisterCategories = allCategories.filter((c) => c.slug !== slug).slice(0, 6);
 
   if (catLoading || !category) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-      </div>
-    );
+    return <CategoryDetailSkeleton />;
   }
 
   return (

@@ -7,3 +7,4 @@ export * from "./CategoryRecentlyViewedSection";
 export * from "./CategoriesView";
 export * from "./CategoryDetailView";
 export * from "./CategoriesPageSkeleton";
+export * from "./CategoryDetailSkeleton";
