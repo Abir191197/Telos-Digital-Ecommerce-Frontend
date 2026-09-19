@@ -6,7 +6,9 @@ const LOCAL_API_URL = "http://localhost:5001/api/v1";
 
 const normalizeApiUrl = (url?: string): string => {
   if (!url || !url.trim()) {
-    return process.env.NODE_ENV === "production" ? PROD_API_URL : LOCAL_API_URL;
+    // Default to hosted cloud backend so the frontend works standalone out-of-the-box
+    // without requiring a local backend or database. To use local backend, set NEXT_PUBLIC_API_URL in .env.local
+    return PROD_API_URL;
   }
 
   const cleanUrl = url.trim().replace(/\/+$/, "");
