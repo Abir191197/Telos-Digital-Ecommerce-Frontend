@@ -4,9 +4,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Trophy, Star, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react";
-import { products } from "@/data";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 const leaderboardContainerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,12 +32,17 @@ const leaderboardCardVariants: Variants = {
 };
 
 export function BestSellersLeaderboard() {
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 40 });
+  const allProducts = serverProducts?.data || [];
+
   // Top 4 best sellers ranked by reviews & rating
   const topRanked = React.useMemo(() => {
-    return [...products]
-      .sort((a, b) => b.reviewCount * b.rating - a.reviewCount * a.rating)
+    return [...allProducts]
+      .sort((a, b) => (b.reviewCount || 0) * (b.rating || 0) - (a.reviewCount || 0) * (a.rating || 0))
       .slice(0, 4);
-  }, []);
+  }, [allProducts]);
+
+  if (topRanked.length === 0 && !isLoading) return null;
 
   const MEDAL_STYLES = [
     { bg: "bg-amber-400 text-amber-950", label: "#1 Best Seller" },
@@ -81,93 +86,114 @@ export function BestSellersLeaderboard() {
         </m.div>
 
         {/* Leaderboard: 2 cols on mobile, 4 cols on desktop */}
-        <m.div
-          variants={leaderboardContainerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
-        >
-        {topRanked.map((product, idx) => {
-          const medal = MEDAL_STYLES[idx] || MEDAL_STYLES[3];
-          const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);
-
-          return (
-            <m.div
-              key={product.id}
-              variants={leaderboardCardVariants}
-              className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-shadow duration-300"
-            >
-              {/* Rank Header Badge */}
-              <div className="flex items-center justify-between pb-3 border-b border-border/40">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider shadow-xs ${medal.bg}`}
-                >
-                  <Trophy className="h-3 w-3" />
-                  {medal.label}
-                </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                  <TrendingUp className="h-3 w-3" />
-                  {product.reviewCount * 7}+ sold
-                </span>
-              </div>
-
-              {/* Product Visual & Details */}
-              <div className="flex items-center gap-3 pt-3.5">
-                <Link href={productUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/40 block">
-                  <Image
-                    src={product.thumbnail}
-                    alt={product.name}
-                    fill
-                    sizes="80px"
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </Link>
-
-                <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                    {product.brand}
-                  </span>
-                  <Link
-                    href={productUrl}
-                    className="block font-bold text-xs sm:text-sm text-foreground hover:text-amber-600 line-clamp-2 transition-colors mt-0.5"
-                  >
-                    {product.name}
-                  </Link>
-                  <div className="flex items-center gap-1 text-xs text-amber-500 mt-1">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    <span className="font-bold text-foreground">{product.rating}</span>
-                    <span className="text-muted-foreground text-[11px]">({product.reviewCount})</span>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 animate-pulse">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={`bestseller-skeleton-${i}`}
+                className="rounded-3xl bg-card p-4 sm:p-5 border border-border/50 h-52 flex flex-col justify-between"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="h-5 w-24 rounded-full bg-muted/60" />
+                  <div className="h-4 w-16 rounded bg-muted/40" />
+                </div>
+                <div className="flex gap-3 items-center">
+                  <div className="h-20 w-20 rounded-2xl bg-muted/60 shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-3 w-12 rounded bg-muted/50" />
+                    <div className="h-4 w-full rounded bg-muted/70" />
+                    <div className="h-3 w-20 rounded bg-muted/50" />
                   </div>
                 </div>
+                <div className="flex justify-between items-center pt-2">
+                  <div className="h-5 w-20 rounded bg-muted/70" />
+                  <div className="h-7 w-16 rounded-full bg-muted/60" />
+                </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {topRanked.map((product, idx) => {
+              const medal = MEDAL_STYLES[idx] || MEDAL_STYLES[3];
+              const productUrl = ROUTES.PRODUCT_DETAIL(product.slug);
 
-              {/* Price & Action */}
-              <div className="mt-4 pt-3.5 border-t border-border/40 flex items-center justify-between">
-                <div>
-                  <div className="text-base font-black text-foreground">
-                    ৳{product.price.toLocaleString()}
+              return (
+                <div
+                  key={product.id}
+                  className="group relative flex flex-col rounded-3xl bg-card p-4 sm:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] transition-shadow duration-300"
+                >
+                  {/* Rank Header Badge */}
+                  <div className="flex items-center justify-between pb-3 border-b border-border/40">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider shadow-xs ${medal.bg}`}
+                    >
+                      <Trophy className="h-3 w-3" />
+                      {medal.label}
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <TrendingUp className="h-3 w-3" />
+                      {product.reviewCount * 7}+ sold
+                    </span>
                   </div>
-                  {product.originalPrice && product.originalPrice > product.price && (
-                    <div className="text-[11px] text-muted-foreground line-through">
-                      ৳{product.originalPrice.toLocaleString()}
+
+                  {/* Product Visual & Details */}
+                  <div className="flex items-center gap-3 pt-3.5">
+                    <Link href={productUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/40 block">
+                      <Image
+                        src={product.thumbnail}
+                        alt={product.name}
+                        fill
+                        sizes="80px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </Link>
+
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                        {product.brand}
+                      </span>
+                      <Link
+                        href={productUrl}
+                        className="block font-bold text-xs sm:text-sm text-foreground hover:text-amber-600 line-clamp-2 transition-colors mt-0.5"
+                      >
+                        {product.name}
+                      </Link>
+                      <div className="flex items-center gap-1 text-xs text-amber-500 mt-1">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <span className="font-bold text-foreground">{product.rating}</span>
+                        <span className="text-muted-foreground text-[11px]">({product.reviewCount})</span>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <Link
-                  href={productUrl}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs transition-colors"
-                >
-                  <ShoppingCart className="h-3.5 w-3.5" />
-                  <span>Buy</span>
-                </Link>
-              </div>
-            </m.div>
-          );
-        })}
-      </m.div>
-    </section>
+                  {/* Price & Action */}
+                  <div className="mt-4 pt-3.5 border-t border-border/40 flex items-center justify-between">
+                    <div>
+                      <div className="text-base font-black text-foreground">
+                        ৳{product.price.toLocaleString()}
+                      </div>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <div className="text-[11px] text-muted-foreground line-through">
+                          ৳{product.originalPrice.toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+
+                    <Link
+                      href={productUrl}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs transition-colors"
+                    >
+                      <ShoppingCart className="h-3.5 w-3.5" />
+                      <span>Buy</span>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
   </LazyMotion>
 );
 }

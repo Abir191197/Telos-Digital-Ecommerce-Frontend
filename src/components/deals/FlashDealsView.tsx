@@ -18,9 +18,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { products } from "@/data";
 import { ProductCard } from "@/components/common";
 import { FlashDealCard } from "./FlashDealCard";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 
 const containerVariants: Variants = {
@@ -76,12 +76,16 @@ export function FlashDealsView() {
     return () => clearInterval(timer);
   }, []);
 
-  // Filter flash deal items or products with significant discount
+  const { data: serverProducts } = useGetProductsQuery({ limit: 100 });
+  const allProducts = serverProducts?.data || [];
+
+  // Filter flash deal items or products with significant discount from real API
   const allFlashProducts = useMemo(() => {
-    return products.filter(
-      (p) => p.isFlashDeal || (p.discountPercentage && p.discountPercentage >= 10)
+    const deals = allProducts.filter(
+      (p) => Boolean(p.isFlashDeal) || (p.discountPercentage && p.discountPercentage >= 10)
     );
-  }, []);
+    return deals.length > 0 ? deals : allProducts;
+  }, [allProducts]);
 
   // Infinite scroll state: start with 8 products, append in batches of 6 with visible transition
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);

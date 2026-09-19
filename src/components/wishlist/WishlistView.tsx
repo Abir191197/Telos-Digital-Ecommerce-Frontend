@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useWishlistStore, useCartStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants";
-import { products } from "@/data";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { Loader2, CheckCircle2 } from "lucide-react";
@@ -133,12 +133,14 @@ export function WishlistView() {
     setTimeout(() => setAllMoved(false), 2000);
   };
 
+  const { data: serverProducts } = useGetProductsQuery({ limit: 20 });
+  const allProducts = serverProducts?.data || [];
+
   // Recommendations for empty state
   const trendingRecommendations = useMemo(() => {
-    return products
-      .filter((p) => p.isFeatured || p.isFlashDeal)
-      .slice(0, 5);
-  }, []);
+    const featured = allProducts.filter((p) => p.isFeatured || p.isFlashDeal);
+    return (featured.length > 0 ? featured : allProducts).slice(0, 5);
+  }, [allProducts]);
 
   if (!mounted || (mounted && isAdmin)) {
     return (

@@ -4,10 +4,10 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { products } from "@/data";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 const rightGridVariants: Variants = {
   hidden: { opacity: 0 },
@@ -33,12 +33,23 @@ const cardItemVariants: Variants = {
 };
 
 export function CategorySpotlightBanner() {
-  // Focus on Flagship Smartphones & Tablets or Gaming
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 40 });
+  const allProducts = serverProducts?.data || [];
+
+  // Focus on Flagship Smartphones & Tablets or top tech
   const spotlightProducts = React.useMemo(() => {
-    return products
-      .filter((p) => p.categorySlug === "smartphones-tablets")
-      .slice(0, 4);
-  }, []);
+    const phones = allProducts.filter(
+      (p) =>
+        p.categorySlug === "smartphones-tablets" ||
+        p.categoryId === "cat-smartphones" ||
+        p.categoryName?.toLowerCase().includes("phone") ||
+        p.categoryName?.toLowerCase().includes("smartphone") ||
+        p.categoryName?.toLowerCase().includes("tablet")
+    );
+    return (phones.length >= 4 ? phones : allProducts).slice(0, 4);
+  }, [allProducts]);
+
+  if (spotlightProducts.length === 0 && !isLoading) return null;
 
   return (
     <LazyMotion features={domAnimation}>
@@ -91,19 +102,32 @@ export function CategorySpotlightBanner() {
           </m.div>
 
           {/* Right 4 Featured Products */}
-          <m.div
-            variants={rightGridVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-40px" }}
-            className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"
-          >
-            {spotlightProducts.map((product) => (
-              <m.div key={product.id} variants={cardItemVariants}>
-                <ProductCard product={product} />
-              </m.div>
-            ))}
-          </m.div>
+          {isLoading ? (
+            <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={`spotlight-skeleton-${i}`}
+                  className="rounded-3xl border border-border/50 bg-card p-2.5 flex flex-col h-[340px] justify-between"
+                >
+                  <div className="aspect-square w-full rounded-2xl bg-muted/60" />
+                  <div className="p-2 space-y-2">
+                    <div className="h-3 bg-muted/60 rounded w-1/3" />
+                    <div className="h-4 bg-muted/70 rounded w-4/5" />
+                    <div className="h-3 bg-muted/50 rounded w-1/2" />
+                  </div>
+                  <div className="h-8 bg-muted/60 rounded-full w-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              {spotlightProducts.map((product) => (
+                <div key={product.id} className="transition-all duration-300">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </LazyMotion>

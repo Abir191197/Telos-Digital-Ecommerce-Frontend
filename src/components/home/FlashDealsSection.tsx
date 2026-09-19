@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Flame, Clock, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
-import { products } from "@/data";
 import { FlashDealCard } from "@/components/deals/FlashDealCard";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { cn } from "@/lib/utils";
@@ -33,8 +32,8 @@ export function FlashDealsSection() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const { data: serverProducts } = useGetProductsQuery({ limit: 20 });
-  const allProducts = serverProducts?.data?.length ? serverProducts.data : products;
+  const { data: serverProducts } = useGetProductsQuery({ limit: 100 });
+  const allProducts = serverProducts?.data || [];
 
   // Countdown timer
   useEffect(() => {
@@ -55,26 +54,17 @@ export function FlashDealsSection() {
     return () => clearInterval(timer);
   }, []);
 
-  // Priority: 1. isFlashDeal && isFeatured (up to 12)
-  // 2. Other flash deals
-  // 3. Intelligent fallback to top products (strictly capped at 12 items)
+  // Strictly displays the products enabled by the admin in /dashboard/flashdeal with:
+  // 1. "Include in Flash Deals" (isFlashDeal: true)
+  // 2. "Feature on Homepage" (isFeatured: true)
+  // Strictly up to 12 products
   const flashProducts = useMemo(() => {
-    const featuredFlashDeals = allProducts.filter((p) => p.isFlashDeal && p.isFeatured);
-    if (featuredFlashDeals.length >= 12) {
-      return featuredFlashDeals.slice(0, 12);
+    const adminSelected = allProducts.filter((p) => Boolean(p.isFlashDeal && p.isFeatured));
+    if (adminSelected.length > 0) {
+      return adminSelected.slice(0, 12);
     }
-
-    const otherFlashDeals = allProducts.filter(
-      (p) => p.isFlashDeal && !p.isFeatured
-    );
-    const combined = [...featuredFlashDeals, ...otherFlashDeals];
-    if (combined.length >= 12) {
-      return combined.slice(0, 12);
-    }
-
-    const existingIds = new Set(combined.map((p) => p.id));
-    const fallbackItems = allProducts.filter((p) => !existingIds.has(p.id));
-    return [...combined, ...fallbackItems].slice(0, 12);
+    // Initial fallback if admin has not yet flagged featured items:
+    return allProducts.filter((p) => Boolean(p.isFlashDeal)).slice(0, 12);
   }, [allProducts]);
 
   // Handle scroll buttons visibility

@@ -6,18 +6,19 @@ import { Product, Category } from "@/types/ecommerce.types";
 import { GridViewMode } from "@/types/catalog.types";
 import { SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation } from "framer-motion";
+import { Loader2, CheckCircle2 } from "lucide-react";
 
 import { FilterSidebar } from "./FilterSidebar";
 import { ActiveFiltersBar } from "./ActiveFiltersBar";
 import { CatalogHeader } from "./CatalogHeader";
 import { CatalogIntroHeader } from "./CatalogIntroHeader";
 import { CatalogProductGrid } from "./CatalogProductGrid";
-import { CatalogPagination } from "./CatalogPagination";
+import { CatalogGridSkeleton } from "./CatalogStateViews";
 import { CatalogMobileDrawer } from "./CatalogMobileDrawer";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 interface CatalogViewProps {
-  initialProducts: Product[];
+  initialProducts?: Product[];
   category?: Category;
   title?: string;
   subtitle?: string;
@@ -25,10 +26,11 @@ interface CatalogViewProps {
   showHeader?: boolean;
 }
 
-const ITEMS_PER_PAGE = 12;
+const INITIAL_BATCH_SIZE = 12;
+const BATCH_INCREMENT = 8;
 
 export function CatalogView({
-  initialProducts,
+  initialProducts = [],
   category,
   title,
   subtitle,
@@ -38,7 +40,7 @@ export function CatalogView({
   const searchParams = useSearchParams();
   const brandParam = searchParams.get("brand");
 
-  const { data: serverProductsData } = useGetProductsQuery({
+  const { data: serverProductsData, isLoading } = useGetProductsQuery({
     limit: 100,
     categoryId: category?.id,
   });
@@ -66,17 +68,21 @@ export function CatalogView({
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "rating-desc" | "newest">("featured");
   const [viewMode, setViewMode] = useState<GridViewMode>("grid-4");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const catalogFeedRef = useRef<HTMLDivElement>(null);
+
+  // Infinite Scroll State (matching FlashDealsView & CategoryGridSection pattern)
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
 
   // Sync if URL brand param changes
   useEffect(() => {
     if (brandParam && brandParam !== "all") {
       setSelectedBrands([brandParam]);
-      setCurrentPage(1);
+      setVisibleCount(INITIAL_BATCH_SIZE);
     } else if (brandParam === "all") {
       setSelectedBrands([]);
-      setCurrentPage(1);
+      setVisibleCount(INITIAL_BATCH_SIZE);
     }
   }, [brandParam]);
 
@@ -100,7 +106,7 @@ export function CatalogView({
     };
   }, [allProducts]);
 
-  // Filter and Sort Engine
+  // Filter and Sort Engine — strictly depends on allProducts from API
   const filteredProducts = useMemo(() => {
     let list = [...allProducts];
 
@@ -168,7 +174,7 @@ export function CatalogView({
 
     return list;
   }, [
-    initialProducts,
+    allProducts,
     searchQuery,
     selectedBrands,
     minPrice,
@@ -179,22 +185,40 @@ export function CatalogView({
     sortBy,
   ]);
 
-  // Pagination calculations
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
-  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
-  const startIndex = (validCurrentPage - 1) * ITEMS_PER_PAGE;
-
+  // Infinite Scroll Slice
   const displayedProducts = useMemo(() => {
-    return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredProducts, startIndex]);
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
 
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages || page === currentPage) return;
-    setCurrentPage(page);
-    if (catalogFeedRef.current) {
-      catalogFeedRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  const hasMore = visibleCount < filteredProducts.length;
+
+  // IntersectionObserver for Infinite Pagination
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((prev) =>
+              Math.min(prev + BATCH_INCREMENT, filteredProducts.length)
+            );
+            setIsLoadingMore(false);
+          }, 450);
+        }
+      },
+      { rootMargin: "150px" }
+    );
+
+    const el = loadMoreTriggerRef.current;
+    if (el) observer.observe(el);
+
+    return () => {
+      if (el) observer.unobserve(el);
+    };
+  }, [hasMore, isLoadingMore, filteredProducts.length]);
 
   const hasActiveFilters =
     searchQuery.trim().length > 0 ||
@@ -205,23 +229,23 @@ export function CatalogView({
     inStockOnly ||
     onSaleOnly;
 
-  // Filter state handlers
+  // Filter state handlers (resets visibleCount for infinite pagination)
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
-    setCurrentPage(1);
+    setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
   const handleToggleBrand = (brand: string) => {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
-    setCurrentPage(1);
+    setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
   const handlePriceChange = (min?: number, max?: number) => {
     setMinPrice(min);
     setMaxPrice(max);
-    setCurrentPage(1);
+    setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
   const handleResetAll = () => {
@@ -232,7 +256,7 @@ export function CatalogView({
     setSelectedRating(undefined);
     setInStockOnly(false);
     setOnSaleOnly(false);
-    setCurrentPage(1);
+    setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
   return (
@@ -262,17 +286,17 @@ export function CatalogView({
                 selectedRating={selectedRating}
                 onSelectRating={(r) => {
                   setSelectedRating(r);
-                  setCurrentPage(1);
+                  setVisibleCount(INITIAL_BATCH_SIZE);
                 }}
                 inStockOnly={inStockOnly}
                 onToggleInStock={() => {
                   setInStockOnly((v) => !v);
-                  setCurrentPage(1);
+                  setVisibleCount(INITIAL_BATCH_SIZE);
                 }}
                 onSaleOnly={onSaleOnly}
                 onToggleOnSale={() => {
                   setOnSaleOnly((v) => !v);
-                  setCurrentPage(1);
+                  setVisibleCount(INITIAL_BATCH_SIZE);
                 }}
                 onResetAll={handleResetAll}
                 hasActiveFilters={hasActiveFilters}
@@ -312,24 +336,42 @@ export function CatalogView({
               totalFilteredCount={filteredProducts.length}
             />
 
-            {/* Product Cards Feed or Empty State */}
-            <CatalogProductGrid
-              products={displayedProducts}
-              totalFilteredCount={filteredProducts.length}
-              viewMode={viewMode}
-              cacheKey={`${validCurrentPage}-${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
-              onResetFilters={handleResetAll}
-            />
+            {/* Product Cards Feed or Loading Skeleton or Empty State */}
+            {isLoading && allProducts.length === 0 ? (
+              <CatalogGridSkeleton count={12} />
+            ) : (
+              <CatalogProductGrid
+                products={displayedProducts}
+                totalFilteredCount={filteredProducts.length}
+                viewMode={viewMode}
+                cacheKey={`${sortBy}-${viewMode}-${selectedBrands.join("-")}-${searchQuery}`}
+                onResetFilters={handleResetAll}
+              />
+            )}
 
-            {/* Thematic Pagination Controls */}
-            <CatalogPagination
-              currentPage={validCurrentPage}
-              totalPages={totalPages}
-              totalProducts={filteredProducts.length}
-              startIndex={startIndex}
-              itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={handlePageChange}
-            />
+            {/* Infinite Scroll Trigger Sentinel & Status Indicator */}
+            {!isLoading && hasMore && (
+              <div
+                ref={loadMoreTriggerRef}
+                className="py-10 flex flex-col items-center justify-center gap-3 text-center"
+              >
+                {isLoadingMore ? (
+                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-card border border-border/80 shadow-xs text-xs sm:text-sm font-semibold text-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+                    <span>Loading more verified products...</span>
+                  </div>
+                ) : (
+                  <div className="h-6 w-full" />
+                )}
+              </div>
+            )}
+
+            {!isLoading && !hasMore && filteredProducts.length > INITIAL_BATCH_SIZE && (
+              <div className="py-8 flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground border-t border-border/40 mt-6">
+                <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                <span>All {filteredProducts.length} verified products loaded</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -347,17 +389,17 @@ export function CatalogView({
           selectedRating={selectedRating}
           onSelectRating={(r) => {
             setSelectedRating(r);
-            setCurrentPage(1);
+            setVisibleCount(INITIAL_BATCH_SIZE);
           }}
           inStockOnly={inStockOnly}
           onToggleInStock={() => {
             setInStockOnly((v) => !v);
-            setCurrentPage(1);
+            setVisibleCount(INITIAL_BATCH_SIZE);
           }}
           onSaleOnly={onSaleOnly}
           onToggleOnSale={() => {
             setOnSaleOnly((v) => !v);
-            setCurrentPage(1);
+            setVisibleCount(INITIAL_BATCH_SIZE);
           }}
           onResetAll={handleResetAll}
           hasActiveFilters={hasActiveFilters}
