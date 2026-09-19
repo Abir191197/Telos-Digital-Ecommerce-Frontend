@@ -122,20 +122,20 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     group: "Finance & Sales",
     items: [
       {
-        title: "Payments",
+        title: "Verify Payments",
         href: ROUTES.PAYMENTS,
         icon: CreditCard,
       },
       {
-        title: "Analytics",
+        title: "Analytics & Reports",
         icon: BarChart3,
         children: [
-          { title: "Revenue Reports", href: ROUTES.REPORTS },
-          { title: "Sales Performance", href: "/dashboard/reports?view=sales" },
-          {
-            title: "Customer Retention",
-            href: "/dashboard/reports?view=retention",
-          },
+          { title: "Reports Overview", href: "/dashboard/reports" },
+          { title: "Profit & Margins", href: "/dashboard/reports/profit" },
+          { title: "Stock Valuation", href: "/dashboard/reports/stock" },
+          { title: "Low-Stock Alerts", href: "/dashboard/reports/low-stock" },
+          { title: "Transaction Audit", href: "/dashboard/reports/transactions" },
+          { title: "Sales Performance", href: "/dashboard/reports/sales" },
         ],
       },
     ],

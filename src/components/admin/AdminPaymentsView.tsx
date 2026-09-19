@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { CreditCard, Search, X, Clock } from "lucide-react";
-import { useAdminStore, AdminPaymentTransaction } from "@/stores";
-import { CategoryPagination } from "@/components/admin/categories/CategoryPagination";
+import React, { useState, useEffect, useRef } from "react";
+import { CreditCard, Clock, Loader2 } from "lucide-react";
+import { AdminPaymentTransaction } from "@/stores";
 import {
   PaymentKpiStrip,
   PaymentFilterDock,
@@ -12,12 +11,17 @@ import {
   PaymentMobileFilterModal,
   PaymentFloatingFilterFab,
   PaymentInspectModal,
+  PaymentPagination,
+  PaymentConfirmModal,
 } from "./payments";
+import {
+  useGetAllPaymentsQuery,
+  useVerifyPaymentMutation,
+} from "@/services/api/payments/paymentApi";
 
 const PAGE_SIZE = 8;
 
 export function AdminPaymentsView() {
-  const { transactions, verifyTransaction } = useAdminStore();
   const [methodFilter, setMethodFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<
@@ -30,35 +34,111 @@ export function AdminPaymentsView() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  // Confirmation Modal state for Approve / Reject actions
+  const [confirmModalState, setConfirmModalState] = useState<{
+    isOpen: boolean;
+    action: "verified" | "rejected" | null;
+    transaction: AdminPaymentTransaction | null;
+  }>({
+    isOpen: false,
+    action: null,
+    transaction: null,
+  });
+  const [isSubmittingVerify, setIsSubmittingVerify] = useState(false);
 
-  // Thematic dropdown state for desktop dock
+  // Dropdown states for custom UI controls
   const [openDropdown, setOpenDropdown] = useState<
     "method" | "status" | "sort" | null
   >(null);
 
-  // Mobile Filter Drawer & Draggable Floating Action Button
+  // Mobile drawer filter state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [fabPosition, setFabPosition] = useState<{ x: number; y: number }>({
-    x: 16,
-    y: 90,
-  });
+
+  // Draggable FAB state for mobile
+  const [fabPosition, setFabPosition] = useState({ x: 20, y: 100 });
   const isDraggingRef = useRef(false);
-  const dragStartRef = useRef<{
-    startX: number;
-    startY: number;
-    posX: number;
-    posY: number;
-  }>({
-    startX: 0,
-    startY: 0,
-    posX: 16,
-    posY: 90,
-  });
+  const dragStartRef = useRef({ startX: 0, startY: 0, posX: 0, posY: 0 });
   const hasMovedRef = useRef(false);
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Backend RTK Query integration
+  const { data: paymentsResponse, isLoading } = useGetAllPaymentsQuery({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    searchTerm: searchQuery || undefined,
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    method: methodFilter !== "all" ? methodFilter : undefined,
+    sortBy: sortBy.startsWith("amount") ? "amount" : "createdAt",
+    sortOrder: sortBy.endsWith("asc") ? "asc" : "desc",
+  });
+
+  const [verifyPaymentMutation] = useVerifyPaymentMutation();
+
+  const transactions =
+    (paymentsResponse?.data?.transactions as unknown as AdminPaymentTransaction[]) || [];
+  const stats = paymentsResponse?.data?.stats;
+  const meta = (paymentsResponse as any)?.meta || {
+    total: 0,
+    totalPage: 1,
+    page: 1,
+    limit: PAGE_SIZE,
+  };
+
+  const totalItems = meta?.total ?? transactions.length;
+  const totalPages = Math.max(
+    1,
+    meta?.totalPage ?? Math.ceil(totalItems / PAGE_SIZE) ?? 1
+  );
+
+  // Ensure currentPage doesn't exceed totalPages when filters change
+  useEffect(() => {
+    if (totalPages >= 1 && currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  // Prompt confirmation modal when user initiates an Approve or Reject action
+  const handleRequestVerify = (id: string, status: "verified" | "rejected") => {
+    const txn =
+      transactions.find((t) => t.id === id) ||
+      (selectedTxn?.id === id ? selectedTxn : null);
+    if (txn) {
+      setConfirmModalState({
+        isOpen: true,
+        action: status,
+        transaction: txn,
+      });
+    }
+  };
+
+  // Perform verified / rejected mutation after confirmation
+  const handleConfirmVerify = async (
+    id: string,
+    status: "verified" | "rejected",
+    note?: string
+  ) => {
+    try {
+      setIsSubmittingVerify(true);
+      await verifyPaymentMutation({ id, status, note }).unwrap();
+      if (selectedTxn?.id === id) {
+        setSelectedTxn((prev) => (prev ? { ...prev, status } : null));
+      }
+      setConfirmModalState({
+        isOpen: false,
+        action: null,
+        transaction: null,
+      });
+    } catch (err) {
+      console.error("Payment verification failed:", err);
+    } finally {
+      setIsSubmittingVerify(false);
+    }
+  };
+
+  // Draggable FAB pointer listeners
   const handlePointerDown = (e: React.PointerEvent) => {
     isDraggingRef.current = true;
     hasMovedRef.current = false;
@@ -121,130 +201,60 @@ export function AdminPaymentsView() {
     setTimeout(() => setCopiedId(null), 1800);
   };
 
-  // Filter & Sort logic
-  const filteredTxns = useMemo(() => {
-    return transactions
-      .filter((t) => {
-        const matchesMethod =
-          methodFilter === "all" || t.method === methodFilter;
-        const matchesStatus =
-          statusFilter === "all" || t.status === statusFilter;
-        const q = searchQuery.toLowerCase().trim();
-        const matchesSearch =
-          !q ||
-          t.orderNumber.toLowerCase().includes(q) ||
-          t.customerName.toLowerCase().includes(q) ||
-          t.trxId?.toLowerCase().includes(q) ||
-          t.customerPhone.includes(q);
-
-        return matchesMethod && matchesStatus && matchesSearch;
-      })
-      .sort((a, b) => {
-        if (sortBy === "date-desc") {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }
-        if (sortBy === "date-asc") {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        }
-        if (sortBy === "amount-desc") {
-          return b.amount - a.amount;
-        }
-        if (sortBy === "amount-asc") {
-          return a.amount - b.amount;
-        }
-        return 0;
-      });
-  }, [transactions, methodFilter, statusFilter, searchQuery, sortBy]);
-
-  const totalPages = Math.ceil(filteredTxns.length / PAGE_SIZE) || 1;
-  const paginatedTxns = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredTxns.slice(start, start + PAGE_SIZE);
-  }, [filteredTxns, currentPage]);
-
-  // Financial KPI calculations
-  const totalVerified = useMemo(() => {
-    return transactions
-      .filter((t) => t.status === "verified")
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [transactions]);
-
-  const pendingVerification = useMemo(() => {
-    return transactions.filter((t) => t.status === "pending_verification");
-  }, [transactions]);
-
-  const pendingAmount = useMemo(() => {
-    return pendingVerification.reduce((sum, t) => sum + t.amount, 0);
-  }, [pendingVerification]);
+  // KPIs from backend stats
+  const totalVerified = stats?.verifiedVolume || 0;
+  const pendingCount = stats?.pendingCount || 0;
+  const pendingAmount = stats?.pendingVolume || 0;
 
   const isFiltered =
     methodFilter !== "all" ||
     statusFilter !== "all" ||
-    sortBy !== "date-desc";
+    searchQuery.trim().length > 0;
 
   return (
-    <div className="w-full space-y-5 sm:space-y-6">
-      {/* ── Mobile Dedicated Sticky Search Bar ── */}
-      <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 sm:-mt-6 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
-        <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search Order #, TrxID, or phone..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="h-10 w-full rounded-xl bg-muted/40 pl-10 pr-8 text-xs font-medium text-foreground focus:bg-background focus:ring-1.5 focus:ring-amber-500/40 focus:outline-none transition-all placeholder:text-muted-foreground/60 border border-border/50"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Desktop Top Header Banner (Hidden on Mobile) ── */}
-      <div className="hidden sm:flex flex-row items-center justify-between gap-4 border-b border-border/70 pb-4">
+    <div className="space-y-6">
+      {/* View Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2.5">
-            <CreditCard className="h-6 w-6 text-amber-500" />
-            Payment Transaction Logs
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time ledger of customer payments, MFS TrxID verification, and settlement statuses.
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              Verify Payments & Transactions
+            </h1>
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              Live Ledger
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Audit customer payments, verify MFS transaction IDs, and reconcile settlements.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-2xl shadow-xs">
-            ৳{totalVerified.toLocaleString()} Verified Collections
-          </span>
+          {pendingCount > 0 && (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold animate-pulse">
+              <Clock className="h-4 w-4" />
+              <span>{pendingCount} Pending Verification</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── KPI Cards Strip (Mobile Swipe / Desktop 3-Grid) ── */}
+      {/* KPI Cards Strip */}
       <PaymentKpiStrip
-        totalCount={transactions.length}
-        pendingCount={pendingVerification.length}
+        totalCount={totalItems}
+        pendingCount={pendingCount}
         pendingAmount={pendingAmount}
         verifiedAmount={totalVerified}
       />
 
-      {/* ── Pending Action Alert Banner ── */}
-      {hasMounted && pendingVerification.length > 0 && (
+      {/* Pending Action Alert Banner */}
+      {hasMounted && pendingCount > 0 && (
         <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
             <div>
               <p className="font-bold text-foreground">
-                {pendingVerification.length} Transaction(s) Pending MFS / COD Confirmation
+                {pendingCount} Transaction(s) Pending MFS / COD Confirmation
               </p>
               <p className="text-muted-foreground text-[11px] mt-0.5">
                 Verify merchant SMS or bank statement against submitted TrxIDs before order dispatch.
@@ -264,58 +274,104 @@ export function AdminPaymentsView() {
         </div>
       )}
 
-      {/* ── Desktop Thematic Filter Dock ── */}
+      {/* Top Filter Dock (Desktop & Tablet) */}
       <PaymentFilterDock
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={(q) => {
+          setSearchQuery(q);
+          setCurrentPage(1);
+        }}
         methodFilter={methodFilter}
-        setMethodFilter={setMethodFilter}
+        setMethodFilter={(m) => {
+          setMethodFilter(m);
+          setCurrentPage(1);
+        }}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        setStatusFilter={(s) => {
+          setStatusFilter(s);
+          setCurrentPage(1);
+        }}
         sortBy={sortBy}
-        setSortBy={setSortBy}
+        setSortBy={(s) => {
+          setSortBy(s);
+          setCurrentPage(1);
+        }}
         openDropdown={openDropdown}
         setOpenDropdown={setOpenDropdown}
         onResetPage={() => setCurrentPage(1)}
       />
 
-      {/* ── Desktop Table View ── */}
-      <PaymentDesktopTable
-        transactions={paginatedTxns}
-        copiedId={copiedId}
-        onCopy={handleCopy}
-        onSelectTxn={setSelectedTxn}
-        onVerify={verifyTransaction}
+      {/* Data Table with Loading State */}
+      {isLoading ? (
+        <div className="rounded-3xl bg-card p-16 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+          <p className="text-xs font-semibold">Loading payment transactions...</p>
+        </div>
+      ) : (
+        <>
+          <PaymentDesktopTable
+            transactions={transactions}
+            copiedId={copiedId}
+            onCopy={handleCopy}
+            onSelectTxn={setSelectedTxn}
+            onVerify={handleRequestVerify}
+          />
+
+          <PaymentMobileList
+            transactions={transactions}
+            copiedId={copiedId}
+            onCopy={handleCopy}
+            onSelectTxn={setSelectedTxn}
+            onVerify={handleRequestVerify}
+          />
+        </>
+      )}
+
+      {/* Pagination Controls */}
+      {!isLoading && totalItems > 0 && (
+        <PaymentPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={PAGE_SIZE}
+          totalItems={totalItems}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      )}
+
+      {/* Transaction Details Modal */}
+      {selectedTxn && (
+        <PaymentInspectModal
+          transaction={selectedTxn}
+          onClose={() => setSelectedTxn(null)}
+          onVerify={handleRequestVerify}
+        />
+      )}
+
+      {/* Payment Confirmation Modal for Approve / Reject */}
+      <PaymentConfirmModal
+        isOpen={confirmModalState.isOpen}
+        action={confirmModalState.action}
+        transaction={confirmModalState.transaction}
+        isLoading={isSubmittingVerify}
+        onClose={() =>
+          setConfirmModalState({
+            isOpen: false,
+            action: null,
+            transaction: null,
+          })
+        }
+        onConfirm={handleConfirmVerify}
       />
 
-      {/* ── Mobile Card List View ── */}
-      <PaymentMobileList
-        transactions={paginatedTxns}
-        copiedId={copiedId}
-        onCopy={handleCopy}
-        onSelectTxn={setSelectedTxn}
-        onVerify={verifyTransaction}
-      />
-
-      {/* ── Pagination ── */}
-      <CategoryPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={PAGE_SIZE}
-        totalItems={filteredTxns.length}
-        onPageChange={(page) => setCurrentPage(page)}
-      />
-
-      {/* ── Mobile Draggable Floating Filter Button ── */}
+      {/* Mobile Floating Action Button & Fullscreen Filter Modal */}
       <PaymentFloatingFilterFab
+        isFiltered={isFiltered}
         position={fabPosition}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        isFiltered={isFiltered}
       />
 
-      {/* ── Mobile Fullscreen Filters Modal ── */}
       <PaymentMobileFilterModal
         isOpen={showMobileFilters}
         onClose={() => setShowMobileFilters(false)}
@@ -334,22 +390,16 @@ export function AdminPaymentsView() {
           setSortBy(sort);
           setCurrentPage(1);
         }}
-        totalResults={filteredTxns.length}
+        totalResults={totalItems}
         openDropdown={openDropdown}
         setOpenDropdown={setOpenDropdown}
         onReset={() => {
           setMethodFilter("all");
           setStatusFilter("all");
           setSortBy("date-desc");
+          setSearchQuery("");
           setCurrentPage(1);
         }}
-      />
-
-      {/* ── Quick Inspect Modal ── */}
-      <PaymentInspectModal
-        transaction={selectedTxn}
-        onClose={() => setSelectedTxn(null)}
-        onVerify={verifyTransaction}
       />
     </div>
   );

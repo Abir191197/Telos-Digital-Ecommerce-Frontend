@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   description: "Executive e-commerce analytics, profit margins, stock valuation, and transaction audits.",
 };
 
-export default function ReportsHubPage() {
+export default function ReportsOverviewPage() {
   return <ReportsOverviewView />;
 }

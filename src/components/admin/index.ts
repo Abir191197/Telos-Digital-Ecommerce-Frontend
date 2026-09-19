@@ -26,3 +26,5 @@ export * from "./AdminWishlistsListView";
 export * from "./inventory";
 
 export * from "./customers";
+
+export * from "./reports";
