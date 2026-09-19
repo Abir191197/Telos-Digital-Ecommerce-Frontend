@@ -20,40 +20,7 @@ export function CategoryDetailSkeleton() {
       </div>
 
       <div className="space-y-8 sm:space-y-12">
-        {/* ── 1. Thematic Hero Header Banner Skeleton (sm+) ── */}
-        <section className="hidden sm:block container px-3 sm:px-6 pt-4">
-          <div className="relative overflow-hidden rounded-3xl sm:rounded-[2rem] bg-card border border-border/60 p-6 sm:p-8 lg:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-              {/* Left Column: Info Skeleton */}
-              <div className="lg:col-span-6 space-y-4">
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="h-6 w-32 rounded-full bg-amber-500/15 border border-amber-500/20" />
-                  <div className="h-6 w-28 rounded-full bg-muted/50" />
-                  <div className="h-6 w-32 rounded-full bg-emerald-500/10" />
-                </div>
-                {/* Title */}
-                <div className="h-9 sm:h-11 w-64 rounded-2xl bg-muted/80" />
-                {/* Description */}
-                <div className="space-y-2">
-                  <div className="h-3.5 w-full rounded bg-muted/50" />
-                  <div className="h-3.5 w-4/5 rounded bg-muted/50" />
-                </div>
-                {/* Micro guarantees */}
-                <div className="pt-3 border-t border-border/40 flex gap-4">
-                  <div className="h-3 w-28 rounded bg-muted/40" />
-                  <div className="h-3 w-28 rounded bg-muted/40" />
-                  <div className="h-3 w-28 rounded bg-muted/40" />
-                </div>
-              </div>
-
-              {/* Right Column: Hero Cover Image Placeholder */}
-              <div className="lg:col-span-6 h-56 lg:h-64 rounded-2xl bg-muted/40" />
-            </div>
-          </div>
-        </section>
-
-        {/* ── 2. Embedded Catalog Section Skeleton (Sidebar + Product Grid) ── */}
+        {/* ── Embedded Catalog Section Skeleton (Sidebar + Product Grid) ── */}
         <section className="container px-3 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Filter Sidebar Skeleton */}

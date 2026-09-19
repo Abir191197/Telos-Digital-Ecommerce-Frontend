@@ -1,25 +1,22 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Category, Product } from "@/types/ecommerce.types";
 import { CatalogView } from "@/components/catalog";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
 import { ROUTES } from "@/constants";
-import { cn } from "@/lib/utils";
-import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { LazyMotion, domAnimation } from "framer-motion";
 import {
-  LayoutGrid,
   ChevronRight,
-  Package,
-  Layers,
-  CheckCircle2,
-  Sparkles as SparklesIcon,
   Compass,
   ArrowUpRight,
 } from "lucide-react";
+import Image from "next/image";
+import { useRecentlyViewedStore } from "@/stores";
+import { useMounted } from "@/hooks";
 import { getCategoryIcon } from "./categoryConfig";
+import { CategoryRecentlyViewedSection } from "./CategoryRecentlyViewedSection";
 
 interface CategoryDetailViewProps {
   category: Category;
@@ -27,115 +24,37 @@ interface CategoryDetailViewProps {
   sisterCategories?: Category[];
 }
 
-const heroFadeUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-  },
-};
-
 export function CategoryDetailView({
   category,
   initialProducts,
   sisterCategories = [],
 }: CategoryDetailViewProps) {
+  const mounted = useMounted();
+  const rawRecentlyViewed = useRecentlyViewedStore((state) => state.items);
+  const recentlyViewed = mounted ? rawRecentlyViewed : [];
+
   const IconComponent = getCategoryIcon(category.icon);
   const subcategories = category.subcategories || [];
 
   return (
     <LazyMotion features={domAnimation}>
       <div className="space-y-8 sm:space-y-12">
-        {/* ── 1. Thematic Hero Header Banner (Hidden on mobile, visible on sm+ screens) ── */}
-        <section className="hidden sm:block container px-3 sm:px-6 pt-4">
-          <m.div
-            variants={heroFadeUp}
-            initial="hidden"
-            animate="visible"
-            className="relative overflow-hidden rounded-3xl sm:rounded-[2rem] bg-card border border-border/60 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
-              {/* Left Column: Editorial Information & Meta */}
-              <div className="lg:col-span-5 p-6 sm:p-8 lg:p-10 space-y-4 flex flex-col justify-center relative z-10">
-                {/* Meta Badge Pills */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-400">
-                    <IconComponent className="h-3.5 w-3.5" />
-                    <span>Official Category</span>
-                  </div>
-
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                    <Package className="h-3.5 w-3.5 text-amber-500" />
-                    <span>{category.itemCount || initialProducts.length} Verified Items</span>
-                  </div>
-
-                  <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>Official BD Warranty</span>
-                  </div>
-                </div>
-
-                {/* Primary Category Title */}
-                <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-                    {category.name}
-                  </h1>
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-                    {category.description ||
-                      "Browse our verified catalog with manufacturer authorized warranty, authentic distributor packaging, and fast delivery across Bangladesh."}
-                  </p>
-                </div>
-
-                {/* Micro-Benefits Guarantee Strip */}
-                <div className="pt-3 border-t border-border/40 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5 font-medium">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    <span>In-Stock Ready to Ship</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 font-medium">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    <span>Dhaka 24h Express</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 font-medium">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                    <span>7-Day Return Policy</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Expanded Hero Image with True Feathered Alpha Mask Blend */}
-              {category.image && (
-                <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-full min-h-[280px] lg:min-h-[340px] w-full overflow-hidden">
-                  <div
-                    className="relative h-full w-full [mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.4)_18%,rgba(0,0,0,0.85)_38%,black_60%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.4)_18%,rgba(0,0,0,0.85)_38%,black_60%)]"
-                  >
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 60vw"
-                      className="object-cover object-center transition-transform duration-700 hover:scale-105"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </m.div>
-        </section>
-
-        {/* ── 2. Embedded Catalog View (Filters + Sort + Products Grid) ── */}
+        {/* ── Embedded Catalog View (Filters + Sort + Products Grid with Title) ── */}
         <section aria-label={`${category.name} Products Feed`}>
           <CatalogView
             initialProducts={initialProducts}
             category={category}
             showSupportStrip={false}
-            showHeader={false}
-            title={`${category.name} Catalog`}
-            subtitle={category.description}
+            showHeader={true}
+            title={category.name}
+            subtitle={category.description || "Official Bangladesh warranty catalog with certified distributor support."}
           />
         </section>
+
+        {/* ── Recently Viewed Products (Above Strips) ── */}
+        {recentlyViewed.length > 0 && (
+          <CategoryRecentlyViewedSection products={recentlyViewed} />
+        )}
 
         {/* ── 4. BD Trust & Guarantee Strip ── */}
         <section className="container px-3 sm:px-6">

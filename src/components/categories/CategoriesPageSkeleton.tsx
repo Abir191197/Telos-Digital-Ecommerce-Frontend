@@ -5,23 +5,14 @@ import React from "react";
 export function CategoriesPageSkeleton() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-20 animate-pulse">
-      {/* ── Hero Banner Skeleton (Desktop/Tablet) ── */}
-      <section className="hidden sm:block border-b border-border/40 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent py-10 md:py-14 mb-6 sm:mb-8">
-        <div className="container px-4 flex flex-col items-center text-center max-w-3xl mx-auto space-y-3">
-          {/* Badge */}
-          <div className="h-6 w-36 rounded-full bg-amber-500/15 border border-amber-500/20" />
-          {/* Headline */}
-          <div className="h-10 sm:h-12 w-80 max-w-full rounded-2xl bg-muted/80" />
-          {/* Subtitle */}
-          <div className="h-4 w-96 max-w-full rounded-lg bg-muted/50" />
-          {/* Trust Guarantees Strip */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <div className="h-7 w-40 rounded-full bg-card border border-border/50" />
-            <div className="h-7 w-48 rounded-full bg-card border border-border/50" />
-            <div className="h-7 w-44 rounded-full bg-card border border-border/50" />
-          </div>
+      {/* ── Compact Header & Breadcrumb Skeleton ── */}
+      <div className="border-b border-border/40 bg-muted/20 py-3 mb-6 sm:mb-8">
+        <div className="container px-3 sm:px-6 flex items-center gap-2">
+          <div className="h-3 w-10 rounded bg-muted/60" />
+          <span className="text-border text-xs">/</span>
+          <div className="h-3 w-16 rounded bg-muted/80" />
         </div>
-      </section>
+      </div>
 
       {/* ── Search & Filter Tabs Header Skeleton ── */}
       <div className="container px-3 sm:px-6 mb-8 sm:mb-10">

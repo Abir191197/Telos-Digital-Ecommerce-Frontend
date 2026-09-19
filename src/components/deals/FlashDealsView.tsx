@@ -5,21 +5,15 @@ import Link from "next/link";
 import {
   Flame,
   Clock,
-  Zap,
-  Sparkles,
   ChevronRight,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
-  Tag,
   ArrowRight,
-  Loader2,
   Bell,
   CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { ProductCard } from "@/components/common";
 import { FlashDealCard } from "./FlashDealCard";
+import { FlashDealsSkeleton, FlashDealCardSkeleton } from "./FlashDealsSkeleton";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 
@@ -76,7 +70,7 @@ export function FlashDealsView() {
     return () => clearInterval(timer);
   }, []);
 
-  const { data: serverProducts } = useGetProductsQuery({ limit: 100 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 100 });
   const allProducts = serverProducts?.data || [];
 
   // Filter flash deal items or products with significant discount from real API
@@ -127,6 +121,10 @@ export function FlashDealsView() {
     };
   }, [hasMore, isLoadingMore, allFlashProducts.length]);
 
+  if (isLoading) {
+    return <FlashDealsSkeleton />;
+  }
+
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen bg-background text-foreground pb-20 selection:bg-amber-500 selection:text-zinc-950">
@@ -143,95 +141,55 @@ export function FlashDealsView() {
           </div>
         </div>
 
-        {/* ── Hero Banner with Live Countdown ── */}
-        <section className="relative overflow-hidden pt-10 pb-12 sm:pt-14 sm:pb-16 border-b border-border/60 bg-gradient-to-b from-amber-500/10 via-background to-background">
-          {/* Ambient Glow */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-amber-500/20 blur-3xl rounded-full -z-10"
-          />
-
-          <div className="container px-4 sm:px-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="space-y-3 max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+        {/* ── Compact Header Bar with Live Countdown ── */}
+        <section className="container px-3 sm:px-6 pt-6 sm:pt-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
                   <Flame className="h-4 w-4 fill-amber-500" />
-                  <span>Limited Time Event</span>
                 </div>
-
-                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground leading-[1.15]">
-                  Exclusive Flash Deals &amp; Daily Price Drops
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                  Flash Deals
                 </h1>
-
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Genuine flagship smartphones, creator laptops, noise-cancelling headphones, and official gaming peripherals with time-sensitive promotional markdowns and authorized Bangladesh warranty.
-                </p>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                  {allFlashProducts.length} Live
+                </span>
               </div>
-
-              {/* Live Countdown Box */}
-              <div className="self-start lg:self-center rounded-3xl bg-card border border-amber-500/30 p-5 sm:p-6 shadow-[0_8px_30px_-4px_rgba(245,158,11,0.2)] dark:shadow-[0_10px_40px_-6px_rgba(0,0,0,0.6)] space-y-3 shrink-0">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <Clock className="h-4 w-4 text-amber-500" />
-                  <span>Flash Round Closes In</span>
-                </div>
-
-                <div className="flex items-center gap-2 font-mono text-base sm:text-lg font-black text-foreground">
-                  <div className="flex flex-col items-center">
-                    <span className="rounded-2xl bg-muted/80 border border-border px-3 py-2 shadow-xs">
-                      {String(timeLeft.hours).padStart(2, "0")}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground mt-1 uppercase">Hours</span>
-                  </div>
-                  <span className="text-amber-500 font-bold -translate-y-2">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="rounded-2xl bg-muted/80 border border-border px-3 py-2 shadow-xs">
-                      {String(timeLeft.minutes).padStart(2, "0")}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground mt-1 uppercase">Mins</span>
-                  </div>
-                  <span className="text-amber-500 font-bold -translate-y-2">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="rounded-2xl bg-amber-500 text-zinc-950 px-3 py-2 shadow-xs">
-                      {String(timeLeft.seconds).padStart(2, "0")}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground mt-1 uppercase">Secs</span>
-                  </div>
-                </div>
-              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Limited-time price markdowns with official Bangladesh warranty.
+              </p>
             </div>
-          </div>
-        </section>
 
-        {/* ── Value Trust Strip ── */}
-        <section className="border-b border-border/60 bg-muted/20 py-4">
-          <div className="container px-4 sm:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
-                <span className="font-semibold text-foreground">100% Genuine BD Stock</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-blue-500 shrink-0" />
-                <span className="font-semibold text-foreground">Dhaka 24h Express Delivery</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4 text-purple-500 shrink-0" />
-                <span className="font-semibold text-foreground">7-Day Return Guarantee</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-amber-500 shrink-0" />
-                <span className="font-semibold text-foreground">{allFlashProducts.length} Deals Live</span>
+            {/* Compact Live Countdown Capsule */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border/70 shadow-xs self-start sm:self-auto">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                <Clock className="h-3.5 w-3.5 text-amber-500" />
+                <span>Ends in:</span>
+              </span>
+              <div className="flex items-center gap-1 font-mono text-xs font-black text-foreground">
+                <span className="rounded-md bg-muted px-1.5 py-0.5">
+                  {String(timeLeft.hours).padStart(2, "0")}h
+                </span>
+                <span className="text-amber-500 font-bold">:</span>
+                <span className="rounded-md bg-muted px-1.5 py-0.5">
+                  {String(timeLeft.minutes).padStart(2, "0")}m
+                </span>
+                <span className="text-amber-500 font-bold">:</span>
+                <span className="rounded-md bg-amber-500 text-zinc-950 px-1.5 py-0.5">
+                  {String(timeLeft.seconds).padStart(2, "0")}s
+                </span>
               </div>
             </div>
           </div>
         </section>
 
         {/* ── Flash Deals Infinite Grid ── */}
-        <section className="container px-3 sm:px-6 py-10 sm:py-14">
+        <section className="container px-3 sm:px-6 py-6 sm:py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-                All Active Flash Deals ({allFlashProducts.length})
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                Active Promotions ({allFlashProducts.length})
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                 Showing {displayedProducts.length} of {allFlashProducts.length} promotional items.
@@ -253,16 +211,18 @@ export function FlashDealsView() {
                 <FlashDealCard product={product} />
               </div>
             ))}
+
+            {/* Skeleton cards shown during infinite scroll fetching */}
+            {isLoadingMore && (
+              Array.from({ length: Math.min(BATCH_SIZE, allFlashProducts.length - displayedProducts.length || BATCH_SIZE) }).map((_, i) => (
+                <FlashDealCardSkeleton key={`loading-more-skeleton-${i}`} />
+              ))
+            )}
           </div>
 
-          {/* Infinite Scroll Trigger Indicator */}
-          <div ref={loadMoreTriggerRef} className="pt-8 pb-4 flex justify-center">
-            {hasMore ? (
-              <div className="inline-flex items-center gap-2.5 rounded-full bg-card border border-border px-5 py-2.5 text-xs font-bold text-muted-foreground shadow-2xs">
-                <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
-                <span>Loading more flash discounts...</span>
-              </div>
-            ) : (
+          {/* Infinite Scroll Trigger Sentinel & Completion Indicator */}
+          <div ref={loadMoreTriggerRef} className="pt-6 pb-4 flex justify-center">
+            {!hasMore && displayedProducts.length > 0 && (
               <div className="inline-flex items-center gap-2 text-xs text-muted-foreground font-medium py-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 <span>You&apos;ve viewed all active flash deals</span>
