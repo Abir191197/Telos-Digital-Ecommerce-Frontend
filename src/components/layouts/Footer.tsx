@@ -102,9 +102,9 @@ export function Footer() {
 
       {/* ── Main Extended Footer Content: Exactly 4 Balanced Columns ── */}
       <div className="container py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
-          {/* Column 1: Brand & About Us Blurb */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8">
+          {/* Column 1: Brand & About Us Blurb (5 Cols) */}
+          <div className="space-y-4 lg:col-span-5 lg:pr-8">
             <Link href={ROUTES.HOME} className="inline-block">
               <Logo size={36} textColor="text-white" />
             </Link>
@@ -172,8 +172,8 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Popular Categories */}
-          <div>
+          {/* Column 2: Popular Categories (3 Cols) */}
+          <div className="lg:col-span-3">
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-100">
               Popular Categories
             </h4>
@@ -191,8 +191,8 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Customer Care */}
-          <div>
+          {/* Column 3: Customer Care (2 Cols) */}
+          <div className="lg:col-span-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-100">
               Customer Care
             </h4>
@@ -210,8 +210,8 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Company & Info */}
-          <div>
+          {/* Column 4: Company & Info (2 Cols) */}
+          <div className="lg:col-span-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-100">
               Company & Info
             </h4>
