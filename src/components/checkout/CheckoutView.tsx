@@ -10,7 +10,12 @@ import {
 } from "@/validations/checkout.schema";
 import { useCartStore, useAuthStore } from "@/stores";
 import { useClearCartMutation } from "@/services/api/cart/cartApi";
-import { useCreateOrderMutation, CreateOrderPayload } from "@/services/api/orders/orderApi";
+import {
+  useCreateOrderMutation,
+  useValidateCheckoutStockMutation,
+  CreateOrderPayload,
+  StockIssue,
+} from "@/services/api/orders/orderApi";
 import {
   useGetAddressesQuery,
   useCreateAddressMutation,
@@ -24,6 +29,7 @@ import { AddressSelectionModal } from "./AddressSelectionModal";
 import { AddressFormModal } from "@/components/account/tabs/AddressFormModal";
 import { PaymentStep } from "./PaymentStep";
 import { OrderSummarySticky } from "./OrderSummarySticky";
+import { StockAlertModal } from "./StockAlertModal";
 import { ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,6 +38,7 @@ export function CheckoutView() {
   const mounted = useMounted();
   const [clearCartMutation] = useClearCartMutation();
   const [createOrderMutation] = useCreateOrderMutation();
+  const [validateCheckoutStockMutation] = useValidateCheckoutStockMutation();
 
   const {
     items,
@@ -41,6 +48,7 @@ export function CheckoutView() {
     removeCoupon,
     getSubtotal,
     clearCart,
+    removeItem,
   } = useCartStore();
 
   const { user } = useAuthStore();
@@ -52,6 +60,10 @@ export function CheckoutView() {
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Stock Issues Modal State
+  const [stockIssues, setStockIssues] = useState<StockIssue[]>([]);
+  const [isStockAlertModalOpen, setIsStockAlertModalOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -81,91 +93,73 @@ export function CheckoutView() {
       zone: "inside-dhaka",
       street: "",
       postalCode: "",
-      deliveryNote: "",
       paymentMethod: "cod",
-      mfsNumber: "",
-      trxId: "",
+      deliveryNote: "",
     },
-    mode: "onTouched",
   });
 
-  const { handleSubmit, trigger, watch, setValue } = form;
+  const { handleSubmit, setValue, watch } = form;
   const currentZone = watch("zone");
 
-  // Shipping fee calculation based on dynamic BD zone and free shipping threshold
-  const subtotal = getSubtotal();
-  const rawShippingFee = currentZone === "inside-dhaka" ? 70 : 130;
-  const shippingFee = subtotal >= 5000 ? 0 : rawShippingFee;
-
-  const discountAmount = appliedCoupon
-    ? appliedCoupon.percentage
-      ? Math.round((subtotal * appliedCoupon.percentage) / 100)
-      : appliedCoupon.fixedAmount || 0
-    : 0;
-
-  const totalPayable = Math.max(0, subtotal - discountAmount + shippingFee);
-
-  // Prepopulate form if user selects a saved address
-  const handleSelectSavedAddress = useCallback((addr: Address) => {
-    setSelectedAddressId(addr.id);
-    setValue("fullName", addr.name, { shouldValidate: false, shouldDirty: true });
-    const cleanPhone = addr.phone
-      ? addr.phone.replace(/^\+880\s?/, "").replace(/^0/, "").replace(/\s+|-/g, "")
-      : "";
-    setValue("phone", cleanPhone, { shouldValidate: false, shouldDirty: true });
-    setValue("city", addr.city, { shouldValidate: false, shouldDirty: true });
-    setValue("zone", addr.zone, { shouldValidate: false, shouldDirty: true });
-    setValue("street", addr.street, { shouldValidate: false, shouldDirty: true });
-    if (addr.postalCode) setValue("postalCode", addr.postalCode, { shouldDirty: true });
-  }, [setValue]);
-
-  // Sync live backend addresses to auth store
-  useEffect(() => {
-    if (backendAddresses && Array.isArray(backendAddresses)) {
-      useAuthStore.setState((state) => {
-        if (!state.user) return state;
-        return {
-          user: {
-            ...state.user,
-            addresses: backendAddresses,
-          },
-        };
-      });
-    }
-  }, [backendAddresses]);
-
-  // Auto-select Default Address (or first address) on initial load
-  useEffect(() => {
-    if (activeAddresses.length > 0) {
-      const existing = activeAddresses.find((a) => a.id === selectedAddressId);
-      if (!existing) {
-        const defaultAddr =
-          activeAddresses.find((a) => a.isDefault) || activeAddresses[0];
-        if (defaultAddr) {
-          handleSelectSavedAddress(defaultAddr);
-        }
-      }
-    }
-  }, [activeAddresses, selectedAddressId, handleSelectSavedAddress]);
-
-  // Active address object
+  // Manage selected address synchronization
   const selectedAddress =
     activeAddresses.find((a) => a.id === selectedAddressId) ||
     activeAddresses.find((a) => a.isDefault) ||
     activeAddresses[0] ||
     null;
 
-  // New Address Form State for Modal
+  const handleSelectSavedAddress = useCallback(
+    (addr: Address) => {
+      setSelectedAddressId(addr.id);
+      setValue("fullName", addr.name, { shouldValidate: true });
+      setValue("phone", addr.phone.replace(/^\+880/, "").replace(/^0/, ""), {
+        shouldValidate: true,
+      });
+      setValue("city", addr.city, { shouldValidate: true });
+      setValue("zone", addr.zone || "inside-dhaka", { shouldValidate: true });
+      setValue("street", addr.street, { shouldValidate: true });
+      setValue("postalCode", addr.postalCode || "", { shouldValidate: true });
+    },
+    [setValue]
+  );
+
+  // Auto-populate form when default address loads
+  useEffect(() => {
+    if (selectedAddress && !selectedAddressId) {
+      handleSelectSavedAddress(selectedAddress);
+    }
+  }, [selectedAddress, selectedAddressId, handleSelectSavedAddress]);
+
+  // Pricing calculations
+  const subtotal = getSubtotal();
+  const shippingFee =
+    subtotal === 0
+      ? 0
+      : subtotal >= 5000 || appliedCoupon?.code === "FREESHIP"
+      ? 0
+      : currentZone === "inside-dhaka"
+      ? 60
+      : 120;
+
+  const discountAmount = appliedCoupon?.percentage
+    ? Math.round((subtotal * appliedCoupon.percentage) / 100)
+    : appliedCoupon?.fixedAmount
+    ? Math.min(appliedCoupon.fixedAmount, subtotal)
+    : 0;
+
+  const totalPayable = Math.max(0, subtotal - discountAmount + shippingFee);
+
+  // New Address form state for modal
   const [newAddressFormData, setNewAddressFormData] = useState<Omit<Address, "id">>({
-    name: user?.name || "",
-    phone: user?.phone || "+880 1712-345678",
+    name: "",
+    phone: "",
     street: "",
     area: "",
     union: "",
     city: "Dhaka",
     zone: "inside-dhaka",
     postalCode: "",
-    isDefault: activeAddresses.length === 0,
+    isDefault: false,
     label: "Home",
   });
 
@@ -206,8 +200,17 @@ export function CheckoutView() {
         }).unwrap();
       } else {
         created = {
-          ...newAddressFormData,
           id: `demo-addr-${Date.now()}`,
+          name: newAddressFormData.name,
+          phone: newAddressFormData.phone,
+          label: (newAddressFormData.label || "Home") as any,
+          street: newAddressFormData.street,
+          area: newAddressFormData.area,
+          union: newAddressFormData.union,
+          city: newAddressFormData.city,
+          zone: newAddressFormData.zone,
+          postalCode: newAddressFormData.postalCode,
+          isDefault: newAddressFormData.isDefault,
         };
         useAuthStore.setState((state) => {
           if (!state.user) return state;
@@ -244,6 +247,57 @@ export function CheckoutView() {
 
     setIsSubmitting(true);
 
+    // =========================================================================
+    // STEP 1: PRE-FLIGHT DIRECT DB STOCK & STATUS VERIFICATION (NO AUTH NEEDED)
+    // =========================================================================
+    try {
+      const stockCheckItems = items.map((item) => ({
+        productId: item.product.id,
+        variantId: item.variant?.id || null,
+        quantity: item.quantity,
+      }));
+
+      const stockCheckRes = await validateCheckoutStockMutation({
+        items: stockCheckItems,
+      }).unwrap();
+
+      const stockData = stockCheckRes?.data;
+
+      // If any product is out of stock, inactive, or unavailable:
+      if (stockData && (!stockData.allValid || (stockData.issues && stockData.issues.length > 0))) {
+        setIsSubmitting(false);
+        setStockIssues(stockData.issues);
+        setIsStockAlertModalOpen(true);
+
+        // Remove out-of-stock / invalid item(s) from cart
+        for (const issue of stockData.issues) {
+          const matchingItems = items.filter(
+            (cartItem) =>
+              cartItem.product.id === issue.productId &&
+              (!issue.variantId || cartItem.variant?.id === issue.variantId)
+          );
+          for (const m of matchingItems) {
+            removeItem(m.id);
+          }
+        }
+
+        showToast("Unavailable items have been removed from your cart.");
+        return;
+      }
+    } catch (stockErr: any) {
+      console.error("Pre-checkout stock verification error:", stockErr);
+      alert(
+        stockErr?.data?.message ||
+          stockErr?.message ||
+          "Could not verify current item stock. Please check your connection."
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
+    // =========================================================================
+    // STEP 2: ALL ITEMS IN STOCK - PROCEED SILENTLY TO CONFIRM ORDER AS USUAL
+    // =========================================================================
     const recipientName =
       values.fullName || selectedAddress?.name || user?.name || "Customer";
     const rawRecipientPhone =
@@ -423,7 +477,7 @@ export function CheckoutView() {
         </form>
       </main>
 
-      {/* ── Address Selection Modal ── */}
+      {/* Address Selection Modal */}
       <AddressSelectionModal
         isOpen={isSelectionModalOpen}
         onClose={() => setIsSelectionModalOpen(false)}
@@ -439,7 +493,7 @@ export function CheckoutView() {
         }}
       />
 
-      {/* ── Add New Address Modal (Cascade District / Upazila / Union) ── */}
+      {/* Add New Address Modal (Cascade District / Upazila / Union) */}
       <AddressFormModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -449,7 +503,15 @@ export function CheckoutView() {
         onSubmit={handleSaveNewAddress}
       />
 
-      {/* ── Quick Notification Toast Banner ── */}
+      {/* Stock Availability Alert Modal (Shows Out-of-Stock items removed from cart) */}
+      <StockAlertModal
+        isOpen={isStockAlertModalOpen}
+        onClose={() => setIsStockAlertModalOpen(false)}
+        issues={stockIssues}
+        remainingCount={items.length}
+      />
+
+      {/* Quick Notification Toast Banner */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-zinc-900/95 dark:bg-white/95 text-white dark:text-zinc-950 text-xs font-bold shadow-2xl border border-white/10 dark:border-zinc-800 animate-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="h-4 w-4 text-emerald-400 dark:text-emerald-600 shrink-0" />

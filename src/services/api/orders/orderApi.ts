@@ -37,6 +37,37 @@ export interface CreateOrderPayload {
   couponCode?: string | null;
 }
 
+export interface ValidateCheckoutStockItem {
+  productId: string;
+  variantId?: string | null;
+  quantity?: number;
+}
+
+export interface ValidateCheckoutStockPayload {
+  items: ValidateCheckoutStockItem[];
+}
+
+export type StockIssueType =
+  | "OUT_OF_STOCK"
+  | "INSUFFICIENT_STOCK"
+  | "INACTIVE"
+  | "NOT_FOUND";
+
+export interface StockIssue {
+  productId: string;
+  variantId?: string | null;
+  productName: string;
+  requestedQuantity: number;
+  availableStock: number;
+  issueType: StockIssueType;
+  message: string;
+}
+
+export interface ValidateCheckoutStockResponse {
+  allValid: boolean;
+  issues: StockIssue[];
+}
+
 export interface OrderStatsResponse {
   totalOrders: number;
   pendingOrders: number;
@@ -124,6 +155,18 @@ export function normalizeBackendOrder(raw: any): Order {
 
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Pre-flight stock verification (Public, fast, unauthenticated)
+    validateCheckoutStock: builder.mutation<
+      ApiResponse<ValidateCheckoutStockResponse>,
+      ValidateCheckoutStockPayload
+    >({
+      query: (body) => ({
+        url: "/orders/validate-checkout",
+        method: "POST",
+        body,
+      }),
+    }),
+
     // Customer / Guest creates order
     createOrder: builder.mutation<ApiResponse<Order>, CreateOrderPayload>({
       query: (body) => ({
@@ -283,6 +326,7 @@ export const orderApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useValidateCheckoutStockMutation,
   useCreateOrderMutation,
   useGetMyOrdersQuery,
   useGetMyOrderByIdQuery,
