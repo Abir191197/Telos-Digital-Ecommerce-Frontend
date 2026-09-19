@@ -159,7 +159,7 @@ export function FlashDealCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col h-full rounded-2xl sm:rounded-3xl bg-card text-card-foreground p-3 sm:p-3.5 border border-amber-500/15 transition-all duration-300 ease-out hover:-translate-y-1.5 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.5)] hover:shadow-[0_16px_32px_-8px_rgba(245,158,11,0.18)] dark:hover:shadow-[0_16px_36px_-8px_rgba(245,158,11,0.22)] hover:border-amber-500/40",
+        "group relative flex flex-col h-full rounded-2xl sm:rounded-3xl bg-card text-card-foreground p-3 sm:p-3.5 border border-amber-500/15 hover:border-amber-500/15 transition-all duration-300 ease-out hover:-translate-y-2 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_45px_-10px_rgba(245,158,11,0.22),0_12px_24px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_22px_50px_-10px_rgba(245,158,11,0.3),0_12px_28px_-8px_rgba(0,0,0,0.7)]",
         className
       )}
     >
