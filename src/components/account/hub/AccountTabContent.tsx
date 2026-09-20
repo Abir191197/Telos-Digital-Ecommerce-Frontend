@@ -20,7 +20,9 @@ import {
   WishlistTab,
   WishlistTabSkeleton,
   ReviewsTab,
+  ReviewsTabSkeleton,
   PaymentsTab,
+  PaymentsTabSkeleton,
   NotificationsTab,
 } from "../tabs";
 
@@ -148,6 +150,9 @@ export function AccountTabContent({
       );
 
     case "reviews":
+      if (isLoadingOrders) {
+        return <ReviewsTabSkeleton />;
+      }
       return (
         <ReviewsTab
           reviews={reviews}
@@ -156,6 +161,9 @@ export function AccountTabContent({
       );
 
     case "payments":
+      if (isLoadingOrders) {
+        return <PaymentsTabSkeleton />;
+      }
       return <PaymentsTab />;
 
     case "notifications":
