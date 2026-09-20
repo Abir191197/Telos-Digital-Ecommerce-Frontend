@@ -8,3 +8,4 @@ export * from "./CategoryDesktopTable";
 export * from "./CategoryMobileList";
 export * from "./CategoryCardGrid";
 export * from "./CategoryPagination";
+export * from "./AdminCategoriesSkeleton";

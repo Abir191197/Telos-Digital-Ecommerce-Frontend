@@ -17,7 +17,7 @@ import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "@/services/api/categories/categoryApi";
-import { PageLoader } from "@/components/common";
+import { AdminCategoriesSkeleton } from "./AdminCategoriesSkeleton";
 import { CategoryDesktopTable } from "./CategoryDesktopTable";
 import { CategoryMobileList } from "./CategoryMobileList";
 import { CategoryCardGrid } from "./CategoryCardGrid";
@@ -135,13 +135,7 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
   };
 
   if (isLoading) {
-    return (
-      <PageLoader
-        title="Loading Categories..."
-        description="Fetching the latest category taxonomies, icons, and hierarchy settings."
-        badgeText="Admin Catalog"
-      />
-    );
+    return <AdminCategoriesSkeleton />;
   }
 
   if (isError) {

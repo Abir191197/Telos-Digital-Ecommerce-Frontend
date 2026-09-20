@@ -1,11 +1,6 @@
-import { PageLoader } from "@/components/common";
+import { AdminCategoriesSkeleton } from "@/components/admin/categories";
 
 export default function DashboardCategoriesLoading() {
-  return (
-    <PageLoader
-      title="Loading Categories..."
-      description="Preparing catalog aisles, subcategories, and hierarchy settings."
-      badgeText="Admin Portal"
-    />
-  );
+  return <AdminCategoriesSkeleton />;
 }
+
