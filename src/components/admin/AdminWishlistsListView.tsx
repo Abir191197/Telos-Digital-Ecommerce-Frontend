@@ -11,7 +11,7 @@ import {
   CheckSquare,
   Square,
   Users,
-  CircleDollarSign,
+  Layers,
   Package,
   Star,
   ChevronLeft,
@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PageLoader } from "@/components/common";
 import { KpiCard } from "./dashboard/KpiCard";
+import { AdminWishlistsSkeleton } from "./AdminWishlistsSkeleton";
 import { ProductFloatingActionPill } from "./products/ProductFloatingActionPill";
 import { ConfirmationModal, type ConfirmationDialogState } from "@/components/common/ConfirmationModal";
 import {
@@ -88,14 +89,14 @@ export function AdminWishlistsListView() {
   const metrics = useMemo(() => {
     const totalItemsCount = wishlistItems.length;
     const uniqueCustomers = new Set(wishlistItems.map((it) => it.customerId)).size;
-    const totalPotentialValue = wishlistItems.reduce((acc, it) => acc + (it.product?.price || 0), 0);
+    const avgWishlistSize = uniqueCustomers > 0 ? Number((totalItemsCount / uniqueCustomers).toFixed(1)) : 0;
     const inStockItems = wishlistItems.filter((it) => (it.product?.stock || 0) > 0).length;
     const inStockRate = totalItemsCount > 0 ? Math.round((inStockItems / totalItemsCount) * 100) : 100;
 
     return {
       totalItemsCount,
       uniqueCustomers,
-      totalPotentialValue,
+      avgWishlistSize,
       inStockRate,
     };
   }, [wishlistItems]);
@@ -160,13 +161,7 @@ export function AdminWishlistsListView() {
   };
 
   if (isLoading && wishlistItems.length === 0) {
-    return (
-      <PageLoader
-        title="Loading Customer Wishlists..."
-        description="Fetching saved customer items, demand indicators, and interest signals."
-        badgeText="Wishlist Catalog"
-      />
-    );
+    return <AdminWishlistsSkeleton />;
   }
 
   return (
@@ -209,12 +204,12 @@ export function AdminWishlistsListView() {
           icon={Users}
         />
         <KpiCard
-          title="Potential Value"
-          rawValue={metrics.totalPotentialValue}
-          prefix="৳"
-          change="Wishlist gross value"
+          title="Avg. Items / User"
+          rawValue={metrics.avgWishlistSize}
+          suffix=" items"
+          change="Demand depth"
           isPositive={true}
-          icon={CircleDollarSign}
+          icon={Layers}
         />
         <KpiCard
           title="In-Stock Availability"

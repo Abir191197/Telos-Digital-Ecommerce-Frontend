@@ -8,6 +8,7 @@ import { CustomerFilterDock } from "./CustomerFilterDock";
 import { CustomerDesktopTable } from "./CustomerDesktopTable";
 import { CustomerCardGrid } from "./CustomerCardGrid";
 import { CustomerDetailModal } from "./CustomerDetailModal";
+import { AdminCustomersSkeleton } from "./AdminCustomersSkeleton";
 import {
   ProductConfirmDialog,
   type ConfirmationDialogState,
@@ -144,6 +145,10 @@ export function AdminCustomersView() {
 
   const customersList = customersData?.data || [];
   const meta = customersData?.meta || { page: 1, limit: PAGE_SIZE, total: 0, totalPage: 1 };
+
+  if (isCustomersLoading && customersList.length === 0) {
+    return <AdminCustomersSkeleton />;
+  }
 
   return (
     <div className="space-y-6 pb-12">

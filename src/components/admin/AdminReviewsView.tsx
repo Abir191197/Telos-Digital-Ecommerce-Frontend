@@ -25,6 +25,7 @@ import {
   ReviewMobileList,
   ReviewMobileFilterModal,
   ReviewDetailModal,
+  AdminReviewsSkeleton,
 } from "./reviews";
 import {
   ProductConfirmDialog,
@@ -306,6 +307,10 @@ export function AdminReviewsView() {
       },
     });
   };
+
+  if (isReviewsLoading && reviews.length === 0) {
+    return <AdminReviewsSkeleton />;
+  }
 
   return (
     <div className="w-full space-y-5 sm:space-y-6">

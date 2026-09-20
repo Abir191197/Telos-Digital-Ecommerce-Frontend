@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PageLoader } from "@/components/common";
 import { KpiCard } from "./dashboard/KpiCard";
+import { AdminCartsSkeleton } from "./carts";
 import { ProductFloatingActionPill } from "./products/ProductFloatingActionPill";
 import { ConfirmationModal, type ConfirmationDialogState } from "@/components/common/ConfirmationModal";
 import {
@@ -160,13 +161,7 @@ export function AdminCartsListView() {
   };
 
   if (isLoading && cartItems.length === 0) {
-    return (
-      <PageLoader
-        title="Loading Customer Carts..."
-        description="Fetching active customer shopping sessions, quantities, and reserved line items."
-        badgeText="Cart Management"
-      />
-    );
+    return <AdminCartsSkeleton />;
   }
 
   return (

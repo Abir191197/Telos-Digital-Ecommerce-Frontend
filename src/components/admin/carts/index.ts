@@ -5,3 +5,4 @@ export * from "./CartDesktopTable";
 export * from "./CartCardGrid";
 export * from "./CartMobileList";
 export * from "./CartInspectDrawer";
+export * from "./AdminCartsSkeleton";

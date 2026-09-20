@@ -26,6 +26,7 @@ export * from "./carts";
 
 export * from "./AdminCartsListView";
 export * from "./AdminWishlistsListView";
+export * from "./AdminWishlistsSkeleton";
 
 export * from "./inventory";
 

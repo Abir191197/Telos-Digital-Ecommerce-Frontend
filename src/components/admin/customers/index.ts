@@ -5,3 +5,4 @@ export * from "./CustomerDesktopTable";
 export * from "./CustomerCardGrid";
 export * from "./CustomerDetailModal";
 export * from "./AdminCustomersView";
+export * from "./AdminCustomersSkeleton";
