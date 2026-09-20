@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useGetAllOrdersQuery } from "@/services/api/orders/orderApi";
+import { useGetDashboardKpisQuery } from "@/services/api/dashboard/dashboardApi";
 import {
   DashboardHeader,
   ActionCenterCard,
@@ -12,11 +13,17 @@ import {
   InventoryAlertList,
   TopProductsCard,
   RecentActivityCard,
+  AdminDashboardSkeleton,
 } from "./dashboard";
 
 export function DashboardOverview() {
-  const { data: allOrdersData } = useGetAllOrdersQuery({ limit: 8 });
+  const { data: kpiResponse, isLoading: isKpisLoading } = useGetDashboardKpisQuery();
+  const { data: allOrdersData, isLoading: isOrdersLoading } = useGetAllOrdersQuery({ limit: 8 });
   const liveOrders = allOrdersData?.data ?? [];
+
+  if (isKpisLoading && !kpiResponse) {
+    return <AdminDashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-5 sm:space-y-6 pb-8">

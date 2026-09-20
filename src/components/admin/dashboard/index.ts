@@ -9,3 +9,4 @@ export * from "./ActionCenterCard";
 export * from "./TopProductsCard";
 export * from "./RecentActivityCard";
 export * from './DashboardDateFilter';
+export * from "./AdminDashboardSkeleton";
