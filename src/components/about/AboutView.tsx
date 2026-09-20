@@ -5,11 +5,11 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation } from "framer-motion";
-import { AboutHero } from "./AboutHero";
-import { AboutStatsGrid } from "./AboutStatsGrid";
-import { AboutPillarsGrid } from "./AboutPillarsGrid";
-import { AboutStandardsStory } from "./AboutStandardsStory";
-import { AboutCtaBanner } from "./AboutCtaBanner";
+import { AboutOperationsMetrics } from "./AboutOperationsMetrics";
+import { AboutAuthorizedBrands } from "./AboutAuthorizedBrands";
+import { AboutInspectionPipeline } from "./AboutInspectionPipeline";
+import { AboutCorporateGovernance } from "./AboutCorporateGovernance";
+import { AboutCorporateCta } from "./AboutCorporateCta";
 
 export function AboutView() {
   return (
@@ -30,27 +30,28 @@ export function AboutView() {
               </Link>
               <ChevronRight className="h-3.5 w-3.5 text-border" />
               <span className="font-semibold text-foreground">
-                About Telos Cart
+                About Telos Digital Commerce Ltd.
               </span>
             </nav>
           </div>
         </div>
 
-        {/* Hero Section with Ambient Lights & Motion */}
-        <AboutHero />
+        {/* Concrete Operational Metrics */}
+        <AboutOperationsMetrics />
 
-        {/* Key Numbers Grid */}
-        <AboutStatsGrid />
+        {/* Tier-1 Direct Brand Partnerships Registry */}
+        <AboutAuthorizedBrands />
 
-        {/* Four Core Pillars */}
-        <AboutPillarsGrid />
+        {/* 5-Stage Authenticity & QA Protocol */}
+        <AboutInspectionPipeline />
 
-        {/* Editorial Story & Verification Checklist */}
-        <AboutStandardsStory />
+        {/* Consumer Charter & Corporate B2B Solutions */}
+        <AboutCorporateGovernance />
 
-        {/* High-Impact Dark CTA Banner */}
-        <AboutCtaBanner />
+        {/* Corporate Inquiry & Physical Office Contact */}
+        <AboutCorporateCta />
       </div>
     </LazyMotion>
   );
 }
+

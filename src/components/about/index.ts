@@ -1,8 +1,11 @@
 export * from "./aboutAnimations";
 export * from "./AnimatedStatNumber";
-export * from "./AboutHero";
-export * from "./AboutStatsGrid";
-export * from "./AboutPillarsGrid";
-export * from "./AboutStandardsStory";
-export * from "./AboutCtaBanner";
+export * from "./AboutExecutiveHero";
+export * from "./AboutOperationsMetrics";
+export * from "./AboutAuthorizedBrands";
+export * from "./AboutInspectionPipeline";
+export * from "./AboutCorporateGovernance";
+export * from "./AboutCorporateCta";
+export * from "./AboutSkeleton";
 export * from "./AboutView";
+
