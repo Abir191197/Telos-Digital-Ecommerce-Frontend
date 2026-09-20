@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation } from "framer-motion";
-import { ContactHero } from "./ContactHero";
 import { ContactChannelsGrid } from "./ContactChannelsGrid";
 import { ContactFormHub } from "./ContactFormHub";
 import { ContactFaqSection } from "./ContactFaqSection";
@@ -34,9 +33,6 @@ export function ContactView() {
             </nav>
           </div>
         </div>
-
-        {/* Hero Header with Ambient Depth & Motion */}
-        <ContactHero />
 
         {/* Contact Channels Grid */}
         <ContactChannelsGrid />
