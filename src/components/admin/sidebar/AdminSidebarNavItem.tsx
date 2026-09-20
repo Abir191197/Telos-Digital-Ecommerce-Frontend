@@ -75,12 +75,10 @@ export function AdminSidebarNavItem({
         {item.badge && (
           <span
             className={cn(
-              "px-1.5 py-0.5 text-[10px] font-bold tracking-tight rounded-full",
+              "px-1.5 py-0.5 text-[10px] font-semibold tracking-tight rounded-full",
               isItemActive
                 ? "bg-background/20 text-background"
-                : isSpecialBadge
-                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                : "bg-muted text-foreground border border-border"
+                : "bg-muted text-muted-foreground border border-border/80"
             )}
           >
             {item.badge}
@@ -91,7 +89,6 @@ export function AdminSidebarNavItem({
   }
 
   // Collapsible parent with sub-items
-  const isParentSpecialBadge = item.badge?.toLowerCase().includes("soon") || item.badge?.toLowerCase().includes("later");
   return (
     <div className="space-y-0.5">
       <button
@@ -116,10 +113,8 @@ export function AdminSidebarNavItem({
         {item.badge && (
           <span
             className={cn(
-              "px-2 py-0.5 text-[10px] font-bold tracking-tight rounded-full mr-1",
-              isParentSpecialBadge
-                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                : "bg-muted text-foreground border border-border"
+              "px-2 py-0.5 text-[10px] font-semibold tracking-tight rounded-full mr-1",
+              "bg-muted text-muted-foreground border border-border/80"
             )}
           >
             {item.badge}
@@ -138,7 +133,6 @@ export function AdminSidebarNavItem({
         <div className="pl-5 pr-1 py-1 space-y-1 border-l-2 border-border ml-5 mt-0.5">
           {item.children!.map((sub) => {
             const isSubActive = isSubRouteActive(sub.href);
-            const isSubSpecialBadge = sub.badge?.toLowerCase().includes("soon") || sub.badge?.toLowerCase().includes("later");
             return (
               <Link
                 key={sub.title}
@@ -158,9 +152,7 @@ export function AdminSidebarNavItem({
                       "px-1.5 py-0.5 text-[10px] font-semibold tracking-tight rounded-full",
                       isSubActive
                         ? "bg-background/25 text-background"
-                        : isSubSpecialBadge
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                        : "bg-muted text-foreground border border-border"
+                        : "bg-muted text-muted-foreground border border-border/80"
                     )}
                   >
                     {sub.badge}

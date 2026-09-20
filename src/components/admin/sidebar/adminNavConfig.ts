@@ -41,17 +41,12 @@ export interface AdminNavGroup {
 
 export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
-    group: "Core",
+    group: "Operations",
     items: [
       {
         title: "Overview",
         href: ROUTES.DASHBOARD,
         icon: LayoutDashboard,
-      },
-      {
-        title: "Customers",
-        href: "/dashboard/customers",
-        icon: Users,
       },
       {
         title: "Orders",
@@ -65,48 +60,37 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         ],
       },
       {
-        title: "Customer Carts",
-        href: ROUTES.ADMIN_CARTS,
-        icon: ShoppingCart,
-      },
-      {
-        title: "Customer Wishlists",
-        href: ROUTES.ADMIN_WISHLISTS,
-        icon: Heart,
+        title: "Payments",
+        href: ROUTES.PAYMENTS,
+        icon: CreditCard,
       },
     ],
   },
   {
-    group: "Catalog",
+    group: "Catalog & Inventory",
     items: [
       {
         title: "Products",
         icon: Package,
         children: [
-          { title: "Manage products", href: "/dashboard/products" },
-          { title: "Create Product", href: "/dashboard/products/create" },
+          { title: "All Products", href: "/dashboard/products" },
+          { title: "Add Product", href: "/dashboard/products/create" },
         ],
       },
       {
-        title: "Flash Deals",
-        href: ROUTES.ADMIN_FLASH_DEALS,
-        icon: Flame,
-        badge: "Live",
-      },
-      {
-        title: "Category",
+        title: "Categories",
         icon: FolderTree,
         children: [
-          { title: "Create category", href: "/dashboard/create-category" },
-          { title: "Manage category", href: "/dashboard/categories" },
+          { title: "All Categories", href: "/dashboard/categories" },
+          { title: "Add Category", href: "/dashboard/create-category" },
         ],
       },
       {
         title: "Brands",
         icon: Award,
         children: [
-          { title: "Create Brand", href: "/dashboard/brands/create" },
-          { title: "Manage brand", href: "/dashboard/brands" },
+          { title: "All Brands", href: "/dashboard/brands" },
+          { title: "Add Brand", href: "/dashboard/brands/create" },
         ],
       },
       {
@@ -117,37 +101,53 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
           { title: "Stock Audit Logs", href: "/dashboard/inventory/audit" },
         ],
       },
+      {
+        title: "Flash Deals",
+        href: ROUTES.ADMIN_FLASH_DEALS,
+        icon: Flame,
+        badge: "Live",
+      },
     ],
   },
   {
-    group: "Finance & Sales",
+    group: "Customers & Engagement",
     items: [
       {
-        title: "Verify Payments",
-        href: ROUTES.PAYMENTS,
-        icon: CreditCard,
+        title: "Customers",
+        href: "/dashboard/customers",
+        icon: Users,
       },
+      {
+        title: "Active Carts",
+        href: ROUTES.ADMIN_CARTS,
+        icon: ShoppingCart,
+      },
+      {
+        title: "Wishlists",
+        href: ROUTES.ADMIN_WISHLISTS,
+        icon: Heart,
+      },
+      {
+        title: "Reviews",
+        icon: Star,
+        href: "/dashboard/reviews",
+      },
+    ],
+  },
+  {
+    group: "Analytics & Audit",
+    items: [
       {
         title: "Analytics & Reports",
         icon: BarChart3,
         children: [
           { title: "Reports Overview", href: "/dashboard/reports" },
+          { title: "Sales Performance", href: "/dashboard/reports/sales" },
           { title: "Profit & Margins", href: "/dashboard/reports/profit" },
           { title: "Stock Valuation", href: "/dashboard/reports/stock" },
           { title: "Low-Stock Alerts", href: "/dashboard/reports/low-stock" },
           { title: "Transaction Audit", href: "/dashboard/reports/transactions" },
-          { title: "Sales Performance", href: "/dashboard/reports/sales" },
         ],
-      },
-    ],
-  },
-  {
-    group: "Engagement & Audit",
-    items: [
-      {
-        title: "Reviews",
-        icon: Star,
-        href: "/dashboard/reviews",
       },
       {
         title: "Activity Logs",
@@ -158,12 +158,11 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   },
   {
     group: "Store Administration",
-    badge: "Coming Soon",
+    badge: "Soon",
     items: [
       {
         title: "Customizations",
         icon: Sliders,
-        badge: "Later",
         children: [
           {
             title: "Banners & Promos",
@@ -185,7 +184,6 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         title: "Settings",
         icon: Settings,
-        badge: "Coming Soon",
         children: [
           {
             title: "Store Profile",
