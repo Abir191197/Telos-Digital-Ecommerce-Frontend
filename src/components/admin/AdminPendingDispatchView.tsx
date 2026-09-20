@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ import { InvoiceModal } from "@/components/account";
 import { useGetAllOrdersQuery, useAssignCourierTrackingMutation, useUpdateOrderStatusMutation } from "@/services/api/orders/orderApi";
 import { KpiCard } from "./dashboard/KpiCard";
 import { PageLoader } from "@/components/common";
+import { AdminOrdersSkeleton } from "./orders";
 import {
   DispatchCardItem,
   DispatchDesktopTable,
@@ -42,6 +43,7 @@ export function AdminPendingDispatchView() {
   const orders = backendOrdersData?.data ?? [];
 
   const [viewMode, setViewMode] = useState<"card" | "table">("table");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [courierFilter, setCourierFilter] = useState<string>("all");
   const [zoneFilter, setZoneFilter] = useState<string>("all");
@@ -167,8 +169,13 @@ export function AdminPendingDispatchView() {
     setTrackingCode(`STE-${Math.floor(10000 + Math.random() * 90000)}`);
   };
 
+  if (isLoading && orders.length === 0) {
+    return <AdminOrdersSkeleton />;
+  }
+
   return (
     <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
+
       {/* ── Mobile Dedicated Top Search Bar ── */}
       <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
         <div className="relative w-full">

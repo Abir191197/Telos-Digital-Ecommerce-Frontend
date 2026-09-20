@@ -6,6 +6,7 @@ import { ROUTES } from "@/constants";
 import {
   AdminOrdersView,
   AdminPendingDispatchView,
+  AdminOrdersSkeleton,
 } from "@/components/admin";
 
 export const metadata: Metadata = {
@@ -27,15 +28,7 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
   }
 
   return (
-    <Suspense
-      fallback={
-        <PageLoader
-          title="Loading Orders..."
-          description="Fetching customer orders and dispatch schedules."
-          badgeText="Orders Hub"
-        />
-      }
-    >
+    <Suspense fallback={<AdminOrdersSkeleton />}>
       {status === "pending" ? (
         <AdminPendingDispatchView />
       ) : (
@@ -44,3 +37,4 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
     </Suspense>
   );
 }
+

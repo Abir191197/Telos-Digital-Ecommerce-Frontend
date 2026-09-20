@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { useAdminStore } from "@/stores";
@@ -29,7 +29,9 @@ import {
   OrderQuickInspectModal,
   OrderMobileFilterModal,
   OrderFloatingFilterFab,
+  AdminOrdersSkeleton,
 } from "./orders";
+
 
 export function AdminOrdersView() {
   const searchParams = useSearchParams();
@@ -42,7 +44,7 @@ export function AdminOrdersView() {
   const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
 
   const { updateOrderStatus, assignCourierTracking } = useAdminStore();
-  const { data: backendOrdersData } = useGetAllOrdersQuery({
+  const { data: backendOrdersData, isLoading } = useGetAllOrdersQuery({
     searchTerm: searchQuery || undefined,
     status: statusFilter !== "all" ? (statusFilter.toUpperCase() as any) : undefined,
   });
@@ -54,6 +56,7 @@ export function AdminOrdersView() {
 
   // Mobile Draggable Floating Filter State
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   const [fabPosition, setFabPosition] = useState<{ x: number; y: number }>({
     x: 16,
     y: 90,
@@ -215,8 +218,13 @@ export function AdminOrdersView() {
     setTrackingNumberInput("");
   };
 
+  if (isLoading && orders.length === 0) {
+    return <AdminOrdersSkeleton />;
+  }
+
   return (
     <div className="space-y-5 sm:space-y-6 min-h-[calc(100dvh-4rem)]">
+
       {/* ── Mobile Dedicated Top Search Bar ── */}
       <div className="md:hidden sticky top-16 z-25 -mx-4 -mt-4 px-4 py-2.5 bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-xs">
         <div className="relative w-full">

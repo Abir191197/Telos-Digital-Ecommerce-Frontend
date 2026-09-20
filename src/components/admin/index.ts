@@ -3,6 +3,8 @@ export * from "./AdminSidebar";
 export * from "./AdminHeader";
 export * from "./DashboardOverview";
 export * from "./AdminOrdersView";
+export * from "./orders";
+
 export * from "./AdminProductsView";
 export * from "./AdminPaymentsView";
 export * from "./AdminCustomersView";
