@@ -11,7 +11,14 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/dashboard");
+  const isAdmin =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/payments") ||
+    pathname.startsWith("/clients") ||
+    pathname.startsWith("/reports") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/notifications");
+
 
   useEffect(() => {
     if (!isAdmin) {

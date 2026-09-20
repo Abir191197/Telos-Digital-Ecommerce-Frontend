@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { AdminPaymentsView } from "@/components/admin";
+import { AdminPaymentsView, AdminPaymentsSkeleton } from "@/components/admin";
 
 export const metadata: Metadata = {
   title: "Payments & Reconciliation | Admin Portal",
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPaymentsPage() {
-  return <AdminPaymentsView />;
+  return (
+    <Suspense fallback={<AdminPaymentsSkeleton />}>
+      <AdminPaymentsView />
+    </Suspense>
+  );
 }
+

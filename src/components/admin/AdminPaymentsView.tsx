@@ -13,7 +13,9 @@ import {
   PaymentInspectModal,
   PaymentPagination,
   PaymentConfirmModal,
+  AdminPaymentsSkeleton,
 } from "./payments";
+
 import {
   useGetAllPaymentsQuery,
   useVerifyPaymentMutation,
@@ -211,8 +213,13 @@ export function AdminPaymentsView() {
     statusFilter !== "all" ||
     searchQuery.trim().length > 0;
 
+  if (isLoading && transactions.length === 0) {
+    return <AdminPaymentsSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
+
       {/* View Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

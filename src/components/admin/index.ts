@@ -7,7 +7,9 @@ export * from "./orders";
 
 export * from "./AdminProductsView";
 export * from "./AdminPaymentsView";
+export * from "./payments";
 export * from "./AdminCustomersView";
+
 export * from "./AdminMobileBottomNav";
 export * from "./AdminPendingDispatchView";
 export * from "./AdminOrderDetailView";

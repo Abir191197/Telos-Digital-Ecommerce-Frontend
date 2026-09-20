@@ -8,3 +8,5 @@ export * from "./PaymentFloatingFilterFab";
 export * from "./PaymentInspectModal";
 export * from "./PaymentPagination";
 export * from "./PaymentConfirmModal";
+export * from "./AdminPaymentsSkeleton";
+
