@@ -25,6 +25,7 @@ import {
   InventoryAuditDesktopTable,
   InventoryAuditCardItem,
   InventoryAuditFilterDock,
+  AdminInventoryAuditSkeleton,
 } from "./";
 
 export function AdminInventoryAuditView() {
@@ -130,13 +131,7 @@ export function AdminInventoryAuditView() {
   };
 
   if (isLoading && logs.length === 0 && !auditResponse) {
-    return (
-      <PageLoader
-        title="Loading Audit Trail..."
-        description="Fetching chronological stock modification history and compliance records."
-        badgeText="Inventory Audit"
-      />
-    );
+    return <AdminInventoryAuditSkeleton />;
   }
 
   const totalLogs = summaryData?.totalLogs ?? backendTotal;

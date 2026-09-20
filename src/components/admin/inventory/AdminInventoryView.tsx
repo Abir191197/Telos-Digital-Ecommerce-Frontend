@@ -29,6 +29,7 @@ import {
   StockFilterType,
   SortOptionType,
   ManageStockModal,
+  AdminInventorySkeleton,
 } from "./";
 
 export function AdminInventoryView() {
@@ -180,13 +181,7 @@ export function AdminInventoryView() {
   };
 
   if (isProductsLoading && products.length === 0 && !adminProductsResponse) {
-    return (
-      <PageLoader
-        title="Loading Inventory..."
-        description="Fetching real-time stock balances and warehouse inventory counts."
-        badgeText="Inventory Management"
-      />
-    );
+    return <AdminInventorySkeleton />;
   }
 
   // Database-wide KPI numbers

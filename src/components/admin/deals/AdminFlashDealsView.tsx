@@ -25,6 +25,7 @@ import {
   useUpdateProductMutation,
 } from "@/services/api/products/productApi";
 import { FlashDealDesktopTable } from "./FlashDealDesktopTable";
+import { AdminFlashDealsSkeleton } from "./AdminFlashDealsSkeleton";
 
 const MAX_HOMEPAGE_FEATURED = 12;
 
@@ -202,6 +203,10 @@ export function AdminFlashDealsView() {
       setSelectedIds(filteredProducts.map((p) => p.id));
     }
   };
+
+  if (isLoading && allProducts.length === 0) {
+    return <AdminFlashDealsSkeleton />;
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-16">
