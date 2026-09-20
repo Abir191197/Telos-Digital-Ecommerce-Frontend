@@ -253,7 +253,7 @@ export function BrandsPageView() {
                   <m.div key={brand.id} variants={cardVariants}>
                     <Link
                       href={ROUTES.BRAND_DETAIL(brand.slug)}
-                      className="group relative flex flex-col items-center justify-between p-5 h-[185px] sm:h-[205px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 overflow-hidden text-center select-none">
+                      className="group relative flex flex-col items-center justify-between p-4 sm:p-5 h-[190px] sm:h-[210px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 overflow-hidden text-center select-none">
                       {/* Ambient glow on hover */}
                       <div
                         aria-hidden="true"
@@ -264,17 +264,18 @@ export function BrandsPageView() {
                         className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                       />
 
-                      {/* Brand Logo Display */}
-                      <div className="relative z-10 flex h-16 w-full items-center justify-center text-foreground/85 group-hover:text-foreground transition-colors duration-200">
+                      {/* Brand Logo Display - Perfectly Centered in upper card body */}
+                      <div className="relative z-10 flex-1 w-full flex items-center justify-center text-foreground/85 group-hover:text-foreground transition-colors duration-200 py-1">
                         <BrandLogoDisplay
                           name={brand.name}
+                          slug={brand.slug}
                           image={brand.image}
-                          className="h-9 sm:h-10 max-w-[120px] object-contain transition-transform duration-300 group-hover:scale-105"
+                          className="h-10 sm:h-11 max-w-[125px] object-contain transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
 
                       {/* Brand Details */}
-                      <div className="relative z-10 w-full flex flex-col items-center gap-1 mt-auto">
+                      <div className="relative z-10 w-full flex flex-col items-center gap-1 shrink-0 pb-0.5">
                         <span className="text-sm sm:text-[15px] font-bold text-foreground group-hover:text-foreground line-clamp-1 w-full tracking-tight">
                           {brand.name}
                         </span>

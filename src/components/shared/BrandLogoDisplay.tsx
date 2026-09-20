@@ -185,38 +185,60 @@ export const BRAND_LOGO_MAP: Record<string, React.ComponentType<{ className?: st
 
 interface BrandLogoDisplayProps {
   name: string;
+  slug?: string | null;
   image?: string | null;
   className?: string;
 }
 
 export function BrandLogoDisplay({
   name,
+  slug,
   image,
   className = "h-9 sm:h-10 max-w-[120px]",
 }: BrandLogoDisplayProps) {
   const [imgError, setImgError] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
-  // Reset imgError state when image URL or name changes
+  // Reset imgError & aspect ratio state when image URL or name changes
   React.useEffect(() => {
     setImgError(false);
-  }, [image, name]);
+    setAspectRatio(null);
+  }, [image, name, slug]);
 
-  const normalizedKey = name?.trim().toLowerCase() || "";
-  const SvgLogo = BRAND_LOGO_MAP[normalizedKey];
+  const normalizedKey = (slug?.trim().toLowerCase() || name?.trim().toLowerCase() || "");
+  const SvgLogo = BRAND_LOGO_MAP[normalizedKey] || BRAND_LOGO_MAP[name?.trim().toLowerCase() || ""];
 
-  // 1. Database image has top priority if provided
+  // Dynamic optical scale factor based on natural aspect ratio:
+  // - Wide logos (AR > 2.0 like SONY, SAMSUNG, ASUS) need slight boost or full width
+  // - Square / Tall logos (AR < 1.3 like Apple, Xiaomi, OnePlus) are optical giants, so we cushion scale to prevent them from overpowering
+  const dynamicScaleClass = React.useMemo(() => {
+    if (!aspectRatio) return "scale-100";
+    if (aspectRatio > 2.2) return "scale-105"; // wide wordmarks
+    if (aspectRatio < 1.25) return "scale-[0.82]"; // compact/square marks
+    if (aspectRatio < 1.5) return "scale-[0.90]";
+    return "scale-100";
+  }, [aspectRatio]);
+
+  // 1. Database image has top priority if provided and hasn't failed to load
   if (image && !imgError) {
     const isRemote = image.startsWith("http://") || image.startsWith("https://");
 
     return (
-      <div className={`relative h-full w-full flex items-center justify-center ${className}`}>
+      <div
+        className={`relative w-full flex items-center justify-center overflow-hidden transition-transform duration-300 ${dynamicScaleClass} ${className}`}>
         <Image
           src={image}
           alt={name}
           fill
-          sizes="150px"
+          sizes="(max-width: 768px) 120px, 160px"
           unoptimized={isRemote}
-          className="object-contain p-1"
+          className="object-contain object-center p-0.5"
+          onLoad={(e) => {
+            const target = e.currentTarget;
+            if (target.naturalWidth && target.naturalHeight) {
+              setAspectRatio(target.naturalWidth / target.naturalHeight);
+            }
+          }}
           onError={() => setImgError(true)}
         />
       </div>
@@ -225,7 +247,16 @@ export function BrandLogoDisplay({
 
   // 2. Vector brand SVG fallback if database image is not uploaded or failed
   if (SvgLogo) {
-    return <SvgLogo className={className} />;
+    // Svg logos also get normalized optical scaling based on known archetype
+    const isWideSvg = ["samsung", "sony", "asus", "anker", "vivo"].includes(normalizedKey);
+    const isSquareSvg = ["apple", "xiaomi", "oneplus"].includes(normalizedKey);
+    const svgScale = isWideSvg ? "scale-105" : isSquareSvg ? "scale-[0.85]" : "scale-100";
+
+    return (
+      <div className={`relative flex items-center justify-center ${svgScale}`}>
+        <SvgLogo className={className} />
+      </div>
+    );
   }
 
   // 3. Monogram initial fallback

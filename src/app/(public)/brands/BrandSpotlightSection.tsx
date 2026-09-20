@@ -66,8 +66,9 @@ export function BrandSpotlightSection({
             <div className="h-24 w-full flex items-center justify-center my-3">
               <BrandLogoDisplay
                 name={brand.name}
+                slug={brand.slug}
                 image={brand.image}
-                className="h-14 max-w-[150px] object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-14 sm:h-16 max-w-[155px] object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </div>
 

@@ -88,6 +88,7 @@ export function BrandDetailView({ params }: Props) {
                 <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/50 shadow-xs p-2">
                   <BrandLogoDisplay
                     name={brand.name}
+                    slug={brand.slug}
                     image={brand.image}
                     className="h-8 sm:h-9 max-w-[60px] object-contain"
                   />

@@ -73,10 +73,11 @@ export function OfficialBrandsSection() {
                   className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-amber-500/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                 />
 
-                {/* Logo Capsule */}
-                <div className="relative z-10 flex h-16 w-full items-center justify-center text-foreground/80 group-hover:text-foreground transition-colors duration-200">
+                {/* Logo Capsule - Centered */}
+                <div className="relative z-10 flex-1 w-full flex items-center justify-center text-foreground/80 group-hover:text-foreground transition-colors duration-200 py-1">
                   <BrandLogoDisplay
                     name={brand.name}
+                    slug={brand.slug}
                     image={brand.image}
                     className="h-9 sm:h-10 max-w-[120px] object-contain transition-transform duration-300 group-hover:scale-105"
                   />
