@@ -6,3 +6,4 @@ export * from "./AdminBrandsListView";
 export * from "./BrandCardGrid";
 export * from "./BrandDesktopTable";
 export * from "./BrandMobileList";
+export * from "./AdminBrandsSkeleton";

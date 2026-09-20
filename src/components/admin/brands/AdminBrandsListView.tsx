@@ -17,7 +17,7 @@ import {
   ProductConfirmDialog,
   type ConfirmationDialogState,
 } from "@/components/admin/products/ProductConfirmDialog";
-import { PageLoader } from "@/components/common";
+import { AdminBrandsSkeleton } from "./AdminBrandsSkeleton";
 import { BrandCardGrid } from "./BrandCardGrid";
 import { BrandDesktopTable } from "./BrandDesktopTable";
 import { BrandMobileList } from "./BrandMobileList";
@@ -88,13 +88,7 @@ export function AdminBrandsListView() {
   };
 
   if (isLoading) {
-    return (
-      <PageLoader
-        title="Loading Brands..."
-        description="Fetching brand partnerships, logos, and marquee showcase settings."
-        badgeText="Brand Catalog"
-      />
-    );
+    return <AdminBrandsSkeleton />;
   }
 
   return (
