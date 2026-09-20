@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Plus,
@@ -88,7 +89,7 @@ export function BrandCompactProductCard({
       {/* Full-frame Thumbnail Container */}
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted/40 dark:bg-zinc-900/50">
         <Link href={productUrl} className="relative block h-full w-full">
-          <Image
+          <ProductImageDisplay
             src={product.thumbnail}
             alt={product.name}
             fill

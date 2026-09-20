@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ProductImageDisplay } from "@/components/shared";
 import { CheckSquare, Square, ExternalLink, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/ecommerce.types";
@@ -88,19 +89,14 @@ export function ProductCardItem({
               className="relative h-20 w-20 rounded-2xl overflow-hidden bg-muted/40 shadow-xs block shrink-0 cursor-pointer"
               title="View live product"
             >
-              {product.thumbnail ? (
-                <Image
-                  src={product.thumbnail}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="80px"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center bg-muted/60 text-[10px] font-bold text-muted-foreground">
-                  No Pic
-                </div>
-              )}
+              <ProductImageDisplay
+                src={product.thumbnail}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="80px"
+                fallbackIconSize={20}
+              />
               {product.stock <= 0 ? (
                 <span className="absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-black uppercase tracking-wider bg-rose-600/90 text-white backdrop-blur-xs">
                   Out
@@ -209,19 +205,14 @@ export function ProductCardItem({
             className="block h-full w-full cursor-pointer"
             title="View live product"
           >
-            {product.thumbnail ? (
-              <Image
-                src={product.thumbnail}
-                alt={product.name}
-                fill
-                className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
-                sizes="(max-width: 768px) 100vw, 350px"
-              />
-            ) : (
-              <div className="h-full w-full flex items-center justify-center bg-muted/60 text-xs font-bold text-muted-foreground">
-                No Picture
-              </div>
-            )}
+            <ProductImageDisplay
+              src={product.thumbnail}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
+              sizes="(max-width: 768px) 100vw, 350px"
+              fallbackIconSize={28}
+            />
           </Link>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />

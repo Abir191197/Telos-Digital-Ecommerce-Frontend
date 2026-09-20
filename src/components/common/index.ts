@@ -23,6 +23,7 @@ export { Logo } from "./Logo";
 export { ThemeToggle } from "./ThemeToggle";
 export { PaymentMethodsGrid } from "./PaymentMethodsGrid";
 export { ProductCard } from "./ProductCard";
+export { ProductImageDisplay } from "../shared/ProductImageDisplay";
 export { ConfirmationModal } from "./ConfirmationModal";
 export type {
   ConfirmationDialogState,

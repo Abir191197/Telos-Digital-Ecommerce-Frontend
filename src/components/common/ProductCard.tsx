@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Heart,
@@ -117,7 +118,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Top Media Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted/40 dark:bg-zinc-900/60">
         <Link href={productUrl} className="relative block h-full w-full">
-          <Image
+          <ProductImageDisplay
             src={product.thumbnail}
             alt={product.name}
             fill

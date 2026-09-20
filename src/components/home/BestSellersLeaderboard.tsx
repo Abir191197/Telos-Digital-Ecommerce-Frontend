@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Trophy, Star, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
@@ -140,12 +141,13 @@ export function BestSellersLeaderboard() {
                   {/* Product Visual & Details - flex-1 for consistent height */}
                   <div className="flex items-center gap-3 pt-3.5 flex-1">
                     <Link href={productUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/40 block">
-                      <Image
+                      <ProductImageDisplay
                         src={product.thumbnail}
                         alt={product.name}
                         fill
                         sizes="80px"
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        fallbackIconSize={20}
                       />
                     </Link>
 

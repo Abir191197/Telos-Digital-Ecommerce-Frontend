@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { m, AnimatePresence, type Variants } from "framer-motion";
 import {
   ChevronLeft,
@@ -154,7 +155,7 @@ export function ProductGallery({
             }}
             className="absolute inset-0 h-full w-full"
           >
-            <Image
+            <ProductImageDisplay
               src={images[activeImageIndex] || product.thumbnail}
               alt={`${product.name} - slide ${activeImageIndex + 1}`}
               fill
@@ -279,13 +280,14 @@ export function ProductGallery({
               exit="exit"
               className="absolute inset-0 h-full w-full"
             >
-              <Image
+              <ProductImageDisplay
                 src={images[activeImageIndex] || product.thumbnail}
                 alt={product.name}
                 fill
                 priority
                 sizes="50vw"
                 className="object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
+                fallbackIconSize={48}
               />
             </m.div>
           </AnimatePresence>
@@ -376,12 +378,13 @@ export function ProductGallery({
                     : "border-border/60 hover:border-border opacity-70 hover:opacity-100"
                 )}
               >
-                <Image
+                <ProductImageDisplay
                   src={img}
                   alt={`Thumbnail ${idx + 1}`}
                   fill
                   sizes="64px"
                   className="object-cover object-center"
+                  fallbackIconSize={18}
                 />
               </button>
             ))}

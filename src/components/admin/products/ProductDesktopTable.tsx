@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ProductImageDisplay } from "@/components/shared";
 import { CheckSquare, Square, MoreVertical, ExternalLink, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/ecommerce.types";
@@ -141,19 +142,14 @@ export function ProductDesktopTable({
                           className="relative h-11 w-11 rounded-xl overflow-hidden border border-border/60 shrink-0 bg-muted/30 hover:opacity-85 transition-opacity block cursor-pointer"
                           title="View live product"
                         >
-                          {prod.thumbnail ? (
-                            <Image
-                              src={prod.thumbnail}
-                              alt={prod.name}
-                              fill
-                              className="object-cover"
-                              sizes="44px"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-muted/60 text-[10px] font-bold text-muted-foreground">
-                              No Pic
-                            </div>
-                          )}
+                          <ProductImageDisplay
+                            src={prod.thumbnail}
+                            alt={prod.name}
+                            fill
+                            className="object-cover"
+                            sizes="44px"
+                            fallbackIconSize={18}
+                          />
                         </Link>
                         <div className="min-w-0 max-w-[220px] lg:max-w-[280px] xl:max-w-[340px]">
                           <Link
