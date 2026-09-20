@@ -57,9 +57,12 @@ export function ProductInfo({
       ? activeOriginalPrice - currentPrice
       : 0;
 
-  // Active inventory count
-  const activeStock = selectedVariant ? selectedVariant.stock : product.stock;
-  const inStock = activeStock > 0;
+  // Active inventory count: check variant stock first; if 0 or undefined, fallback to product.stock
+  const activeStock =
+    selectedVariant && (selectedVariant.stock ?? 0) > 0
+      ? selectedVariant.stock
+      : (product.stock || 0);
+  const inStock = activeStock > 0 || Boolean(product.inStock && product.stock > 0);
   const activeSku = selectedVariant?.sku || product.sku;
 
   // Group variants by type or render clean interactive buttons
@@ -208,7 +211,7 @@ export function ProductInfo({
             {variants.map((v: ProductVariant) => {
               const isSelected = selectedVariantId === v.id;
               const vPrice = v.price || product.price;
-              const vStock = v.stock ?? 0;
+              const vStock = (v.stock ?? 0) > 0 ? v.stock : (product.stock || 0);
               const isOutOfStock = vStock <= 0;
 
               return (

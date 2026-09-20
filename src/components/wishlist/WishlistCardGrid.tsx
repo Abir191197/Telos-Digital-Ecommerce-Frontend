@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
@@ -38,12 +39,13 @@ export function WishlistCardGrid({
                 href={ROUTES.PRODUCT_DETAIL(product.slug)}
                 className="block relative h-full w-full"
               >
-                <Image
+                <ProductImageDisplay
                   src={product.thumbnail}
                   alt={product.name}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                   className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-106"
+                  fallbackIconSize={28}
                 />
               </Link>
 

@@ -5,6 +5,7 @@ import type { Product } from "@/types/ecommerce.types";
 
 interface WishlistState {
   items: Product[];
+  _hasHydrated: boolean;
 }
 
 interface WishlistActions {
@@ -15,6 +16,7 @@ interface WishlistActions {
   clearWishlist: () => void;
   setServerItems: (items: Product[]) => void;
   getCount: () => number;
+  setHasHydrated: (state: boolean) => void;
 }
 
 type WishlistStore = WishlistState & WishlistActions;
@@ -23,6 +25,7 @@ export const useWishlistStore = create<WishlistStore>()(
   persist(
     (set, get) => ({
       items: [],
+      _hasHydrated: false,
 
       addItem: (product) => {
         const currentItems = get().items;
@@ -56,15 +59,17 @@ export const useWishlistStore = create<WishlistStore>()(
       setServerItems: (items) => set({ items }),
 
       getCount: () => get().items.length,
+      setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
     }),
     {
       name: "telos-wishlist-storage",
-      partialize: () => ({}),
+      partialize: (state) => ({
+        items: state.items,
+      }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.items = [];
-        }
+        state?.setHasHydrated(true);
       },
     }
   )
 );
+

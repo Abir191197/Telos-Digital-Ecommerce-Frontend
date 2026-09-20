@@ -31,13 +31,8 @@ export function CartWishlistSync() {
     refetchOnMountOrArgChange: true,
   });
 
-  // Clear client cart and wishlist immediately if session is unauthenticated or admin
-  useEffect(() => {
-    if (!isCustomerSession) {
-      useCartStore.getState().setServerItems([]);
-      useWishlistStore.getState().setServerItems([]);
-    }
-  }, [isCustomerSession]);
+  // Note: auth.store logout() handles clearing cart & wishlist on sign out.
+  // Do NOT wipe them synchronously here before auth store hydrates from localStorage on refresh!
 
   useEffect(() => {
     if (isCustomerSession && cartResponse?.data?.items) {
@@ -98,21 +93,26 @@ export function CartWishlistSync() {
   useEffect(() => {
     if (isCustomerSession && wishlistResponse?.data?.items) {
       const serverProducts: Product[] = wishlistResponse.data.items.map(
-        (it) => ({
-          ...it.product,
-          description: (it.product as any).description || "",
-          category: (it.product.category?.name || "General") as any,
-          brand: (it.product.brand?.name || "Standard") as any,
-          images: it.product.thumbnail ? [it.product.thumbnail] : [],
-          tags: [],
-          isFeatured: false,
-          isNew: false,
-          rating: it.product.rating || 5,
-          reviewCount: it.product.reviewCount || 0,
-          status: (it.product.stockStatus || "IN_STOCK") as any,
-          createdAt: it.createdAt,
-          updatedAt: it.updatedAt,
-        }),
+        (it) => {
+          const itemStock = Number(it.product.stock) || 0;
+          return {
+            ...it.product,
+            stock: itemStock,
+            inStock: itemStock > 0 || it.product.stockStatus === "IN_STOCK",
+            description: (it.product as any).description || "",
+            category: (it.product.category?.name || "General") as any,
+            brand: (it.product.brand?.name || "Standard") as any,
+            images: it.product.thumbnail ? [it.product.thumbnail] : [],
+            tags: [],
+            isFeatured: false,
+            isNew: false,
+            rating: it.product.rating || 5,
+            reviewCount: it.product.reviewCount || 0,
+            status: (it.product.stockStatus || "IN_STOCK") as any,
+            createdAt: it.createdAt,
+            updatedAt: it.updatedAt,
+          };
+        }
       ) as unknown as Product[];
 
       useWishlistStore.getState().setServerItems(serverProducts);

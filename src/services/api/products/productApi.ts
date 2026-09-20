@@ -1,4 +1,4 @@
-﻿import { baseApi } from "@/lib/rtk-query/baseApi";
+import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
 import type { Product, ProductVariant, ProductReview } from "@/types/ecommerce.types";
 
@@ -114,13 +114,19 @@ export const normalizeProduct = (item: any): Product => {
 
   const images = rawImages.length > 0 ? rawImages : [thumbnail];
 
+  const parentStock = Number(item.stock) || 0;
+
   // Normalize variants
   const variants: ProductVariant[] = Array.isArray(item.variants)
     ? item.variants.map((v: any) => {
         const vPrice = v.price !== null && v.price !== undefined ? Number(v.price) : price;
         const vOriginalPrice = v.originalPrice !== null && v.originalPrice !== undefined ? Number(v.originalPrice) : originalPrice;
         const vCostPrice = v.costPrice !== null && v.costPrice !== undefined ? Number(v.costPrice) : undefined;
-        const vStock = Number(v.stock) || 0;
+        // Fall back to parent product stock if variant stock not set or 0 while parent has inventory
+        const rawVStock = v.stock !== null && v.stock !== undefined ? Number(v.stock) : null;
+        const vStock = rawVStock !== null && !isNaN(rawVStock) && rawVStock > 0 
+          ? rawVStock 
+          : (parentStock > 0 ? parentStock : (Number(v.stock) || 0));
         const labels = [v.color, v.size, v.weight].filter(Boolean);
         const name = v.name || (labels.length > 0 ? labels.join(" / ") : "Standard Edition");
 

@@ -6,6 +6,7 @@ import { useWishlistStore, useCartStore, useAuthStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { ROUTES } from "@/constants";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import { useGetMyWishlistQuery } from "@/services/api/wishlist/wishlistApi";
 import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
 import { LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { Loader2, CheckCircle2 } from "lucide-react";
@@ -34,9 +35,17 @@ export function WishlistView() {
   const mounted = useMounted();
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isAdmin = user?.role === "admin";
 
+  const isCustomer = isAuthenticated && !isAdmin;
+  const { isLoading: isServerWishlistLoading, isFetching: isServerWishlistFetching } =
+    useGetMyWishlistQuery(undefined, {
+      skip: !isCustomer,
+    });
+
   const items = useWishlistStore((state) => state.items);
+  const hasHydrated = useWishlistStore((state) => state._hasHydrated);
   const removeItem = useWishlistStore((state) => state.removeItem);
   const clearWishlist = useWishlistStore((state) => state.clearWishlist);
   const addToCart = useCartStore((state) => state.addItem);
@@ -142,10 +151,54 @@ export function WishlistView() {
     return (featured.length > 0 ? featured : allProducts).slice(0, 5);
   }, [allProducts]);
 
-  if (!mounted || (mounted && isAdmin)) {
+  const isWishlistDataLoading =
+    !mounted ||
+    !hasHydrated ||
+    (isCustomer && (isServerWishlistLoading || (isServerWishlistFetching && items.length === 0)));
+
+  if (isWishlistDataLoading || (mounted && isAdmin)) {
     return (
-      <div className="container py-12">
-        <div className="h-44 rounded-3xl bg-muted/40 animate-pulse" />
+      <div className="container py-8 sm:py-12 space-y-8 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 md:pb-6 border-b border-border/60">
+          <div className="space-y-2">
+            <div className="h-4 w-36 bg-muted/60 rounded-full" />
+            <div className="h-8 sm:h-10 w-48 sm:w-64 bg-muted/70 rounded-xl" />
+            <div className="h-4 w-72 sm:w-96 bg-muted/50 rounded" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-9 w-20 bg-muted/60 rounded-xl" />
+            <div className="h-9 w-32 bg-muted/60 rounded-xl" />
+          </div>
+        </div>
+
+        {/* Wishlist Items List Skeleton */}
+        <div className="overflow-hidden rounded-3xl bg-card border border-border/60 shadow-xs divide-y divide-border/60">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={`wishlist-skeleton-${i}`}
+              className="p-4 sm:p-5 flex flex-col lg:grid lg:grid-cols-12 gap-4 items-center justify-between">
+              <div className="w-full lg:col-span-5 flex items-center gap-4">
+                <div className="h-20 w-20 sm:h-22 sm:w-22 rounded-2xl bg-muted/60 shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-3/4 bg-muted/70 rounded" />
+                  <div className="h-3 w-1/3 bg-muted/50 rounded" />
+                  <div className="h-3 w-1/2 bg-muted/40 rounded" />
+                </div>
+              </div>
+              <div className="hidden lg:block lg:col-span-2 text-center">
+                <div className="h-6 w-20 bg-muted/60 rounded-full mx-auto" />
+              </div>
+              <div className="hidden lg:block lg:col-span-2 text-center">
+                <div className="h-5 w-24 bg-muted/70 rounded mx-auto" />
+              </div>
+              <div className="w-full lg:col-span-3 flex items-center justify-end gap-2">
+                <div className="h-9 w-28 bg-muted/60 rounded-full" />
+                <div className="h-9 w-9 bg-muted/40 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

@@ -50,8 +50,11 @@ export function ProductActions({
     );
   }
 
-  const activeStock = selectedVariant ? selectedVariant.stock : product.stock;
-  const isOutOfStock = activeStock <= 0;
+  const activeStock =
+    selectedVariant && (selectedVariant.stock ?? 0) > 0
+      ? selectedVariant.stock
+      : (product.stock || 0);
+  const isOutOfStock = activeStock <= 0 && (!product.inStock || (product.stock ?? 0) <= 0);
 
   return (
     <div className="mt-6 space-y-4">

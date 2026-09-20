@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Trash2, ShoppingCart, Minus, Plus } from "lucide-react";
 import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils";
@@ -52,19 +53,14 @@ export function WishlistListRow({
               {/* 1. Product Details & Thumbnail (Col 4) */}
               <div className="w-full lg:col-span-4 flex items-start sm:items-center gap-3 sm:gap-4">
                 <div className="relative h-20 w-20 sm:h-22 sm:w-22 shrink-0 overflow-hidden rounded-2xl bg-muted/30 border border-border/40">
-                  {product.thumbnail ? (
-                    <Image
-                      src={product.thumbnail}
-                      alt={product.name}
-                      fill
-                      sizes="88px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-muted-foreground font-black text-xl">
-                      {product.name.charAt(0)}
-                    </div>
-                  )}
+                  <ProductImageDisplay
+                    src={product.thumbnail}
+                    alt={product.name}
+                    fill
+                    sizes="88px"
+                    className="object-cover"
+                    fallbackIconSize={22}
+                  />
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-1">
@@ -110,11 +106,6 @@ export function WishlistListRow({
                     <span className="text-base font-black text-foreground">
                       ৳{product.price.toLocaleString()}
                     </span>
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <span className="text-xs text-muted-foreground line-through">
-                        ৳{product.originalPrice.toLocaleString()}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -139,11 +130,6 @@ export function WishlistListRow({
                 <span className="text-base font-black text-foreground">
                   ৳{product.price.toLocaleString()}
                 </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-xs text-muted-foreground line-through">
-                    ৳{product.originalPrice.toLocaleString()}
-                  </span>
-                )}
               </div>
 
               {/* 4. Quantity Counter (Col 2) */}
