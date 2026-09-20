@@ -11,6 +11,7 @@ import {
   OverviewTab,
   AccountOverviewSkeleton,
   ProfileTab,
+  ProfileTabSkeleton,
   AddressesTab,
   OrdersTab,
   TrackingTab,
@@ -85,6 +86,9 @@ export function AccountTabContent({
       );
 
     case "profile":
+      if (isLoadingOrders) {
+        return <ProfileTabSkeleton />;
+      }
       return (
         <ProfileTab
           user={user}

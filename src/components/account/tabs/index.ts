@@ -12,3 +12,4 @@ export { ReviewsTab } from "./ReviewsTab";
 export { PaymentsTab } from "./PaymentsTab";
 export { NotificationsTab } from "./NotificationsTab";
 export { AccountOverviewSkeleton } from "./AccountOverviewSkeleton";
+export { ProfileTabSkeleton } from "./ProfileTabSkeleton";

@@ -21,10 +21,10 @@ export function AddressCard({
   return (
     <div
       className={cn(
-        "rounded-3xl p-5 sm:p-6 space-y-4 relative transition-all duration-300 border shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)]",
+        "rounded-3xl p-5 sm:p-6 space-y-4 relative transition-shadow duration-300 border shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.18),0_8px_20px_-4px_rgba(245,158,11,0.1)]",
         address.isDefault
-          ? "bg-gradient-to-br from-amber-500/[0.08] via-card to-card dark:from-amber-500/[0.12] dark:via-zinc-900/90 dark:to-zinc-900/70 border-amber-500/40 shadow-[0_10px_35px_-6px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20 hover:bg-gradient-to-br hover:from-amber-500/[0.12] hover:via-card hover:to-amber-500/[0.04]"
-          : "bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 border-border/40 dark:border-white/10 hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)]"
+          ? "bg-gradient-to-br from-amber-500/[0.08] via-card to-card dark:from-amber-500/[0.12] dark:via-zinc-900/90 dark:to-zinc-900/70 border-amber-500/40 ring-1 ring-amber-500/20"
+          : "bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 border-border/40 dark:border-white/10"
       )}
     >
       {/* Top Row: Label badge + Default Status / Set Default */}
