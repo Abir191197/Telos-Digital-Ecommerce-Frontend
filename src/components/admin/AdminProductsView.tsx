@@ -18,7 +18,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PageLoader } from "@/components/common";
 import { KpiCard } from "./dashboard/KpiCard";
 import {
   useGetAdminProductsQuery,
@@ -34,6 +33,7 @@ import {
   ProductDesktopTable,
   ProductCardItem,
   ProductFilterDock,
+  AdminProductsSkeleton,
 } from "./products";
 
 export function AdminProductsView() {
@@ -280,13 +280,7 @@ export function AdminProductsView() {
   };
 
   if (isProductsLoading && products.length === 0) {
-    return (
-      <PageLoader
-        title="Loading Products..."
-        description="Fetching product inventory, stock levels, and pricing data from warehouse."
-        badgeText="Inventory Catalog"
-      />
-    );
+    return <AdminProductsSkeleton />;
   }
 
   return (

@@ -13,3 +13,4 @@ export * from "./ProductLivePreviewCard";
 export * from "./ProductDetailsFormCard";
 
 export * from "./RichTextEditor";
+export * from "./AdminProductsSkeleton";
