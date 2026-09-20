@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Award, ExternalLink, Edit3, Trash2 } from "lucide-react";
+import { Award, ExternalLink, Edit3, Trash2, Sparkles, Package } from "lucide-react";
 import type { Brand } from "@/types/ecommerce.types";
 
 interface BrandCardGridProps {
@@ -20,13 +20,15 @@ export function BrandCardGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
       {brands.map((brand) => {
+        const itemCount = brand.itemCount ?? brand._count?.products ?? 0;
+
         return (
           <div
             key={brand.id}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl bg-card border-none p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.06),0_20px_50px_-10px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.5),0_25px_60px_-10px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_45px_-5px_rgba(245,158,11,0.12),0_25px_65px_-10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_50px_-5px_rgba(245,158,11,0.18),0_25px_70px_-10px_rgba(0,0,0,0.6)]"
           >
             <div>
-              {/* Header: Logo / Default Icon + Badge */}
+              {/* Header: Logo / Default Icon + Tagline / Badge */}
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-muted/30 border border-border/40 p-2.5 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-300">
                   {brand.image ? (
@@ -44,16 +46,30 @@ export function BrandCardGrid({
                   )}
                 </div>
 
-                <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  {brand.tagline || "—"}
-                </span>
+                {brand.tagline ? (
+                  <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold tracking-wide uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    {brand.tagline}
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-mono text-muted-foreground bg-muted/40">
+                    -
+                  </span>
+                )}
               </div>
 
               {/* Title & Description */}
               <div className="space-y-1">
-                <h3 className="font-extrabold text-foreground text-base tracking-tight truncate">
-                  {brand.name}
-                </h3>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-extrabold text-foreground text-base tracking-tight truncate">
+                    {brand.name}
+                  </h3>
+                  {brand.isFeaturedMarquee && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase">
+                      <Sparkles className="h-2 w-2" />
+                      Featured
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                   {brand.description || "Authentic official warranty products and verified direct imports."}
                 </p>
@@ -61,12 +77,19 @@ export function BrandCardGrid({
 
               {/* Meta stats */}
               <div className="mt-3.5 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
-                <span>{brand.isActive ? "Active" : "Inactive"}</span>
-                {brand.isFeaturedMarquee && (
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    ★ Featured
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1 font-bold text-foreground">
+                  <Package className="h-3 w-3 text-muted-foreground" />
+                  {itemCount} {itemCount === 1 ? "item" : "items"}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    brand.isActive !== false
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+                  }`}
+                >
+                  {brand.isActive !== false ? "Active" : "Inactive"}
+                </span>
               </div>
             </div>
 

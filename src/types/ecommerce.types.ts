@@ -128,6 +128,10 @@ export interface Brand {
   imageKey?: string | null;
   isActive?: boolean;
   isFeaturedMarquee?: boolean;
+  itemCount?: number;
+  _count?: {
+    products?: number;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

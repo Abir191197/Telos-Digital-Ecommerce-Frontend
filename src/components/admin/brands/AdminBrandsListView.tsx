@@ -68,6 +68,31 @@ export function AdminBrandsListView() {
     setCurrentPage(1);
   }, [searchTerm, filterFeatured]);
 
+  const getNumericBrandId = (id: string, index: number) => {
+    const matches = id.match(/\d+/g);
+    if (matches && matches.length > 0) {
+      const numStr = matches.join("");
+      return numStr.length > 6 ? numStr.slice(-5) : numStr;
+    }
+    const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return String(1000 + (hash % 9000));
+  };
+
+  const formatBrandDate = (dateStr?: string) => {
+    if (!dateStr) return "Sep 12, 2026";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "Sep 12, 2026";
+      return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return "Sep 12, 2026";
+    }
+  };
+
   const handleDeleteRequest = (brand: Brand) => {
     setConfirmDialog({
       isOpen: true,
@@ -250,8 +275,12 @@ export function AdminBrandsListView() {
             ) : (
               <BrandDesktopTable
                 brands={brands}
+                currentPage={currentPage}
+                pageSize={PAGE_SIZE}
                 activeMenuId={activeMenuId}
                 setActiveMenuId={setActiveMenuId}
+                getNumericId={getNumericBrandId}
+                formatDate={formatBrandDate}
                 onDelete={handleDeleteRequest}
               />
             )}

@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Award, ExternalLink, Edit3, Trash2 } from "lucide-react";
+import { Award, ExternalLink, Edit3, Trash2, Sparkles, Package } from "lucide-react";
 import type { Brand } from "@/types/ecommerce.types";
 
 interface BrandMobileListProps {
@@ -20,6 +20,8 @@ export function BrandMobileList({
   return (
     <div className="block md:hidden space-y-3.5">
       {brands.map((brand) => {
+        const itemCount = brand.itemCount ?? brand._count?.products ?? 0;
+
         return (
           <div
             key={brand.id}
@@ -28,13 +30,13 @@ export function BrandMobileList({
             {/* Top row: Brand Emblem + Name/Tag + Status pill */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="relative h-10 w-10 shrink-0 rounded-2xl bg-muted/50 p-1 flex items-center justify-center overflow-hidden border border-border/40">
+                <div className="relative h-11 w-11 shrink-0 rounded-2xl bg-muted/50 p-1 flex items-center justify-center overflow-hidden border border-border/40">
                   {brand.image ? (
                     <Image
                       src={brand.image}
                       alt={brand.name}
-                      width={36}
-                      height={36}
+                      width={38}
+                      height={38}
                       className="object-contain"
                     />
                   ) : (
@@ -42,16 +44,41 @@ export function BrandMobileList({
                   )}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-foreground">{brand.name}</h4>
-                  <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                    {brand.tagline || "—"}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h4 className="text-sm font-black text-foreground">{brand.name}</h4>
+                    {brand.isFeaturedMarquee && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase">
+                        <Sparkles className="h-2 w-2" />
+                        Featured
+                      </span>
+                    )}
+                  </div>
+                  {brand.tagline && (
+                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      {brand.tagline}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-xl">
-                {brand.isActive ? "Active" : "Inactive"}
+              <span
+                className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border ${
+                  brand.isActive !== false
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                    : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+                }`}
+              >
+                {brand.isActive !== false ? "Active" : "Inactive"}
               </span>
+            </div>
+
+            {/* Middle row: Items count and slug */}
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+              <span className="inline-flex items-center gap-1 font-bold text-foreground">
+                <Package className="h-3 w-3 text-muted-foreground" />
+                {itemCount} {itemCount === 1 ? "item" : "items"}
+              </span>
+              <span className="text-[10px] text-muted-foreground/80">/{brand.slug}</span>
             </div>
 
             {brand.description && (
