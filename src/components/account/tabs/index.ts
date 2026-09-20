@@ -14,3 +14,4 @@ export { NotificationsTab } from "./NotificationsTab";
 export { AccountOverviewSkeleton } from "./AccountOverviewSkeleton";
 export { ProfileTabSkeleton } from "./ProfileTabSkeleton";
 export { OrdersTabSkeleton } from "./OrdersTabSkeleton";
+export { WishlistTabSkeleton } from "./WishlistTabSkeleton";

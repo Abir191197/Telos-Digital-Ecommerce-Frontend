@@ -18,6 +18,7 @@ import {
   TrackingTab,
   ReturnsTab,
   WishlistTab,
+  WishlistTabSkeleton,
   ReviewsTab,
   PaymentsTab,
   NotificationsTab,
@@ -135,6 +136,9 @@ export function AccountTabContent({
       );
 
     case "wishlist":
+      if (isLoadingOrders) {
+        return <WishlistTabSkeleton />;
+      }
       return (
         <WishlistTab
           wishlistItems={wishlistItems}
