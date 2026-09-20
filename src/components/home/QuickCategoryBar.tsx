@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Loader2,
 } from "lucide-react";
 import { getCategoryIcon } from "@/components/categories/categoryConfig";
 
@@ -105,8 +104,28 @@ export function QuickCategoryBar() {
 
   if (isLoading) {
     return (
-      <section className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+      <section aria-label="Quick Categories" className="w-full relative animate-pulse">
+        <div className="flex items-end justify-between mb-5 sm:mb-6">
+          <div className="space-y-2">
+            <div className="h-3 w-20 bg-muted/60 rounded" />
+            <div className="h-6 w-44 bg-muted/70 rounded-lg" />
+            <div className="h-3.5 w-64 bg-muted/50 rounded" />
+          </div>
+          <div className="h-8 w-28 bg-muted/60 rounded-full" />
+        </div>
+        <div className="flex lg:grid lg:grid-cols-8 gap-3 sm:gap-4 overflow-hidden pb-8 pt-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={`cat-skeleton-${i}`}
+              className="flex-shrink-0 w-[130px] sm:w-[145px] lg:w-auto h-[160px] sm:h-[175px] rounded-3xl bg-card border border-border/40 p-4 flex flex-col items-center justify-between shadow-xs">
+              <div className="h-12 w-12 rounded-2xl bg-muted/60 mt-1" />
+              <div className="w-full space-y-1.5 flex flex-col items-center">
+                <div className="h-3.5 w-3/4 bg-muted/70 rounded" />
+                <div className="h-2.5 w-1/2 bg-muted/50 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     );
   }

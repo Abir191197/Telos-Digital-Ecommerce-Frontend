@@ -27,7 +27,7 @@ export function FlashDealsSection() {
     seconds: 1,
   });
 
-  const { data: serverProducts } = useGetProductsQuery({ limit: 100 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 100 });
   const allProducts = serverProducts?.data || [];
 
   // Countdown timer
@@ -63,6 +63,42 @@ export function FlashDealsSection() {
     // Initial fallback if admin has not yet flagged featured items:
     return allProducts.filter((p) => Boolean(p.isFlashDeal)).slice(0, 12);
   }, [allProducts]);
+
+  if (isLoading) {
+    return (
+      <section aria-label="Flash Deals" className="w-full animate-pulse">
+        <div className="rounded-3xl border border-border/50 bg-card p-4 sm:p-6 lg:p-7 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-muted/60 shrink-0" />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-32 bg-muted/70 rounded-lg" />
+                  <div className="h-5 w-24 bg-muted/50 rounded-full" />
+                </div>
+                <div className="h-3.5 w-48 bg-muted/40 rounded" />
+              </div>
+            </div>
+            <div className="h-8 w-24 bg-muted/60 rounded-full" />
+          </div>
+          <div className="flex gap-4 overflow-hidden pt-5 pb-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={`flash-skeleton-${i}`}
+                className="w-[210px] sm:w-[235px] md:w-[250px] shrink-0 h-[340px] rounded-3xl bg-muted/30 border border-border/40 p-3 flex flex-col justify-between">
+                <div className="aspect-square w-full rounded-2xl bg-muted/60" />
+                <div className="space-y-2 mt-2">
+                  <div className="h-3.5 w-3/4 bg-muted/70 rounded" />
+                  <div className="h-3 w-1/2 bg-muted/50 rounded" />
+                </div>
+                <div className="h-8 w-full bg-muted/60 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (flashProducts.length === 0) return null;
 

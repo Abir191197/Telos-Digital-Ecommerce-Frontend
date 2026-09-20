@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
-import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
@@ -112,8 +112,20 @@ export function CategoryAisleSection({
 
         {/* Product Cards Grid: 2 cols on mobile, 3 on md, 5 cols on xl desktop */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 animate-pulse">
+            {Array.from({ length: limit }).map((_, i) => (
+              <div
+                key={`aisle-skeleton-${i}`}
+                className="rounded-3xl border border-border/50 bg-card p-2.5 flex flex-col h-[340px] justify-between shadow-xs">
+                <div className="aspect-square w-full rounded-2xl bg-muted/60" />
+                <div className="p-2 space-y-2">
+                  <div className="h-3 bg-muted/60 rounded w-1/3" />
+                  <div className="h-4 bg-muted/70 rounded w-4/5" />
+                  <div className="h-3 bg-muted/50 rounded w-1/2" />
+                </div>
+                <div className="h-8 bg-muted/60 rounded-full w-full" />
+              </div>
+            ))}
           </div>
         ) : (
           <m.div

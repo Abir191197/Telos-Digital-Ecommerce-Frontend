@@ -2,7 +2,7 @@
 
 import { ROUTES } from "@/constants";
 import { useGetMarqueeBrandsQuery } from "@/services/api/brands/brandApi";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { BrandLogoDisplay } from "@/components/shared";
@@ -12,9 +12,26 @@ export function OfficialBrandsSection() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
-      </div>
+      <section aria-label="Official Brand Stores" className="w-full overflow-hidden animate-pulse">
+        <div className="flex items-end justify-between mb-5">
+          <div className="space-y-2">
+            <div className="h-3 w-28 bg-muted/60 rounded" />
+            <div className="h-6 w-48 bg-muted/70 rounded-lg" />
+            <div className="h-3.5 w-60 bg-muted/50 rounded" />
+          </div>
+          <div className="h-8 w-24 bg-muted/60 rounded-full" />
+        </div>
+        <div className="flex gap-3 sm:gap-4 overflow-hidden pb-8 pt-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={`brand-skeleton-${i}`}
+              className="flex-shrink-0 w-[140px] sm:w-[160px] h-[105px] sm:h-[115px] rounded-3xl bg-card border border-border/40 p-3.5 flex flex-col items-center justify-center gap-2 shadow-xs">
+              <div className="h-8 w-20 rounded bg-muted/60" />
+              <div className="h-3 w-16 rounded bg-muted/40" />
+            </div>
+          ))}
+        </div>
+      </section>
     );
   }
 
