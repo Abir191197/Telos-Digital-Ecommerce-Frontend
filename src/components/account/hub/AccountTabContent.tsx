@@ -14,6 +14,7 @@ import {
   ProfileTabSkeleton,
   AddressesTab,
   OrdersTab,
+  OrdersTabSkeleton,
   TrackingTab,
   ReturnsTab,
   WishlistTab,
@@ -109,6 +110,9 @@ export function AccountTabContent({
       );
 
     case "orders":
+      if (isLoadingOrders) {
+        return <OrdersTabSkeleton />;
+      }
       return (
         <OrdersTab
           orders={orders}
