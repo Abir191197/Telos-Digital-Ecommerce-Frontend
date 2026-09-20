@@ -21,11 +21,11 @@ export function CartLineItemsTable({
   onSaveForLater,
 }: CartLineItemsTableProps) {
   return (
-    <div className="overflow-hidden rounded-3xl bg-card border border-border/60 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+    <div className="overflow-hidden rounded-3xl bg-card border border-border/70 shadow-xs dark:shadow-none">
       {/* Desktop Header */}
-      <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/60 text-xs font-bold uppercase tracking-wider text-muted-foreground items-center">
+      <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-3 bg-muted/30 border-b border-border/60 text-[11px] font-bold uppercase tracking-wider text-muted-foreground items-center">
         <div className="col-span-5">Product Details</div>
-        <div className="col-span-2 text-center">Unit Price</div>
+        <div className="col-span-2 text-right pr-2">Unit Price</div>
         <div className="col-span-3 text-center">Quantity</div>
         <div className="col-span-2 text-right">Total</div>
       </div>
@@ -35,19 +35,19 @@ export function CartLineItemsTable({
         {items.map((item) => (
           <div
             key={item.id}
-            className="p-3.5 sm:p-5 lg:p-6 flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 items-stretch lg:items-center hover:bg-muted/15 transition-colors"
+            className="p-3 sm:py-3.5 sm:px-5 flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 items-stretch lg:items-center hover:bg-muted/15 transition-colors"
           >
             {/* Product (Col 5) */}
-            <div className="w-full lg:col-span-5 flex items-start sm:items-center gap-3 sm:gap-4">
+            <div className="w-full lg:col-span-5 flex items-center gap-3 sm:gap-3.5">
               <Link
                 href={ROUTES.PRODUCT_DETAIL(item.product.slug)}
-                className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-2xl bg-muted/30 border border-border/50 hover:border-amber-500/40 transition-colors"
+                className="relative h-16 w-16 sm:h-18 sm:w-18 shrink-0 overflow-hidden rounded-xl bg-muted/30 border border-border/50 hover:border-amber-500/40 transition-colors shadow-2xs"
               >
                 <Image
                   src={item.product.thumbnail}
                   alt={item.product.name}
                   fill
-                  sizes="80px"
+                  sizes="72px"
                   className="object-cover"
                 />
               </Link>
@@ -55,70 +55,74 @@ export function CartLineItemsTable({
               <div className="min-w-0 flex-1 space-y-1">
                 <Link
                   href={ROUTES.PRODUCT_DETAIL(item.product.slug)}
-                  className="font-bold text-xs sm:text-sm lg:text-base text-foreground hover:text-amber-500 transition-colors line-clamp-2 leading-snug"
+                  className="font-bold text-xs sm:text-sm text-foreground hover:text-amber-500 transition-colors line-clamp-1 leading-snug"
                 >
                   {item.product.name}
                 </Link>
 
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
                     {item.product.brand || "Official Store"}
                   </span>
                   {item.variant && (
-                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-muted-foreground">
+                    <span className="rounded-md bg-muted px-1.5 py-0.2 text-[10px] font-semibold text-muted-foreground">
                       {item.variant.name}
                     </span>
                   )}
                   {item.product.stock <= 3 && item.product.stock > 0 && (
-                    <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.2 text-[9px] sm:text-[10px] font-bold text-rose-600">
+                    <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.2 text-[9px] font-bold text-rose-600">
                       {item.product.stock} left
                     </span>
                   )}
                 </div>
 
-                {/* Mobile inline Unit Price */}
-                <div className="flex lg:hidden items-baseline gap-1.5 pt-0.5">
-                  <span className="text-xs font-semibold text-muted-foreground">Unit:</span>
-                  <span className="text-xs font-bold text-foreground">
-                    ৳{item.unitPrice.toLocaleString()}
-                  </span>
-                  {item.product.originalPrice && item.product.originalPrice > item.unitPrice && (
-                    <span className="text-[10px] text-muted-foreground line-through">
-                      ৳{item.product.originalPrice.toLocaleString()}
+                {/* Mobile inline Unit Price (Right aligned) */}
+                <div className="flex lg:hidden items-end justify-between pt-0.5">
+                  <span className="text-[11px] font-semibold text-muted-foreground">Unit Price:</span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs font-bold text-foreground">
+                      ৳{item.unitPrice.toLocaleString()}
                     </span>
-                  )}
+                    {item.product.originalPrice && item.product.originalPrice > item.unitPrice && (
+                      <span className="text-[10px] text-muted-foreground line-through">
+                        ৳{item.product.originalPrice.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="flex items-center gap-3 pt-1 text-xs">
+                {/* Quick Actions - Icon-only buttons */}
+                <div className="flex items-center gap-1.5 pt-1">
                   <button
                     type="button"
                     onClick={() => onSaveForLater(item)}
-                    className="font-semibold text-muted-foreground hover:text-amber-500 transition-colors flex items-center gap-1 cursor-pointer text-[11px] sm:text-xs"
+                    className="flex h-7.5 w-7.5 items-center justify-center rounded-lg border border-border/80 bg-background/90 hover:bg-amber-500/10 hover:border-amber-500/40 text-muted-foreground hover:text-amber-500 transition-all cursor-pointer shadow-2xs active:scale-90"
+                    title="Save for Later"
+                    aria-label="Save for Later"
                   >
-                    <Heart className="h-3 w-3" />
-                    <span>Save for Later</span>
+                    <Heart className="h-3.5 w-3.5" />
                   </button>
-                  <span className="text-border">•</span>
+
                   <button
                     type="button"
                     onClick={() => onRemoveItem(item.id)}
-                    className="font-semibold text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1 cursor-pointer text-[11px] sm:text-xs"
+                    className="flex h-7.5 w-7.5 items-center justify-center rounded-lg border border-border/80 bg-background/90 hover:bg-destructive/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive transition-all cursor-pointer shadow-2xs active:scale-90"
+                    title="Remove item"
+                    aria-label="Remove item"
                   >
-                    <Trash2 className="h-3 w-3" />
-                    <span>Remove</span>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Unit Price (Col 2 - Desktop only) */}
-            <div className="hidden lg:flex w-full lg:col-span-2 lg:justify-center items-baseline gap-2">
-              <span className="text-sm sm:text-base font-bold text-foreground">
+            {/* Unit Price (Col 2 - Desktop: Right align, strikethrough below) */}
+            <div className="hidden lg:flex w-full lg:col-span-2 flex-col items-end justify-center pr-2">
+              <span className="text-base font-bold text-foreground tracking-tight">
                 ৳{item.unitPrice.toLocaleString()}
               </span>
               {item.product.originalPrice && item.product.originalPrice > item.unitPrice && (
-                <span className="text-xs text-muted-foreground line-through">
+                <span className="text-xs text-muted-foreground line-through tabular-nums">
                   ৳{item.product.originalPrice.toLocaleString()}
                 </span>
               )}
@@ -160,8 +164,8 @@ export function CartLineItemsTable({
                 </div>
               </div>
 
-              {/* Subtotal (Col 2) */}
-              <div className="lg:col-span-2 flex lg:justify-end items-baseline gap-1.5">
+              {/* Subtotal (Col 2 - Right aligned) */}
+              <div className="lg:col-span-2 flex lg:justify-end items-baseline gap-1.5 text-right">
                 <span className="lg:hidden text-xs font-semibold text-muted-foreground">
                   Total:
                 </span>

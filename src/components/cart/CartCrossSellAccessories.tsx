@@ -18,7 +18,7 @@ export function CartCrossSellAccessories({
   if (products.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 space-y-4">
+    <div className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs dark:shadow-none space-y-4">
       <div className="flex items-center justify-between border-b border-border/50 pb-3">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-amber-500" />

@@ -6,3 +6,4 @@ export { CartSavedForLaterShelf } from "./CartSavedForLaterShelf";
 export { CartEmptyState } from "./CartEmptyState";
 export { CartView } from "./CartView";
 export { CartDrawer } from "./CartDrawer";
+export { CartSkeleton } from "./CartSkeleton";

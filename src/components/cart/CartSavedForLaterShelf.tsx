@@ -21,7 +21,7 @@ export function CartSavedForLaterShelf({
   if (wishlistItems.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-6 space-y-4">
+    <div className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs dark:shadow-none space-y-4">
       <div className="flex items-center justify-between border-b border-border/50 pb-3">
         <div className="flex items-center gap-2">
           <Heart className="h-4 w-4 text-rose-500" />
@@ -72,9 +72,9 @@ export function CartSavedForLaterShelf({
               type="button"
               onClick={() => onRemoveFromWishlist(savedProduct.id)}
               aria-label={`Delete ${savedProduct.name}`}
-              className="text-muted-foreground/60 hover:text-destructive p-1 cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/70 bg-background text-muted-foreground hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors shadow-2xs active:scale-95"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ))}

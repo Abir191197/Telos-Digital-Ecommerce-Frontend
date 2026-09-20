@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
-  MapPin,
   Tag,
   Sparkles,
   AlertCircle,
@@ -11,10 +10,10 @@ import {
   Lock,
   ArrowRight,
   ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/common";
 import { ROUTES } from "@/constants";
-import { cn } from "@/lib/utils";
 import type { CouponDiscount } from "@/types/cart.types";
 
 interface CartSummarySidebarProps {
@@ -23,8 +22,6 @@ interface CartSummarySidebarProps {
   discount: number;
   estimatedShippingFee: number;
   estimatedTotal: number;
-  deliveryZone: "inside-dhaka" | "outside-dhaka";
-  onDeliveryZoneChange: (zone: "inside-dhaka" | "outside-dhaka") => void;
   promoInput: string;
   onPromoInputChange: (val: string) => void;
   appliedCoupon: CouponDiscount | null;
@@ -40,8 +37,6 @@ export function CartSummarySidebar({
   discount,
   estimatedShippingFee,
   estimatedTotal,
-  deliveryZone,
-  onDeliveryZoneChange,
   promoInput,
   onPromoInputChange,
   appliedCoupon,
@@ -50,57 +45,60 @@ export function CartSummarySidebar({
   onApplyPromo,
   onRemoveCoupon,
 }: CartSummarySidebarProps) {
+  const [isPromoOpen, setIsPromoOpen] = useState(false);
+
   return (
-    <aside className="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
-      <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-lg space-y-5">
+    <aside className="lg:col-span-4 lg:sticky lg:top-40 space-y-4">
+      <div className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs dark:shadow-none space-y-4">
         <h2 className="text-lg font-black tracking-tight text-foreground border-b border-border/60 pb-3">
           Summary & Estimate
         </h2>
 
-        {/* Shipping Zone Estimator */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-amber-500" />
-              Delivery Destination
+        {/* Calculation Breakdown */}
+        <div className="space-y-2.5 text-sm text-muted-foreground">
+          <div className="flex justify-between items-center">
+            <span>
+              Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
             </span>
-            <span className="text-[11px] text-muted-foreground">Estimated</span>
+            <span className="font-semibold text-foreground">
+              ৳{subtotal.toLocaleString()}
+            </span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => onDeliveryZoneChange("inside-dhaka")}
-              className={cn(
-                "rounded-xl p-2.5 text-left border text-xs transition-all cursor-pointer",
-                deliveryZone === "inside-dhaka"
-                  ? "border-amber-500 bg-amber-500/10 text-foreground font-bold"
-                  : "border-border/70 bg-muted/20 text-muted-foreground hover:text-foreground"
+
+          {discount > 0 && (
+            <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
+              <span>Coupon Discount</span>
+              <span className="font-semibold">
+                -৳{discount.toLocaleString()}
+              </span>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <span>Estimated Delivery</span>
+            <span>
+              {estimatedShippingFee === 0 ? (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                  FREE
+                </span>
+              ) : (
+                `৳${estimatedShippingFee.toLocaleString()}`
               )}
-            >
-              <p className="font-bold">Inside Dhaka</p>
-              <p className="text-[10px] opacity-80">24-48 hrs • ৳70</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => onDeliveryZoneChange("outside-dhaka")}
-              className={cn(
-                "rounded-xl p-2.5 text-left border text-xs transition-all cursor-pointer",
-                deliveryZone === "outside-dhaka"
-                  ? "border-amber-500 bg-amber-500/10 text-foreground font-bold"
-                  : "border-border/70 bg-muted/20 text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <p className="font-bold">Outside Dhaka</p>
-              <p className="text-[10px] opacity-80">48-72 hrs • ৳130</p>
-            </button>
+            </span>
+          </div>
+
+          <div className="pt-3 border-t border-border/60 flex items-baseline justify-between">
+            <span className="text-base font-black text-foreground">
+              Estimated Total
+            </span>
+            <span className="text-2xl font-black text-foreground tracking-tight">
+              ৳{estimatedTotal.toLocaleString()}
+            </span>
           </div>
         </div>
 
-        {/* Promo Code Input */}
-        <div className="space-y-2 pt-1 border-t border-border/50">
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Have a Promo Code?
-          </label>
+        {/* Collapsible Promo Code Trigger / Section */}
+        <div className="pt-2 border-t border-border/50">
           {appliedCoupon ? (
             <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2.5 text-xs">
               <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
@@ -120,97 +118,73 @@ export function CartSummarySidebar({
                 Remove
               </button>
             </div>
+          ) : !isPromoOpen ? (
+            <button
+              type="button"
+              onClick={() => setIsPromoOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-600 cursor-pointer transition-colors"
+            >
+              <Tag className="h-3.5 w-3.5" />
+              <span>Have a promo code?</span>
+            </button>
           ) : (
-            <form onSubmit={onApplyPromo} className="flex gap-2">
-              <div className="relative flex-1">
-                <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={promoInput}
-                  onChange={(e) => onPromoInputChange(e.target.value)}
-                  placeholder="Promo code (TELOS10)"
-                  className="h-10 w-full rounded-xl border border-border/70 bg-background pl-9 pr-3 text-xs uppercase text-foreground placeholder:normal-case placeholder:text-muted-foreground focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 focus:outline-none transition-all"
-                />
+            <div className="space-y-2 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Promo Code
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsPromoOpen(false)}
+                  className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Cancel
+                </button>
               </div>
-              <button
-                type="submit"
-                className="rounded-xl bg-muted hover:bg-muted/80 text-foreground px-4 text-xs font-bold border border-border/80 transition-colors cursor-pointer"
-              >
-                Apply
-              </button>
-            </form>
+              <form onSubmit={onApplyPromo} className="flex gap-2">
+                <div className="relative flex-1">
+                  <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => onPromoInputChange(e.target.value)}
+                    placeholder="Enter code"
+                    autoFocus
+                    className="h-9 w-full rounded-xl border border-border/70 bg-background pl-9 pr-3 text-xs uppercase text-foreground placeholder:normal-case placeholder:text-muted-foreground focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 focus:outline-none transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-muted hover:bg-muted/80 text-foreground px-3.5 text-xs font-bold border border-border/80 transition-colors cursor-pointer"
+                >
+                  Apply
+                </button>
+              </form>
+            </div>
           )}
 
           {couponError && (
-            <p className="flex items-center gap-1 text-[11px] font-semibold text-rose-600">
+            <p className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 pt-1.5">
               <AlertCircle className="h-3 w-3" />
               {couponError}
             </p>
           )}
 
           {promoSuccess && (
-            <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pt-1.5">
               <Check className="h-3 w-3" />
               Coupon applied successfully!
             </p>
           )}
         </div>
 
-        {/* Calculation Breakdown */}
-        <div className="space-y-2.5 text-sm text-muted-foreground border-t border-border/60 pt-4">
-          <div className="flex justify-between">
-            <span>
-              Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
-            </span>
-            <span className="font-semibold text-foreground">
-              ৳{subtotal.toLocaleString()}
-            </span>
-          </div>
-
-          {discount > 0 && (
-            <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-              <span>Coupon Discount</span>
-              <span className="font-semibold">
-                -৳{discount.toLocaleString()}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between">
-            <span>Estimated Delivery</span>
-            <span>
-              {estimatedShippingFee === 0 ? (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                  FREE
-                </span>
-              ) : (
-                `৳${estimatedShippingFee.toLocaleString()}`
-              )}
-            </span>
-          </div>
-
-          <div className="pt-3 border-t border-border/60 flex items-baseline justify-between">
-            <div>
-              <span className="text-base font-black text-foreground">
-                Estimated Total
-              </span>
-              <p className="text-[11px] text-muted-foreground">
-                VAT included where applicable
-              </p>
-            </div>
-            <span className="text-2xl font-black text-foreground">
-              ৳{estimatedTotal.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
         {/* Direct Checkout CTA */}
-        <div className="space-y-3 pt-1">
+        <div className="space-y-3 pt-2">
           <Button
             asChild
             variant="amber"
             size="lg"
-            className="w-full font-bold text-base py-6 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.99] transition-transform"
+            className="w-full font-bold text-base py-5 sm:py-6 rounded-2xl shadow-xl shadow-amber-500/20 active:scale-[0.99] transition-transform"
           >
             <Link
               href={ROUTES.CHECKOUT}
@@ -222,38 +196,9 @@ export function CartSummarySidebar({
             </Link>
           </Button>
 
-          <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1 font-semibold">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              100% Genuine BD Warranty
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Order Assurance Mini Guarantee Box */}
-      <div className="rounded-3xl border border-border/60 bg-muted/20 p-4 space-y-2.5">
-        <p className="text-xs font-black uppercase tracking-wider text-foreground">
-          Shopping Guarantees
-        </p>
-        <div className="space-y-1.5 text-xs text-muted-foreground">
-          <div className="flex items-start gap-2">
-            <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-            <span>
-              <strong>7-Day Easy Replacement</strong> on defects.
-            </span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-            <span>
-              <strong>BTRC Verified IMEI</strong> for smartphones.
-            </span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-            <span>
-              <strong>Open-box inspection</strong> with courier.
-            </span>
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="font-semibold">100% Genuine BD Warranty</span>
           </div>
         </div>
       </div>
