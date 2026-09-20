@@ -27,7 +27,7 @@ export function FlashDealsSection() {
     seconds: 1,
   });
 
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 100 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
   const allProducts = serverProducts?.data || [];
 
   // Countdown timer

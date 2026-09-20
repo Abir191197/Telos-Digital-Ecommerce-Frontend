@@ -8,7 +8,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 
 export function FeaturedProductsTabs() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 10 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
   const featuredProducts = React.useMemo(() => {
     return (serverProducts?.data || []).slice(0, 10);
   }, [serverProducts]);

@@ -33,7 +33,7 @@ const cardItemVariants: Variants = {
 };
 
 export function CategorySpotlightBanner() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 40 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
   const allProducts = serverProducts?.data || [];
 
   // Focus on Flagship Smartphones & Tablets or top tech

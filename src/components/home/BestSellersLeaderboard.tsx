@@ -33,7 +33,7 @@ const leaderboardCardVariants: Variants = {
 };
 
 export function BestSellersLeaderboard() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 40 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
   const allProducts = serverProducts?.data || [];
 
   // Top 4 best sellers ranked by reviews & rating

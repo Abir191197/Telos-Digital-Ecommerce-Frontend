@@ -32,7 +32,7 @@ const itemVariants: Variants = {
 };
 
 export function ShopByBudgetSection() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 40 });
+  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
   const allProducts = serverProducts?.data || [];
 
   const budgetProducts = React.useMemo(() => {
