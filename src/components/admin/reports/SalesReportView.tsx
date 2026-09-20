@@ -15,6 +15,7 @@ import {
   ReportKpiCards,
   KpiCardItem,
   ReportPrintSheet,
+  SalesReportSkeleton,
 } from "./";
 import {
   useGetSalesReportMutation,
@@ -112,6 +113,10 @@ export function SalesReportView() {
       icon: Truck,
     },
   ];
+
+  if (isLoading && !reportResponse) {
+    return <SalesReportSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

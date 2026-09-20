@@ -16,6 +16,7 @@ import {
   ReportKpiCards,
   KpiCardItem,
   ReportPrintSheet,
+  ProfitReportSkeleton,
 } from "./";
 import {
   useGetProfitReportMutation,
@@ -115,6 +116,10 @@ export function ProfitReportView() {
       icon: Percent,
     },
   ];
+
+  if (isLoading && !reportResponse) {
+    return <ProfitReportSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

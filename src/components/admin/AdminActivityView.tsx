@@ -25,6 +25,7 @@ import {
   ActivityCardGrid,
   ActivityMobileList,
   ActivityMobileFilterModal,
+  AdminActivitySkeleton,
 } from "./activity";
 
 const PAGE_SIZE = 8;
@@ -168,6 +169,10 @@ export function AdminActivityView() {
 
   const isFiltered =
     categoryFilter !== "all" || severityFilter !== "all" || sortBy !== "date-desc";
+
+  if (isFetching && logs.length === 0) {
+    return <AdminActivitySkeleton />;
+  }
 
   return (
     <div className="w-full space-y-5 sm:space-y-6">

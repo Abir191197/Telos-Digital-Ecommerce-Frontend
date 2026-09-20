@@ -15,6 +15,7 @@ import {
   ReportKpiCards,
   KpiCardItem,
   ReportPrintSheet,
+  TransactionReportSkeleton,
 } from "./";
 import {
   useGetTransactionReportMutation,
@@ -114,6 +115,10 @@ export function TransactionReportView() {
       icon: CreditCard,
     },
   ];
+
+  if (isLoading && !reportResponse) {
+    return <TransactionReportSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

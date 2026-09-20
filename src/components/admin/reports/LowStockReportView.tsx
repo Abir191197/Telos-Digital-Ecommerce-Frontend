@@ -15,6 +15,7 @@ import {
   ReportKpiCards,
   KpiCardItem,
   ReportPrintSheet,
+  LowStockReportSkeleton,
 } from "./";
 import {
   useGetLowStockReportMutation,
@@ -112,6 +113,10 @@ export function LowStockReportView() {
       icon: CircleDollarSign,
     },
   ];
+
+  if (isLoading && !reportResponse) {
+    return <LowStockReportSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

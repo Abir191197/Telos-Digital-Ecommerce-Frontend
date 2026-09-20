@@ -15,6 +15,7 @@ import {
   ReportKpiCards,
   KpiCardItem,
   ReportPrintSheet,
+  StockReportSkeleton,
 } from "./";
 import {
   useGetStockReportMutation,
@@ -112,6 +113,10 @@ export function StockReportView() {
       icon: AlertTriangle,
     },
   ];
+
+  if (isLoading && !reportResponse) {
+    return <StockReportSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
