@@ -10,7 +10,6 @@ import {
 } from "@/services/api/cart/cartApi";
 import {
   DrawerHeader,
-  DrawerFreeShippingBar,
   DrawerItem,
   DrawerEmpty,
   DrawerFooter,
@@ -137,7 +136,7 @@ export function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Shopping Cart"
-        className="relative z-10 flex h-[calc(100%-4rem)] md:h-full w-full max-w-md flex-col bg-background/95 backdrop-blur-xl text-foreground shadow-[0_0_50px_rgba(0,0,0,0.3)] transition-transform animate-in slide-in-from-right duration-300 border-l border-border/70"
+        className="relative z-10 flex h-[calc(100%-4rem)] md:h-[calc(100%-1.5rem)] w-full max-w-lg md:m-3 flex-col bg-background/95 backdrop-blur-2xl text-foreground shadow-[0_0_60px_rgba(0,0,0,0.35)] transition-transform animate-in slide-in-from-right duration-300 border-l md:border border-border/70 md:border-border/80 md:rounded-3xl overflow-hidden"
       >
         {/* Drawer Header */}
         <DrawerHeader
@@ -149,17 +148,12 @@ export function CartDrawer() {
           onCloseCart={closeCart}
         />
 
-        {/* Free Shipping Progress Bar */}
-        <DrawerFreeShippingBar
-          freeShippingRemaining={freeShippingRemaining}
-        />
-
         {/* Line Items Scroll Area */}
-        <div className="flex-1 overflow-y-auto px-5 py-3 divide-y divide-border/40 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-4 py-3 scrollbar-thin">
           {items.length === 0 ? (
             <DrawerEmpty onCloseCart={closeCart} isAuthenticated={isAuthenticated} />
           ) : (
-            <div className="divide-y divide-border/40">
+            <div className="space-y-3">
               {items.map((item) => (
                 <DrawerItem
                   key={item.id}

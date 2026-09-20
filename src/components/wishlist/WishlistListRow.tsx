@@ -32,7 +32,7 @@ export function WishlistListRow({
       <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/60 text-xs font-bold uppercase tracking-wider text-muted-foreground items-center">
         <div className="col-span-4">Product</div>
         <div className="col-span-2 text-center">Stock Status</div>
-        <div className="col-span-2 text-center">Price</div>
+        <div className="col-span-2 text-right pr-2">Price</div>
         <div className="col-span-2 text-center">Quantity</div>
         <div className="col-span-1 text-center">Buy Action</div>
         <div className="col-span-1 text-center">Remove</div>
@@ -102,10 +102,15 @@ export function WishlistListRow({
                   </div>
 
                   {/* Mobile inline price */}
-                  <div className="flex lg:hidden items-baseline gap-2 pt-0.5">
+                  <div className="flex lg:hidden items-baseline gap-1.5 pt-0.5">
                     <span className="text-base font-black text-foreground">
                       ৳{product.price.toLocaleString()}
                     </span>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <span className="text-[11px] text-muted-foreground line-through decoration-muted-foreground/60">
+                        ৳{product.originalPrice.toLocaleString()}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -126,7 +131,7 @@ export function WishlistListRow({
               </div>
 
               {/* 3. Price (Col 2 - Desktop) */}
-              <div className="hidden lg:flex w-full lg:col-span-2 lg:justify-center items-baseline gap-2">
+              <div className="hidden lg:flex w-full lg:col-span-2 lg:justify-end items-baseline gap-2 pr-2">
                 <span className="text-base font-black text-foreground">
                   ৳{product.price.toLocaleString()}
                 </span>

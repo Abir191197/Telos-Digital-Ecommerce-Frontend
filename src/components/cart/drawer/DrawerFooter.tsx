@@ -6,7 +6,6 @@ import {
   AlertCircle,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/common";
 import { ROUTES } from "@/constants";
@@ -147,7 +146,7 @@ export function DrawerFooter({
             asChild
             variant="outline"
             size="default"
-            className="rounded-xl font-bold border-border/80 hover:border-amber-500/40 hover:bg-amber-500/5 text-xs h-10 transition-colors"
+            className="rounded-xl font-bold border-border/80 hover:border-zinc-900 dark:hover:border-zinc-700 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-800 dark:hover:text-zinc-100 text-xs h-10 transition-colors shadow-2xs"
           >
             <Link
               href={ROUTES.CART}
@@ -173,22 +172,6 @@ export function DrawerFooter({
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </Button>
-        </div>
-
-        <div className="hidden sm:flex items-center justify-center gap-2 text-[11px] text-muted-foreground pt-0.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-          <span>100% Genuine BD Warranty</span>
-        </div>
-
-        {/* Payment Methods Pill */}
-        <div className="hidden sm:flex items-center justify-center gap-2 text-[10px] font-medium text-muted-foreground pt-1 border-t border-border/40">
-          <span>bKash</span>
-          <span>•</span>
-          <span>Nagad</span>
-          <span>•</span>
-          <span>Cards</span>
-          <span>•</span>
-          <span>Cash on Delivery</span>
         </div>
       </div>
     </div>

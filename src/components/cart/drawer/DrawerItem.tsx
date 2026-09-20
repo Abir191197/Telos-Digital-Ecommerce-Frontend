@@ -19,12 +19,12 @@ export function DrawerItem({
   onCloseCart,
 }: DrawerItemProps) {
   return (
-    <div className="py-3.5 flex items-center gap-3.5 group">
+    <div className="relative p-3 sm:p-3.5 rounded-2xl bg-card/80 dark:bg-card/60 backdrop-blur-md border border-border/70 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_24px_-6px_rgba(0,0,0,0.45),0_2px_6px_-2px_rgba(0,0,0,0.25)] hover:shadow-[0_14px_28px_-6px_rgba(245,158,11,0.12),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_16px_32px_-6px_rgba(245,158,11,0.2),0_4px_12px_-2px_rgba(0,0,0,0.5)] hover:border-amber-500/30 transition-all duration-300 flex items-center gap-3.5 group">
       {/* Thumb */}
       <Link
         href={ROUTES.PRODUCT_DETAIL(item.product.slug)}
         onClick={onCloseCart}
-        className="relative h-18 w-18 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-muted/30 group-hover:border-amber-500/40 transition-colors"
+        className="relative h-18 w-18 shrink-0 overflow-hidden rounded-xl border border-border/70 bg-muted/40 group-hover:border-amber-500/40 shadow-inner transition-colors"
       >
         <Image
           src={item.product.thumbnail}
@@ -45,13 +45,16 @@ export function DrawerItem({
           >
             {item.product.name}
           </Link>
+
+          {/* Delete Button */}
           <button
             type="button"
             onClick={() => onRemoveItem(item.id)}
             aria-label="Remove item"
-            className="text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-lg p-1 transition-colors cursor-pointer"
+            title="Remove item"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white border border-rose-500/20 hover:border-rose-600 active:scale-90 transition-all shadow-2xs cursor-pointer"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
 
@@ -61,13 +64,13 @@ export function DrawerItem({
               {item.variant.name}
             </span>
           ) : (
-            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <Check className="h-2.5 w-2.5" /> In Stock
+            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <Check className="h-2.5 w-2.5 stroke-[3]" /> In Stock
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-1.5">
+        <div className="flex items-center justify-between pt-1">
           {/* Crisp Clean Segmented Stepper */}
           <div className="inline-flex items-center rounded-xl bg-muted/60 border border-border/80 p-0.5 shadow-2xs">
             <button
@@ -99,7 +102,7 @@ export function DrawerItem({
 
           {/* Price */}
           <div className="text-right">
-            <p className="text-xs font-bold text-foreground">
+            <p className="text-xs font-black text-foreground">
               ৳{item.subtotal.toLocaleString()}
             </p>
             {item.quantity > 1 && (
@@ -113,3 +116,4 @@ export function DrawerItem({
     </div>
   );
 }
+
