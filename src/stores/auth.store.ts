@@ -1,4 +1,4 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { BackendAuthUser, User } from "@/types/auth.types";
 import type { Address } from "@/types/order.types";
@@ -160,12 +160,25 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         if (typeof window !== "undefined") {
           try {
-            localStorage.removeItem("telos-cart-storage");
-            localStorage.removeItem("telos-wishlist-storage");
+            // ── Clear ALL persisted Zustand store keys ────────────────────────
+            // Add any new store keys here as the app grows.
+            const STORAGE_KEYS = [
+              "telos-auth-storage",       // auth.store.ts
+              "telos-cart-storage",        // cart.store.ts
+              "telos-wishlist-storage",    // wishlist.store.ts
+              "telos-admin-storage",       // admin.store.ts
+              "telos-recently-viewed-storage", // recently-viewed.store.ts
+              "paytrack-sidebar",          // sidebar.store.ts
+              "telos-theme",              // theme.store.ts
+              "theme",                    // next-themes persisted value
+            ];
+            STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+
+            // ── Clear auth cookies ────────────────────────────────────────────
             document.cookie = "accessToken=; path=/; max-age=0";
             document.cookie = "authRole=; path=/; max-age=0";
           } catch {
-            // ignore
+            // localStorage may be blocked in private/incognito — ignore silently
           }
         }
         useCartStore.getState().clearCart();
