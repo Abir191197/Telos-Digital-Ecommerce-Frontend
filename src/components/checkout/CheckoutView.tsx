@@ -9,7 +9,7 @@ import {
   CheckoutFormValues,
 } from "@/validations/checkout.schema";
 import { useCartStore, useAuthStore } from "@/stores";
-import { useClearCartMutation } from "@/services/api/cart/cartApi";
+import { useClearCartMutation, useGetMyCartQuery } from "@/services/api/cart/cartApi";
 import {
   useCreateOrderMutation,
   useValidateCheckoutStockMutation,
@@ -23,19 +23,26 @@ import {
 import { useMounted } from "@/hooks";
 import { Address } from "@/types/order.types";
 import { ROUTES } from "@/constants";
-import { CheckoutHeader } from "./CheckoutHeader";
 import { AddressStep } from "./AddressStep";
 import { AddressSelectionModal } from "./AddressSelectionModal";
 import { AddressFormModal } from "@/components/account/tabs/AddressFormModal";
 import { PaymentStep } from "./PaymentStep";
 import { OrderSummarySticky } from "./OrderSummarySticky";
 import { StockAlertModal } from "./StockAlertModal";
+import { CheckoutSkeleton } from "./CheckoutSkeleton";
 import { ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export function CheckoutView() {
   const router = useRouter();
   const mounted = useMounted();
+  const { user } = useAuthStore();
+
+  const { isLoading: isCartLoading } = useGetMyCartQuery(undefined, {
+    skip: !user,
+    refetchOnMountOrArgChange: true,
+  });
+
   const [clearCartMutation] = useClearCartMutation();
   const [createOrderMutation] = useCreateOrderMutation();
   const [validateCheckoutStockMutation] = useValidateCheckoutStockMutation();
@@ -50,8 +57,6 @@ export function CheckoutView() {
     clearCart,
     removeItem,
   } = useCartStore();
-
-  const { user } = useAuthStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -353,6 +358,8 @@ export function CheckoutView() {
         couponCode: appliedCoupon?.code || undefined,
       };
 
+      console.log("Submitting orderPayload:", JSON.stringify(orderPayload, null, 2));
+
       const result = await createOrderMutation(orderPayload).unwrap();
       const placedOrder = result.data;
 
@@ -370,8 +377,26 @@ export function CheckoutView() {
       const targetOrderId = placedOrder?.orderNumber || placedOrder?.id || "";
       router.push(targetOrderId ? `/checkout/success?orderId=${targetOrderId}` : "/checkout/success");
     } catch (err: any) {
-      console.error("Order placement error:", err);
-      alert(err?.data?.message || err?.message || "Order placement failed. Please try again.");
+      const serializableError = {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        status: err?.status,
+        data: err?.data,
+        error: err?.error,
+        keys: err ? Object.getOwnPropertyNames(err) : [],
+      };
+      console.error("Order placement error details:", serializableError);
+
+      const serverMsg =
+        (typeof err?.data === "object" && err?.data?.message) ||
+        (typeof err?.data === "object" && err?.data?.error) ||
+        (typeof err?.data === "string" ? err.data : null) ||
+        err?.error ||
+        err?.message ||
+        `Status ${err?.status || "Unknown"}: Order placement failed.`;
+
+      alert(`Error (${err?.status || "Unknown"}): ${serverMsg}`);
       setIsSubmitting(false);
     }
   };
@@ -385,23 +410,15 @@ export function CheckoutView() {
     }
   }, [mounted, user, router]);
 
-  // Safe client render check or redirecting
-  if (!mounted || user?.role === "admin" || !user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <CheckoutHeader />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="h-8 w-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mx-auto" />
-        </div>
-      </div>
-    );
+  // Safe client render check or initial cart/session loading
+  if (!mounted || user?.role === "admin" || !user || (isCartLoading && items.length === 0)) {
+    return <CheckoutSkeleton />;
   }
 
   // If cart is empty, show empty state
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <CheckoutHeader />
         <div className="container max-w-lg mx-auto px-4 py-20 text-center space-y-6">
           <div className="h-20 w-20 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
             <ShoppingBag className="h-10 w-10" />
@@ -428,8 +445,6 @@ export function CheckoutView() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
-      <CheckoutHeader />
-
       <main className="container py-6 sm:py-8 space-y-8">
         <form id="checkout-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -459,7 +474,7 @@ export function CheckoutView() {
             </div>
 
             {/* Right Column: Sticky Order Summary */}
-            <div className="lg:col-span-5 lg:sticky lg:top-24">
+            <div className="lg:col-span-5 lg:sticky lg:top-40">
               <OrderSummarySticky
                 items={items}
                 subtotal={subtotal}
