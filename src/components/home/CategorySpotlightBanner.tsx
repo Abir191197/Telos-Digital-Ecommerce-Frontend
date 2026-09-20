@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import type { Product } from "@/types/ecommerce.types";
 
 const rightGridVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,9 +33,18 @@ const cardItemVariants: Variants = {
   },
 };
 
-export function CategorySpotlightBanner() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
-  const allProducts = serverProducts?.data || [];
+interface CategorySpotlightBannerProps {
+  /** Pre-fetched products from the Server Component (ISR). When provided,
+   *  the section renders immediately with no skeleton on first visit. */
+  initialProducts?: Product[];
+}
+
+export function CategorySpotlightBanner({ initialProducts }: CategorySpotlightBannerProps) {
+  const { data: serverProducts, isLoading: rtkLoading } = useGetProductsQuery({ limit: 30 });
+
+  // SSR data renders immediately; RTK Query takes over after client hydration.
+  const allProducts = serverProducts?.data ?? initialProducts ?? [];
+  const isLoading = rtkLoading && !initialProducts;
 
   // Focus on Flagship Smartphones & Tablets or top tech
   const spotlightProducts = React.useMemo(() => {

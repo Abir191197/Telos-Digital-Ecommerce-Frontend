@@ -14,6 +14,12 @@ import {
   OfficialBrandsSection,
   SupportAndHelpstrip,
 } from "@/components/home";
+import { serverFetchProducts } from "@/lib/api/server-fetch";
+
+// ── ISR: Rebuild cached HTML every 60 seconds in the background ───────────────
+// Every visitor within the 60s window gets instant, pre-rendered HTML.
+// After the window expires, the next request triggers a background rebuild.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Telos Cart — Next-Gen Digital & Retail E-Commerce",
@@ -21,7 +27,15 @@ export const metadata: Metadata = {
     "Explore authentic electronics, curated fashion, home essentials, and digital software products with fast delivery across Bangladesh.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  // ── Single server-side fetch for all homepage product sections ───────────
+  // This fetch runs on the Next.js server (or Vercel Edge) — NOT in the browser.
+  // Result: the 5 product sections below all receive their data instantly from
+  // the server-rendered HTML, eliminating skeleton loading on first visit.
+  // RTK Query hooks within each component still run client-side for
+  // stale-while-revalidate background updates (e.g. price/stock changes).
+  const initialProducts = await serverFetchProducts({ limit: 30 });
+
   return (
     <div className="w-full space-y-8 sm:space-y-12">
       {/* ── Full-Width Hero Slider ── */}
@@ -33,13 +47,13 @@ export default function HomePage() {
         <QuickCategoryBar />
 
         {/* Flash Deals with Live Countdown */}
-        <FlashDealsSection />
+        <FlashDealsSection initialProducts={initialProducts} />
 
         {/* ── Official Brand Stores Marquee (Apple, Samsung, Google, Sony, etc.) ── */}
         <OfficialBrandsSection />
 
         {/* Curated Products Tabs (Featured / Trending / New / Top Rated) */}
-        <FeaturedProductsTabs />
+        <FeaturedProductsTabs initialProducts={initialProducts} />
 
         {/* Dynamic Multi-Height & Multi-Weight Bento Lifestyle Showcase */}
         <BentoShowcaseSection />
@@ -48,10 +62,10 @@ export default function HomePage() {
         <AuthenticityGuaranteeBanner />
 
         {/* Shop By Budget Section (Under ৳5k, Under ৳15k, Under ৳35k, ৳35k+) */}
-        <ShopByBudgetSection />
+        <ShopByBudgetSection initialProducts={initialProducts} />
 
         {/* Category Spotlight Zone (Smartphones & Tablets) */}
-        <CategorySpotlightBanner />
+        <CategorySpotlightBanner initialProducts={initialProducts} />
 
         {/* Category Aisle 1: Laptops & Computing */}
         <CategoryAisleSection
@@ -67,7 +81,7 @@ export default function HomePage() {
         <DeliveryAndReturnBanner />
 
         {/* Best Sellers Leaderboard (#1, #2, #3, #4) */}
-        <BestSellersLeaderboard />
+        <BestSellersLeaderboard initialProducts={initialProducts} />
 
         {/* Category Aisle 2: Audio & Headphones */}
         <CategoryAisleSection
@@ -85,3 +99,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -6,12 +6,24 @@ import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import type { Product } from "@/types/ecommerce.types";
 
-export function FeaturedProductsTabs() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
+interface FeaturedProductsTabsProps {
+  /** Pre-fetched products from the Server Component (ISR). When provided,
+   *  the section renders immediately with no skeleton on first visit. */
+  initialProducts?: Product[];
+}
+
+export function FeaturedProductsTabs({ initialProducts }: FeaturedProductsTabsProps) {
+  const { data: serverProducts, isLoading: rtkLoading } = useGetProductsQuery({ limit: 30 });
+
+  // SSR data renders immediately; RTK Query takes over after client hydration.
+  const allProducts = serverProducts?.data ?? initialProducts ?? [];
+  const isLoading = rtkLoading && !initialProducts;
+
   const featuredProducts = React.useMemo(() => {
-    return (serverProducts?.data || []).slice(0, 10);
-  }, [serverProducts]);
+    return allProducts.slice(0, 10);
+  }, [allProducts]);
 
   return (
     <section aria-label="Curated Products" className="w-full">

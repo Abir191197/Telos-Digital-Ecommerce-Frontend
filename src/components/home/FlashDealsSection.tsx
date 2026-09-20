@@ -3,6 +3,7 @@
 import { FlashDealCard } from "@/components/deals/FlashDealCard";
 import { ROUTES } from "@/constants";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import type { Product } from "@/types/ecommerce.types";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { ArrowRight, Flame } from "lucide-react";
 import Link from "next/link";
@@ -20,15 +21,26 @@ const sectionVariants: Variants = {
   },
 };
 
-export function FlashDealsSection() {
+interface FlashDealsSectionProps {
+  /** Pre-fetched products from the Server Component (ISR). When provided,
+   *  the section renders immediately with no skeleton on first visit.
+   *  RTK Query still runs in the background for stale-while-revalidate. */
+  initialProducts?: Product[];
+}
+
+export function FlashDealsSection({ initialProducts }: FlashDealsSectionProps) {
   const [timeLeft, setTimeLeft] = useState({
     hours: 8,
     minutes: 42,
     seconds: 1,
   });
 
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
-  const allProducts = serverProducts?.data || [];
+  const { data: serverProducts, isLoading: rtkLoading } = useGetProductsQuery({ limit: 30 });
+
+  // Use SSR-provided data immediately; RTK Query data takes over after hydration.
+  // When initialProducts is present, suppress the loading skeleton entirely.
+  const allProducts = serverProducts?.data ?? initialProducts ?? [];
+  const isLoading = rtkLoading && !initialProducts;
 
   // Countdown timer
   useEffect(() => {

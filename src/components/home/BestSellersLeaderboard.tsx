@@ -8,6 +8,7 @@ import { Trophy, Star, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import type { Product } from "@/types/ecommerce.types";
 
 const leaderboardContainerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,9 +33,18 @@ const leaderboardCardVariants: Variants = {
   },
 };
 
-export function BestSellersLeaderboard() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
-  const allProducts = serverProducts?.data || [];
+interface BestSellersLeaderboardProps {
+  /** Pre-fetched products from the Server Component (ISR). When provided,
+   *  the section renders immediately with no skeleton on first visit. */
+  initialProducts?: Product[];
+}
+
+export function BestSellersLeaderboard({ initialProducts }: BestSellersLeaderboardProps) {
+  const { data: serverProducts, isLoading: rtkLoading } = useGetProductsQuery({ limit: 30 });
+
+  // SSR data renders immediately; RTK Query takes over after client hydration.
+  const allProducts = serverProducts?.data ?? initialProducts ?? [];
+  const isLoading = rtkLoading && !initialProducts;
 
   // Top 4 best sellers ranked by reviews & rating
   const topRanked = React.useMemo(() => {

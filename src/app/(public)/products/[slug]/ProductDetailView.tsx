@@ -7,28 +7,42 @@ import { ROUTES } from "@/constants";
 import { Button } from "@/components/common";
 import { useGetProductBySlugQuery, useGetProductsQuery } from "@/services/api/products/productApi";
 import { ProductView, ProductDetailSkeleton } from "@/components/product-detail";
+import type { Product } from "@/types/ecommerce.types";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  /** Pre-fetched product from the Server Component. When provided, the page
+   *  renders immediately with data — no skeleton flash on first visit.
+   *  RTK Query runs in background for stale-while-revalidate. */
+  initialProduct?: Product | null;
 }
 
-export function ProductDetailView({ params }: Props) {
+export function ProductDetailView({ params, initialProduct }: Props) {
   const { slug } = use(params);
-  const { data: product, isLoading, isError } = useGetProductBySlugQuery(slug);
+
+  // RTK Query — runs client-side for SWR background refresh.
+  // When initialProduct is provided, skip the loading skeleton.
+  const { data: product, isLoading: rtkLoading, isError } = useGetProductBySlugQuery(slug);
+
+  // Use SSR-provided product immediately; RTK Query data takes over after hydration.
+  const resolvedProduct = product ?? initialProduct ?? undefined;
+  const isLoading = rtkLoading && !initialProduct;
 
   // Dynamically load related products from the same category excluding the current one
   const { data: relatedResponse } = useGetProductsQuery(
-    { categoryId: product?.categoryId, limit: 8 },
-    { skip: !product?.categoryId }
+    { categoryId: resolvedProduct?.categoryId, limit: 8 },
+    { skip: !resolvedProduct?.categoryId },
   );
 
-  const relatedProducts = (relatedResponse?.data || []).filter((p) => p.id !== product?.id);
+  const relatedProducts = (relatedResponse?.data || []).filter(
+    (p) => p.id !== resolvedProduct?.id,
+  );
 
   if (isLoading) {
     return <ProductDetailSkeleton />;
   }
 
-  if (isError || !product) {
+  if (isError || !resolvedProduct) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="h-16 w-16 rounded-3xl bg-muted/60 text-muted-foreground flex items-center justify-center">
@@ -52,5 +66,5 @@ export function ProductDetailView({ params }: Props) {
     );
   }
 
-  return <ProductView product={product} relatedProducts={relatedProducts} />;
+  return <ProductView product={resolvedProduct} relatedProducts={relatedProducts} />;
 }

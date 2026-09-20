@@ -7,6 +7,7 @@ import { ROUTES } from "@/constants";
 import { Wallet, ArrowRight } from "lucide-react";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
+import type { Product } from "@/types/ecommerce.types";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -31,9 +32,18 @@ const itemVariants: Variants = {
   },
 };
 
-export function ShopByBudgetSection() {
-  const { data: serverProducts, isLoading } = useGetProductsQuery({ limit: 30 });
-  const allProducts = serverProducts?.data || [];
+interface ShopByBudgetSectionProps {
+  /** Pre-fetched products from the Server Component (ISR). When provided,
+   *  the section renders immediately with no skeleton on first visit. */
+  initialProducts?: Product[];
+}
+
+export function ShopByBudgetSection({ initialProducts }: ShopByBudgetSectionProps) {
+  const { data: serverProducts, isLoading: rtkLoading } = useGetProductsQuery({ limit: 30 });
+
+  // SSR data renders immediately; RTK Query takes over after client hydration.
+  const allProducts = serverProducts?.data ?? initialProducts ?? [];
+  const isLoading = rtkLoading && !initialProducts;
 
   const budgetProducts = React.useMemo(() => {
     const under15k = allProducts.filter((p) => Number(p.price) <= 15000);
