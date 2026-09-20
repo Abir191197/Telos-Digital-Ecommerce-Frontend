@@ -230,40 +230,37 @@ export function OverviewTab({
             {/* Connected Chain / Progress Line: Vertical on mobile, Horizontal on desktop */}
             <div className="py-2">
               {/* Desktop Horizontal Chain */}
-              <div className="hidden sm:flex items-center justify-between relative">
-                {/* Background Track Line */}
-                <div className="absolute left-6 right-6 top-5 h-0.5 bg-border/60 dark:bg-zinc-800 -z-0" />
-                {/* Active Progress Fill Line */}
-                <div
-                  className="absolute left-6 top-5 h-0.5 bg-gradient-to-r from-amber-500 to-amber-500 transition-all duration-500 -z-0"
-                  style={{
-                    width:
-                      currentStep <= 0
-                        ? "0%"
-                        : currentStep >= steps.length - 1
-                        ? "calc(100% - 3rem)"
-                        : `calc(${(currentStep / (steps.length - 1)) * 100}% - 1.5rem)`,
-                  }}
-                />
-
+              <div className="hidden sm:grid sm:grid-cols-4 items-start relative px-2">
                 {steps.map((step, idx) => {
                   const isComplete = currentStep > idx;
                   const isCurrent = currentStep === idx;
                   const Icon = step.icon;
+                  const isLast = idx === steps.length - 1;
+                  const nextStepComplete = currentStep > idx;
 
                   return (
                     <div
                       key={step.label}
-                      className="relative z-10 flex flex-col items-center text-center group cursor-default"
+                      className="relative flex flex-col items-center text-center group cursor-default"
                     >
-                      {/* Node Icon Circle */}
+                      {/* Segment connector strictly between this node and next node */}
+                      {!isLast && (
+                        <div
+                          className={cn(
+                            "absolute left-[calc(50%+24px)] right-[calc(-50%+24px)] top-5 h-0.5 -translate-y-1/2 z-0 pointer-events-none transition-all duration-300",
+                            nextStepComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                          )}
+                        />
+                      )}
+
+                      {/* Node Icon Circle: Solid background + z-20 */}
                       <div
                         className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-2xl border-2 transition-all duration-300",
+                          "relative z-20 flex h-10 w-10 items-center justify-center rounded-2xl border-2 transition-all duration-300",
                           isCurrent
                             ? "bg-amber-500 border-amber-400 text-zinc-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] ring-4 ring-amber-500/20 scale-110"
                             : isComplete
-                            ? "bg-amber-500/20 border-amber-500 text-amber-500"
+                            ? "bg-card bg-amber-500/20 border-amber-500 text-amber-500"
                             : "bg-card border-border/70 text-muted-foreground"
                         )}
                       >

@@ -17,3 +17,4 @@ export { OrdersTabSkeleton } from "./OrdersTabSkeleton";
 export { WishlistTabSkeleton } from "./WishlistTabSkeleton";
 export { ReviewsTabSkeleton } from "./ReviewsTabSkeleton";
 export { PaymentsTabSkeleton } from "./PaymentsTabSkeleton";
+export { TrackingTabSkeleton } from "./TrackingTabSkeleton";

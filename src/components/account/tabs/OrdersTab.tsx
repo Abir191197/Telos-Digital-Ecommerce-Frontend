@@ -13,6 +13,8 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order.types";
@@ -54,9 +56,16 @@ export function OrdersTab({
     productThumbnail: string;
   } | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+  const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
 
   const toggleOrderExpanded = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
+  const handleCopyTracking = (trackingNumber: string) => {
+    navigator.clipboard.writeText(trackingNumber);
+    setCopiedTrackingId(trackingNumber);
+    setTimeout(() => setCopiedTrackingId(null), 2000);
   };
 
   const filteredOrders =
@@ -172,9 +181,19 @@ export function OrdersTab({
                 {/* 1. Ultra-Lean Single-Line Header */}
                 <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-border/40 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-black text-foreground text-xs sm:text-sm">
-                      #{order.orderNumber}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyTracking(order.orderNumber)}
+                      className="inline-flex items-center gap-1 font-mono font-black text-foreground text-xs sm:text-sm hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                      title="Click to copy order number"
+                    >
+                      <span>#{order.orderNumber}</span>
+                      {copiedTrackingId === order.orderNumber ? (
+                        <Check className="h-3 w-3 text-emerald-500 stroke-[3]" />
+                      ) : (
+                        <Copy className="h-2.5 w-2.5 text-muted-foreground" />
+                      )}
+                    </button>
                     <span className="text-[11px] text-muted-foreground">
                       {new Date(order.createdAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -248,13 +267,29 @@ export function OrdersTab({
 
                 {/* 3. Merged Courier & Actions Footer */}
                 <div className="pt-2.5 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-                  {/* Courier pill */}
+                  {/* Courier pill with click-to-copy */}
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
                     <Truck className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                     <span className="truncate">
                       <strong className="text-foreground font-semibold">{order.courierName}</strong>
                       <span className="mx-1 text-border">•</span>
-                      <span className="font-mono">{order.trackingNumber}</span>
+                      {order.trackingNumber ? (
+                        <button
+                          type="button"
+                          onClick={() => handleCopyTracking(order.trackingNumber!)}
+                          className="inline-flex items-center gap-1 font-mono px-1.5 py-0.5 rounded-md bg-muted/60 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 text-foreground transition-all cursor-pointer font-bold"
+                          title="Click to copy tracking code"
+                        >
+                          <span>{order.trackingNumber}</span>
+                          {copiedTrackingId === order.trackingNumber ? (
+                            <Check className="h-3 w-3 text-emerald-500 stroke-[3]" />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5 text-muted-foreground" />
+                          )}
+                        </button>
+                      ) : (
+                        <span className="font-mono text-muted-foreground">Pending</span>
+                      )}
                       {order.estimatedDelivery && (
                         <>
                           <span className="mx-1 text-border">•</span>
@@ -266,6 +301,17 @@ export function OrdersTab({
 
                   {/* Actions inline */}
                   <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                    {/* Live Tracking Jump */}
+                    <button
+                      type="button"
+                      onClick={() => onSelectTab("tracking")}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-bold transition-all cursor-pointer active:scale-95"
+                      title="Track live shipment"
+                    >
+                      <Truck className="h-3 w-3" />
+                      <span>Track</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => setInvoiceModalOrder(order)}

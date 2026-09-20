@@ -16,6 +16,7 @@ import {
   OrdersTab,
   OrdersTabSkeleton,
   TrackingTab,
+  TrackingTabSkeleton,
   ReturnsTab,
   WishlistTab,
   WishlistTabSkeleton,
@@ -127,6 +128,9 @@ export function AccountTabContent({
       );
 
     case "tracking":
+      if (isLoadingOrders) {
+        return <TrackingTabSkeleton />;
+      }
       return <TrackingTab orders={orders} />;
 
     case "returns":
