@@ -13,6 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { CustomerReview } from "../accountNavData";
 
+import { useCreateReviewMutation } from "@/services/api/reviews/reviewApi";
+
 interface ReviewsTabProps {
   reviews: CustomerReview[];
   onReviewUpdate: (updatedReview: CustomerReview) => void;
@@ -23,14 +25,40 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
   const [reviewModalItem, setReviewModalItem] = useState<CustomerReview | null>(null);
   const [ratingInput, setRatingInput] = useState<number>(5);
   const [commentInput, setCommentInput] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [createReviewMutation] = useCreateReviewMutation();
 
   const pendingReviewCount = reviews.filter(
     (r) => r.status === "pending_review"
   ).length;
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewModalItem) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      if (reviewModalItem.productId && !reviewModalItem.productId.startsWith("mock-")) {
+        await createReviewMutation({
+          productId: reviewModalItem.productId,
+          rating: ratingInput,
+          comment: commentInput.trim(),
+        }).unwrap();
+      }
+    } catch (err: any) {
+      console.warn("Review API notice:", err);
+      // If backend reports error, show message or fallback
+      if (err?.data?.message) {
+        setSubmitError(err.data.message);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     onReviewUpdate({
       ...reviewModalItem,
       rating: ratingInput,
@@ -38,6 +66,8 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
       status: "published",
       date: "Just now",
     });
+
+    setIsSubmitting(false);
     setReviewModalItem(null);
     setCommentInput("");
   };
@@ -353,20 +383,28 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                 />
               </div>
 
+              {submitError && (
+                <div className="p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+                  {submitError}
+                </div>
+              )}
+
               {/* Sticky/Bottom-docked Action Buttons with Safe-area clearance */}
               <div className="pt-2 pb-6 sm:pb-1 flex items-center gap-2.5 border-t border-border/40">
                 <button
                   type="button"
                   onClick={() => setReviewModalItem(null)}
-                  className="flex-1 rounded-xl bg-muted/70 hover:bg-muted text-foreground py-3 text-xs font-bold transition-all cursor-pointer active:scale-98"
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-xl bg-muted/70 hover:bg-muted text-foreground py-3 text-xs font-bold transition-all cursor-pointer active:scale-98 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+                  disabled={isSubmitting || !commentInput.trim()}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 py-3 text-xs font-bold shadow-md shadow-amber-500/20 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  Publish Review
+                  {isSubmitting ? "Publishing..." : "Publish Review"}
                 </button>
               </div>
             </form>

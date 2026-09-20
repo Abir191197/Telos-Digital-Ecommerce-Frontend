@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 export function PaymentsTab() {
   return (
@@ -18,9 +19,14 @@ export function PaymentsTab() {
         {/* bKash Wallet Pass */}
         <div className="rounded-3xl border border-pink-500/20 dark:border-pink-500/30 bg-gradient-to-br from-card via-card to-pink-500/[0.04] dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-pink-500/[0.08] p-5 space-y-3 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-pink-500/[0.03] hover:to-pink-500/[0.1] hover:shadow-[0_14px_35px_-6px_rgba(236,72,153,0.15)] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-pink-600 dark:text-pink-400 bg-pink-500/15 border border-pink-500/20 px-2.5 py-1 rounded-xl shadow-2xs">
-              bKash Wallet
-            </span>
+            <div className="relative h-8 w-14 rounded-xl bg-white dark:bg-white/95 p-1 border border-border/40 overflow-hidden shadow-2xs">
+              <Image
+                src="/images/payment-partners/bkash.png"
+                alt="bKash"
+                fill
+                className="object-contain p-0.5"
+              />
+            </div>
             <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">
               Linked
             </span>

@@ -46,6 +46,9 @@ const VALID_TABS = new Set<AccountTabKey>([
   "notifications",
 ]);
 
+const STORAGE_KEY_REVIEWS = "telos_customer_reviews";
+const STORAGE_KEY_RETURNS = "telos_customer_returns";
+
 export function CustomerAccountHub() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,18 +73,105 @@ export function CustomerAccountHub() {
     : "overview";
 
   const [activeTab, setActiveTabState] = useState<AccountTabKey>(initialTab);
-    const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
+  const [mobileSubScreen, setMobileSubScreen] = useState<boolean>(hasTabParam);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { data: myOrdersData } = useGetMyOrdersQuery(undefined, {
-    skip: !user,
-  });
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const { data: myOrdersData, isLoading: isOrdersLoading } = useGetMyOrdersQuery(
+    undefined,
+    {
+      skip: !user,
+    }
+  );
   const [cancelMyOrderMutation] = useCancelMyOrderMutation();
 
   const displayOrders = myOrdersData?.data ?? [];
 
-  // Return tickets and Reviews state
-  const [returnTickets, setReturnTickets] = useState<ReturnTicketData[]>([]);
-  const [reviews, setReviews] = useState<CustomerReview[]>([]);
+  // Return tickets and Reviews state with persistent fallback
+  const [returnTickets, setReturnTickets] = useState<ReturnTicketData[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_RETURNS);
+        if (saved) return JSON.parse(saved);
+      } catch (err) {
+        console.warn("Could not read stored return tickets:", err);
+      }
+    }
+    return [];
+  });
+
+  const [reviews, setReviews] = useState<CustomerReview[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_REVIEWS);
+        if (saved) return JSON.parse(saved);
+      } catch (err) {
+        console.warn("Could not read stored customer reviews:", err);
+      }
+    }
+    return [];
+  });
+
+  // Save return tickets to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY_RETURNS, JSON.stringify(returnTickets));
+      } catch (err) {
+        console.warn("Could not persist return tickets:", err);
+      }
+    }
+  }, [returnTickets]);
+
+  // Save reviews to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY_REVIEWS, JSON.stringify(reviews));
+      } catch (err) {
+        console.warn("Could not persist reviews:", err);
+      }
+    }
+  }, [reviews]);
+
+  // Derive pending reviews automatically from delivered orders
+  useEffect(() => {
+    if (!displayOrders || displayOrders.length === 0) return;
+
+    const deliveredOrders = displayOrders.filter((o) => o.status === "delivered");
+    if (deliveredOrders.length === 0) return;
+
+    setReviews((prevReviews) => {
+      const existingIds = new Set(prevReviews.map((r) => r.productId));
+      const newPendingReviews: CustomerReview[] = [];
+
+      for (const order of deliveredOrders) {
+        for (const item of order.items) {
+          if (item.productId && !existingIds.has(item.productId)) {
+            existingIds.add(item.productId);
+            newPendingReviews.push({
+              id: `pending-${order.orderNumber}-${item.productId}`,
+              productId: item.productId,
+              productName: item.productName,
+              productThumbnail: item.productThumbnail || "/placeholder.png",
+              rating: 5,
+              date: order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB") : "Recently",
+              comment: "",
+              verifiedPurchase: true,
+              status: "pending_review",
+            });
+          }
+        }
+      }
+
+      if (newPendingReviews.length === 0) return prevReviews;
+      return [...prevReviews, ...newPendingReviews];
+    });
+  }, [displayOrders]);
 
   // Sync state whenever URL query params change (Next.js router or browser back/forward)
   useEffect(() => {
@@ -174,7 +264,7 @@ export function CustomerAccountHub() {
   }
 
   return (
-    <div className="container py-2 sm:py-10 space-y-3 sm:space-y-6">
+    <div className="container py-2 sm:py-10 space-y-3 sm:space-y-6 relative">
       {/* ── Mobile Account View ── */}
       <div className="lg:hidden space-y-3">
         {mobileSubScreen ? (
@@ -220,6 +310,7 @@ export function CustomerAccountHub() {
             activeTab={activeTab}
             user={user}
             orders={displayOrders}
+            isLoadingOrders={isOrdersLoading}
             wishlistItems={wishlistItems}
             reviews={reviews}
             returnTickets={returnTickets}
@@ -232,41 +323,56 @@ export function CustomerAccountHub() {
             onCancelOrder={async (orderNumber, reason) => {
               try {
                 await cancelMyOrderMutation({ id: orderNumber, reason }).unwrap();
-              } catch (err) {
+                showToast(`Order #${orderNumber} cancelled successfully.`);
+              } catch (err: any) {
                 console.error("Cancel order error:", err);
+                showToast(err?.data?.message || "Failed to cancel order. Please contact support.");
               }
             }}
             onAddReturnTicket={(ticket) => {
               setReturnTickets((prev) => [ticket, ...prev]);
+              showToast(`Return ticket submitted for Order #${ticket.orderNumber}.`);
               handleSelectTab("returns");
             }}
             onAddReview={(newRev) => {
-              setReviews((prev) => [
-                {
-                  id: `rev-${Date.now()}`,
-                  productId: newRev.productId,
-                  productName: newRev.productName,
-                  productThumbnail: newRev.productThumbnail,
-                  rating: newRev.rating,
-                  date: "Just now",
-                  comment: newRev.comment,
-                  verifiedPurchase: true,
-                  status: "published",
-                },
-                ...prev,
-              ]);
+              setReviews((prev) => {
+                const filtered = prev.filter((r) => r.productId !== newRev.productId);
+                return [
+                  {
+                    id: `rev-${Date.now()}`,
+                    productId: newRev.productId,
+                    productName: newRev.productName,
+                    productThumbnail: newRev.productThumbnail,
+                    rating: newRev.rating,
+                    date: "Just now",
+                    comment: newRev.comment,
+                    verifiedPurchase: true,
+                    status: "published",
+                  },
+                  ...filtered,
+                ];
+              });
+              showToast("Review submitted successfully! Thank you.");
               handleSelectTab("reviews");
             }}
             onUpdateReview={(updated) => {
               setReviews((prev) =>
                 prev.map((r) => (r.id === updated.id ? updated : r)),
               );
+              showToast("Review published successfully.");
             }}
             onAddToCart={(product, quantity) => addToCart(product, quantity)}
             onRemoveWishlistItem={(productId) => removeWishlistItem(productId)}
           />
         </main>
       </div>
+
+      {/* Floating Status Notification Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-zinc-900/95 dark:bg-white/95 text-white dark:text-zinc-950 text-xs font-bold shadow-2xl border border-white/10 dark:border-zinc-800 animate-in slide-in-from-bottom-5 duration-300">
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

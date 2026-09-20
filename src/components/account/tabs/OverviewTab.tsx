@@ -11,12 +11,14 @@ import type { AccountTabKey } from "../accountNavData";
 interface OverviewTabProps {
   user: CustomerUser;
   orders: Order[];
+  isLoadingOrders?: boolean;
   onSelectTab: (tab: AccountTabKey) => void;
 }
 
 export function OverviewTab({
   user,
   orders,
+  isLoadingOrders = false,
   onSelectTab,
 }: OverviewTabProps) {
   const getStatusBadge = (status: OrderStatus) => {
@@ -62,7 +64,7 @@ export function OverviewTab({
   return (
     <div className="flex flex-col space-y-6">
       {/* Profile Details Hero Card on Overview */}
-      <div className="order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.04] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.03] hover:to-amber-500/[0.08] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.12)] transition-all duration-300">
+      <div className="order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.04] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.2),0_8px_20px_-4px_rgba(245,158,11,0.12)] transition-shadow duration-300">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500/80 shadow-md shadow-amber-500/20 bg-muted/40">
             {user.avatar ? (
@@ -119,15 +121,71 @@ export function OverviewTab({
         };
         const currentStep = statusMap[latestOrder.status] ?? 1;
 
+        // Formatted timestamp helpers
+        const orderDate = new Date(latestOrder.createdAt);
+        const placedTime = orderDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+
+        // Computed approximate step times based on order timeline
+        const packingDate = new Date(orderDate.getTime() + 4 * 3600 * 1000);
+        const packingTime = packingDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+
+        const transitDate = new Date(orderDate.getTime() + 18 * 3600 * 1000);
+        const transitTime = transitDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+
         const steps = [
-          { label: "Placed", icon: Clock, desc: "Confirmed" },
-          { label: "Packing", icon: Package, desc: "Quality Verified" },
-          { label: "In Transit", icon: Truck, desc: latestOrder.courierName || "Courier" },
-          { label: "Delivered", icon: CheckCircle2, desc: "To Doorstep" },
+          {
+            label: "Placed",
+            icon: Clock,
+            desc: "Confirmed",
+            time: placedTime,
+          },
+          {
+            label: "Packing",
+            icon: Package,
+            desc: "Quality Verified",
+            time: currentStep >= 1 ? packingTime : "Pending",
+          },
+          {
+            label: "In Transit",
+            icon: Truck,
+            desc: latestOrder.courierName || "Steadfast Courier",
+            time:
+              currentStep >= 2
+                ? transitTime
+                : currentStep === 1
+                ? "Expected Today"
+                : "Pending",
+          },
+          {
+            label: "Delivered",
+            icon: CheckCircle2,
+            desc: "To Doorstep",
+            time:
+              latestOrder.status === "delivered"
+                ? "Completed"
+                : latestOrder.estimatedDelivery
+                ? `Est. ${latestOrder.estimatedDelivery}`
+                : "Est. 2-3 Days",
+          },
         ];
 
         return (
-          <div className="order-2 lg:order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6.5 space-y-5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
+          <div className="order-2 lg:order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6.5 space-y-5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.18),0_8px_20px_-4px_rgba(245,158,11,0.1)] transition-shadow duration-300">
             {/* Top Row: Order Details & Live Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
               <div className="flex items-center gap-3">
@@ -169,75 +227,165 @@ export function OverviewTab({
               </div>
             </div>
 
-            {/* 4-Stage Segmented Milestone Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {steps.map((step, idx) => {
-                const isComplete = currentStep > idx;
-                const isCurrent = currentStep === idx;
-                const Icon = step.icon;
+            {/* Connected Chain / Progress Line: Vertical on mobile, Horizontal on desktop */}
+            <div className="py-2">
+              {/* Desktop Horizontal Chain */}
+              <div className="hidden sm:flex items-center justify-between relative">
+                {/* Background Track Line */}
+                <div className="absolute left-6 right-6 top-5 h-0.5 bg-border/60 dark:bg-zinc-800 -z-0" />
+                {/* Active Progress Fill Line */}
+                <div
+                  className="absolute left-6 top-5 h-0.5 bg-gradient-to-r from-amber-500 to-amber-500 transition-all duration-500 -z-0"
+                  style={{
+                    width:
+                      currentStep <= 0
+                        ? "0%"
+                        : currentStep >= steps.length - 1
+                        ? "calc(100% - 3rem)"
+                        : `calc(${(currentStep / (steps.length - 1)) * 100}% - 1.5rem)`,
+                  }}
+                />
 
-                return (
-                  <div
-                    key={step.label}
-                    className={cn(
-                      "relative flex flex-col p-3 rounded-2xl border transition-all duration-300",
-                      isCurrent
-                        ? "bg-gradient-to-br from-amber-500/15 via-amber-500/10 to-transparent border-amber-500/40 shadow-xs ring-1 ring-amber-500/20"
-                        : isComplete
-                        ? "bg-muted/30 border-border/40 text-foreground"
-                        : "bg-muted/10 border-border/30 opacity-60"
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                {steps.map((step, idx) => {
+                  const isComplete = currentStep > idx;
+                  const isCurrent = currentStep === idx;
+                  const Icon = step.icon;
+
+                  return (
+                    <div
+                      key={step.label}
+                      className="relative z-10 flex flex-col items-center text-center group cursor-default"
+                    >
+                      {/* Node Icon Circle */}
                       <div
                         className={cn(
-                          "flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold transition-all",
+                          "flex h-10 w-10 items-center justify-center rounded-2xl border-2 transition-all duration-300",
                           isCurrent
-                            ? "bg-amber-500 text-zinc-950 shadow-xs"
+                            ? "bg-amber-500 border-amber-400 text-zinc-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] ring-4 ring-amber-500/20 scale-110"
                             : isComplete
-                            ? "bg-emerald-500 text-white"
-                            : "bg-muted text-muted-foreground"
+                            ? "bg-amber-500/20 border-amber-500 text-amber-500"
+                            : "bg-card border-border/70 text-muted-foreground"
+                        )}
+                      >
+                        {isComplete ? (
+                          <Check className="h-4 w-4 stroke-[3]" />
+                        ) : (
+                          <Icon className="h-4 w-4 stroke-[2.2]" />
+                        )}
+                      </div>
+
+                      {/* Text Details */}
+                      <div className="mt-2.5 space-y-0.5">
+                        <span
+                          className={cn(
+                            "text-xs font-bold block",
+                            isCurrent
+                              ? "text-amber-600 dark:text-amber-400 font-black"
+                              : isComplete
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {step.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block truncate max-w-[110px]">
+                          {step.desc}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[9px] font-mono block",
+                            isCurrent
+                              ? "text-amber-600 dark:text-amber-400 font-semibold"
+                              : "text-muted-foreground/70"
+                          )}
+                        >
+                          {step.time}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Vertical Chain */}
+              <div className="sm:hidden space-y-0 relative pl-2">
+                {steps.map((step, idx) => {
+                  const isComplete = currentStep > idx;
+                  const isCurrent = currentStep === idx;
+                  const isLast = idx === steps.length - 1;
+                  const Icon = step.icon;
+
+                  return (
+                    <div key={step.label} className="relative flex items-start gap-3.5 pb-5 last:pb-1">
+                      {/* Vertical Connecting Line */}
+                      {!isLast && (
+                        <div
+                          className={cn(
+                            "absolute left-[17px] top-9 w-0.5 bottom-0 transition-colors duration-300",
+                            isComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                          )}
+                        />
+                      )}
+
+                      {/* Node Circle */}
+                      <div
+                        className={cn(
+                          "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 transition-all duration-300",
+                          isCurrent
+                            ? "bg-amber-500 border-amber-400 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.5)] ring-2 ring-amber-500/25"
+                            : isComplete
+                            ? "bg-amber-500/20 border-amber-500 text-amber-500"
+                            : "bg-card border-border/70 text-muted-foreground"
                         )}
                       >
                         {isComplete ? (
                           <Check className="h-3.5 w-3.5 stroke-[3]" />
                         ) : (
-                          <Icon className="h-3 w-3 stroke-[2.2]" />
+                          <Icon className="h-3.5 w-3.5 stroke-[2.2]" />
                         )}
                       </div>
 
-                      <span
-                        className={cn(
-                          "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md",
-                          isCurrent
-                            ? "bg-amber-500/20 text-amber-700 dark:text-amber-300"
-                            : isComplete
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-muted-foreground/70"
-                        )}
-                      >
-                        {isCurrent ? "Active" : isComplete ? "Done" : `Step ${idx + 1}`}
-                      </span>
+                      {/* Step Labels */}
+                      <div className="flex-1 min-w-0 pt-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p
+                              className={cn(
+                                "text-xs font-bold",
+                                isCurrent
+                                  ? "text-amber-600 dark:text-amber-400 font-black"
+                                  : isComplete
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              )}
+                            >
+                              {step.label}
+                            </p>
+                            <p className="text-[10px] font-mono text-muted-foreground/80 mt-0.5">
+                              {step.time}
+                            </p>
+                          </div>
+                          <span
+                            className={cn(
+                              "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-md shrink-0",
+                              isCurrent
+                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                                : isComplete
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-muted-foreground/60"
+                            )}
+                          >
+                            {isCurrent ? "Active" : isComplete ? "Done" : `Step ${idx + 1}`}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {step.desc}
+                        </p>
+                      </div>
                     </div>
-
-                    <span
-                      className={cn(
-                        "text-xs font-extrabold tracking-tight truncate",
-                        isCurrent
-                          ? "text-amber-700 dark:text-amber-400"
-                          : isComplete
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {step.label}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground truncate">
-                      {step.desc}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Items Preview Strip & Delivery Partner Footer */}
@@ -293,7 +441,7 @@ export function OverviewTab({
       {/* 2-Column Responsive Grid on Large Screen: Primary Delivery Address + Saved Payment Methods */}
       <div className="order-3 lg:order-2 grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 1. Address Book Snapshot */}
-        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
+        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.18),0_8px_20px_-4px_rgba(245,158,11,0.1)] transition-shadow duration-300">
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
@@ -349,7 +497,7 @@ export function OverviewTab({
         </div>
 
         {/* 2. Saved Payment Methods Snapshot */}
-        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:bg-gradient-to-br hover:from-card hover:via-amber-500/[0.02] hover:to-amber-500/[0.06] hover:shadow-[0_14px_35px_-6px_rgba(245,158,11,0.1)] transition-all duration-300">
+        <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-5 sm:p-6 flex flex-col justify-between shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.18),0_8px_20px_-4px_rgba(245,158,11,0.1)] transition-shadow duration-300">
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
@@ -372,8 +520,13 @@ export function OverviewTab({
             <div className="space-y-2">
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-12 rounded-lg bg-pink-500/15 flex items-center justify-center font-bold text-xs text-pink-600">
-                    bKash
+                  <div className="relative h-9 w-14 rounded-xl bg-white dark:bg-white/95 p-1 flex items-center justify-center border border-border/40 shadow-2xs shrink-0 overflow-hidden">
+                    <Image
+                      src="/images/payment-partners/bkash.png"
+                      alt="bKash"
+                      fill
+                      className="object-contain p-1"
+                    />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-foreground">bKash Personal</p>

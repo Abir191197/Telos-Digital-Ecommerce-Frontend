@@ -11,3 +11,4 @@ export { WishlistTab } from "./WishlistTab";
 export { ReviewsTab } from "./ReviewsTab";
 export { PaymentsTab } from "./PaymentsTab";
 export { NotificationsTab } from "./NotificationsTab";
+export { AccountOverviewSkeleton } from "./AccountOverviewSkeleton";

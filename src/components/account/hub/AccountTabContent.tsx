@@ -9,6 +9,7 @@ import {
 import type { ReturnTicketData } from "../ReturnRequestModal";
 import {
   OverviewTab,
+  AccountOverviewSkeleton,
   ProfileTab,
   AddressesTab,
   OrdersTab,
@@ -24,6 +25,7 @@ interface AccountTabContentProps {
   activeTab: AccountTabKey;
   user: CustomerUser;
   orders: Order[];
+  isLoadingOrders?: boolean;
   wishlistItems: Product[];
   reviews: CustomerReview[];
   returnTickets: ReturnTicketData[];
@@ -51,6 +53,7 @@ export function AccountTabContent({
   activeTab,
   user,
   orders,
+  isLoadingOrders = false,
   wishlistItems,
   reviews,
   returnTickets,
@@ -69,10 +72,14 @@ export function AccountTabContent({
 }: AccountTabContentProps) {
   switch (activeTab) {
     case "overview":
+      if (isLoadingOrders) {
+        return <AccountOverviewSkeleton />;
+      }
       return (
         <OverviewTab
           user={user}
           orders={orders}
+          isLoadingOrders={isLoadingOrders}
           onSelectTab={onSelectTab}
         />
       );
