@@ -205,10 +205,16 @@ export function CustomerAccountHub() {
 
   // Update URL using router.push for Next.js router & browser history stack integration
   const handleSelectTab = useCallback(
-    (tab: AccountTabKey) => {
+    (tab: AccountTabKey, extraParams?: Record<string, string>) => {
       setActiveTabState(tab);
       setMobileSubScreen(true);
-      router.push(`/account?tab=${tab}`, { scroll: false });
+      const params = new URLSearchParams({ tab });
+      if (extraParams) {
+        Object.entries(extraParams).forEach(([k, v]) => {
+          if (v) params.set(k, v);
+        });
+      }
+      router.push(`/account?${params.toString()}`, { scroll: false });
     },
     [router],
   );

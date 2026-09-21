@@ -14,7 +14,7 @@ interface OverviewTabProps {
   user: CustomerUser;
   orders: Order[];
   isLoadingOrders?: boolean;
-  onSelectTab: (tab: AccountTabKey) => void;
+  onSelectTab: (tab: AccountTabKey, extraParams?: Record<string, string>) => void;
 }
 
 export function OverviewTab({
@@ -215,7 +215,7 @@ export function OverviewTab({
                 {getStatusBadge(latestOrder.status)}
                 <button
                   type="button"
-                  onClick={() => onSelectTab("tracking")}
+                  onClick={() => onSelectTab("tracking", { orderId: latestOrder.orderNumber })}
                   className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 px-3.5 py-1.5 text-xs font-bold shadow-xs shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                 >
                   <Truck className="h-3.5 w-3.5" />
@@ -244,27 +244,30 @@ export function OverviewTab({
                       {!isLast && (
                         <div
                           className={cn(
-                            "absolute left-[calc(50%+24px)] right-[calc(-50%+24px)] top-5 h-0.5 -translate-y-1/2 z-0 pointer-events-none transition-all duration-300",
-                            nextStepComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                            "absolute left-[calc(50%+22px)] right-[calc(-50%+22px)] top-5 h-[3px] -translate-y-1/2 z-0 pointer-events-none rounded-full transition-all duration-500",
+                            nextStepComplete
+                              ? "bg-gradient-to-r from-amber-500 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]"
+                              : "bg-muted/80 dark:bg-zinc-800/80"
                           )}
                         />
                       )}
 
-                      {/* Node Icon Circle: Solid background + z-20 */}
+                      {/* Node Icon Circle: Borderless, high-end solid/subtle glass surface */}
                       <div
                         className={cn(
-                          "relative z-20 flex h-10 w-10 items-center justify-center rounded-2xl border-2 transition-all duration-300",
+                          "relative z-20 flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300",
                           isCurrent
-                            ? "bg-amber-500 border-amber-400 text-zinc-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] ring-4 ring-amber-500/20 scale-110"
+                            ? "bg-gradient-to-br from-amber-400 to-amber-500 text-zinc-950 shadow-[0_4px_20px_rgba(245,158,11,0.45)] ring-4 ring-amber-500/20 scale-110"
                             : isComplete
-                            ? "bg-card bg-amber-500/20 border-amber-500 text-amber-500"
-                            : "bg-card border-border/70 text-muted-foreground"
+                            ? "bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 shadow-xs"
+                            : "bg-muted/60 dark:bg-zinc-800/60 text-muted-foreground/60"
                         )}
                       >
-                        {isComplete ? (
-                          <Check className="h-4 w-4 stroke-[3]" />
-                        ) : (
-                          <Icon className="h-4 w-4 stroke-[2.2]" />
+                        <Icon className="h-4.5 w-4.5 stroke-[2.2]" />
+                        {isComplete && (
+                          <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-zinc-950 shadow-xs ring-2 ring-card">
+                            <Check className="h-2.5 w-2.5 stroke-[3.5]" />
+                          </span>
                         )}
                       </div>
 
@@ -315,27 +318,30 @@ export function OverviewTab({
                       {!isLast && (
                         <div
                           className={cn(
-                            "absolute left-[17px] top-9 w-0.5 bottom-0 transition-colors duration-300",
-                            isComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                            "absolute left-[18px] top-9 w-[3px] -translate-x-1/2 bottom-0 rounded-full transition-colors duration-500",
+                            isComplete
+                              ? "bg-gradient-to-b from-amber-500 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]"
+                              : "bg-muted/80 dark:bg-zinc-800/80"
                           )}
                         />
                       )}
 
-                      {/* Node Circle */}
+                      {/* Node Circle: Borderless */}
                       <div
                         className={cn(
-                          "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 transition-all duration-300",
+                          "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
                           isCurrent
-                            ? "bg-amber-500 border-amber-400 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.5)] ring-2 ring-amber-500/25"
+                            ? "bg-gradient-to-br from-amber-400 to-amber-500 text-zinc-950 shadow-[0_4px_16px_rgba(245,158,11,0.45)] ring-4 ring-amber-500/20"
                             : isComplete
-                            ? "bg-amber-500/20 border-amber-500 text-amber-500"
-                            : "bg-card border-border/70 text-muted-foreground"
+                            ? "bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 shadow-xs"
+                            : "bg-muted/60 dark:bg-zinc-800/60 text-muted-foreground/60"
                         )}
                       >
-                        {isComplete ? (
-                          <Check className="h-3.5 w-3.5 stroke-[3]" />
-                        ) : (
-                          <Icon className="h-3.5 w-3.5 stroke-[2.2]" />
+                        <Icon className="h-4 w-4 stroke-[2.2]" />
+                        {isComplete && (
+                          <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 text-zinc-950 shadow-xs ring-2 ring-card">
+                            <Check className="h-2 w-2 stroke-[3.5]" />
+                          </span>
                         )}
                       </div>
 

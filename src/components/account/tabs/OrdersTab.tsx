@@ -29,7 +29,7 @@ interface OrdersTabProps {
   orders: Order[];
   onCancelOrder: (orderNumber: string, reason: string) => void;
   onSubmitReturnTicket: (ticket: ReturnTicketData) => void;
-  onSelectTab: (tab: "overview" | "profile" | "addresses" | "orders" | "tracking" | "returns" | "wishlist" | "reviews" | "payments" | "notifications") => void;
+  onSelectTab: (tab: "overview" | "profile" | "addresses" | "orders" | "tracking" | "returns" | "wishlist" | "reviews" | "payments" | "notifications", extraParams?: Record<string, string>) => void;
   onReviewSubmitted: (newRev: {
     productId: string;
     productName: string;
@@ -319,7 +319,7 @@ export function OrdersTab({
                     {/* Live Tracking Jump */}
                     <button
                       type="button"
-                      onClick={() => onSelectTab("tracking")}
+                      onClick={() => onSelectTab("tracking", { orderId: order.orderNumber })}
                       className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-bold transition-all cursor-pointer active:scale-95"
                       title="Track live shipment"
                     >

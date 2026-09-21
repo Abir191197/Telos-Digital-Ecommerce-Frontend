@@ -35,7 +35,7 @@ interface AccountTabContentProps {
   wishlistItems: Product[];
   reviews: CustomerReview[];
   returnTickets: ReturnTicketData[];
-  onSelectTab: (tab: AccountTabKey) => void;
+  onSelectTab: (tab: AccountTabKey, extraParams?: Record<string, string>) => void;
   onUpdateUser: (data: Partial<CustomerUser>) => void;
   onAddAddress: (address: Omit<Address, "id">) => void;
   onUpdateAddress: (id: string, data: Partial<Omit<Address, "id">>) => void;

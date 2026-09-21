@@ -26,14 +26,14 @@ export function TrackingTab({ orders }: TrackingTabProps) {
   const searchParams = useSearchParams();
   const paramOrderId = searchParams.get("orderId");
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [copied, setCopied] = useState(false);
-
   // Active tracking order: Prioritize search param, then user-selected or active order
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(() => {
     if (paramOrderId) {
       const match = orders.find(
-        (o) => o.id === paramOrderId || o.orderNumber === paramOrderId
+        (o) =>
+          o.id.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.orderNumber.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.trackingNumber?.toLowerCase() === paramOrderId.toLowerCase()
       );
       if (match) return match;
     }
@@ -41,12 +41,34 @@ export function TrackingTab({ orders }: TrackingTabProps) {
     return orders.find((o) => o.status === "shipped" || o.status === "processing") || orders[0] || null;
   });
 
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (paramOrderId) {
+      const match = orders.find(
+        (o) =>
+          o.id.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.orderNumber.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.trackingNumber?.toLowerCase() === paramOrderId.toLowerCase()
+      );
+      return match ? match.orderNumber : paramOrderId;
+    }
+    return "";
+  });
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     if (paramOrderId) {
       const match = orders.find(
-        (o) => o.id === paramOrderId || o.orderNumber === paramOrderId
+        (o) =>
+          o.id.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.orderNumber.toLowerCase() === paramOrderId.toLowerCase() ||
+          o.trackingNumber?.toLowerCase() === paramOrderId.toLowerCase()
       );
-      if (match) setSelectedOrder(match);
+      if (match) {
+        setSelectedOrder(match);
+        setSearchQuery(match.orderNumber);
+      } else {
+        setSearchQuery(paramOrderId);
+      }
     }
   }, [paramOrderId, orders]);
 
@@ -241,51 +263,49 @@ export function TrackingTab({ orders }: TrackingTabProps) {
                 const isLast = idx === milestones.length - 1;
                 const nextStepComplete = idx + 1 <= (selectedOrder.status === "delivered" ? 3 : selectedOrder.status === "shipped" ? 2 : selectedOrder.status === "processing" ? 1 : 0);
 
-                // Stage semantic accents
-                const stageTheme =
-                  idx === 0
-                    ? { activeBorder: "border-blue-500", activeBg: "bg-blue-500", activeText: "text-blue-600 dark:text-blue-400", glow: "shadow-[0_0_20px_rgba(59,130,246,0.5)]", doneBg: "bg-blue-500/15 border-blue-500 text-blue-500" }
-                    : idx === 1
-                    ? { activeBorder: "border-purple-500", activeBg: "bg-purple-500", activeText: "text-purple-600 dark:text-purple-400", glow: "shadow-[0_0_20px_rgba(168,85,247,0.5)]", doneBg: "bg-purple-500/15 border-purple-500 text-purple-500" }
-                    : idx === 2
-                    ? { activeBorder: "border-amber-500", activeBg: "bg-amber-500", activeText: "text-amber-600 dark:text-amber-400", glow: "shadow-[0_0_20px_rgba(245,158,11,0.5)]", doneBg: "bg-amber-500/15 border-amber-500 text-amber-500" }
-                    : { activeBorder: "border-emerald-500", activeBg: "bg-emerald-500", activeText: "text-emerald-600 dark:text-emerald-400", glow: "shadow-[0_0_20px_rgba(16,185,129,0.5)]", doneBg: "bg-emerald-500/15 border-emerald-500 text-emerald-500" };
-
                 return (
                   <div key={step.title} className="relative flex flex-col items-center text-center">
-                    {/* Segment connector strictly between this node and next node */}
+                    {/* Segment connector line strictly between this node and next node */}
                     {!isLast && (
                       <div
                         className={cn(
-                          "absolute left-[calc(50%+24px)] right-[calc(-50%+24px)] top-5 h-0.5 -translate-y-1/2 z-0 pointer-events-none transition-all duration-300",
-                          nextStepComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                          "absolute left-[calc(50%+22px)] right-[calc(-50%+22px)] top-5 h-[3px] -translate-y-1/2 z-0 pointer-events-none rounded-full transition-all duration-500",
+                          nextStepComplete
+                            ? "bg-gradient-to-r from-amber-500 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]"
+                            : "bg-muted/80 dark:bg-zinc-800/80"
                         )}
                       />
                     )}
 
-                    {/* Node Icon Circle: Solid background + z-20 so line NEVER shows over or inside icon */}
+                    {/* Node Icon Circle: Borderless, high-end solid/subtle glass surface */}
                     <div
                       className={cn(
-                        "relative z-20 flex h-10 w-10 items-center justify-center rounded-2xl border-2 transition-all duration-300",
+                        "relative z-20 flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300",
                         isCurrent
-                          ? `${stageTheme.activeBg} ${stageTheme.activeBorder} text-zinc-950 ${stageTheme.glow} ring-4 ring-amber-500/20 scale-110`
+                          ? "bg-gradient-to-br from-amber-400 to-amber-500 text-zinc-950 shadow-[0_4px_20px_rgba(245,158,11,0.45)] ring-4 ring-amber-500/20 scale-110"
                           : isComplete
-                          ? `bg-card ${stageTheme.doneBg}`
-                          : "bg-card border-border/70 text-muted-foreground"
+                          ? "bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 shadow-xs"
+                          : "bg-muted/60 dark:bg-zinc-800/60 text-muted-foreground/60"
                       )}
                     >
-                      {isComplete ? (
-                        <Check className="h-4 w-4 stroke-[3]" />
-                      ) : (
-                        <Icon className="h-4 w-4 stroke-[2.2]" />
+                      <Icon className="h-4.5 w-4.5 stroke-[2.2]" />
+                      {/* Micro check badge for completed steps */}
+                      {isComplete && (
+                        <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-zinc-950 shadow-xs ring-2 ring-card">
+                          <Check className="h-2.5 w-2.5 stroke-[3.5]" />
+                        </span>
                       )}
                     </div>
 
                     <div className="mt-2.5 space-y-0.5 relative z-10 px-1">
                       <span
                         className={cn(
-                          "text-xs font-bold block",
-                          isCurrent ? `${stageTheme.activeText} font-black` : isComplete ? "text-foreground" : "text-muted-foreground"
+                          "text-xs font-bold block transition-colors",
+                          isCurrent
+                            ? "text-amber-600 dark:text-amber-400 font-black"
+                            : isComplete
+                            ? "text-foreground"
+                            : "text-muted-foreground"
                         )}
                       >
                         {step.title}
@@ -310,41 +330,48 @@ export function TrackingTab({ orders }: TrackingTabProps) {
                 const isLast = idx === milestones.length - 1;
                 const nextStepComplete = idx + 1 <= (selectedOrder.status === "delivered" ? 3 : selectedOrder.status === "shipped" ? 2 : selectedOrder.status === "processing" ? 1 : 0);
 
-                const stageTheme =
-                  idx === 0
-                    ? { activeBg: "bg-blue-500 text-zinc-950", activeText: "text-blue-600 dark:text-blue-400", doneBg: "bg-blue-500/15 border-blue-500 text-blue-500" }
-                    : idx === 1
-                    ? { activeBg: "bg-purple-500 text-zinc-950", activeText: "text-purple-600 dark:text-purple-400", doneBg: "bg-purple-500/15 border-purple-500 text-purple-500" }
-                    : idx === 2
-                    ? { activeBg: "bg-amber-500 text-zinc-950", activeText: "text-amber-600 dark:text-amber-400", doneBg: "bg-amber-500/15 border-amber-500 text-amber-500" }
-                    : { activeBg: "bg-emerald-500 text-zinc-950", activeText: "text-emerald-600 dark:text-emerald-400", doneBg: "bg-emerald-500/15 border-emerald-500 text-emerald-500" };
-
                 return (
                   <div key={step.title} className="relative flex items-start gap-3.5">
                     {/* Vertical connector line segment */}
                     {!isLast && (
                       <div
                         className={cn(
-                          "absolute left-4.5 top-9 bottom-[-16px] w-0.5 z-0 transition-colors duration-300",
-                          nextStepComplete ? "bg-amber-500" : "bg-border/60 dark:bg-zinc-800"
+                          "absolute left-[18px] top-9 bottom-[-16px] w-[3px] -translate-x-1/2 z-0 rounded-full transition-colors duration-500",
+                          nextStepComplete
+                            ? "bg-gradient-to-b from-amber-500 to-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]"
+                            : "bg-muted/80 dark:bg-zinc-800/80"
                         )}
                       />
                     )}
 
                     <div
                       className={cn(
-                        "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 transition-all",
+                        "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
                         isCurrent
-                          ? `${stageTheme.activeBg} border-amber-400 shadow-md ring-2 ring-amber-500/20`
+                          ? "bg-gradient-to-br from-amber-400 to-amber-500 text-zinc-950 shadow-[0_4px_16px_rgba(245,158,11,0.45)] ring-4 ring-amber-500/20"
                           : isComplete
-                          ? stageTheme.doneBg
-                          : "bg-card border-border/70 text-muted-foreground"
+                          ? "bg-amber-500/15 dark:bg-amber-400/15 text-amber-600 dark:text-amber-400 shadow-xs"
+                          : "bg-muted/60 dark:bg-zinc-800/60 text-muted-foreground/60"
                       )}
                     >
-                      {isComplete ? <Check className="h-4 w-4 stroke-[3]" /> : <Icon className="h-4 w-4 stroke-[2]" />}
+                      <Icon className="h-4 w-4 stroke-[2.2]" />
+                      {isComplete && (
+                        <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 text-zinc-950 shadow-xs ring-2 ring-card">
+                          <Check className="h-2 w-2 stroke-[3.5]" />
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 space-y-0.5 pt-0.5">
-                      <span className={cn("text-xs font-bold block", isCurrent ? `${stageTheme.activeText} font-black` : "text-foreground")}>
+                      <span
+                        className={cn(
+                          "text-xs font-bold block transition-colors",
+                          isCurrent
+                            ? "text-amber-600 dark:text-amber-400 font-black"
+                            : isComplete
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
                         {step.title}
                       </span>
                       <p className="text-[11px] text-muted-foreground leading-snug">
