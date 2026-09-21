@@ -21,3 +21,8 @@ export * from "./AdminProductsSkeleton";
 export * from "./ProductPreviewSidebar";
 export * from "./ProductFormActionsBar";
 export * from "./useProductEditor";
+export * from "./ProductsKpiGrid";
+export * from "./ProductsHeaderBanner";
+export * from "./ProductsMobileSearchBar";
+export * from "./ProductsPagination";
+export * from "./useAdminProductsManager";
