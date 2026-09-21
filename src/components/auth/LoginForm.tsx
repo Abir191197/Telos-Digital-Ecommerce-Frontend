@@ -130,7 +130,7 @@ export function LoginForm() {
         window.location.assign(ROUTES.DASHBOARD);
       } else {
         await handlePendingAction();
-        window.location.assign(getRedirectUrl(ROUTES.ACCOUNT));
+        window.location.assign(getRedirectUrl(ROUTES.HOME));
       }
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
@@ -147,7 +147,7 @@ export function LoginForm() {
         const response = await login(DEMO_CUSTOMER).unwrap();
         persistSession(response.data.accessToken, response.data.user);
         await handlePendingAction();
-        window.location.assign(getRedirectUrl(ROUTES.ACCOUNT));
+        window.location.assign(getRedirectUrl(ROUTES.HOME));
       } catch (error) {
         setErrorMessage(getErrorMessage(error));
       }

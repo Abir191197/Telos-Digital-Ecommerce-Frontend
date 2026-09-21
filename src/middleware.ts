@@ -67,7 +67,7 @@ export function middleware(request: NextRequest) {
       callbackUrl && callbackUrl.startsWith("/") && !authPaths.some((p) => callbackUrl.startsWith(p))
         ? callbackUrl
         : null;
-    const defaultPath = authRole === "SUPER_ADMIN" ? "/dashboard" : "/account";
+    const defaultPath = authRole === "SUPER_ADMIN" ? "/dashboard" : "/";
     return NextResponse.redirect(new URL(safeCallback || defaultPath, request.url));
   }
 
