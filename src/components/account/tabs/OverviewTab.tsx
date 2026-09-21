@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { AppImage } from "@/components/shared";
+import { ROUTES } from "@/constants";
 import { Sparkles, Edit3, Package, Truck, MapPin, Check, ChevronRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CustomerUser } from "@/stores";
@@ -385,9 +387,10 @@ export function OverviewTab({
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2 overflow-hidden py-0.5">
                   {latestOrder.items.slice(0, 3).map((item, i) => (
-                    <div
+                    <Link
                       key={item.id || i}
-                      className="relative h-8 w-8 rounded-xl border-2 border-background overflow-hidden bg-muted shadow-2xs shrink-0"
+                      href={ROUTES.PRODUCT_DETAIL(item.productId)}
+                      className="relative h-8 w-8 rounded-xl border-2 border-background overflow-hidden bg-muted shadow-2xs shrink-0 hover:scale-110 hover:z-20 transition-transform block"
                       title={item.productName}
                     >
                       <AppImage
@@ -397,7 +400,7 @@ export function OverviewTab({
                         className="object-cover"
                         fallbackIconSize={14}
                       />
-                    </div>
+                    </Link>
                   ))}
                   {latestOrder.items.length > 3 && (
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl border-2 border-background bg-muted text-[10px] font-bold text-foreground shrink-0 shadow-2xs">

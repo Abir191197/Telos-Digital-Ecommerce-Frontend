@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { AppImage } from "@/components/shared";
+import { ROUTES } from "@/constants";
 import {
   Package,
   Truck,
@@ -216,33 +218,45 @@ export function OrdersTab({
 
                 {/* 2. Compact Items Row */}
                 <div className="space-y-2">
-                  {visibleItems.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl overflow-hidden bg-muted/40 border border-border/40">
-                          <AppImage
-                            src={item.productThumbnail}
-                            alt={item.productName}
-                            fill
-                            className="object-cover"
-                            fallbackIconSize={18}
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs sm:text-sm font-bold text-foreground truncate">
-                            {item.productName}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {item.variantName ? `${item.variantName} • ` : ""}Qty: {item.quantity}
-                          </p>
-                        </div>
-                      </div>
+                  {visibleItems.map((item) => {
+                    const productUrl = ROUTES.PRODUCT_DETAIL(item.productId);
 
-                      <div className="text-xs sm:text-sm font-bold text-foreground shrink-0 text-right">
-                        ৳{item.subtotal.toLocaleString()}
+                    return (
+                      <div key={item.id} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Link
+                            href={productUrl}
+                            className="group/thumb relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl overflow-hidden bg-muted/40 border border-border/40 hover:border-amber-500/50 transition-colors shadow-2xs block"
+                            title={`View ${item.productName}`}
+                          >
+                            <AppImage
+                              src={item.productThumbnail}
+                              alt={item.productName}
+                              fill
+                              className="object-cover group-hover/thumb:scale-108 transition-transform duration-300"
+                              fallbackIconSize={18}
+                            />
+                          </Link>
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={productUrl}
+                              className="text-xs sm:text-sm font-bold text-foreground truncate block hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                              title={`View ${item.productName}`}
+                            >
+                              {item.productName}
+                            </Link>
+                            <p className="text-[11px] text-muted-foreground">
+                              {item.variantName ? `${item.variantName} • ` : ""}Qty: {item.quantity}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-xs sm:text-sm font-bold text-foreground shrink-0 text-right">
+                          ৳{item.subtotal.toLocaleString()}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {/* Multi-item expander trigger */}
                   {isMultiItem && (
