@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { mapBackendUserToCustomerUser, useAuthStore } from "@/stores";
 import { ROUTES } from "@/constants";
 import {
@@ -43,6 +43,8 @@ const getErrorMessage = (error: unknown) => {
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const setAuth = useAuthStore((state) => state.setAuth);
   const [registerCustomer, { isLoading: isRegisterLoading }] =
     useRegisterMutation();
@@ -66,6 +68,10 @@ export function RegisterForm() {
     setAuthCookies(accessToken, user.role);
   };
 
+  const getRedirectUrl = (fallback: string) => {
+    return callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : fallback;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !phone || !password) return;
@@ -79,16 +85,16 @@ export function RegisterForm() {
         password,
       }).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      router.push(ROUTES.ACCOUNT);
+      window.location.assign(getRedirectUrl(ROUTES.ACCOUNT));
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-r from-emerald-500/10 via-emerald-500/[0.03] to-background dark:from-emerald-950/25 dark:via-zinc-950 dark:to-background">
+    <div className="relative w-full overflow-hidden bg-background lg:bg-gradient-to-r lg:from-emerald-500/10 lg:via-emerald-500/[0.03] lg:to-background dark:lg:from-emerald-950/25 dark:lg:via-zinc-950 dark:lg:to-background">
       {/* Directional Hero Ambient Lighting: intense at left, fading softly to the right */}
-      <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-0 select-none overflow-hidden hidden lg:block" aria-hidden="true">
         {/* Intense primary radial burst at top-left */}
         <div className="absolute -top-40 -left-40 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent blur-[130px] dark:from-emerald-500/15 dark:via-teal-600/8" />
         {/* Secondary mid-left glow bridging across */}
@@ -100,8 +106,8 @@ export function RegisterForm() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-16 min-h-[calc(100vh-8rem)] flex items-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
           
-          {/* Left Hero Storytelling Content */}
-          <div className="lg:col-span-6 xl:col-span-6 space-y-8 text-foreground">
+          {/* Left Hero Storytelling Content (Hidden on mobile/tablet to show form only) */}
+          <div className="hidden lg:block lg:col-span-6 xl:col-span-6 space-y-8 text-foreground">
             {/* Logo */}
             <div>
               <Link

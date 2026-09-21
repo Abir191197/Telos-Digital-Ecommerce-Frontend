@@ -70,6 +70,19 @@ export function AboutCorporateCta() {
                 <span>+880 9610-000000 (Sat - Thu, 9:00 AM - 8:00 PM)</span>
               </div>
             </div>
+
+            <div className="pt-2 mt-1 border-t border-border/60 text-[11px] text-muted-foreground">
+              A digital commerce initiative created & engineered by{" "}
+              <a
+                href="https://www.telosdigital.agency/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-amber-500 hover:text-amber-400 underline underline-offset-2 transition-colors"
+              >
+                Telos Digital
+              </a>
+              .
+            </div>
           </div>
         </div>
       </m.div>

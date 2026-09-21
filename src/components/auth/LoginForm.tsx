@@ -127,10 +127,10 @@ export function LoginForm() {
       const isAdmin =
         userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "admin";
       if (isAdmin) {
-        router.push(ROUTES.DASHBOARD);
+        window.location.assign(ROUTES.DASHBOARD);
       } else {
         await handlePendingAction();
-        router.push(getRedirectUrl(ROUTES.ACCOUNT));
+        window.location.assign(getRedirectUrl(ROUTES.ACCOUNT));
       }
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
@@ -147,7 +147,7 @@ export function LoginForm() {
         const response = await login(DEMO_CUSTOMER).unwrap();
         persistSession(response.data.accessToken, response.data.user);
         await handlePendingAction();
-        router.push(getRedirectUrl(ROUTES.ACCOUNT));
+        window.location.assign(getRedirectUrl(ROUTES.ACCOUNT));
       } catch (error) {
         setErrorMessage(getErrorMessage(error));
       }
@@ -157,7 +157,7 @@ export function LoginForm() {
       try {
         const response = await adminLogin(DEMO_ADMIN).unwrap();
         persistSession(response.data.accessToken, response.data.user);
-        router.push(ROUTES.DASHBOARD);
+        window.location.assign(ROUTES.DASHBOARD);
       } catch (error) {
         setErrorMessage(getErrorMessage(error));
       }
@@ -165,9 +165,9 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-r from-amber-500/10 via-amber-500/[0.03] to-background dark:from-amber-950/25 dark:via-zinc-950 dark:to-background">
+    <div className="relative w-full overflow-hidden bg-background lg:bg-gradient-to-r lg:from-amber-500/10 lg:via-amber-500/[0.03] lg:to-background dark:lg:from-amber-950/25 dark:lg:via-zinc-950 dark:lg:to-background">
       {/* Directional Hero Ambient Lighting: intense at left, fading softly to the right */}
-      <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-0 select-none overflow-hidden hidden lg:block" aria-hidden="true">
         {/* Intense primary radial burst at top-left */}
         <div className="absolute -top-40 -left-40 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent blur-[130px] dark:from-amber-500/15 dark:via-orange-600/8" />
         {/* Secondary mid-left glow bridging across */}
@@ -179,8 +179,8 @@ export function LoginForm() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-16 min-h-[calc(100vh-8rem)] flex items-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
           
-          {/* Left Hero Storytelling Content */}
-          <div className="lg:col-span-6 xl:col-span-6 space-y-8 text-foreground">
+          {/* Left Hero Storytelling Content (Hidden on mobile/tablet to show form only) */}
+          <div className="hidden lg:block lg:col-span-6 xl:col-span-6 space-y-8 text-foreground">
             {/* Logo */}
             <div>
               <Link

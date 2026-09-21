@@ -62,8 +62,13 @@ export function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from auth routes
   if (isAuthRoute && token) {
-    const redirectPath = authRole === "SUPER_ADMIN" ? "/dashboard" : "/account";
-    return NextResponse.redirect(new URL(redirectPath, request.url));
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+    const safeCallback =
+      callbackUrl && callbackUrl.startsWith("/") && !authPaths.some((p) => callbackUrl.startsWith(p))
+        ? callbackUrl
+        : null;
+    const defaultPath = authRole === "SUPER_ADMIN" ? "/dashboard" : "/account";
+    return NextResponse.redirect(new URL(safeCallback || defaultPath, request.url));
   }
 
   return NextResponse.next();
