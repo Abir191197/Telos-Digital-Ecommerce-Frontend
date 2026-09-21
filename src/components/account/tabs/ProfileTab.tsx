@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import {
   User,
   Phone,
@@ -167,17 +167,19 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
                 title="Click to upload profile photo"
                 className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-amber-500/80 overflow-hidden bg-muted/30 flex items-center justify-center font-black text-amber-600 text-xl sm:text-2xl shadow-md shadow-amber-500/20 cursor-pointer hover:opacity-90 transition-opacity"
               >
-                {(isEditingProfile ? profileAvatar : user.avatar) ? (
-                  <Image
-                    src={(isEditingProfile ? profileAvatar : user.avatar) || ""}
-                    alt={profileName || user.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  (profileName || user.name).charAt(0)
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-0.5">
+                <AppImage
+                  src={(isEditingProfile ? profileAvatar : user.avatar) || ""}
+                  alt={profileName || user.name}
+                  fill
+                  className="object-cover"
+                  fallbackIcon={
+                    <span className="font-black text-amber-600 text-xl sm:text-2xl">
+                      {(profileName || user.name).charAt(0).toUpperCase()}
+                    </span>
+                  }
+                  containerClassName="p-0 bg-transparent"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-0.5 z-10">
                   <Upload className="h-3.5 w-3.5" />
                   <span>Change</span>
                 </div>
@@ -537,16 +539,14 @@ export function ProfileTab({ user, orders, onUpdateUser }: ProfileTabProps) {
             <div className="rounded-2xl border border-border/70 bg-muted/20 p-4 space-y-2.5 text-xs">
               <div className="flex items-center gap-3 pb-2 border-b border-border/50">
                 <div className="relative h-12 w-12 shrink-0 rounded-xl border border-amber-500/60 overflow-hidden bg-muted/40 flex items-center justify-center font-bold text-amber-600">
-                  {profileAvatar ? (
-                    <Image
-                      src={profileAvatar}
-                      alt={profileName}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    profileName.charAt(0)
-                  )}
+                  <AppImage
+                    src={profileAvatar}
+                    alt={profileName}
+                    fill
+                    className="object-cover"
+                    fallbackIcon={<span className="font-bold text-amber-600 text-sm">{profileName.charAt(0)}</span>}
+                    containerClassName="p-0 bg-transparent"
+                  />
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">

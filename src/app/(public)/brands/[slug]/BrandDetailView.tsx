@@ -2,7 +2,6 @@
 
 import React, { use } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ROUTES } from "@/constants";
 import { ChevronRight, Award, ShieldCheck, Package, Sparkles } from "lucide-react";
 import { useGetBrandBySlugQuery, useGetBrandsQuery } from "@/services/api/brands/brandApi";
@@ -227,19 +226,12 @@ export function BrandDetailView({ params }: Props) {
                     >
                       {/* Brand Image */}
                       <div className="relative h-16 sm:h-20 w-full flex items-center justify-center overflow-hidden mb-3">
-                        {otherBrand.image ? (
-                          <Image
-                            src={otherBrand.image}
-                            alt={otherBrand.name}
-                            width={80}
-                            height={80}
-                            className="object-contain max-h-full transition-transform duration-300 group-hover:scale-110"
-                          />
-                        ) : (
-                          <span className="text-3xl font-black text-foreground/60">
-                            {otherBrand.name.charAt(0)}
-                          </span>
-                        )}
+                        <BrandLogoDisplay
+                          name={otherBrand.name}
+                          slug={otherBrand.slug}
+                          image={otherBrand.image}
+                          className="h-10 sm:h-12 max-w-[90px] object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
                       </div>
 
                       {/* Brand Info */}

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { X, Printer, Download, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Order } from "@/types/order.types";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { AppImage } from "@/components/shared";
 import {
   Heart,
   LayoutList,
@@ -122,11 +122,12 @@ export function WishlistTab({
                   href={`/products/${item.slug || item.id}`}
                   className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs group cursor-pointer border border-border/40"
                 >
-                  <Image
+                  <AppImage
                     src={item.thumbnail}
                     alt={item.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    fallbackIconSize={20}
                   />
                 </Link>
                 <div className="min-w-0 flex-1 space-y-1">
@@ -195,11 +196,12 @@ export function WishlistTab({
                   href={`/products/${item.slug || item.id}`}
                   className="relative aspect-square w-full rounded-2xl overflow-hidden bg-muted/30 block group cursor-pointer shadow-2xs border border-border/40"
                 >
-                  <Image
+                  <AppImage
                     src={item.thumbnail}
                     alt={item.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    fallbackIconSize={24}
                   />
                   <button
                     type="button"

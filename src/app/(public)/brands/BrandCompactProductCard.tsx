@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ProductImageDisplay } from "@/components/shared";
 import { usePathname, useRouter } from "next/navigation";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { Plus, Check, Trash2, X, CreditCard, ShieldCheck } from "lucide-react";
 
 interface PaymentMethod {
@@ -144,11 +144,12 @@ export function PaymentsTab() {
             <div className="flex items-center justify-between">
               {method.logoUrl ? (
                 <div className="relative h-8 w-14 rounded-xl bg-white dark:bg-white/95 p-1 border border-border/40 overflow-hidden shadow-2xs">
-                  <Image
+                  <AppImage
                     src={method.logoUrl}
                     alt={method.title}
                     fill
                     className="object-contain p-0.5"
+                    fallbackIconSize={14}
                   />
                 </div>
               ) : (
@@ -246,7 +247,7 @@ export function PaymentsTab() {
                 >
                   {item.logo ? (
                     <div className="relative h-6 w-10">
-                      <Image src={item.logo} alt={item.label} fill className="object-contain" />
+                      <AppImage src={item.logo} alt={item.label} fill className="object-contain" fallbackIconSize={12} />
                     </div>
                   ) : (
                     <CreditCard className="h-6 w-6 text-foreground" />

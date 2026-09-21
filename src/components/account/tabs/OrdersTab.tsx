@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import {
   Package,
   Truck,
@@ -220,11 +220,12 @@ export function OrdersTab({
                     <div key={item.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl overflow-hidden bg-muted/40 border border-border/40">
-                          <Image
+                          <AppImage
                             src={item.productThumbnail}
                             alt={item.productName}
                             fill
                             className="object-cover"
+                            fallbackIconSize={18}
                           />
                         </div>
                         <div className="min-w-0 flex-1">

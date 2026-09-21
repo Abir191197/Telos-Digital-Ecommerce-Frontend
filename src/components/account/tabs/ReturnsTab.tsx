@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { RotateCcw } from "lucide-react";
 import type { ReturnTicketData } from "../ReturnRequestModal";
 
@@ -66,11 +66,12 @@ export function ReturnsTab({ returnTickets, onSelectTab }: ReturnsTabProps) {
 
               <div className="flex items-center gap-3">
                 <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
-                  <Image
+                  <AppImage
                     src={ticket.productThumbnail}
                     alt={ticket.productName}
                     fill
                     className="object-cover"
+                    fallbackIconSize={16}
                   />
                 </div>
                 <div className="min-w-0 flex-1 text-xs">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { X, Upload, RotateCcw, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
 import { Order, OrderItem } from "@/types/order.types";
 import { cn } from "@/lib/utils";
@@ -120,12 +120,13 @@ export function ReturnRequestModal({
                       : "border-border/70 hover:bg-muted/40"
                   )}
                 >
-                  <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
-                    <Image
+                  <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-muted/40 border border-border/60 shrink-0">
+                    <AppImage
                       src={item.productThumbnail}
                       alt={item.productName}
                       fill
                       className="object-cover"
+                      fallbackIconSize={16}
                     />
                   </div>
                   <div className="min-w-0 flex-1">

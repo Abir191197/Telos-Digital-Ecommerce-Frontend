@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import {
   MessageSquarePlus,
   History,
@@ -165,11 +165,12 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                   >
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <div className="relative h-16 w-16 sm:h-18 sm:w-18 shrink-0 rounded-2xl overflow-hidden bg-muted/40 shadow-2xs border border-border/40">
-                        <Image
+                        <AppImage
                           src={rev.productThumbnail}
                           alt={rev.productName}
                           fill
                           className="object-cover"
+                          fallbackIconSize={20}
                         />
                       </div>
                       <div className="min-w-0 flex-1 space-y-1">
@@ -238,11 +239,12 @@ export function ReviewsTab({ reviews, onReviewUpdate }: ReviewsTabProps) {
                     <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/40">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="relative h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-muted/40 shadow-2xs border border-border/40">
-                          <Image
+                          <AppImage
                             src={rev.productThumbnail}
                             alt={rev.productName}
                             fill
                             className="object-cover"
+                            fallbackIconSize={16}
                           />
                         </div>
                         <div className="min-w-0">

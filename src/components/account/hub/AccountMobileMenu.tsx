@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { User, ShieldCheck, Edit3, ChevronRight, LogOut } from "lucide-react";
 import type { CustomerUser } from "@/stores/auth.store";
 import type { Order } from "@/types/order.types";
@@ -32,16 +32,13 @@ export function AccountMobileMenu({
       <div className="rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 p-4.5 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.18),0_8px_20px_-4px_rgba(245,158,11,0.1)] transition-shadow duration-300">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 shrink-0 rounded-2xl border-2 border-amber-500/80 shadow-md shadow-amber-500/20 flex items-center justify-center bg-muted/40 overflow-hidden text-foreground">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <User className="h-9 w-9 stroke-[1.5] text-muted-foreground" />
-            )}
+            <AppImage
+              src={user.avatar}
+              alt={user.name}
+              fill
+              className="object-cover"
+              fallbackIcon={<User className="h-8 w-8 stroke-[1.5] text-muted-foreground" />}
+            />
           </div>
 
           <div className="min-w-0 flex-1 space-y-1">

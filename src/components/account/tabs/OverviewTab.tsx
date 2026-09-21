@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { Sparkles, Edit3, Package, Truck, MapPin, Check, ChevronRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CustomerUser } from "@/stores";
@@ -67,18 +67,13 @@ export function OverviewTab({
       <div className="order-1 rounded-3xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card/95 to-amber-500/[0.04] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.06),0_2px_8px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_-8px_rgba(245,158,11,0.2),0_8px_20px_-4px_rgba(245,158,11,0.12)] transition-shadow duration-300">
         <div className="flex items-center gap-4">
           <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500/80 shadow-md shadow-amber-500/20 bg-muted/40">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="h-full w-full flex items-center justify-center font-black text-xl text-amber-600 bg-amber-500/10">
-                {user.name.charAt(0)}
-              </div>
-            )}
+            <AppImage
+              src={user.avatar}
+              alt={user.name}
+              fill
+              className="object-cover"
+              fallbackIcon={<span className="font-bold text-lg text-amber-600">{user.name.charAt(0).toUpperCase()}</span>}
+            />
           </div>
 
           <div className="space-y-1 min-w-0">
@@ -395,11 +390,12 @@ export function OverviewTab({
                       className="relative h-8 w-8 rounded-xl border-2 border-background overflow-hidden bg-muted shadow-2xs shrink-0"
                       title={item.productName}
                     >
-                      <Image
+                      <AppImage
                         src={item.productThumbnail}
                         alt={item.productName}
                         fill
                         className="object-cover"
+                        fallbackIconSize={14}
                       />
                     </div>
                   ))}
@@ -518,11 +514,12 @@ export function OverviewTab({
               <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60">
                 <div className="flex items-center gap-3">
                   <div className="relative h-9 w-14 rounded-xl bg-white dark:bg-white/95 p-1 flex items-center justify-center border border-border/40 shadow-2xs shrink-0 overflow-hidden">
-                    <Image
+                    <AppImage
                       src="/images/payment-partners/bkash.png"
                       alt="bKash"
                       fill
                       className="object-contain p-1"
+                      fallbackIconSize={16}
                     />
                   </div>
                   <div>
