@@ -13,6 +13,9 @@ import {
   Home,
   MapPin,
   Plus,
+  AlertTriangle,
+  Phone,
+  Edit2,
 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
@@ -25,6 +28,7 @@ interface AddressStepProps {
   onSelectSavedAddress?: (addr: Address) => void;
   onOpenChangeModal?: () => void;
   onOpenAddModal?: () => void;
+  onOpenEditModal?: (addr: Address) => void;
   onContinue?: () => void;
 }
 
@@ -37,6 +41,7 @@ export function AddressStep({
   onSelectSavedAddress,
   onOpenChangeModal,
   onOpenAddModal,
+  onOpenEditModal,
 }: AddressStepProps) {
   const { register } = form;
 
@@ -169,8 +174,33 @@ export function AddressStep({
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border/30 mt-2.5 text-[10px] font-mono text-muted-foreground">
-                  {addr.phone}
+                <div className="pt-2 border-t border-border/30 mt-2.5 flex items-center justify-between gap-1 text-[10px]">
+                  {addr.phone && addr.phone.trim() ? (
+                    <span className="font-mono text-muted-foreground flex items-center gap-1">
+                      <Phone className="h-3 w-3 text-muted-foreground/60" />
+                      <span>{addr.phone}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>Phone required</span>
+                    </span>
+                  )}
+
+                  {onOpenEditModal && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenEditModal(addr);
+                      }}
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:underline p-0.5 cursor-pointer ml-auto"
+                      title="Edit this address"
+                    >
+                      <Edit2 className="h-2.5 w-2.5" />
+                      <span>{addr.phone && addr.phone.trim() ? "Edit" : "Add Phone"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );

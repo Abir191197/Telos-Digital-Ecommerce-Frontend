@@ -33,13 +33,16 @@ export function CheckoutView() {
     activeAddresses,
     selectedAddress,
     selectedAddressId,
+    isSelectedAddressMissingPhone,
     isAddressesLoading,
     handleSelectSavedAddress,
     isSelectionModalOpen,
     setIsSelectionModalOpen,
     isAddModalOpen,
     setIsAddModalOpen,
+    editingAddress,
     handleOpenAddModal,
+    handleOpenEditAddressModal,
     newAddressFormData,
     setNewAddressFormData,
     handleSaveNewAddress,
@@ -61,7 +64,16 @@ export function CheckoutView() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
+    <div className="min-h-screen bg-background text-foreground selection:bg-amber-500 selection:text-zinc-950 pb-20">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 animate-in slide-in-from-bottom-5 duration-200">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          <p className="text-xs font-bold">{toastMessage}</p>
+        </div>
+      )}
+
+      {/* Main Content */}
       <main className="container py-6 sm:py-8 space-y-8">
         <form id="checkout-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -80,6 +92,7 @@ export function CheckoutView() {
                 }}
                 onOpenChangeModal={() => setIsSelectionModalOpen(true)}
                 onOpenAddModal={handleOpenAddModal}
+                onOpenEditModal={handleOpenEditAddressModal}
               />
 
               {/* 2. Payment Method & Details */}
@@ -103,6 +116,14 @@ export function CheckoutView() {
                 onRemoveCoupon={removeCoupon}
                 total={totalPayable}
                 isSubmitting={isSubmitting}
+                isAddressValid={!isSelectedAddressMissingPhone}
+                onPromptFixAddress={() => {
+                  if (selectedAddress) {
+                    handleOpenEditAddressModal(selectedAddress);
+                  } else {
+                    handleOpenAddModal();
+                  }
+                }}
               />
             </div>
           </div>
@@ -123,13 +144,14 @@ export function CheckoutView() {
           setIsSelectionModalOpen(false);
           handleOpenAddModal();
         }}
+        onEditAddress={handleOpenEditAddressModal}
       />
 
-      {/* Add New Address Modal (Cascade District / Upazila / Union) */}
+      {/* Add / Edit Address Modal */}
       <AddressFormModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        isEditing={false}
+        isEditing={Boolean(editingAddress)}
         formData={newAddressFormData}
         setFormData={setNewAddressFormData}
         onSubmit={handleSaveNewAddress}

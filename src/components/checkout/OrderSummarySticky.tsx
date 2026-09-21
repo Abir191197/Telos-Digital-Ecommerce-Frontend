@@ -10,6 +10,7 @@ import {
   ChevronUp,
   Percent,
   Lock,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/common";
@@ -25,6 +26,8 @@ interface OrderSummaryStickyProps {
   onRemoveCoupon: () => void;
   total: number;
   isSubmitting?: boolean;
+  isAddressValid?: boolean;
+  onPromptFixAddress?: () => void;
 }
 
 export function OrderSummarySticky({
@@ -38,6 +41,8 @@ export function OrderSummarySticky({
   onRemoveCoupon,
   total,
   isSubmitting = false,
+  isAddressValid = true,
+  onPromptFixAddress,
 }: OrderSummaryStickyProps) {
   const [isItemsExpanded, setIsItemsExpanded] = useState(true);
   const [isCouponOpen, setIsCouponOpen] = useState(false);
@@ -251,25 +256,36 @@ export function OrderSummarySticky({
       </div>
 
       {/* Primary Confirm & Place Order Button */}
-      <Button
-        type="submit"
-        form="checkout-form"
-        variant="amber"
-        disabled={isSubmitting}
-        className="w-full h-11 font-bold text-sm rounded-xl shadow-xs active:scale-[0.99] transition-transform cursor-pointer"
-      >
-        {isSubmitting ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            <span>Placing Order...</span>
-          </span>
-        ) : (
-          <span className="flex items-center justify-center gap-2">
-            <Lock className="h-4 w-4 shrink-0" />
-            <span>Confirm Order</span>
-          </span>
-        )}
-      </Button>
+      {!isAddressValid ? (
+        <button
+          type="button"
+          onClick={onPromptFixAddress}
+          className="w-full h-11 font-bold text-xs sm:text-sm rounded-xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+          <span>Add Phone Number to Continue</span>
+        </button>
+      ) : (
+        <Button
+          type="submit"
+          form="checkout-form"
+          variant="amber"
+          disabled={isSubmitting}
+          className="w-full h-11 font-bold text-sm rounded-xl shadow-xs active:scale-[0.99] transition-transform cursor-pointer"
+        >
+          {isSubmitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              <span>Placing Order...</span>
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <Lock className="h-4 w-4 shrink-0" />
+              <span>Confirm Order</span>
+            </span>
+          )}
+        </Button>
+      )}
     </div>
   );
 }

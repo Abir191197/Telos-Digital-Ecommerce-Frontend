@@ -16,6 +16,7 @@ import {
 import {
   useGetAddressesQuery,
   useCreateAddressMutation,
+  useUpdateAddressMutation,
 } from "@/services/api/address/addressApi";
 import { useMounted } from "@/hooks";
 import { Address } from "@/types/order.types";
@@ -34,6 +35,8 @@ export function useCheckoutFlow() {
   const [clearCartMutation] = useClearCartMutation();
   const [createOrderMutation] = useCreateOrderMutation();
   const [validateCheckoutStockMutation] = useValidateCheckoutStockMutation();
+  const [createAddressMutation] = useCreateAddressMutation();
+  const [updateAddressMutation] = useUpdateAddressMutation();
 
   const {
     items,
@@ -42,107 +45,100 @@ export function useCheckoutFlow() {
     applyCoupon,
     removeCoupon,
     getSubtotal,
+    getDiscountAmount,
     clearCart,
     removeItem,
   } = useCartStore();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-
-  // Address Modals & Toast State
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Stock Issues Modal State
   const [stockIssues, setStockIssues] = useState<StockIssue[]>([]);
   const [isStockAlertModalOpen, setIsStockAlertModalOpen] = useState(false);
 
+  // Toast feedback state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
   };
 
-  // Live Backend Address Query
-  const isDemo = !user || user.id.startsWith("demo");
-  const {
-    data: backendAddresses,
-    isLoading: isAddressesLoading,
-  } = useGetAddressesQuery(undefined, { skip: isDemo || !user });
+  const isDemo =
+    Boolean(user?.id?.startsWith("mock-")) ||
+    user?.email === "admin@telos.com" ||
+    user?.email === "customer@telos.com";
 
-  const [createAddressMutation] = useCreateAddressMutation();
+  // Real backend address data
+  const { data: serverAddresses = [], isLoading: isAddressesLoading } =
+    useGetAddressesQuery(undefined, {
+      skip: !user || isDemo,
+      refetchOnMountOrArgChange: true,
+    });
 
-  // Active addresses: live backend data prioritized, fallback to user store
-  const activeAddresses: Address[] = backendAddresses ?? user?.addresses ?? [];
+  const activeAddresses: Address[] = isDemo
+    ? user?.addresses || []
+    : serverAddresses.length > 0
+    ? serverAddresses
+    : user?.addresses || [];
 
-  // Setup React Hook Form with Zod
-  const form = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      fullName: user?.name || "",
-      phone: user?.phone ? user.phone.replace(/^\+880/, "").replace(/^0/, "") : "",
-      email: user?.email || "",
-      city: "Dhaka",
-      zone: "inside-dhaka",
-      street: "",
-      postalCode: "",
-      paymentMethod: "cod",
-      deliveryNote: "",
-    },
-  });
-
-  const { handleSubmit, setValue, watch } = form;
-  const currentZone = watch("zone");
-
-  // Manage selected address synchronization
+  // Default to primary or first available address
   const selectedAddress =
     activeAddresses.find((a) => a.id === selectedAddressId) ||
     activeAddresses.find((a) => a.isDefault) ||
     activeAddresses[0] ||
     null;
 
-  const handleSelectSavedAddress = useCallback(
-    (addr: Address) => {
-      setSelectedAddressId(addr.id);
-      setValue("fullName", addr.name, { shouldValidate: true });
-      setValue("phone", addr.phone.replace(/^\+880/, "").replace(/^0/, ""), {
-        shouldValidate: true,
-      });
-      setValue("city", addr.city, { shouldValidate: true });
-      setValue("zone", addr.zone || "inside-dhaka", { shouldValidate: true });
-      setValue("street", addr.street, { shouldValidate: true });
-      setValue("postalCode", addr.postalCode || "", { shouldValidate: true });
-    },
-    [setValue]
-  );
+  const handleSelectSavedAddress = useCallback((addr: Address) => {
+    setSelectedAddressId(addr.id);
+  }, []);
 
-  // Auto-populate form when default address loads
+  useEffect(() => {
+    if (activeAddresses.length > 0 && !selectedAddressId) {
+      const defaultAddr = activeAddresses.find((a) => a.isDefault) || activeAddresses[0];
+      if (defaultAddr) {
+        setSelectedAddressId(defaultAddr.id);
+      }
+    }
+  }, [activeAddresses, selectedAddressId]);
+
+  // Sync selected address into react-hook-form state
   useEffect(() => {
     if (selectedAddress && !selectedAddressId) {
       handleSelectSavedAddress(selectedAddress);
     }
   }, [selectedAddress, selectedAddressId, handleSelectSavedAddress]);
 
-  // Pricing calculations
+  const currentZone = selectedAddress?.zone || "inside-dhaka";
+
+  const form = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      fullName: "",
+      phone: "",
+      email: "",
+      street: "",
+      city: "Dhaka",
+      zone: "inside-dhaka",
+      postalCode: "",
+      deliveryNote: "",
+      paymentMethod: "cod",
+      mfsNumber: "",
+      trxId: "",
+    },
+  });
+
   const subtotal = getSubtotal();
-  const shippingFee =
-    subtotal === 0
-      ? 0
-      : subtotal >= 5000 || appliedCoupon?.code === "FREESHIP"
-      ? 0
-      : currentZone === "inside-dhaka"
-      ? 60
-      : 120;
-
-  const discountAmount = appliedCoupon?.percentage
-    ? Math.round((subtotal * appliedCoupon.percentage) / 100)
-    : appliedCoupon?.fixedAmount
-    ? Math.min(appliedCoupon.fixedAmount, subtotal)
-    : 0;
-
+  const discountAmount = getDiscountAmount();
+  const shippingFee = currentZone === "inside-dhaka" ? 70 : 130;
   const totalPayable = Math.max(0, subtotal - discountAmount + shippingFee);
 
-  // New Address form state for modal
+  // Address form state for modal
   const [newAddressFormData, setNewAddressFormData] = useState<Omit<Address, "id">>({
     name: "",
     phone: "",
@@ -157,9 +153,10 @@ export function useCheckoutFlow() {
   });
 
   const handleOpenAddModal = () => {
+    setEditingAddress(null);
     setNewAddressFormData({
       name: user?.name || "",
-      phone: user?.phone || "+880 1712-345678",
+      phone: user?.phone || "",
       street: "",
       area: "",
       union: "",
@@ -172,64 +169,156 @@ export function useCheckoutFlow() {
     setIsAddModalOpen(true);
   };
 
+  const handleOpenEditAddressModal = (addr: Address) => {
+    setEditingAddress(addr);
+    setNewAddressFormData({
+      name: addr.name || "",
+      phone: addr.phone || "",
+      street: addr.street || "",
+      area: addr.area || "",
+      union: addr.union || "",
+      city: addr.city || "Dhaka",
+      zone: addr.zone || "inside-dhaka",
+      postalCode: addr.postalCode || "",
+      isDefault: Boolean(addr.isDefault),
+      label: addr.label || "Home",
+    });
+    setIsAddModalOpen(true);
+  };
+
   const handleSaveNewAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAddressFormData.street || !newAddressFormData.name) return;
 
-    try {
-      let created: Address;
-      if (!isDemo) {
-        created = await createAddressMutation({
-          name: newAddressFormData.name,
-          phone: newAddressFormData.phone,
-          title: newAddressFormData.label,
-          street: newAddressFormData.street,
-          city: newAddressFormData.city,
-          area: newAddressFormData.area,
-          union: newAddressFormData.union,
-          zone: newAddressFormData.zone,
-          postalCode: newAddressFormData.postalCode,
-          isDefault: newAddressFormData.isDefault,
-        }).unwrap();
-      } else {
-        created = {
-          id: `demo-addr-${Date.now()}`,
-          name: newAddressFormData.name,
-          phone: newAddressFormData.phone,
-          label: (newAddressFormData.label || "Home") as any,
-          street: newAddressFormData.street,
-          area: newAddressFormData.area,
-          union: newAddressFormData.union,
-          city: newAddressFormData.city,
-          zone: newAddressFormData.zone,
-          postalCode: newAddressFormData.postalCode,
-          isDefault: newAddressFormData.isDefault,
-        };
-        useAuthStore.setState((state) => {
-          if (!state.user) return state;
-          return {
-            user: {
-              ...state.user,
-              addresses: [...(state.user.addresses || []), created],
-            },
-          };
-        });
-      }
+    if (!newAddressFormData.phone || !newAddressFormData.phone.trim()) {
+      alert("A valid phone number is required for courier delivery.");
+      return;
+    }
 
-      handleSelectSavedAddress(created);
-      setIsAddModalOpen(false);
-      setIsSelectionModalOpen(false);
-      showToast("New delivery address added and selected!");
+    try {
+      if (editingAddress) {
+        // EDIT EXISTING ADDRESS
+        let updated: Address;
+        if (!isDemo) {
+          updated = await updateAddressMutation({
+            id: editingAddress.id,
+            body: {
+              name: newAddressFormData.name,
+              phone: newAddressFormData.phone,
+              title: newAddressFormData.label,
+              street: newAddressFormData.street,
+              city: newAddressFormData.city,
+              area: newAddressFormData.area,
+              union: newAddressFormData.union,
+              zone: newAddressFormData.zone,
+              postalCode: newAddressFormData.postalCode,
+              isDefault: newAddressFormData.isDefault,
+            },
+          }).unwrap();
+        } else {
+          updated = {
+            id: editingAddress.id,
+            name: newAddressFormData.name,
+            phone: newAddressFormData.phone,
+            label: (newAddressFormData.label || "Home") as any,
+            street: newAddressFormData.street,
+            area: newAddressFormData.area,
+            union: newAddressFormData.union,
+            city: newAddressFormData.city,
+            zone: newAddressFormData.zone,
+            postalCode: newAddressFormData.postalCode,
+            isDefault: newAddressFormData.isDefault,
+          };
+          useAuthStore.setState((state) => {
+            if (!state.user) return state;
+            return {
+              user: {
+                ...state.user,
+                addresses: (state.user.addresses || []).map((a) =>
+                  a.id === editingAddress.id ? updated : a
+                ),
+              },
+            };
+          });
+        }
+
+        handleSelectSavedAddress(updated);
+        setIsAddModalOpen(false);
+        setEditingAddress(null);
+        showToast("Address updated successfully!");
+      } else {
+        // CREATE NEW ADDRESS
+        let created: Address;
+        if (!isDemo) {
+          created = await createAddressMutation({
+            name: newAddressFormData.name,
+            phone: newAddressFormData.phone,
+            title: newAddressFormData.label,
+            street: newAddressFormData.street,
+            city: newAddressFormData.city,
+            area: newAddressFormData.area,
+            union: newAddressFormData.union,
+            zone: newAddressFormData.zone,
+            postalCode: newAddressFormData.postalCode,
+            isDefault: newAddressFormData.isDefault,
+          }).unwrap();
+        } else {
+          created = {
+            id: `demo-addr-${Date.now()}`,
+            name: newAddressFormData.name,
+            phone: newAddressFormData.phone,
+            label: (newAddressFormData.label || "Home") as any,
+            street: newAddressFormData.street,
+            area: newAddressFormData.area,
+            union: newAddressFormData.union,
+            city: newAddressFormData.city,
+            zone: newAddressFormData.zone,
+            postalCode: newAddressFormData.postalCode,
+            isDefault: newAddressFormData.isDefault,
+          };
+          useAuthStore.setState((state) => {
+            if (!state.user) return state;
+            return {
+              user: {
+                ...state.user,
+                addresses: [...(state.user.addresses || []), created],
+              },
+            };
+          });
+        }
+
+        handleSelectSavedAddress(created);
+        setIsAddModalOpen(false);
+        setIsSelectionModalOpen(false);
+        setEditingAddress(null);
+        showToast("New delivery address added and selected!");
+      }
     } catch (err: any) {
-      console.error("Failed to create address:", err);
-      alert(err?.data?.message || err?.message || "Failed to create address.");
+      console.error("Failed to save address:", err);
+      alert(err?.data?.message || err?.message || "Failed to save address.");
     }
   };
+
+  const isSelectedAddressMissingPhone = Boolean(
+    selectedAddress && (!selectedAddress.phone || !selectedAddress.phone.trim())
+  );
 
   const finalizeOrderPlacement = async (values: CheckoutFormValues) => {
     if (!selectedAddress && activeAddresses.length === 0) {
       alert("Please add a delivery address first.");
       handleOpenAddModal();
+      return;
+    }
+
+    // STRICT CHECK: Verify selected address has a valid phone number
+    const addressPhone = (selectedAddress?.phone || values.phone || "").trim();
+    if (!addressPhone) {
+      showToast("Selected delivery address is missing a phone number. Please update it to proceed.");
+      if (selectedAddress) {
+        handleOpenEditAddressModal(selectedAddress);
+      } else {
+        handleOpenAddModal();
+      }
       return;
     }
 
@@ -282,11 +371,7 @@ export function useCheckoutFlow() {
     // STEP 2: ALL ITEMS IN STOCK - PROCEED TO CONFIRM ORDER
     const recipientName =
       values.fullName || selectedAddress?.name || user?.name || "Customer";
-    const rawRecipientPhone =
-      values.phone ||
-      selectedAddress?.phone ||
-      user?.phone ||
-      "01712345678";
+    const rawRecipientPhone = addressPhone;
     const recipientStreet =
       values.street || selectedAddress?.street || "Delivery Address";
     const recipientCity =
@@ -297,6 +382,12 @@ export function useCheckoutFlow() {
       values.postalCode || selectedAddress?.postalCode || "1200";
 
     try {
+      const formattedPhone = rawRecipientPhone.startsWith("+880")
+        ? rawRecipientPhone
+        : rawRecipientPhone.startsWith("0")
+        ? `+88${rawRecipientPhone}`
+        : `+880${rawRecipientPhone}`;
+
       const orderPayload: CreateOrderPayload = {
         items: items.map((item) => ({
           productId: item.product.id,
@@ -310,58 +401,53 @@ export function useCheckoutFlow() {
         })),
         customerDetails: {
           name: recipientName,
-          phone: rawRecipientPhone.startsWith("+880")
-            ? rawRecipientPhone
-            : rawRecipientPhone.startsWith("0")
-            ? `+88${rawRecipientPhone}`
-            : `+880${rawRecipientPhone}`,
+          phone: formattedPhone,
           email: values.email || user?.email || undefined,
           street: recipientStreet,
-          area: selectedAddress?.area || selectedAddress?.city || recipientCity,
           city: recipientCity,
-          zone: recipientZone,
+          area: selectedAddress?.area || selectedAddress?.city || recipientCity,
+          union: selectedAddress?.union || undefined,
+          zone: recipientZone as "inside-dhaka" | "outside-dhaka",
           postalCode: recipientPostalCode,
           label: selectedAddress?.label || "Home",
           deliveryNote: values.deliveryNote || undefined,
         },
-        transaction: {
-          paymentMethod: values.paymentMethod,
-          trxId: values.trxId || undefined,
-          mfsNumber: values.mfsNumber || undefined,
-          amount: totalPayable,
-        },
+        transaction:
+          values.paymentMethod !== "cod"
+            ? {
+                paymentMethod: values.paymentMethod,
+                mfsNumber: values.mfsNumber,
+                trxId: values.trxId,
+                amount: totalPayable,
+              }
+            : undefined,
         deliveryFee: shippingFee,
         discount: discountAmount,
-        couponCode: appliedCoupon?.code || undefined,
+        couponCode: appliedCoupon?.code,
       };
 
-      const result = await createOrderMutation(orderPayload).unwrap();
-      const placedOrder = result.data;
+      const res = await createOrderMutation(orderPayload).unwrap();
+      const confirmedOrder = res?.data || res;
+      const finalOrderNumber = confirmedOrder?.orderNumber || "OD-CONFIRMED";
 
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("last_order", JSON.stringify(placedOrder));
-      }
-
-      clearCart();
-      try {
+      if (!isDemo && user) {
         await clearCartMutation().unwrap();
-      } catch (e) {
-        console.error("Failed to clear server cart on checkout:", e);
       }
+      clearCart();
 
-      const targetOrderId = placedOrder?.orderNumber || placedOrder?.id || "";
-      router.push(targetOrderId ? `/checkout/success?orderId=${targetOrderId}` : "/checkout/success");
+      const successUrl = `${ROUTES.CHECKOUT_SUCCESS}?orderNumber=${encodeURIComponent(
+        finalOrderNumber
+      )}&total=${encodeURIComponent(totalPayable)}&paymentMethod=${encodeURIComponent(
+        values.paymentMethod
+      )}`;
+      router.push(successUrl);
     } catch (err: any) {
-      console.error("Order placement error details:", err);
-      const serverMsg =
-        (typeof err?.data === "object" && err?.data?.message) ||
-        (typeof err?.data === "object" && err?.data?.error) ||
-        (typeof err?.data === "string" ? err.data : null) ||
-        err?.error ||
+      console.error("Order creation failed:", err);
+      const msg =
+        err?.data?.message ||
         err?.message ||
-        `Status ${err?.status || "Unknown"}: Order placement failed.`;
-
-      alert(`Error (${err?.status || "Unknown"}): ${serverMsg}`);
+        "Could not finalize your order. Please try again.";
+      alert(msg);
       setIsSubmitting(false);
     }
   };
@@ -369,15 +455,6 @@ export function useCheckoutFlow() {
   const onSubmit = async (values: CheckoutFormValues) => {
     await finalizeOrderPlacement(values);
   };
-
-  useEffect(() => {
-    if (!mounted) return;
-    if (user?.role === "admin") {
-      router.replace(ROUTES.DASHBOARD);
-    } else if (!user) {
-      router.replace(`${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.CHECKOUT)}`);
-    }
-  }, [mounted, user, router]);
 
   return {
     mounted,
@@ -393,19 +470,22 @@ export function useCheckoutFlow() {
     totalPayable,
     currentZone,
     form,
-    handleSubmit,
+    handleSubmit: form.handleSubmit,
     onSubmit,
     isSubmitting,
     activeAddresses,
     selectedAddress,
     selectedAddressId,
+    isSelectedAddressMissingPhone,
     isAddressesLoading,
     handleSelectSavedAddress,
     isSelectionModalOpen,
     setIsSelectionModalOpen,
     isAddModalOpen,
     setIsAddModalOpen,
+    editingAddress,
     handleOpenAddModal,
+    handleOpenEditAddressModal,
     newAddressFormData,
     setNewAddressFormData,
     handleSaveNewAddress,

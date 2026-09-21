@@ -11,6 +11,9 @@ import {
   Briefcase,
   Truck,
   Check,
+  AlertTriangle,
+  Phone,
+  Edit2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Address } from "@/types/order.types";
@@ -23,6 +26,7 @@ interface AddressSelectionModalProps {
   selectedAddressId: string | null;
   onSelectAddress: (address: Address) => void;
   onAddNewAddress: () => void;
+  onEditAddress?: (address: Address) => void;
 }
 
 export function AddressSelectionModal({
@@ -32,6 +36,7 @@ export function AddressSelectionModal({
   selectedAddressId,
   onSelectAddress,
   onAddNewAddress,
+  onEditAddress,
 }: AddressSelectionModalProps) {
   const [tempSelectedId, setTempSelectedId] = useState<string | null>(
     selectedAddressId
@@ -194,9 +199,34 @@ export function AddressSelectionModal({
                       {addr.postalCode ? ` - ${addr.postalCode}` : ""}
                     </p>
 
-                    <p className="text-xs font-mono font-semibold text-foreground">
-                      {addr.phone}
-                    </p>
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-xs">
+                      {addr.phone && addr.phone.trim() ? (
+                        <p className="font-mono font-semibold text-foreground flex items-center gap-1.5 text-xs">
+                          <Phone className="h-3 w-3 text-muted-foreground/60" />
+                          <span>{addr.phone}</span>
+                        </p>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded text-[11px]">
+                          <AlertTriangle className="h-3 w-3" />
+                          <span>Phone number missing (required)</span>
+                        </span>
+                      )}
+
+                      {onEditAddress && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                            onEditAddress(addr);
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline p-1 cursor-pointer"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                          <span>{addr.phone && addr.phone.trim() ? "Edit" : "Add Phone"}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
