@@ -11,6 +11,10 @@ export * from "./CreateProductView";
 export * from "./ProductPhotosUploadCard";
 export * from "./ProductLivePreviewCard";
 export * from "./ProductDetailsFormCard";
-
+export * from "./ProductBasicInfoSection";
+export * from "./ProductPricingSection";
+export * from "./ProductVariantsSection";
+export * from "./ProductVoucherSection";
+export * from "./ProductSpecsSection";
 export * from "./RichTextEditor";
 export * from "./AdminProductsSkeleton";
