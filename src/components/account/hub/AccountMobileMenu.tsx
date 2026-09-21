@@ -1,6 +1,23 @@
 import React from "react";
+import Link from "next/link";
 import { AppImage } from "@/components/shared";
-import { User, ShieldCheck, Edit3, ChevronRight, LogOut } from "lucide-react";
+import {
+  User,
+  ShieldCheck,
+  Edit3,
+  ChevronRight,
+  LogOut,
+  Flame,
+  Tag,
+  LayoutGrid,
+  ShoppingBag,
+  Headphones,
+  FileQuestion,
+  FileText,
+  ShieldAlert,
+  Info,
+} from "lucide-react";
+import { ROUTES } from "@/constants";
 import type { CustomerUser } from "@/stores/auth.store";
 import type { Order } from "@/types/order.types";
 import {
@@ -147,8 +164,167 @@ export function AccountMobileMenu({
           </div>
         ))}
 
+        {/* ── Shop & Discovery ── */}
+        <div className="space-y-2 pt-2">
+          <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Shop &amp; Discovery
+          </p>
+          <div className="space-y-2">
+            <Link
+              href={ROUTES.FLASH_DEALS}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/15 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-500">
+                  <Flame className="h-4.5 w-4.5 fill-amber-500 animate-flame" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-foreground">
+                      Flash Deals
+                    </span>
+                    <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black px-1.5 py-0.2 text-[9px] uppercase tracking-wider">
+                      Live
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    Limited-time discounts &amp; mega savings
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href={ROUTES.BRANDS}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <Tag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  All Brands
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href={ROUTES.CATEGORIES}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <LayoutGrid className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  All Categories
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href={ROUTES.PRODUCTS}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <ShoppingBag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  Catalog &amp; All Products
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Customer Care & Help ── */}
+        <div className="space-y-2 pt-2">
+          <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Customer Care &amp; Help
+          </p>
+          <div className="space-y-2">
+            <Link
+              href={ROUTES.CONTACT}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <Headphones className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">
+                    24/7 Support Hotline &amp; Contact
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    +880 1700-000000 · Live assistance
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => onSelectTab("returns")}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <FileQuestion className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  FAQ &amp; Returns Policy
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        </div>
+
+        {/* ── Legal & Info ── */}
+        <div className="space-y-2 pt-2">
+          <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Legal &amp; Information
+          </p>
+          <div className="space-y-2">
+            <Link
+              href={ROUTES.TERMS}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  Terms &amp; Conditions
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href={ROUTES.PRIVACY_POLICY}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <ShieldAlert className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  Privacy Policy
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href={ROUTES.ABOUT}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <Info className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                <span className="text-sm font-semibold text-foreground">
+                  About Telos Cart
+                </span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+        </div>
+
         {/* Sign Out Card */}
-        <div className="pt-1">
+        <div className="pt-2">
           <button
             type="button"
             onClick={onLogout}

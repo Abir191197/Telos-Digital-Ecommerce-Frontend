@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import Link from "next/link";
 import { User, ChevronRight } from "lucide-react";
 import { ROUTES } from "@/constants";
@@ -23,6 +23,38 @@ export function AccountUnauthenticatedState() {
         >
           <span>Sign In to Your Account</span>
           <ChevronRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      {/* Guest Quick Exploration Links */}
+      <div className="pt-6 grid grid-cols-2 gap-2 text-left">
+        <Link
+          href={ROUTES.FLASH_DEALS}
+          className="flex items-center justify-between p-3 rounded-2xl border border-border/40 bg-card hover:bg-muted/50 text-xs font-semibold text-foreground transition-colors"
+        >
+          <span>⚡ Flash Deals</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </Link>
+        <Link
+          href={ROUTES.BRANDS}
+          className="flex items-center justify-between p-3 rounded-2xl border border-border/40 bg-card hover:bg-muted/50 text-xs font-semibold text-foreground transition-colors"
+        >
+          <span>🏷️ All Brands</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </Link>
+        <Link
+          href={ROUTES.CATEGORIES}
+          className="flex items-center justify-between p-3 rounded-2xl border border-border/40 bg-card hover:bg-muted/50 text-xs font-semibold text-foreground transition-colors"
+        >
+          <span>📦 All Categories</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </Link>
+        <Link
+          href={ROUTES.CONTACT}
+          className="flex items-center justify-between p-3 rounded-2xl border border-border/40 bg-card hover:bg-muted/50 text-xs font-semibold text-foreground transition-colors"
+        >
+          <span>🎧 24/7 Support</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
         </Link>
       </div>
     </div>
