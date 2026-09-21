@@ -1,15 +1,15 @@
 import {
-  User,
-  Package,
-  MapPin,
-  Heart,
-  Star,
-  CreditCard,
   Bell,
+  CreditCard,
+  Heart,
   LayoutDashboard,
-  Truck,
+  MapPin,
+  Package,
   RotateCcw,
+  Star,
   Ticket,
+  Truck,
+  User,
 } from "lucide-react";
 
 export type AccountTabKey =
@@ -82,4 +82,3 @@ export interface CustomerReview {
   verifiedPurchase: boolean;
   status: "published" | "pending_review";
 }
-

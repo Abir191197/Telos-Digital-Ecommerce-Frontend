@@ -180,7 +180,7 @@ export function HeaderUserMenu({
               </div>
 
               <Link
-                href={ROUTES.ACCOUNT}
+                href={`${ROUTES.ACCOUNT}?tab=orders`}
                 onClick={() => onToggle(false)}
                 className="flex items-center justify-between rounded-lg px-3 py-2 text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
               >
