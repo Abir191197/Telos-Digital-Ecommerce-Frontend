@@ -239,8 +239,20 @@ export function Footer() {
       {/* ── Bottom Bar: Copyright & Terms ── */}
       <div className="border-t border-zinc-800/80 bg-black/50 py-6">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row text-xs text-zinc-400">
-          <p className="text-center md:text-left">
-            &copy; {new Date().getFullYear()} Telos Cart. All rights reserved. A Telos Digital initiative.
+          <p className="text-center md:text-left flex flex-wrap items-center justify-center md:justify-start gap-1">
+            <span>&copy; {new Date().getFullYear()} Telos Cart. All rights reserved.</span>
+            <span className="hidden md:inline text-zinc-600">•</span>
+            <span>
+              A Product of{" "}
+              <a
+                href="https://www.telosdigital.agency/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-zinc-300 hover:text-amber-400 underline underline-offset-2 transition-colors"
+              >
+                Telos Digital
+              </a>
+            </span>
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-zinc-400">
