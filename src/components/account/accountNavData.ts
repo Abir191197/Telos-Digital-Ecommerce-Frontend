@@ -37,19 +37,19 @@ export interface AccountNavGroup {
 
 export const ACCOUNT_NAV_GROUPS: AccountNavGroup[] = [
   {
-    group: "Manage My Account",
-    items: [
-      { id: "overview", label: "Overview", icon: LayoutDashboard },
-      { id: "profile", label: "My Profile", icon: User },
-      { id: "addresses", label: "Address Book", icon: MapPin },
-    ],
-  },
-  {
     group: "Orders & Purchases",
     items: [
       { id: "orders", label: "My Orders", icon: Package },
       { id: "tracking", label: "Order Tracking", icon: Truck },
       { id: "returns", label: "Returns & Refunds", icon: RotateCcw },
+    ],
+  },
+  {
+    group: "Account & Addresses",
+    items: [
+      { id: "overview", label: "Overview", icon: LayoutDashboard },
+      { id: "profile", label: "My Profile", icon: User },
+      { id: "addresses", label: "Address Book", icon: MapPin },
     ],
   },
   {
@@ -60,7 +60,7 @@ export const ACCOUNT_NAV_GROUPS: AccountNavGroup[] = [
     ],
   },
   {
-    group: "Preferences",
+    group: "Preferences & Wallet",
     items: [
       { id: "payments", label: "Payment Methods", icon: CreditCard },
       { id: "notifications", label: "Notifications", icon: Bell },

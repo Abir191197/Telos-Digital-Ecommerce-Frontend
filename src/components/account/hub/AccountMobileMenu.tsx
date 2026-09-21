@@ -91,150 +91,158 @@ export function AccountMobileMenu({
 
       {/* Mobile Navigation List */}
       <div className="space-y-4">
-        {ACCOUNT_NAV_GROUPS.map((group) => (
-          <div key={group.group} className="space-y-2">
-            <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              {group.group}
-            </p>
-            <div className="space-y-2">
-              {group.items.map((item) => {
-                const Icon = item.icon;
+        {ACCOUNT_NAV_GROUPS.map((group) => {
+          const isPreferences = group.group === "Preferences & Wallet";
 
-                // Dynamic badges synced to sidebar logic
-                let badgeContent: React.ReactNode = null;
-                if (item.id === "orders" && orders.length > 0) {
-                  badgeContent = (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
-                      {orders.length}
-                    </span>
-                  );
-                } else if (item.id === "tracking") {
-                  badgeContent = (
-                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-                      Live Courier
-                    </span>
-                  );
-                } else if (item.id === "wishlist" && wishlistCount > 0) {
-                  badgeContent = (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
-                      {wishlistCount}
-                    </span>
-                  );
-                } else if (item.id === "reviews" && pendingReviewCount > 0) {
-                  badgeContent = (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                      {pendingReviewCount} new
-                    </span>
-                  );
-                } else if (item.id === "addresses") {
-                  badgeContent = (
-                    <span className="text-xs text-muted-foreground font-medium">
-                      {user.addresses.length} saved
-                    </span>
-                  );
-                } else if (item.id === "payments") {
-                  badgeContent = (
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                      ৳ 70
-                    </span>
-                  );
-                }
-
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => onSelectTab(item.id)}
-                    className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 hover:bg-gradient-to-r hover:from-amber-500/[0.06] hover:via-amber-500/[0.02] hover:to-transparent transition-all duration-300 cursor-pointer shadow-2xs text-left group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {item.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {badgeContent}
+          return (
+            <React.Fragment key={group.group}>
+              {/* Insert Shop & Discovery right before Preferences & Wallet (after My Activity) */}
+              {isPreferences && (
+                <div className="space-y-2 pt-1">
+                  <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Shop &amp; Discovery
+                  </p>
+                  <div className="space-y-2">
+                    <Link
+                      href={ROUTES.FLASH_DEALS}
+                      className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/15 transition-all duration-300 shadow-2xs group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-500">
+                          <Flame className="h-4.5 w-4.5 fill-amber-500 animate-flame" />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-bold text-foreground">
+                              Flash Deals
+                            </span>
+                            <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black px-1.5 py-0.2 text-[9px] uppercase tracking-wider">
+                              Live
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-muted-foreground">
+                            Limited-time discounts &amp; mega savings
+                          </span>
+                        </div>
+                      </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+                    </Link>
 
-        {/* ── Shop & Discovery ── */}
-        <div className="space-y-2 pt-2">
-          <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Shop &amp; Discovery
-          </p>
-          <div className="space-y-2">
-            <Link
-              href={ROUTES.FLASH_DEALS}
-              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/15 transition-all duration-300 shadow-2xs group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-500">
-                  <Flame className="h-4.5 w-4.5 fill-amber-500 animate-flame" />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-bold text-foreground">
-                      Flash Deals
-                    </span>
-                    <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black px-1.5 py-0.2 text-[9px] uppercase tracking-wider">
-                      Live
-                    </span>
+                    <Link
+                      href={ROUTES.BRANDS}
+                      className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Tag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                        <span className="text-sm font-semibold text-foreground">
+                          All Brands
+                        </span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+
+                    <Link
+                      href={ROUTES.CATEGORIES}
+                      className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <LayoutGrid className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                        <span className="text-sm font-semibold text-foreground">
+                          All Categories
+                        </span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+
+                    <Link
+                      href={ROUTES.PRODUCTS}
+                      className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ShoppingBag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                        <span className="text-sm font-semibold text-foreground">
+                          Catalog &amp; All Products
+                        </span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
                   </div>
-                  <span className="text-[11px] text-muted-foreground">
-                    Limited-time discounts &amp; mega savings
-                  </span>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {group.group}
+                </p>
+                <div className="space-y-2">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+
+                    // Dynamic badges synced to sidebar logic
+                    let badgeContent: React.ReactNode = null;
+                    if (item.id === "orders" && orders.length > 0) {
+                      badgeContent = (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
+                          {orders.length}
+                        </span>
+                      );
+                    } else if (item.id === "tracking") {
+                      badgeContent = (
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                          Live Courier
+                        </span>
+                      );
+                    } else if (item.id === "wishlist" && wishlistCount > 0) {
+                      badgeContent = (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
+                          {wishlistCount}
+                        </span>
+                      );
+                    } else if (item.id === "reviews" && pendingReviewCount > 0) {
+                      badgeContent = (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                          {pendingReviewCount} new
+                        </span>
+                      );
+                    } else if (item.id === "addresses") {
+                      badgeContent = (
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {user.addresses.length} saved
+                        </span>
+                      );
+                    } else if (item.id === "payments") {
+                      badgeContent = (
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                          ৳ 70
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onSelectTab(item.id)}
+                        className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-900/60 hover:bg-gradient-to-r hover:from-amber-500/[0.06] hover:via-amber-500/[0.02] hover:to-transparent transition-all duration-300 cursor-pointer shadow-2xs text-left group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
+                          <span className="text-sm font-semibold text-foreground">
+                            {item.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {badgeContent}
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <Link
-              href={ROUTES.BRANDS}
-              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
-            >
-              <div className="flex items-center gap-3">
-                <Tag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
-                <span className="text-sm font-semibold text-foreground">
-                  All Brands
-                </span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <Link
-              href={ROUTES.CATEGORIES}
-              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
-            >
-              <div className="flex items-center gap-3">
-                <LayoutGrid className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
-                <span className="text-sm font-semibold text-foreground">
-                  All Categories
-                </span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <Link
-              href={ROUTES.PRODUCTS}
-              className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-border/40 dark:border-white/10 bg-gradient-to-br from-card via-card to-card/95 dark:from-zinc-900/90 hover:bg-muted/40 transition-all duration-300 shadow-2xs group"
-            >
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="h-5 w-5 text-amber-500/90 dark:text-amber-400 stroke-[1.8] group-hover:scale-105 transition-transform" />
-                <span className="text-sm font-semibold text-foreground">
-                  Catalog &amp; All Products
-                </span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-        </div>
+            </React.Fragment>
+          );
+        })}
 
         {/* ── Customer Care & Help ── */}
         <div className="space-y-2 pt-2">
