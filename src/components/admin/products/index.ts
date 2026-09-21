@@ -18,3 +18,6 @@ export * from "./ProductVoucherSection";
 export * from "./ProductSpecsSection";
 export * from "./RichTextEditor";
 export * from "./AdminProductsSkeleton";
+export * from "./ProductPreviewSidebar";
+export * from "./ProductFormActionsBar";
+export * from "./useProductEditor";

@@ -1,5 +1,12 @@
 export { OverviewTab } from "./OverviewTab";
+export { OverviewProfileCard } from "./OverviewProfileCard";
+export { OverviewActiveOrderCard } from "./OverviewActiveOrderCard";
+export { OverviewQuickCardsGrid } from "./OverviewQuickCardsGrid";
 export { ProfileTab } from "./ProfileTab";
+export { ProfileInfoCard } from "./ProfileInfoCard";
+export { ProfilePasswordCard } from "./ProfilePasswordCard";
+export { ProfileInsightsCards } from "./ProfileInsightsCards";
+export { ProfileConfirmModal } from "./ProfileConfirmModal";
 export { AddressesTab } from "./AddressesTab";
 export { AddressCard } from "./AddressCard";
 export { AddressFormModal } from "./AddressFormModal";
