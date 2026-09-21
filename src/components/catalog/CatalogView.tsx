@@ -39,6 +39,7 @@ export function CatalogView({
 }: CatalogViewProps) {
   const searchParams = useSearchParams();
   const brandParam = searchParams.get("brand");
+  const queryParam = searchParams.get("q") || searchParams.get("search") || "";
 
   const { data: serverProductsData, isLoading } = useGetProductsQuery({
     limit: 100,
@@ -53,7 +54,7 @@ export function CatalogView({
   }, [serverProductsData, initialProducts]);
 
   // Filter state
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(() => queryParam);
   const [selectedBrands, setSelectedBrands] = useState<string[]>(() => {
     if (brandParam && brandParam !== "all") {
       return [brandParam];
@@ -74,6 +75,12 @@ export function CatalogView({
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
+
+  // Sync if URL query param (?q=) changes
+  useEffect(() => {
+    setSearchQuery(queryParam);
+    setVisibleCount(INITIAL_BATCH_SIZE);
+  }, [queryParam]);
 
   // Sync if URL brand param changes
   useEffect(() => {

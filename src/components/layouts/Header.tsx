@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Shield } from "lucide-react";
 import { Logo } from "@/components/common";
 import { ROUTES } from "@/constants";
@@ -33,6 +33,8 @@ export function Header() {
   const cartCount = mounted && user ? rawCartCount : 0;
   const wishlistCount = mounted && user ? rawWishlistCount : 0;
 
+  const router = useRouter();
+
   const handleLogout = () => {
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
@@ -44,7 +46,9 @@ export function Header() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    const clean = searchQuery.trim();
+    if (!clean) return;
+    router.push(`/products?q=${encodeURIComponent(clean)}`);
   };
 
   const isAccountPage = pathname.startsWith(ROUTES.ACCOUNT);
