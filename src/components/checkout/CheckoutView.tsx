@@ -53,12 +53,12 @@ export function CheckoutView() {
     showToast,
   } = useCheckoutFlow();
 
-  // Safe client render check or initial cart/session loading
-  if (!mounted || user?.role === "admin" || !user || (isCartLoading && items.length === 0)) {
+  // Safe client render check, initial cart/session loading, or order submission in progress
+  if (!mounted || user?.role === "admin" || !user || (isCartLoading && items.length === 0) || isSubmitting) {
     return <CheckoutSkeleton />;
   }
 
-  // If cart is empty, show empty state
+  // If cart is empty and not submitting, show empty state
   if (items.length === 0) {
     return <CheckoutEmptyState />;
   }
