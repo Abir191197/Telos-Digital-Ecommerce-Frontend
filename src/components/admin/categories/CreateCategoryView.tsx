@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Sparkles, CheckCircle2, Loader2, Save } from "lucide-react";
 import {
   useCreateCategoryMutation,
   useGetCategoriesQuery,
@@ -338,7 +338,7 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
   }
 
   return (
-    <div className="w-full space-y-6 pb-24">
+    <div className="w-full space-y-6 pb-36 sm:pb-24">
       {/* Top Header & Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div className="flex items-center gap-3">
@@ -426,8 +426,8 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
                 onRemoveSubcategory={handleRemoveSubcategory}
               />
 
-              {/* Bottom Actions */}
-              <div className="pt-2 flex items-center justify-end gap-2.5">
+              {/* Bottom Actions (Desktop) */}
+              <div className="pt-2 hidden sm:flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={handleResetForm}
@@ -477,6 +477,36 @@ export function CreateCategoryView({ initialTab = "create", categoryId, category
           dialog={confirmModal}
           onClose={() => setConfirmModal(null)}
         />
+      )}
+
+      {/* ── Mobile Floating Action Pill (Above Mobile Bottom Nav) ── */}
+      {currentView === "create" && (
+        <div className="fixed bottom-18 left-0 right-0 z-40 sm:hidden flex justify-center pointer-events-none px-4">
+          <div className="pointer-events-auto flex items-center justify-between gap-2.5 w-full max-w-[330px] px-3 py-1.5 rounded-full border border-white/10 dark:border-amber-500/25 bg-zinc-950/80 dark:bg-black/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+            <button
+              type="button"
+              onClick={handleResetForm}
+              className="px-4 py-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-[11px] font-semibold text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer"
+            >
+              {isEditMode ? "Reset" : "Discard"}
+            </button>
+            <button
+              type="submit"
+              form="category-create-form"
+              disabled={isSubmitting || !formValues.name.trim()}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-1.5 text-[11px] font-black text-zinc-950 hover:from-amber-400 hover:to-amber-300 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-amber-500/20 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-3 w-3 animate-spin text-zinc-950" />
+              ) : isEditMode ? (
+                <Save className="h-3 w-3" />
+              ) : (
+                <Sparkles className="h-3 w-3 fill-zinc-950" />
+              )}
+              <span>{isSubmitting ? "Saving..." : isEditMode ? "Save Changes" : "Publish Category"}</span>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

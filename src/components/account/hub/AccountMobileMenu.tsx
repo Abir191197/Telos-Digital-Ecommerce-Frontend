@@ -210,6 +210,12 @@ export function AccountMobileMenu({
                           {user.addresses.length} saved
                         </span>
                       );
+                    } else if (item.id === "vouchers") {
+                      badgeContent = (
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md">
+                          3 Active
+                        </span>
+                      );
                     } else if (item.id === "payments") {
                       badgeContent = (
                         <span className="text-xs font-bold text-amber-600 dark:text-amber-400">

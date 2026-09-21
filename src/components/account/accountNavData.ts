@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Truck,
   RotateCcw,
+  Ticket,
 } from "lucide-react";
 
 export type AccountTabKey =
@@ -21,6 +22,7 @@ export type AccountTabKey =
   | "wishlist"
   | "reviews"
   | "payments"
+  | "vouchers"
   | "notifications";
 
 export interface AccountNavItem {
@@ -62,6 +64,7 @@ export const ACCOUNT_NAV_GROUPS: AccountNavGroup[] = [
   {
     group: "Preferences & Wallet",
     items: [
+      { id: "vouchers", label: "Vouchers & Offers", icon: Ticket },
       { id: "payments", label: "Payment Methods", icon: CreditCard },
       { id: "notifications", label: "Notifications", icon: Bell },
     ],

@@ -10,6 +10,7 @@ export { ReturnsTab } from "./ReturnsTab";
 export { WishlistTab } from "./WishlistTab";
 export { ReviewsTab } from "./ReviewsTab";
 export { PaymentsTab } from "./PaymentsTab";
+export { VouchersTab } from "./VouchersTab";
 export { NotificationsTab } from "./NotificationsTab";
 export { AccountOverviewSkeleton } from "./AccountOverviewSkeleton";
 export { ProfileTabSkeleton } from "./ProfileTabSkeleton";

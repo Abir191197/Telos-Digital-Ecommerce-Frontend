@@ -24,6 +24,7 @@ import {
   ReviewsTabSkeleton,
   PaymentsTab,
   PaymentsTabSkeleton,
+  VouchersTab,
   NotificationsTab,
 } from "../tabs";
 
@@ -169,6 +170,9 @@ export function AccountTabContent({
         return <PaymentsTabSkeleton />;
       }
       return <PaymentsTab />;
+
+    case "vouchers":
+      return <VouchersTab />;
 
     case "notifications":
       return <NotificationsTab user={user} />;

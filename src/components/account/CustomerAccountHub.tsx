@@ -30,6 +30,7 @@ const TAB_TITLES: Record<AccountTabKey, string> = {
   wishlist: "Saved Wishlist | Telos Cart BD",
   reviews: "Reviews & Ratings | Telos Cart BD",
   payments: "Payment Methods | Telos Cart BD",
+  vouchers: "Vouchers & Offers | Telos Cart BD",
   notifications: "Notification Preferences | Telos Cart BD",
 };
 
@@ -43,6 +44,7 @@ const VALID_TABS = new Set<AccountTabKey>([
   "wishlist",
   "reviews",
   "payments",
+  "vouchers",
   "notifications",
 ]);
 

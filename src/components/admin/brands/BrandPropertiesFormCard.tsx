@@ -116,8 +116,8 @@ export function BrandPropertiesFormCard({
         </label>
       </div>
 
-      {/* Bottom Actions */}
-      <div className="pt-4 border-t border-border/40 flex items-center justify-end gap-2.5">
+      {/* Bottom Actions - Hidden on mobile in favor of floating pill */}
+      <div className="pt-4 border-t border-border/40 hidden sm:flex items-center justify-end gap-2.5">
         <Link
           href="/dashboard/brands"
           className="px-4 py-2.5 rounded-xl border border-border/80 bg-card text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
