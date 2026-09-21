@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Sparkles,
+  Percent,
   Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -130,7 +130,7 @@ export function OrderSummarySticky({
         {appliedCoupon ? (
           <div className="flex items-center justify-between p-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-xs">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
+              <Percent className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <span className="font-bold text-emerald-700 dark:text-emerald-400">
                   {appliedCoupon.code}

@@ -2,7 +2,7 @@
 
 import { ROUTES } from "@/constants";
 import { useGetMarqueeBrandsQuery } from "@/services/api/brands/brandApi";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { BrandLogoDisplay } from "@/components/shared";
@@ -49,7 +49,7 @@ export function OfficialBrandsSection() {
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-500">
-              <Sparkles className="h-3 w-3" />
+              <BadgeCheck className="h-3.5 w-3.5" />
               Direct Partnerships
             </span>
           </div>

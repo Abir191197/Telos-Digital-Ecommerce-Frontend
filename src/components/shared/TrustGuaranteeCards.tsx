@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldCheck, Sparkles, CheckCircle2, Headphones } from "lucide-react";
+import { ShieldCheck, Zap, CheckCircle2, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TrustGuaranteeCardsProps {
@@ -32,7 +32,7 @@ const GUARANTEE_ITEMS: GuaranteeItem[] = [
     tags: ["Original Box & Seal", "Official Invoicing", "1-2 Yr Service"],
   },
   {
-    icon: Sparkles,
+    icon: Zap,
     title: "Express 24-48h Dispatch",
     badge: "Dhaka Metro Fast",
     badgeClass: "bg-amber-500/20 text-amber-800 dark:text-amber-300",

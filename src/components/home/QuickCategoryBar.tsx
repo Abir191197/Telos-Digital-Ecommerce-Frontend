@@ -140,7 +140,7 @@ export function QuickCategoryBar() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-500">
-                <Sparkles className="h-3 w-3" />
+                <LayoutGrid className="h-3 w-3" />
                 Departments
               </span>
             </div>

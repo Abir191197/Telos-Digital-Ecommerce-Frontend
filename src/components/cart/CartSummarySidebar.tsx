@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   Tag,
-  Sparkles,
+  Percent,
   AlertCircle,
   Check,
   Lock,
@@ -102,7 +102,7 @@ export function CartSummarySidebar({
           {appliedCoupon ? (
             <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2.5 text-xs">
               <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-                <Sparkles className="h-4 w-4 shrink-0" />
+                <Percent className="h-4 w-4 shrink-0" />
                 <div>
                   <p className="font-bold">Code: {appliedCoupon.code}</p>
                   <p className="text-[11px] opacity-80">

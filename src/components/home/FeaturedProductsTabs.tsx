@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import type { Product } from "@/types/ecommerce.types";
 
@@ -31,7 +31,7 @@ export function FeaturedProductsTabs({ initialProducts }: FeaturedProductsTabsPr
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-500">
-              <Sparkles className="h-3 w-3" />
+              <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
               Hand-Picked Selection
             </span>
           </div>

@@ -3,7 +3,7 @@
 import React, { use } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants";
-import { ChevronRight, Award, ShieldCheck, Package, Sparkles } from "lucide-react";
+import { ChevronRight, Award, ShieldCheck, Package } from "lucide-react";
 import { useGetBrandBySlugQuery, useGetBrandsQuery } from "@/services/api/brands/brandApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { ProductCard } from "@/components/common";

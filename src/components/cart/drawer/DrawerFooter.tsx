@@ -4,7 +4,7 @@ import {
   Tag,
   Check,
   AlertCircle,
-  Sparkles,
+  Percent,
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/common";
@@ -47,7 +47,7 @@ export function DrawerFooter({
         {appliedCoupon ? (
           <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2 text-xs">
             <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Percent className="h-3.5 w-3.5" />
               <span>
                 Promo <strong>{appliedCoupon.code}</strong> applied (
                 {appliedCoupon.description})

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ProductImageDisplay } from "@/components/shared";
-import { Sparkles, Plus, CheckCircle2 } from "lucide-react";
+import { PlusCircle, Plus, CheckCircle2 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
 
 interface CartCrossSellAccessoriesProps {
@@ -21,7 +21,7 @@ export function CartCrossSellAccessories({
     <div className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-xs dark:shadow-none space-y-4">
       <div className="flex items-center justify-between border-b border-border/50 pb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-amber-500" />
+          <PlusCircle className="h-4 w-4 text-amber-500" />
           <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground">
             Frequently Paired Tech Accessories
           </h2>

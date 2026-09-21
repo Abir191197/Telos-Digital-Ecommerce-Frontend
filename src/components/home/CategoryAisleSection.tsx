@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
@@ -84,7 +84,7 @@ export function CategoryAisleSection({
                   badgeColor
                 )}
               >
-                <Sparkles className="h-3 w-3" />
+                <Layers className="h-3 w-3" />
                 {badge}
               </span>
             </div>

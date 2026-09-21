@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { ProductCard } from "@/components/common";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
@@ -75,7 +75,7 @@ export function CategorySpotlightBanner({ initialProducts }: CategorySpotlightBa
           >
             <div className="relative z-10 space-y-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider shadow-xs">
-                <Sparkles className="h-3 w-3" />
+                <Flame className="h-3 w-3 fill-white" />
                 Flagship Zone
               </span>
               <h3 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight leading-tight">

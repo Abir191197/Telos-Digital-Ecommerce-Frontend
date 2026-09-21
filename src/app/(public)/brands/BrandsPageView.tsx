@@ -9,7 +9,7 @@ import { ROUTES } from "@/constants";
 import { useGetBrandsQuery } from "@/services/api/brands/brandApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
-import { Loader2, Search, Sparkles, X } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Check, X } from "lucide-react";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { BrandsPageSkeleton } from "./BrandsPageSkeleton";
@@ -287,7 +287,7 @@ export function BrandsPageView() {
                       {/* Featured Badge */}
                       {brand.isFeaturedMarquee && (
                         <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 backdrop-blur-xs whitespace-nowrap shadow-2xs">
-                          <Sparkles className="h-2.5 w-2.5 shrink-0" />
+                          <BadgeCheck className="h-2.5 w-2.5 shrink-0" />
                           <span>Featured</span>
                         </div>
                       )}
@@ -308,7 +308,7 @@ export function BrandsPageView() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 py-4 text-xs font-medium text-muted-foreground/70">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
                       <span>
                         All {filteredBrands.length} brands displayed
                       </span>

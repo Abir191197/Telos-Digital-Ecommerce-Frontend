@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useGetProductReviewsQuery } from "@/services/api/reviews/reviewApi";
 import type { Product, ProductReview } from "@/types/ecommerce.types";
 import { m, type Variants } from "framer-motion";
-import { CheckCircle2, PackageCheck, Sparkles, Star, Loader2 } from "lucide-react";
+import { CheckCircle2, PackageCheck, MessageSquare, Star, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 interface ProductReviewsSectionProps {
@@ -150,7 +150,7 @@ export function ProductReviewsSection({
         {reviews.length === 0 ? (
           <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-border/80 bg-muted/10 space-y-3">
             <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
-              <Sparkles className="h-6 w-6" />
+              <MessageSquare className="h-6 w-6" />
             </div>
             <h3 className="text-base font-bold text-foreground">
               No Customer Reviews Yet

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { BrandLogoDisplay } from "@/components/shared";
 import { ROUTES } from "@/constants";
-import { Sparkles, ShieldCheck, ArrowRight } from "lucide-react";
+import { Award, ShieldCheck, ArrowRight, Store } from "lucide-react";
 import { BrandCompactProductCard } from "./BrandCompactProductCard";
 import type { Brand, Product } from "@/types/ecommerce.types";
 
@@ -25,7 +25,7 @@ export function BrandSpotlightSection({
       <div className="flex items-center justify-between pb-4 mb-5 border-b border-border/40">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-            <Sparkles className="h-4 w-4" />
+            <Award className="h-4 w-4" />
           </span>
           <div>
             <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-foreground flex items-center gap-2">
@@ -120,7 +120,7 @@ export function BrandSpotlightSection({
                       className="group flex-1 flex items-center justify-between p-4 rounded-2xl bg-card shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_28px_-6px_rgba(245,158,11,0.15),0_4px_16px_-2px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_32px_-6px_rgba(245,158,11,0.28),0_8px_20px_-4px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-colors">
-                          <Sparkles className="h-5 w-5" />
+                          <Store className="h-5 w-5" />
                         </div>
                         <div>
                           <div className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">

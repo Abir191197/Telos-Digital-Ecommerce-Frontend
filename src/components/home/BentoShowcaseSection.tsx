@@ -118,7 +118,7 @@ export function BentoShowcaseSection() {
                 Featured Collections & Lifestyle
               </h2>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
-                <Sparkles className="h-3.5 w-3.5" />
+                <Layers className="h-3.5 w-3.5" />
                 Hand-Picked
               </span>
             </div>

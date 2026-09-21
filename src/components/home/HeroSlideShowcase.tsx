@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { m, type Variants } from "framer-motion";
 
@@ -75,7 +75,7 @@ export function HeroSlideShowcase({
           </div>
 
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold px-2.5 py-0.5 text-[10px]">
-            <Sparkles className="h-3 w-3" />
+            <Tag className="h-3 w-3" />
             <span>{activeSlide.tag}</span>
           </span>
         </div>
