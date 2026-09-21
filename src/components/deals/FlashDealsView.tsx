@@ -156,13 +156,13 @@ export function FlashDealsView() {
                   {allFlashProducts.length} Live
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              <p className="hidden sm:block text-xs sm:text-sm text-muted-foreground mt-1">
                 Limited-time price markdowns with official Bangladesh warranty.
               </p>
             </div>
 
-            {/* Compact Live Countdown Capsule */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border/70 shadow-xs self-start sm:self-auto">
+            {/* Desktop Countdown Capsule */}
+            <div className="hidden sm:inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border/70 shadow-xs">
               <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                 <Clock className="h-3.5 w-3.5 text-amber-500" />
                 <span>Ends in:</span>
@@ -184,9 +184,32 @@ export function FlashDealsView() {
           </div>
         </section>
 
+        {/* ── Mobile Floating Countdown Pill (Above Bottom Nav) ── */}
+        <div className="fixed bottom-18 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 sm:hidden animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <div className="pointer-events-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/90 dark:bg-black/90 text-white border border-amber-500/40 shadow-xl shadow-black/30 backdrop-blur-md">
+            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400">
+              <Clock className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
+              <span>Ends:</span>
+            </span>
+            <div className="flex items-center gap-1 font-mono text-xs font-black text-white">
+              <span className="rounded bg-zinc-800 px-1.5 py-0.5">
+                {String(timeLeft.hours).padStart(2, "0")}h
+              </span>
+              <span className="text-amber-400 font-bold">:</span>
+              <span className="rounded bg-zinc-800 px-1.5 py-0.5">
+                {String(timeLeft.minutes).padStart(2, "0")}m
+              </span>
+              <span className="text-amber-400 font-bold">:</span>
+              <span className="rounded bg-amber-500 text-zinc-950 px-1.5 py-0.5">
+                {String(timeLeft.seconds).padStart(2, "0")}s
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* ── Flash Deals Infinite Grid ── */}
-        <section className="container px-3 sm:px-6 py-6 sm:py-8">
-          <div className="flex items-center justify-between mb-6">
+        <section className="container px-3 sm:px-6 py-4 sm:py-8">
+          <div className="hidden sm:flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                 Active Promotions ({allFlashProducts.length})

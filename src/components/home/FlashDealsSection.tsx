@@ -93,17 +93,17 @@ export function FlashDealsSection({ initialProducts }: FlashDealsSectionProps) {
             </div>
             <div className="h-8 w-24 bg-muted/60 rounded-full" />
           </div>
-          <div className="flex gap-4 overflow-hidden pt-5 pb-3">
+          <div className="flex gap-2.5 sm:gap-4 overflow-hidden pt-5 pb-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={`flash-skeleton-${i}`}
-                className="w-[210px] sm:w-[235px] md:w-[250px] shrink-0 h-[340px] rounded-3xl bg-muted/30 border border-border/40 p-3 flex flex-col justify-between">
-                <div className="aspect-square w-full rounded-2xl bg-muted/60" />
-                <div className="space-y-2 mt-2">
-                  <div className="h-3.5 w-3/4 bg-muted/70 rounded" />
-                  <div className="h-3 w-1/2 bg-muted/50 rounded" />
+                className="w-[calc(50vw-28px)] min-w-[155px] max-w-[190px] sm:w-[235px] sm:max-w-none md:w-[250px] shrink-0 h-[260px] sm:h-[340px] rounded-2xl sm:rounded-3xl bg-muted/30 border border-border/40 p-2 sm:p-3 flex flex-col justify-between">
+                <div className="aspect-square w-full rounded-xl sm:rounded-2xl bg-muted/60" />
+                <div className="space-y-1.5 sm:space-y-2 mt-2">
+                  <div className="h-3 sm:h-3.5 w-3/4 bg-muted/70 rounded" />
+                  <div className="h-2.5 sm:h-3 w-1/2 bg-muted/50 rounded" />
                 </div>
-                <div className="h-8 w-full bg-muted/60 rounded-full" />
+                <div className="h-7 sm:h-8 w-full bg-muted/60 rounded-full" />
               </div>
             ))}
           </div>
@@ -171,14 +171,14 @@ export function FlashDealsSection({ initialProducts }: FlashDealsSectionProps) {
           {/* Smooth Slow Marquee Track with Hover-Pause */}
           <div className="relative mt-4 sm:mt-5 overflow-hidden py-3">
             <div
-              className="flex gap-4 select-none animate-marquee pb-4 pt-2"
+              className="flex gap-2.5 sm:gap-4 select-none animate-marquee pb-4 pt-2"
               style={{
                 animationDuration: `${Math.max(35, flashProducts.length * 8)}s`,
               }}>
               {[...flashProducts, ...flashProducts].map((product, idx) => (
                 <div
                   key={`${product.id}-${idx}`}
-                  className="w-[210px] sm:w-[235px] md:w-[250px] shrink-0">
+                  className="w-[calc(50vw-28px)] min-w-[155px] max-w-[190px] sm:w-[235px] sm:max-w-none md:w-[250px] shrink-0">
                   <FlashDealCard product={product} />
                 </div>
               ))}
