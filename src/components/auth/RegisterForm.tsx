@@ -86,60 +86,55 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-8rem)]">
-        {/* Left Hero Panel - Luxury Deep Emerald & Sage Rich Gradient */}
-        <div className="hidden lg:flex relative lg:col-span-5 p-10 xl:p-14 flex-col justify-between overflow-hidden border-r border-emerald-900/10 dark:border-emerald-950/30 bg-gradient-to-br from-emerald-100/85 via-teal-50/60 to-zinc-100 dark:from-emerald-950/60 dark:via-zinc-950 dark:to-teal-950/40 text-foreground">
-          {/* Intense Ambient Emerald Glow Orbs & Smartwatch Overlay */}
-          <div className="absolute inset-0 pointer-events-none select-none">
-            <Image
-              src="/images/hero/smartwatch.png"
-              alt="Telos Member Perks"
-              fill
-              priority
-              sizes="(min-width: 1024px) 42vw, 100vw"
-              className="object-cover object-center opacity-[0.09] dark:opacity-[0.14] mix-blend-multiply dark:mix-blend-luminosity scale-105"
-            />
-            {/* Emerald/Teal multi-stop glow */}
-            <div className="absolute -top-24 -left-20 w-96 h-96 rounded-full bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-transparent blur-[90px]" />
-            <div className="absolute bottom-0 right-0 w-88 h-88 rounded-full bg-gradient-to-tl from-teal-400/20 via-emerald-300/15 to-transparent dark:from-emerald-600/20 blur-[100px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-transparent" />
-          </div>
+    <div className="relative w-full overflow-hidden bg-gradient-to-r from-emerald-500/10 via-emerald-500/[0.03] to-background dark:from-emerald-950/25 dark:via-zinc-950 dark:to-background">
+      {/* Directional Hero Ambient Lighting: intense at left, fading softly to the right */}
+      <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+        {/* Intense primary radial burst at top-left */}
+        <div className="absolute -top-40 -left-40 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent blur-[130px] dark:from-emerald-500/15 dark:via-teal-600/8" />
+        {/* Secondary mid-left glow bridging across */}
+        <div className="absolute top-1/3 -left-20 w-[520px] h-[520px] rounded-full bg-gradient-to-r from-teal-400/15 via-emerald-400/5 to-transparent blur-[120px] dark:from-emerald-600/10" />
+        {/* Soft bottom-left grounding pool */}
+        <div className="absolute -bottom-32 -left-20 w-[500px] h-[500px] rounded-full bg-emerald-500/10 dark:bg-emerald-500/5 blur-[120px]" />
+      </div>
 
-          {/* Top Logo */}
-          <div className="relative z-10">
-            <Link
-              href={ROUTES.HOME}
-              className="inline-flex items-center gap-3 transition-opacity hover:opacity-85"
-            >
-              <Logo size={36} />
-            </Link>
-          </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-16 min-h-[calc(100vh-8rem)] flex items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
+          
+          {/* Left Hero Storytelling Content */}
+          <div className="lg:col-span-6 xl:col-span-6 space-y-8 text-foreground">
+            {/* Logo */}
+            <div>
+              <Link
+                href={ROUTES.HOME}
+                className="inline-flex items-center gap-3 transition-opacity hover:opacity-85"
+              >
+                <Logo size={40} />
+              </Link>
+            </div>
 
-          {/* Center Editorial Focus */}
-          <div className="relative z-10 max-w-sm space-y-6 my-auto py-10">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-600/25 backdrop-blur-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-950 dark:text-emerald-300">
+            {/* Editorial Heading & Subtitle */}
+            <div className="space-y-4 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 dark:bg-emerald-500/10 border border-emerald-500/25 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold tracking-wider uppercase text-emerald-900 dark:text-emerald-300">
                   Verified Member Access
                 </span>
               </div>
-              <h2 className="text-3xl xl:text-4xl font-bold tracking-tight text-foreground leading-[1.15]">
-                Unlock Bangladesh&apos;s Smartest Tech Store.
-              </h2>
-              <p className="text-xs xl:text-sm text-muted-foreground font-normal leading-relaxed">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+                Unlock Bangladesh&apos;s <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 dark:from-emerald-400 dark:to-teal-400">Smartest Tech Store.</span>
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground font-normal leading-relaxed">
                 Create your Telos ID to save multiple delivery addresses, track live courier dispatches, and get VIP pre-order access.
               </p>
             </div>
 
-            {/* Spec Row */}
-            <div className="pt-2 border-t border-emerald-950/10 dark:border-emerald-500/15 grid grid-cols-2 gap-4">
+            {/* Spec / Benefit Highlights */}
+            <div className="pt-2 grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-border/40 max-w-lg">
               <div>
                 <span className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground block">
                   Coverage
                 </span>
-                <span className="text-xs font-semibold text-foreground mt-0.5 block">
+                <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block">
                   Official Warranty BD
                 </span>
               </div>
@@ -147,40 +142,42 @@ export function RegisterForm() {
                 <span className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground block">
                   Speed Checkout
                 </span>
-                <span className="text-xs font-semibold text-foreground mt-0.5 block">
+                <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block">
                   1-Click Saved Hubs
                 </span>
               </div>
+              <div className="hidden sm:block">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground block">
+                  Security
+                </span>
+                <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block">
+                  TLS 1.3 Protected
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Metatag */}
+            <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span>Verified Storefront • BD / REG-2026</span>
             </div>
           </div>
 
-          {/* Bottom Metatag */}
-          <div className="relative z-10 flex items-center justify-between text-[11px] font-mono text-muted-foreground border-t border-emerald-950/10 dark:border-emerald-500/15 pt-4">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="font-medium text-foreground">TLS 1.3 End-to-End Secure</span>
-            </div>
-            <span>BD / REG-2026</span>
-          </div>
-        </div>
-
-        {/* Form Panel - Cool Slate & Opal Rich Gradient */}
-        <div className="relative lg:col-span-7 px-6 py-10 sm:px-12 sm:py-16 lg:px-16 xl:px-20 flex flex-col justify-center overflow-hidden bg-gradient-to-bl from-slate-50 via-zinc-50 to-stone-100/90 dark:from-zinc-950 dark:via-zinc-900 dark:to-stone-950">
-          <div className="pointer-events-none absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-500/[0.04] dark:bg-amber-500/[0.03] blur-[100px]" />
-
-          <div className="relative z-10 w-full max-w-lg mx-auto space-y-6">
-            {/* Header */}
-            <div className="space-y-2">
-              <span className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground font-mono">
-                New Membership
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Create Account
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Get started in under 30 seconds.
-              </p>
-            </div>
+          {/* Right Hero Form: Pure Seamless Layout (No container card) */}
+          <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end">
+            <div className="w-full max-w-lg space-y-6">
+              {/* Header */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-600 dark:text-emerald-400 font-mono">
+                  New Membership
+                </span>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Create Account
+                </h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Join Telos to experience lightning-fast checkouts and live parcel updates.
+                </p>
+              </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {errorMessage && (
@@ -316,5 +313,6 @@ export function RegisterForm() {
         </div>
       </div>
     </div>
+  </div>
   );
 }
