@@ -85,7 +85,8 @@ export function RegisterForm() {
         password,
       }).unwrap();
       persistSession(response.data.accessToken, response.data.user);
-      window.location.assign(getRedirectUrl(ROUTES.HOME));
+      router.push(getRedirectUrl(ROUTES.HOME));
+      router.refresh();
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
