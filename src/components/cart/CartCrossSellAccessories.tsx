@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Sparkles, Plus, CheckCircle2 } from "lucide-react";
 import type { Product } from "@/types/ecommerce.types";
 
@@ -39,12 +39,13 @@ export function CartCrossSellAccessories({
           >
             <div className="flex items-start gap-3">
               <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden bg-background border border-border/40">
-                <Image
+                <ProductImageDisplay
                   src={rec.thumbnail}
                   alt={rec.name}
                   fill
                   sizes="56px"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  fallbackIconSize={18}
                 />
               </div>
               <div className="min-w-0 flex-1 space-y-1">

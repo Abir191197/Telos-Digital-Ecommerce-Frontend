@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { m, LazyMotion, domAnimation, type Variants } from "framer-motion";
 import { ROUTES } from "@/constants";
 import { useGetCategoryTreeQuery } from "@/services/api/categories/categoryApi";
@@ -222,12 +222,14 @@ export function QuickCategoryBar() {
                   <div className="relative z-10 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-background/85 group-hover:bg-background/95 backdrop-blur-md transition-transform duration-300 group-hover:scale-105 shadow-none">
                     {cat.image ? (
                       <div className="relative h-10 w-10 sm:h-11 sm:w-11 overflow-hidden rounded-xl">
-                        <Image
+                        <AppImage
                           src={cat.image}
                           alt={cat.name}
                           fill
                           sizes="44px"
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          fallbackIcon={<Icon className={`h-6 w-6 transition-transform duration-300 ${theme.iconColor}`} />}
+                          containerClassName="p-0 bg-transparent"
                         />
                       </div>
                     ) : (

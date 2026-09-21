@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 
 // Minimalist vector brand marks
 export function AppleLogo({ className }: { className?: string }) {
@@ -259,10 +260,18 @@ export function BrandLogoDisplay({
     );
   }
 
-  // 3. Monogram initial fallback
+  // 3. Monogram initial or photo icon fallback
+  if (name?.trim()) {
+    return (
+      <span className="text-xl sm:text-2xl font-black text-foreground/80 tracking-wider">
+        {name.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
   return (
-    <span className="text-xl sm:text-2xl font-black text-foreground/80 tracking-wider">
-      {name?.charAt(0).toUpperCase()}
-    </span>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground/50 border border-border/40">
+      <ImageIcon className="h-5 w-5" />
+    </div>
   );
 }

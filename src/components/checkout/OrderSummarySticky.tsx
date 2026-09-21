@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import type { CartItem, CouponDiscount } from "@/types/cart.types";
 import {
   Tag,
@@ -91,12 +91,13 @@ export function OrderSummarySticky({
               {/* Thumbnail with unclipped quantity badge */}
               <div className="relative shrink-0 my-1">
                 <div className="relative h-14 w-14 rounded-xl border border-border/70 overflow-hidden bg-muted/30">
-                  <Image
+                  <ProductImageDisplay
                     src={item.product.thumbnail}
                     alt={item.product.name}
                     fill
                     sizes="56px"
                     className="object-cover"
+                    fallbackIconSize={18}
                   />
                 </div>
                 <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-[10px] font-black shadow-xs">

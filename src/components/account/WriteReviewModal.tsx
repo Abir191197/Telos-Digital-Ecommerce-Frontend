@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Star, X, Upload, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreateReviewMutation } from "@/services/api/reviews/reviewApi";
@@ -122,11 +122,12 @@ export function WriteReviewModal({
           {/* Product mini card */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-border/70">
             <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-border/60 shrink-0">
-              <Image
+              <ProductImageDisplay
                 src={item.productThumbnail}
                 alt={item.productName}
                 fill
                 className="object-cover"
+                fallbackIconSize={16}
               />
             </div>
             <div className="min-w-0 flex-1">

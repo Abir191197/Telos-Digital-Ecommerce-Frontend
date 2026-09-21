@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Category, Product } from "@/types/ecommerce.types";
 import { CatalogView } from "@/components/catalog";
-import { TrustGuaranteeCards, SupportAndHelpstrip } from "@/components/shared";
+import { TrustGuaranteeCards, SupportAndHelpstrip, AppImage } from "@/components/shared";
 import { ROUTES } from "@/constants";
 import { LazyMotion, domAnimation } from "framer-motion";
 import {
@@ -12,7 +12,6 @@ import {
   Compass,
   ArrowUpRight,
 } from "lucide-react";
-import Image from "next/image";
 import { useRecentlyViewedStore } from "@/stores";
 import { useMounted } from "@/hooks";
 import { getCategoryIcon } from "./categoryConfig";
@@ -102,15 +101,14 @@ export function CategoryDetailView({
                     >
                       {/* Image Thumbnail Container with Gradient Mask */}
                       <div className="relative h-24 sm:h-28 w-full overflow-hidden bg-muted/40">
-                        {sister.image ? (
-                          <Image
-                            src={sister.image}
-                            alt={sister.name}
-                            fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                          />
-                        ) : null}
+                        <AppImage
+                          src={sister.image}
+                          alt={sister.name}
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                          fallbackIconSize={26}
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
                         {/* Top-Right Arrow Micro-badge */}

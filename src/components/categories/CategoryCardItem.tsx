@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { m } from "framer-motion";
 import { LayoutGrid, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/constants";
@@ -33,15 +33,14 @@ export function CategoryCardItem({ category, index }: CategoryCardItemProps) {
         href={ROUTES.CATEGORY_DETAIL(category.slug)}
         className="relative block h-32 sm:h-38 w-full overflow-hidden bg-muted/20"
       >
-        {category.image ? (
-          <Image
-            src={category.image}
-            alt={category.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-          />
-        ) : null}
+        <AppImage
+          src={category.image}
+          alt={category.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-106"
+          fallbackIconSize={32}
+        />
 
         {/* Minimal Floating Category Icon */}
         <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl bg-background/85 backdrop-blur-md text-foreground shadow-xs">

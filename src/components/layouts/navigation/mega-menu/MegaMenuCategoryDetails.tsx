@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { AppImage } from "@/components/shared";
 import { ArrowRight } from "lucide-react";
 import { ROUTES } from "@/constants";
 import type { Category, Product, Subcategory } from "@/types/ecommerce.types";
@@ -78,12 +78,13 @@ export function MegaMenuCategoryDetails({
                 className="group flex flex-col rounded-2xl bg-card p-2 shadow-xs transition-all hover:shadow-md hover:-translate-y-0.5"
               >
                 <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
-                  <Image
+                  <AppImage
                     src={prod.thumbnail}
                     alt={prod.name}
                     fill
                     sizes="(max-width: 768px) 50vw, 15vw"
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    fallbackIconSize={20}
                   />
                   {prod.discountPercentage && prod.discountPercentage > 0 ? (
                     <span className="absolute top-1 left-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[9px] font-bold text-white shadow-xs">

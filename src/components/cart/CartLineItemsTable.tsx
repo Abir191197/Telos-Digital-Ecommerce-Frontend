@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Minus, Plus, Trash2, Heart } from "lucide-react";
 import { ROUTES } from "@/constants";
 import type { CartItem } from "@/types/cart.types";
@@ -43,12 +43,13 @@ export function CartLineItemsTable({
                 href={ROUTES.PRODUCT_DETAIL(item.product.slug)}
                 className="relative h-16 w-16 sm:h-18 sm:w-18 shrink-0 overflow-hidden rounded-xl bg-muted/30 border border-border/50 hover:border-amber-500/40 transition-colors shadow-2xs"
               >
-                <Image
+                <ProductImageDisplay
                   src={item.product.thumbnail}
                   alt={item.product.name}
                   fill
                   sizes="72px"
                   className="object-cover"
+                  fallbackIconSize={20}
                 />
               </Link>
 

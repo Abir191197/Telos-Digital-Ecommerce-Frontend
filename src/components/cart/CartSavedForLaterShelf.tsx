@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ProductImageDisplay } from "@/components/shared";
 import { Heart, Plus, Trash2 } from "lucide-react";
 import { ROUTES } from "@/constants";
 import type { Product } from "@/types/ecommerce.types";
@@ -44,12 +44,13 @@ export function CartSavedForLaterShelf({
             className="flex items-center gap-3 p-3 rounded-2xl bg-muted/20 border border-border/50 hover:border-amber-500/30 transition-colors"
           >
             <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden bg-background border border-border/50">
-              <Image
+              <ProductImageDisplay
                 src={savedProduct.thumbnail}
                 alt={savedProduct.name}
                 fill
                 sizes="56px"
                 className="object-cover"
+                fallbackIconSize={18}
               />
             </div>
             <div className="min-w-0 flex-1 space-y-0.5">

@@ -1,7 +1,7 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Plus, Minus, Trash2, Check } from "lucide-react";
+import { ProductImageDisplay } from "@/components/shared";
+import { Trash2, Plus, Minus, Check } from "lucide-react";
 import type { CartItem } from "@/types/cart.types";
 import { ROUTES } from "@/constants";
 
@@ -26,12 +26,13 @@ export function DrawerItem({
         onClick={onCloseCart}
         className="relative h-18 w-18 shrink-0 overflow-hidden rounded-xl border border-border/70 bg-muted/40 group-hover:border-amber-500/40 shadow-inner transition-colors"
       >
-        <Image
+        <ProductImageDisplay
           src={item.product.thumbnail}
           alt={item.product.name}
           fill
           sizes="72px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
+          fallbackIconSize={20}
         />
       </Link>
 
