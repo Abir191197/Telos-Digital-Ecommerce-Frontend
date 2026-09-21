@@ -12,3 +12,5 @@ export * from "./AdminCategoriesSkeleton";
 export * from "./CategoryHeader";
 export * from "./CategoryFormActions";
 export * from "./useCategoryEditor";
+export * from "./CategoryEditPhotoUpload";
+export * from "./CategoryEditProperties";

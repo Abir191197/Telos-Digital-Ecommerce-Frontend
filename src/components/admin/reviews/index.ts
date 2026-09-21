@@ -7,3 +7,4 @@ export * from "./ReviewMobileList";
 export * from "./ReviewMobileFilterModal";
 export * from "./ReviewDetailModal";
 export * from "./AdminReviewsSkeleton";
+export * from "./useAdminReviewsManager";

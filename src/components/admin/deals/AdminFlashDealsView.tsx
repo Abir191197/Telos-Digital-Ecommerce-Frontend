@@ -1,208 +1,133 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   Flame,
   Zap,
+  Layers,
   Search,
-  Package,
   AlertTriangle,
   CheckCircle2,
   X,
   ExternalLink,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Product } from "@/types/ecommerce.types";
 import { ROUTES } from "@/constants";
 import { PageLoader } from "@/components/common";
-import {
-  useGetAdminProductsQuery,
-  useUpdateProductMutation,
-} from "@/services/api/products/productApi";
 import { FlashDealDesktopTable } from "./FlashDealDesktopTable";
 import { AdminFlashDealsSkeleton } from "./AdminFlashDealsSkeleton";
+import { useAdminFlashDeals, MAX_HOMEPAGE_FEATURED } from "./useAdminFlashDeals";
 
-const MAX_HOMEPAGE_FEATURED = 12;
+interface DealsKpiGridProps {
+  totalCount: number;
+  flashCount: number;
+  homepageFeaturedCount: number;
+}
+
+function DealsKpiGrid({
+  totalCount,
+  flashCount,
+  homepageFeaturedCount,
+}: DealsKpiGridProps) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Total in Flash Deals */}
+      <div className="rounded-3xl border border-amber-500/20 bg-card p-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            Total Flash Deals
+          </span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+            <Zap className="h-4 w-4" />
+          </div>
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-2xl sm:text-3xl font-black text-foreground">
+            {flashCount}
+          </span>
+          <span className="text-xs text-muted-foreground">active promotions</span>
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          All active deals appear on <code className="text-[10px] bg-muted px-1.5 py-0.5 rounded">/flash-deals</code>
+        </p>
+      </div>
+
+      {/* Featured on Homepage (12 Limit) */}
+      <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-transparent p-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+            Featured on Homepage
+          </span>
+          <span className="rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 px-2.5 py-0.5 text-[10px] font-black">
+            {homepageFeaturedCount} / {MAX_HOMEPAGE_FEATURED} Max
+          </span>
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-2xl sm:text-3xl font-black text-foreground">
+            {homepageFeaturedCount}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            / {MAX_HOMEPAGE_FEATURED} items allowed
+          </span>
+        </div>
+        <div className="mt-2.5">
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+              style={{ width: `${(homepageFeaturedCount / MAX_HOMEPAGE_FEATURED) * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Total Catalog Items */}
+      <div className="rounded-3xl border border-border bg-card p-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            Catalog Items
+          </span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Layers className="h-4 w-4" />
+          </div>
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-2xl sm:text-3xl font-black text-foreground">
+            {totalCount}
+          </span>
+          <span className="text-xs text-muted-foreground">eligible products</span>
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Toggle switch in table to promote any item
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function AdminFlashDealsView() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterMode, setFilterMode] = useState<"all" | "flash" | "featured" | "regular">("all");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-
-  // Warning Modal State when hitting 12-item limit
-  const [limitAlert, setLimitAlert] = useState<{
-    isOpen: boolean;
-    productName: string;
-  }>({
-    isOpen: false,
-    productName: "",
-  });
-
-  // Toast Notification
-  const [toastMessage, setToastMessage] = useState<{
-    type: "success" | "error" | "info";
-    text: string;
-  } | null>(null);
-
-  const showToast = (text: string, type: "success" | "error" | "info" = "success") => {
-    setToastMessage({ text, type });
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
-  };
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
-
-  // Fetch admin products
   const {
-    data: adminProductsResponse,
+    searchQuery,
+    setSearchQuery,
+    filterMode,
+    setFilterMode,
+    selectedIds,
+    updatingId,
+    limitAlert,
+    setLimitAlert,
+    toastMessage,
+    setToastMessage,
     isLoading,
-    refetch,
-  } = useGetAdminProductsQuery({
-    page: currentPage,
-    limit: 100, // Fetch up to 100 items to enable accurate filtering & counts
-    searchTerm: searchQuery || undefined,
-  });
-
-  const [updateProductMutation] = useUpdateProductMutation();
-
-  const allProducts: Product[] = useMemo(() => {
-    return adminProductsResponse?.data || [];
-  }, [adminProductsResponse?.data]);
-
-  // Overall KPI counts
-  const { totalCount, flashCount, homepageFeaturedCount } = useMemo(() => {
-    const total = allProducts.length;
-    const flash = allProducts.filter((p) => p.isFlashDeal).length;
-    const featured = allProducts.filter((p) => p.isFlashDeal && p.isFeatured).length;
-    return { totalCount: total, flashCount: flash, homepageFeaturedCount: featured };
-  }, [allProducts]);
-
-  // Filtered products based on active tab and search
-  const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      // Search
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(q);
-        const matchesSku = (product.sku || "").toLowerCase().includes(q);
-        const matchesBrand = (product.brand || "").toLowerCase().includes(q);
-        if (!matchesName && !matchesSku && !matchesBrand) return false;
-      }
-
-      // Filter Mode
-      if (filterMode === "flash") {
-        return Boolean(product.isFlashDeal);
-      }
-      if (filterMode === "featured") {
-        return Boolean(product.isFlashDeal && product.isFeatured);
-      }
-      if (filterMode === "regular") {
-        return !product.isFlashDeal;
-      }
-      return true;
-    });
-  }, [allProducts, filterMode, searchQuery]);
-
-  // Handle Toggle "Include in Flash Deals"
-  const handleToggleFlashDeal = async (product: Product) => {
-    const nextState = !product.isFlashDeal;
-    setUpdatingId(product.id);
-
-    try {
-      // If disabling flash deal, also disable homepage featured
-      const payloadFormData = new FormData();
-      payloadFormData.append("isFlashDeal", String(nextState));
-      if (!nextState && product.isFeatured) {
-        payloadFormData.append("isFeatured", "false");
-      }
-
-      await updateProductMutation({
-        id: product.id,
-        payload: payloadFormData,
-      }).unwrap();
-
-      showToast(
-        nextState
-          ? `Added "${product.name}" to Flash Deals.`
-          : `Removed "${product.name}" from Flash Deals.`
-      );
-      refetch();
-    } catch (err: any) {
-      console.error("Failed to update flash deal status:", err);
-      showToast(err?.data?.message || "Failed to update flash deal status.", "error");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  // Handle Toggle "Feature on Homepage" (Strict Max 12 Limit)
-  const handleToggleHomepageFeatured = async (product: Product) => {
-    const isCurrentlyFeatured = Boolean(product.isFeatured && product.isFlashDeal);
-    const nextState = !isCurrentlyFeatured;
-
-    // Check if activating and already at limit
-    if (nextState) {
-      if (homepageFeaturedCount >= MAX_HOMEPAGE_FEATURED) {
-        setLimitAlert({
-          isOpen: true,
-          productName: product.name,
-        });
-        return;
-      }
-    }
-
-    setUpdatingId(product.id);
-
-    try {
-      const payloadFormData = new FormData();
-      payloadFormData.append("isFeatured", String(nextState));
-      // If enabling for homepage, ensure it's also included in flash deals
-      if (nextState && !product.isFlashDeal) {
-        payloadFormData.append("isFlashDeal", "true");
-      }
-
-      await updateProductMutation({
-        id: product.id,
-        payload: payloadFormData,
-      }).unwrap();
-
-      showToast(
-        nextState
-          ? `"${product.name}" is now featured on Homepage Flash Deals (${homepageFeaturedCount + 1}/${MAX_HOMEPAGE_FEATURED}).`
-          : `"${product.name}" removed from Homepage Flash Deals.`
-      );
-      refetch();
-    } catch (err: any) {
-      console.error("Failed to update homepage featured state:", err);
-      showToast(err?.data?.message || "Failed to update featured state.", "error");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  // Selection helpers
-  const handleToggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedIds.length === filteredProducts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredProducts.map((p) => p.id));
-    }
-  };
+    allProducts,
+    totalCount,
+    flashCount,
+    homepageFeaturedCount,
+    filteredProducts,
+    handleToggleFlashDeal,
+    handleToggleHomepageFeatured,
+    handleToggleSelect,
+    handleSelectAll,
+  } = useAdminFlashDeals();
 
   if (isLoading && allProducts.length === 0) {
     return <AdminFlashDealsSkeleton />;
@@ -238,7 +163,7 @@ export function AdminFlashDealsView() {
         </div>
       )}
 
-      {/* ── Limit Warning Modal (Max 12 Reached) ── */}
+      {/* Limit Warning Modal (Max 12 Reached) */}
       {limitAlert.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="relative w-full max-w-md rounded-3xl bg-card border border-amber-500/30 p-6 shadow-2xl space-y-4">
@@ -278,7 +203,7 @@ export function AdminFlashDealsView() {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
@@ -308,83 +233,15 @@ export function AdminFlashDealsView() {
         </div>
       </div>
 
-      {/* ── KPI Summary Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Total in Flash Deals */}
-        <div className="rounded-3xl border border-amber-500/20 bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Total Flash Deals
-            </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
-              <Zap className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-foreground">
-              {flashCount}
-            </span>
-            <span className="text-xs text-muted-foreground">active promotions</span>
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            All active deals appear on <code className="text-[10px] bg-muted px-1.5 py-0.5 rounded">/flash-deals</code>
-          </p>
-        </div>
+      {/* KPI Cards */}
+      <DealsKpiGrid
+        totalCount={totalCount}
+        flashCount={flashCount}
+        homepageFeaturedCount={homepageFeaturedCount}
+      />
 
-        {/* Featured on Homepage (12 Limit) */}
-        <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-transparent p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
-              Featured on Homepage
-            </span>
-            <span className="rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 px-2.5 py-0.5 text-[10px] font-black">
-              {homepageFeaturedCount} / {MAX_HOMEPAGE_FEATURED} Max
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-foreground">
-              {homepageFeaturedCount}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              / {MAX_HOMEPAGE_FEATURED} items allowed
-            </span>
-          </div>
-          {/* Progress Bar for 12 items */}
-          <div className="mt-2.5">
-            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
-                style={{ width: `${(homepageFeaturedCount / MAX_HOMEPAGE_FEATURED) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Catalog Items */}
-        <div className="rounded-3xl border border-border bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Catalog Items
-            </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-              <Layers className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-foreground">
-              {totalCount}
-            </span>
-            <span className="text-xs text-muted-foreground">eligible products</span>
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Toggle switch in table to promote any item
-          </p>
-        </div>
-      </div>
-
-      {/* ── Toolbar: Search & Filter Tabs ── */}
+      {/* Toolbar: Search & Filter Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-muted/50 border border-border/80">
           <button
             type="button"
@@ -438,7 +295,6 @@ export function AdminFlashDealsView() {
           </button>
         </div>
 
-        {/* Search Bar */}
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
@@ -460,7 +316,7 @@ export function AdminFlashDealsView() {
         </div>
       </div>
 
-      {/* ── Table Component ── */}
+      {/* Table */}
       {isLoading ? (
         <div className="py-20 flex justify-center">
           <PageLoader />

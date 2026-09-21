@@ -1,22 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   X,
-  Plus,
-  Minus,
   Check,
   AlertCircle,
   Package,
-  TrendingUp,
-  TrendingDown,
-  ArrowRight,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/ecommerce.types";
 import { useAdjustStockMutation } from "@/services/api/inventory/inventoryApi";
+import { StockPreviewPanel } from "./StockPreviewPanel";
+import {
+  StockAdjustmentControls,
+  INCREASE_REASONS,
+  DECREASE_REASONS,
+} from "./StockAdjustmentControls";
 
 interface ManageStockModalProps {
   product: Product | null;
@@ -24,25 +23,6 @@ interface ManageStockModalProps {
   onClose: () => void;
   onStockUpdated: (message: string) => void;
 }
-
-const INCREASE_REASONS = [
-  "New Stock Received / Restock",
-  "Supplier Purchase / Buy",
-  "Customer Return",
-  "Inventory Count Correction",
-  "Custom / Other",
-];
-
-const DECREASE_REASONS = [
-  "Damaged / Defective Goods",
-  "Stolen / Lost Inventory",
-  "Expired Goods",
-  "Internal Store Use / Sample",
-  "Inventory Count Correction",
-  "Custom / Other",
-];
-
-const QUICK_INCREMENTS = [1, 5, 10, 25, 50, 100];
 
 export function ManageStockModal({
   product,
@@ -70,7 +50,6 @@ export function ManageStockModal({
     }
   }, [product]);
 
-  // When switching actionType, update default reason
   const handleActionChange = (newType: "INCREASE" | "DECREASE") => {
     setActionType(newType);
     setSelectedReason(newType === "INCREASE" ? INCREASE_REASONS[0] : DECREASE_REASONS[0]);
@@ -154,260 +133,32 @@ export function ManageStockModal({
           </button>
         </div>
 
-        {/* Two-Column Form for Clean Single-Page Layout */}
+        {/* Two-Column Form */}
         <form onSubmit={handleSubmit} className="pt-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
             {/* Left Column: Product Snapshot & Real-Time Math Trajectory */}
-            <div className="md:col-span-5 space-y-3.5">
-              {/* Product Snapshot */}
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-muted/30 border border-border/50">
-                <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-border/60 shrink-0 bg-muted/40">
-                  {product.thumbnail ? (
-                    <Image
-                      src={product.thumbnail}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground font-bold">
-                      No Pic
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-xs sm:text-sm text-foreground line-clamp-2 leading-snug">
-                    {product.name}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-muted-foreground font-mono">
-                    <span className="bg-muted px-1.5 py-0.5 rounded text-[10px]">
-                      SKU: {product.sku || "N/A"}
-                    </span>
-                    {product.categoryName && (
-                      <span className="bg-muted px-1.5 py-0.5 rounded text-[10px]">
-                        {product.categoryName}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Math Preview Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/20 border border-border/60 space-y-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                  <span>Balance Trajectory</span>
-                  <span className="text-[10px] font-normal text-muted-foreground">Preview</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 items-center text-center">
-                  {/* Current */}
-                  <div className="p-2 rounded-xl bg-background/80 border border-border/50">
-                    <p className="text-[10px] text-muted-foreground font-semibold">Current</p>
-                    <p className="text-base font-black font-mono text-foreground mt-0.5">
-                      {currentStock}
-                    </p>
-                  </div>
-
-                  {/* Delta */}
-                  <div
-                    className={cn(
-                      "p-2 rounded-xl border font-mono font-black text-sm",
-                      actionType === "INCREASE"
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                        : "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400"
-                    )}
-                  >
-                    <p className="text-[10px] font-semibold opacity-80">Change</p>
-                    <p className="mt-0.5">
-                      {actionType === "INCREASE" ? `+${quantity}` : `-${quantity}`}
-                    </p>
-                  </div>
-
-                  {/* Resulting */}
-                  <div
-                    className={cn(
-                      "p-2 rounded-xl border",
-                      resultingStock < 0
-                        ? "bg-rose-500/15 border-rose-500/40"
-                        : "bg-background/80 border-border/50"
-                    )}
-                  >
-                    <p className="text-[10px] text-muted-foreground font-semibold">New Total</p>
-                    <p
-                      className={cn(
-                        "text-base font-black font-mono mt-0.5",
-                        resultingStock < 0
-                          ? "text-rose-600"
-                          : resultingStock <= (product.lowStockThreshold || 5)
-                          ? "text-amber-500"
-                          : "text-emerald-600 dark:text-emerald-400"
-                      )}
-                    >
-                      {resultingStock}
-                    </p>
-                  </div>
-                </div>
-
-                {isInvalidReduction && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-semibold">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                    <span>Exceeds available stock ({currentStock} units)</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Optional Reference Note */}
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                  Note / Reference (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. PO #1042 or damaged box receipt"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  className="h-10 w-full rounded-xl bg-background border border-border/60 px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1.5 focus:ring-amber-500/40 placeholder:text-muted-foreground/60"
-                />
-              </div>
-            </div>
+            <StockPreviewPanel
+              product={product}
+              currentStock={currentStock}
+              actionType={actionType}
+              quantity={quantity}
+              resultingStock={resultingStock}
+              isInvalidReduction={isInvalidReduction}
+              note={note}
+              setNote={setNote}
+            />
 
             {/* Right Column: Adjustment Type, Quantity Stepper, & Reasons */}
-            <div className="md:col-span-7 space-y-3.5">
-              {/* Action Type Toggle: INCREASE (+) vs DECREASE (-) */}
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
-                  Adjustment Type
-                </label>
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-muted/40 border border-border/50">
-                  <button
-                    type="button"
-                    onClick={() => handleActionChange("INCREASE")}
-                    className={cn(
-                      "flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                      actionType === "INCREASE"
-                        ? "bg-emerald-600 text-white shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <TrendingUp className="h-4 w-4" />
-                    <span>Add Stock (+)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleActionChange("DECREASE")}
-                    className={cn(
-                      "flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                      actionType === "DECREASE"
-                        ? "bg-rose-600 text-white shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <TrendingDown className="h-4 w-4" />
-                    <span>Remove Stock (-)</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Quantity Controls & Quick Presets */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Adjustment Quantity
-                  </label>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Units to {actionType === "INCREASE" ? "add" : "deduct"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    disabled={quantity <= 1}
-                    className="h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-muted text-foreground flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      min="1"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="h-10 w-full rounded-xl bg-background border-2 border-border/70 text-center font-mono font-black text-base text-foreground focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-muted-foreground">
-                      units
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((prev) => prev + 1)}
-                    className="h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-muted text-foreground flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* Quick Increment Chips */}
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="text-[10px] text-muted-foreground font-semibold mr-1">Quick:</span>
-                  {QUICK_INCREMENTS.map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setQuantity(amt)}
-                      className={cn(
-                        "px-2 py-0.5 rounded-lg text-[10px] font-bold font-mono transition-colors border cursor-pointer",
-                        quantity === amt
-                          ? "bg-amber-500 text-zinc-950 border-amber-500"
-                          : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted hover:text-foreground"
-                      )}
-                    >
-                      {amt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reason Selection */}
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
-                  Reason for {actionType === "INCREASE" ? "Addition (+)" : "Reduction (-)"}
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {(actionType === "INCREASE" ? INCREASE_REASONS : DECREASE_REASONS).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setSelectedReason(r)}
-                      className={cn(
-                        "px-2.5 py-2 rounded-xl text-left text-[11px] font-semibold transition-all border cursor-pointer truncate",
-                        selectedReason === r
-                          ? actionType === "INCREASE"
-                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/40 font-bold"
-                            : "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/40 font-bold"
-                          : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60 hover:text-foreground"
-                      )}
-                      title={r}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedReason === "Custom / Other" && (
-                  <input
-                    type="text"
-                    placeholder="Specify custom reason..."
-                    value={customReasonText}
-                    onChange={(e) => setCustomReasonText(e.target.value)}
-                    className="h-9 w-full mt-2 rounded-xl bg-background border border-border/70 px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1.5 focus:ring-amber-500/40 placeholder:text-muted-foreground/60"
-                    required
-                  />
-                )}
-              </div>
-            </div>
+            <StockAdjustmentControls
+              actionType={actionType}
+              onActionChange={handleActionChange}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              selectedReason={selectedReason}
+              setSelectedReason={setSelectedReason}
+              customReasonText={customReasonText}
+              setCustomReasonText={setCustomReasonText}
+            />
           </div>
 
           {/* Error Message */}
