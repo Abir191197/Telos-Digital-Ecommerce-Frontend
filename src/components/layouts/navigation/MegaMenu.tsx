@@ -7,6 +7,8 @@ import {
   LayoutGrid,
   Home as HomeIcon,
   Flame,
+  Tag,
+  Headphones,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants";
@@ -125,8 +127,48 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
             />
           </button>
 
+          {/* Flash Deals — directly beside Categories button */}
+          <Link
+            href={ROUTES.FLASH_DEALS}
+            onClick={() => setCategoriesOpen(false)}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all group",
+              pathname === ROUTES.FLASH_DEALS
+                ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                : "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+            )}
+          >
+            <Flame className="h-4 w-4 shrink-0 fill-amber-500 text-amber-500 animate-flame transition-transform group-hover:scale-110" />
+            <span>Flash Deals</span>
+            <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-zinc-950 font-black px-2 py-0.5 text-[9px] uppercase tracking-wider shadow-2xs">
+              Live
+            </span>
+          </Link>
+
+          {/* Brands Navigation */}
+          <Link
+            href={ROUTES.BRANDS}
+            onClick={() => setCategoriesOpen(false)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all hover:bg-muted/60",
+              pathname.startsWith(ROUTES.BRANDS)
+                ? "font-bold text-amber-600 dark:text-amber-400 bg-muted/40"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Tag
+              className={cn(
+                "h-4 w-4 shrink-0 stroke-[2.2]",
+                pathname.startsWith(ROUTES.BRANDS)
+                  ? "text-amber-500"
+                  : "text-muted-foreground"
+              )}
+            />
+            <span>Brands</span>
+          </Link>
+
           {/* Quick Categories with Icons */}
-          <div className="hidden sm:flex items-center gap-1.5">
+          <div className="hidden lg:flex items-center gap-1.5">
             {QUICK_CATEGORIES.map((cat) => {
               const isCatActive =
                 categoriesOpen && activeCategorySlug === cat.slug;
@@ -204,16 +246,23 @@ export function MegaMenu({ pathname }: MegaMenuProps) {
           )}
         </div>
 
-        {/* Right link in nav row */}
-        <div className="hidden lg:flex items-center text-sm font-semibold text-muted-foreground">
+        {/* Right: 24/7 Live Customer Support Pill */}
+        <div className="hidden sm:flex items-center">
           <Link
-            href={ROUTES.FLASH_DEALS}
-            className="group flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
+            href={ROUTES.CONTACT}
+            className="group flex items-center gap-2 py-1 text-xs font-semibold text-foreground transition-all"
           >
-            <span className="inline-flex items-center justify-center">
-              <Flame className="h-4.5 w-4.5 fill-amber-500 text-amber-500 animate-flame transition-transform" />
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="group-hover:underline">Flash Deals</span>
+            <Headphones className="h-3.5 w-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
+            <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+              Need Help?
+            </span>
+            <span className="font-bold text-amber-600 dark:text-amber-400 group-hover:underline">
+              24/7 Support
+            </span>
           </Link>
         </div>
       </div>
