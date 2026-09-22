@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Sparkles,
+  Power,
+  PowerOff,
+  Loader2,
   ExternalLink,
   Edit3,
   Trash2,
@@ -24,6 +27,8 @@ export interface CategoryDesktopTableProps {
   formatDate: (dateStr?: string) => string;
   onEdit?: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onToggleStatus?: (category: Category) => void;
+  togglingId?: string | null;
 }
 
 interface MenuPosition {
@@ -41,6 +46,8 @@ export function CategoryDesktopTable({
   formatDate,
   onEdit,
   onDelete,
+  onToggleStatus,
+  togglingId,
 }: CategoryDesktopTableProps) {
   const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -184,15 +191,32 @@ export function CategoryDesktopTable({
 
                     {/* Status */}
                     <td className="py-3 px-4 text-center">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                          category.isActive !== false
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                            : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
-                        }`}
-                      >
-                        {category.isActive !== false ? "Active" : "Inactive"}
-                      </span>
+                      {onToggleStatus ? (
+                        <button
+                          type="button"
+                          onClick={() => onToggleStatus(category)}
+                          disabled={togglingId === category.id}
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
+                            category.isActive !== false
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                              : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20 hover:bg-zinc-500/20"
+                          } ${togglingId === category.id ? "opacity-60 cursor-wait" : "active:scale-95"}`}
+                          title={category.isActive !== false ? "Status: Active (Click to Deactivate)" : "Status: Inactive (Click to Activate)"}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${category.isActive !== false ? "bg-emerald-500 animate-pulse" : "bg-zinc-400"}`} />
+                          {category.isActive !== false ? "Active" : "Inactive"}
+                        </button>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            category.isActive !== false
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+                          }`}
+                        >
+                          {category.isActive !== false ? "Active" : "Inactive"}
+                        </span>
+                      )}
                     </td>
 
                     {/* Three-Dot Action Column */}
@@ -228,7 +252,7 @@ export function CategoryDesktopTable({
             right: menuPos.right,
             zIndex: 9999,
           }}
-          className="w-44 rounded-xl border border-border bg-popover p-1 shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left"
+          className="w-48 rounded-xl border border-border bg-popover p-1 shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left"
         >
           <Link
             href={`/category/${activeCategory.slug}`}
@@ -253,6 +277,30 @@ export function CategoryDesktopTable({
             <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Edit Details</span>
           </Link>
+          {onToggleStatus && (
+            <button
+              type="button"
+              onClick={() => {
+                const cat = activeCategory;
+                setActiveMenuId(null);
+                setMenuPos(null);
+                onToggleStatus(cat);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted rounded-lg transition-colors text-left cursor-pointer"
+            >
+              {activeCategory.isActive !== false ? (
+                <>
+                  <PowerOff className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Deactivate Category</span>
+                </>
+              ) : (
+                <>
+                  <Power className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Activate Category</span>
+                </>
+              )}
+            </button>
+          )}
           <div className="my-1 border-t border-border/60" />
           <button
             type="button"

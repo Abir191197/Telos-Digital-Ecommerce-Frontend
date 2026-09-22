@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { useGoogleLoginMutation } from "@/services/api/auth/authApi";
 import { mapBackendUserToCustomerUser, useAuthStore } from "@/stores";
@@ -40,6 +40,26 @@ export function GoogleAuthButton({
   const [googleLogin, { isLoading }] = useGoogleLoginMutation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isVerifying, setIsVerifying] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [buttonWidth, setButtonWidth] = useState<string>("400");
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        const measured = containerRef.current.clientWidth;
+        if (measured > 0) {
+          // Google GSI accepts width between 200 and 400 pixels
+          const clamped = Math.min(400, Math.max(200, Math.floor(measured)));
+          setButtonWidth(String(clamped));
+        }
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
 
   const handlePendingAction = async () => {
     if (!productId) return;
@@ -92,9 +112,15 @@ export function GoogleAuthButton({
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center my-1 relative">
+    <div
+      ref={containerRef}
+      className="w-full flex flex-col items-center justify-center my-1 relative"
+    >
       {isVerifying || isLoading ? (
-        <div className="w-full h-10 flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-xs font-medium text-muted-foreground animate-pulse">
+        <div
+          style={{ width: `${buttonWidth}px`, maxWidth: "100%" }}
+          className="h-10 flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-xs font-medium text-muted-foreground animate-pulse"
+        >
           <svg className="animate-spin h-3.5 w-3.5 text-amber-500" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -102,7 +128,7 @@ export function GoogleAuthButton({
           <span>Authenticating with Google...</span>
         </div>
       ) : (
-        <div className="w-full flex justify-center [&>div]:w-full [&_iframe]:w-full overflow-hidden rounded-lg">
+        <div className="w-full flex justify-center items-center overflow-hidden rounded-lg">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() =>
@@ -112,6 +138,8 @@ export function GoogleAuthButton({
             theme="outline"
             size="large"
             shape="rectangular"
+            width={buttonWidth}
+            logo_alignment="left"
           />
         </div>
       )}

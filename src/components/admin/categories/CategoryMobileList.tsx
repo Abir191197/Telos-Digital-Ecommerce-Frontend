@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Sparkles,
+  Power,
+  PowerOff,
+  Loader2,
   ExternalLink,
   Edit3,
   Trash2,
@@ -20,6 +23,8 @@ export interface CategoryMobileListProps {
   formatDate: (dateStr?: string) => string;
   onEdit?: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onToggleStatus?: (category: Category) => void;
+  togglingId?: string | null;
 }
 
 export function CategoryMobileList({
@@ -28,6 +33,8 @@ export function CategoryMobileList({
   formatDate,
   onEdit,
   onDelete,
+  onToggleStatus,
+  togglingId,
 }: CategoryMobileListProps) {
   return (
     <div className="block md:hidden space-y-3.5">
@@ -100,6 +107,29 @@ export function CategoryMobileList({
               </Link>
 
               <div className="flex items-center gap-2">
+                {/* Quick Status Toggle Button */}
+                {onToggleStatus && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleStatus(category)}
+                    disabled={togglingId === category.id}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border shadow-2xs cursor-pointer ${
+                      category.isActive !== false
+                        ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        : "bg-zinc-500/10 hover:bg-zinc-500/20 text-zinc-400 border-zinc-500/20"
+                    } ${togglingId === category.id ? "opacity-60 cursor-wait" : "active:scale-95"}`}
+                    title={category.isActive !== false ? "Click to Deactivate" : "Click to Activate"}
+                  >
+                    {togglingId === category.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
+                    ) : category.isActive !== false ? (
+                      <Power className="h-3.5 w-3.5 text-emerald-500" />
+                    ) : (
+                      <PowerOff className="h-3.5 w-3.5 text-zinc-400" />
+                    )}
+                    <span>{category.isActive !== false ? "Active" : "Inactive"}</span>
+                  </button>
+                )}
                 <Link
                   href={`/dashboard/categories/${category.slug}/edit`}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-600 dark:text-blue-400 hover:text-white text-xs font-bold transition-all shadow-xs active:scale-95"

@@ -16,6 +16,7 @@ import type { Category } from "@/types/ecommerce.types";
 import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
+  useUpdateCategoryMutation,
 } from "@/services/api/categories/categoryApi";
 import { AdminCategoriesSkeleton } from "./AdminCategoriesSkeleton";
 import { CategoryDesktopTable } from "./CategoryDesktopTable";
@@ -36,6 +37,8 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
     limit: 100,
   });
   const [deleteCategory] = useDeleteCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
+  const [togglingCategoryId, setTogglingCategoryId] = useState<string | null>(null);
   const categories = categoriesResponse?.data || [];
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured">("all");
@@ -111,6 +114,26 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
       });
     } catch {
       return "Sep 12, 2026";
+    }
+  };
+
+
+  const handleToggleCategoryStatus = async (category: Category) => {
+    const nextStatus = category.isActive === false;
+    setTogglingCategoryId(category.id);
+    try {
+      await updateCategory({
+        id: category.id,
+        payload: {
+          name: category.name,
+          isActive: nextStatus,
+        },
+      }).unwrap();
+      showToast(`Category "${category.name}" is now ${nextStatus ? "Active" : "Inactive"}`);
+    } catch (err: any) {
+      showToast(err?.data?.message || err?.message || "Failed to update category status");
+    } finally {
+      setTogglingCategoryId(null);
     }
   };
 
@@ -302,6 +325,8 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
               getNumericId={getNumericCategoryId}
               formatDate={formatCategoryDate}
               onDelete={handleDeleteRequest}
+              onToggleStatus={handleToggleCategoryStatus}
+              togglingId={togglingCategoryId}
             />
           </div>
 
@@ -317,6 +342,8 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
                 getNumericId={getNumericCategoryId}
                 formatDate={formatCategoryDate}
                 onDelete={handleDeleteRequest}
+                onToggleStatus={handleToggleCategoryStatus}
+                togglingId={togglingCategoryId}
               />
             ) : (
               <CategoryCardGrid
@@ -324,6 +351,8 @@ export function AdminCategoriesListView({ onSwitchToCreate }: AdminCategoriesLis
                 getNumericId={getNumericCategoryId}
                 formatDate={formatCategoryDate}
                 onDelete={handleDeleteRequest}
+                onToggleStatus={handleToggleCategoryStatus}
+                togglingId={togglingCategoryId}
               />
             )}
           </div>

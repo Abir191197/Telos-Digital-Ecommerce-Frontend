@@ -11,7 +11,7 @@ import {
   Award,
   X,
 } from "lucide-react";
-import { useGetBrandsQuery, useDeleteBrandMutation } from "@/services/api/brands/brandApi";
+import { useGetBrandsQuery, useDeleteBrandMutation, useUpdateBrandMutation } from "@/services/api/brands/brandApi";
 import type { Brand } from "@/types/ecommerce.types";
 import {
   ProductConfirmDialog,
@@ -39,6 +39,8 @@ export function AdminBrandsListView() {
   });
 
   const [deleteBrand] = useDeleteBrandMutation();
+  const [updateBrand] = useUpdateBrandMutation();
+  const [togglingBrandId, setTogglingBrandId] = useState<string | null>(null);
 
   const brands = data?.data || [];
   const totalItems = data?.meta?.total || 0;
@@ -90,6 +92,26 @@ export function AdminBrandsListView() {
       });
     } catch {
       return "Sep 12, 2026";
+    }
+  };
+
+
+  const handleToggleBrandStatus = async (brand: Brand) => {
+    const nextStatus = brand.isActive === false;
+    setTogglingBrandId(brand.id);
+    try {
+      await updateBrand({
+        id: brand.id,
+        payload: {
+          name: brand.name,
+          isActive: nextStatus,
+        },
+      }).unwrap();
+      showToast(`Brand "${brand.name}" is now ${nextStatus ? "Active" : "Inactive"}`);
+    } catch (err: any) {
+      showToast(err?.data?.message || err?.message || "Failed to update brand status");
+    } finally {
+      setTogglingBrandId(null);
     }
   };
 
@@ -282,6 +304,8 @@ export function AdminBrandsListView() {
                 getNumericId={getNumericBrandId}
                 formatDate={formatBrandDate}
                 onDelete={handleDeleteRequest}
+                onToggleStatus={handleToggleBrandStatus}
+                togglingId={togglingBrandId}
               />
             )}
           </div>

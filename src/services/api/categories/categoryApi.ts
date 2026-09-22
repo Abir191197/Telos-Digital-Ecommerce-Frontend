@@ -15,7 +15,7 @@ type BackendListResponse<T> = ApiResponse<T[]> & {
 };
 
 export type CategoryFormPayload = {
-  name: string;
+  name?: string;
   description?: string;
   icon?: string;
   subCategories?: Array<{ name: string; description?: string; isActive?: boolean }>;

@@ -3,19 +3,23 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Award, ExternalLink, Edit3, Trash2, Sparkles, Package } from "lucide-react";
+import { Award, ExternalLink, Edit3, Trash2, Sparkles, Package, Power, PowerOff, Loader2 } from "lucide-react";
 import type { Brand } from "@/types/ecommerce.types";
 
 interface BrandCardGridProps {
   brands: Brand[];
   onEdit?: (brand: Brand) => void;
   onDelete: (brand: Brand) => void;
+  onToggleStatus?: (brand: Brand) => void;
+  togglingId?: string | null;
 }
 
 export function BrandCardGrid({
   brands,
   onEdit,
   onDelete,
+  onToggleStatus,
+  togglingId,
 }: BrandCardGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
@@ -95,6 +99,28 @@ export function BrandCardGrid({
 
             {/* Direct Action Buttons: Edit, Delete, Store Link */}
             <div className="flex items-center gap-2 pt-3 mt-4 border-t border-border/30">
+              {onToggleStatus && (
+                <button
+                  type="button"
+                  onClick={() => onToggleStatus(brand)}
+                  disabled={togglingId === brand.id}
+                  className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border shadow-2xs ${
+                    brand.isActive !== false
+                      ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      : "bg-zinc-500/10 hover:bg-zinc-500/20 text-zinc-400 border-zinc-500/20"
+                  } ${togglingId === brand.id ? "opacity-60 cursor-wait" : "active:scale-95"}`}
+                  title={brand.isActive !== false ? "Click to Deactivate" : "Click to Activate"}
+                >
+                  {togglingId === brand.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : brand.isActive !== false ? (
+                    <Power className="h-3.5 w-3.5" />
+                  ) : (
+                    <PowerOff className="h-3.5 w-3.5" />
+                  )}
+                  <span>{brand.isActive !== false ? "Active" : "Inactive"}</span>
+                </button>
+              )}
               <Link
                 href={`/dashboard/brands/${brand.slug}/edit`}
                 className="flex-1 py-2 px-3 rounded-xl bg-muted/60 hover:bg-amber-500 hover:text-zinc-950 text-foreground text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"

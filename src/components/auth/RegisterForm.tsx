@@ -173,7 +173,7 @@ export function RegisterForm() {
 
           {/* Right Hero Form: Pure Seamless Layout (No container card) */}
           <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end">
-            <div className="w-full max-w-lg space-y-6">
+            <div className="w-full max-w-md space-y-6">
               {/* Header */}
               <div className="space-y-1.5">
                 <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-600 dark:text-emerald-400 font-mono">

@@ -14,7 +14,7 @@ type BackendListResponse<T> = ApiResponse<T[]> & {
 };
 
 export type BrandFormPayload = {
-  name: string;
+  name?: string;
   tagline?: string;
   description?: string;
   isActive?: boolean;
