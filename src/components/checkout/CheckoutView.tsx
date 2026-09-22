@@ -9,6 +9,7 @@ import { OrderSummarySticky } from "./OrderSummarySticky";
 import { StockAlertModal } from "./StockAlertModal";
 import { CheckoutSkeleton } from "./CheckoutSkeleton";
 import { CheckoutEmptyState } from "./CheckoutEmptyState";
+import { CheckoutLoadingOverlay } from "./CheckoutLoadingOverlay";
 import { CheckCircle2 } from "lucide-react";
 import { useCheckoutFlow } from "./useCheckoutFlow";
 
