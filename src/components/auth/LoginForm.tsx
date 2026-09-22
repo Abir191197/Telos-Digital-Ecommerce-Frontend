@@ -66,6 +66,17 @@ export function LoginForm() {
   const quantityParam = searchParams.get("quantity");
   const variantIdParam = searchParams.get("variantId");
 
+  const registerHref = React.useMemo(() => {
+    const params = new URLSearchParams();
+    if (callbackUrl) params.set("callbackUrl", callbackUrl);
+    if (action) params.set("action", action);
+    if (productId) params.set("productId", productId);
+    if (quantityParam) params.set("quantity", quantityParam);
+    if (variantIdParam) params.set("variantId", variantIdParam);
+    const qs = params.toString();
+    return qs ? `${ROUTES.REGISTER}?${qs}` : ROUTES.REGISTER;
+  }, [callbackUrl, action, productId, quantityParam, variantIdParam]);
+
   const [addToCartMutation] = useAddToCartMutation();
   const [addToWishlistMutation] = useAddToWishlistMutation();
 
@@ -408,7 +419,7 @@ export function LoginForm() {
               <p className="text-xs text-muted-foreground">
                 Don&apos;t have an account?{" "}
                 <Link
-                  href={ROUTES.REGISTER}
+                  href={registerHref}
                   className="font-semibold text-foreground hover:underline"
                 >
                   Create account

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import {
   ChevronDown,
@@ -46,10 +47,28 @@ export function HeaderUserMenu({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onToggle]);
 
+  const pathname = usePathname();
+  const [currentPath, setCurrentPath] = useState(pathname || "");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const full = window.location.pathname + window.location.search;
+      setCurrentPath(full);
+    }
+  }, [pathname]);
+
+  const loginHref = useMemo(() => {
+    if (!pathname || pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER) {
+      return ROUTES.LOGIN;
+    }
+    const target = currentPath || pathname;
+    return `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(target)}`;
+  }, [pathname, currentPath]);
+
   if (!user) {
     return (
       <Link
-        href={ROUTES.LOGIN}
+        href={loginHref}
         className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/25 hover:bg-muted/60 px-3 py-1.5 text-xs font-semibold text-foreground hover:border-amber-500/50 transition-all active:scale-95 shadow-2xs"
       >
         <UserIcon className="h-3.5 w-3.5 text-amber-500" />

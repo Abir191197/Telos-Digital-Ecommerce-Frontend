@@ -46,6 +46,22 @@ export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  const action = searchParams.get("action");
+  const productId = searchParams.get("productId");
+  const quantityParam = searchParams.get("quantity");
+  const variantIdParam = searchParams.get("variantId");
+
+  const loginHref = React.useMemo(() => {
+    const params = new URLSearchParams();
+    if (callbackUrl) params.set("callbackUrl", callbackUrl);
+    if (action) params.set("action", action);
+    if (productId) params.set("productId", productId);
+    if (quantityParam) params.set("quantity", quantityParam);
+    if (variantIdParam) params.set("variantId", variantIdParam);
+    const qs = params.toString();
+    return qs ? `${ROUTES.LOGIN}?${qs}` : ROUTES.LOGIN;
+  }, [callbackUrl, action, productId, quantityParam, variantIdParam]);
+
   const setAuth = useAuthStore((state) => state.setAuth);
   const [registerCustomer, { isLoading: isRegisterLoading }] =
     useRegisterMutation();
@@ -321,7 +337,7 @@ export function RegisterForm() {
               <p className="text-xs text-muted-foreground">
                 Already have an account?{" "}
                 <Link
-                  href={ROUTES.LOGIN}
+                  href={loginHref}
                   className="font-semibold text-foreground hover:underline"
                 >
                   Sign in

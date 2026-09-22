@@ -19,6 +19,22 @@ import { cn } from "@/lib/utils";
 export function MobileBottomNav() {
   const pathname = usePathname();
   const mounted = useMounted();
+  const [currentPath, setCurrentPath] = React.useState(pathname || "");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const full = window.location.pathname + window.location.search;
+      setCurrentPath(full);
+    }
+  }, [pathname]);
+
+  const loginHref = React.useMemo(() => {
+    if (!pathname || pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER) {
+      return ROUTES.LOGIN;
+    }
+    const target = currentPath || pathname;
+    return `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(target)}`;
+  }, [pathname, currentPath]);
 
   // Zustand state
   const rawCartCount = useCartStore((state) => state.getItemCount());
@@ -152,7 +168,7 @@ export function MobileBottomNav() {
 
         {/* 5. Account */}
         <Link
-          href={user?.role === "admin" ? ROUTES.DASHBOARD : user ? ROUTES.ACCOUNT : ROUTES.LOGIN}
+          href={user?.role === "admin" ? ROUTES.DASHBOARD : user ? ROUTES.ACCOUNT : loginHref}
           onClick={closeCart}
           className={cn(
             "relative flex flex-col items-center justify-center gap-1 transition-all duration-200 select-none",
