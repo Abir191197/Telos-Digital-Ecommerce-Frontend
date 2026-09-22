@@ -54,25 +54,24 @@ export function CheckoutView() {
     showToast,
   } = useCheckoutFlow();
 
-  // Safe client render check, initial cart/session loading, or order submission in progress
-  if (!mounted || user?.role === "admin" || !user || (isCartLoading && items.length === 0) || isSubmitting) {
+  // Safe client render check + initial cart/session loading (NOT isSubmitting — overlay handles that)
+  if (!mounted || user?.role === "admin" || !user || (isCartLoading && items.length === 0)) {
     return <CheckoutSkeleton />;
   }
 
   // If cart is empty and not submitting, show empty state
-  if (items.length === 0) {
+  if (items.length === 0 && !isSubmitting) {
     return <CheckoutEmptyState />;
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-amber-500 selection:text-zinc-950 pb-20">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 animate-in slide-in-from-bottom-5 duration-200">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-          <p className="text-xs font-bold">{toastMessage}</p>
-        </div>
-      )}
+      {/* Order submission full-screen overlay — shown while placing the order */}
+      <CheckoutLoadingOverlay
+        isSubmitting={isSubmitting}
+        totalPayable={totalPayable}
+        itemCount={items.length}
+      />
 
       {/* Main Content */}
       <main className="container py-6 sm:py-8 space-y-8">
