@@ -1,6 +1,6 @@
 import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
-import type { Address, Order, OrderItem, OrderStatus } from "@/types/order.types";
+import type { Address, Order, OrderItem, OrderListItem, OrderStatus } from "@/types/order.types";
 
 export interface CreateOrderPayload {
   items: {
@@ -88,6 +88,33 @@ export interface BackendOrderListResponse extends ApiResponse<Order[]> {
   };
 }
 
+export interface AdminOrderListResponse extends ApiResponse<OrderListItem[]> {
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+}
+
+function normalizeShippingAddress(raw: any): Address {
+  const shippingAddress = raw.shippingAddress || raw.customerDetails || {};
+
+  return {
+    id: shippingAddress.id || `addr-${raw.id}`,
+    name: shippingAddress.name || raw.customerName || "Customer",
+    phone: shippingAddress.phone || raw.customerPhone || "",
+    street: shippingAddress.street || raw.shippingStreet || "",
+    area: shippingAddress.area || raw.shippingArea || shippingAddress.city || raw.shippingCity || "",
+    union: shippingAddress.union || raw.shippingUnion || "",
+    city: shippingAddress.city || raw.shippingCity || "Dhaka",
+    zone: (shippingAddress.zone || raw.shippingZone || "inside-dhaka") as Address["zone"],
+    postalCode: shippingAddress.postalCode || raw.shippingPostalCode || "",
+    isDefault: Boolean(shippingAddress.isDefault),
+    label: (shippingAddress.label || "Home") as Address["label"],
+  };
+}
+
 export function normalizeBackendOrder(raw: any): Order {
   if (!raw) return raw;
 
@@ -142,6 +169,30 @@ export function normalizeBackendOrder(raw: any): Order {
     items,
     shippingAddress,
     paymentMethod,
+    paymentStatus,
+    subtotal: Number(raw.subtotal) || 0,
+    deliveryFee: Number(raw.deliveryFee) || 0,
+    discount: Number(raw.discount) || 0,
+    total: Number(raw.total) || 0,
+    trackingNumber: raw.trackingNumber || undefined,
+    courierName: raw.courierName || undefined,
+    estimatedDelivery: raw.estimatedDelivery || undefined,
+  };
+}
+
+export function normalizeOrderListItem(raw: any): OrderListItem {
+  const status = (raw.status || "pending").toLowerCase() as OrderStatus;
+  const paymentStatus = (raw.paymentStatus || "unpaid").toLowerCase() as "paid" | "unpaid";
+
+  return {
+    id: raw.id,
+    orderNumber: raw.orderNumber || raw.id,
+    createdAt: raw.createdAt,
+    status,
+    itemCount: Math.max(0, Number(raw.itemCount ?? raw._count?.items) || 0),
+    items: [],
+    shippingAddress: normalizeShippingAddress(raw),
+    paymentMethod: (raw.paymentMethod || "cod").toLowerCase() as OrderListItem["paymentMethod"],
     paymentStatus,
     subtotal: Number(raw.subtotal) || 0,
     deliveryFee: Number(raw.deliveryFee) || 0,
@@ -225,7 +276,7 @@ export const orderApi = baseApi.injectEndpoints({
 
     // Admin lists all orders with filters
     getAllOrders: builder.query<
-      BackendOrderListResponse,
+      AdminOrderListResponse,
       {
         searchTerm?: string;
         status?: string;
@@ -246,7 +297,7 @@ export const orderApi = baseApi.injectEndpoints({
       transformResponse: (response: any) => ({
         ...response,
         data: Array.isArray(response.data)
-          ? response.data.map(normalizeBackendOrder)
+          ? response.data.map(normalizeOrderListItem)
           : [],
       }),
       providesTags: ["Order"],
@@ -333,7 +384,7 @@ export const {
   useCancelMyOrderMutation,
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
-  useGetOrderStatsQuery,
+  useLazyGetOrderByIdQuery,  useGetOrderStatsQuery,
   useUpdateOrderStatusMutation,
   useAssignCourierTrackingMutation,
   useUpdateOrderPaymentMutation,

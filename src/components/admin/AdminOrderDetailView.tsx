@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { OrderStatus } from "@/types/order.types";
 import { InvoiceModal } from "@/components/account";
-import { PageLoader } from "@/components/common";
 import {
   useGetOrderByIdQuery,
   useUpdateOrderStatusMutation,
@@ -27,13 +26,14 @@ import {
   OrderStatusDropdown,
   OrderItemsSection,
   OrderSidebarSection,
+  AdminOrderDetailSkeleton,
 } from "./order-detail";
 
 export function AdminOrderDetailView() {
   const params = useParams();
   const orderIdParam = params?.id as string;
 
-  const { orders, updateOrderStatus, assignCourierTracking } = useAdminStore();
+  const { updateOrderStatus, assignCourierTracking } = useAdminStore();
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [courierNameInput, setCourierNameInput] = useState("Steadfast Courier");
@@ -43,51 +43,35 @@ export function AdminOrderDetailView() {
   const {
     data: backendOrderData,
     isLoading,
-  } = useGetOrderByIdQuery(orderIdParam, {
-    skip: !orderIdParam,
-  });
+    isError,
+    error,
+    refetch,
+  } = useGetOrderByIdQuery(orderIdParam, { skip: !orderIdParam });
 
   const [updateOrderStatusMutation] = useUpdateOrderStatusMutation();
   const [assignCourierTrackingMutation] = useAssignCourierTrackingMutation();
 
-  const storeOrder = orders.find(
-    (o) =>
-      o.id === orderIdParam ||
-      o.orderNumber === orderIdParam ||
-      o.orderNumber?.toLowerCase() === orderIdParam?.toLowerCase()
-  );
+  const order = backendOrderData?.data;
+  const isNotFound = isError && typeof error === "object" && error !== null && "status" in error && error.status === 404;
 
-  const order = backendOrderData?.data || storeOrder;
+  if (isLoading || !orderIdParam) return <AdminOrderDetailSkeleton />;
 
-  if (isLoading && !order) {
+  if (isNotFound) {
     return (
-      <PageLoader
-        title="Loading Order Details..."
-        description="Fetching customer order and item records..."
-        badgeText="Admin Orders"
-      />
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-muted/60 text-muted-foreground"><AlertCircle className="h-8 w-8 text-rose-500" /></div>
+        <div className="space-y-1"><h2 className="text-lg font-black text-foreground">Order Not Found</h2><p className="text-xs text-muted-foreground">No order matches &quot;{orderIdParam}&quot; in admin database.</p></div>
+        <Link href="/dashboard/orders" className="inline-flex items-center gap-2 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-bold shadow-xs hover:opacity-90 transition-opacity"><ArrowLeft className="h-4 w-4" /><span>Back to All Orders</span></Link>
+      </div>
     );
   }
 
-  if (!order) {
+  if (isError || !order) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-muted/60 text-muted-foreground">
-          <AlertCircle className="h-8 w-8 text-rose-500" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-black text-foreground">Order Not Found</h2>
-          <p className="text-xs text-muted-foreground">
-            No order matches &quot;{orderIdParam}&quot; in the admin database.
-          </p>
-        </div>
-        <Link
-          href="/dashboard/orders"
-          className="inline-flex items-center gap-2 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-bold shadow-xs hover:opacity-90 transition-opacity"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to All Orders</span>
-        </Link>
+        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-500/10 text-rose-500"><AlertCircle className="h-8 w-8" /></div>
+        <div className="space-y-1"><h2 className="text-lg font-black text-foreground">Order Details Could Not Load</h2><p className="text-xs text-muted-foreground">Check connection, then try loading order again.</p></div>
+        <div className="flex items-center gap-2"><button type="button" onClick={() => refetch()} className="rounded-xl bg-foreground text-background px-4 py-2 text-xs font-bold shadow-xs hover:opacity-90 transition-opacity">Try Again</button><Link href="/dashboard/orders" className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-xs font-bold text-foreground hover:bg-muted transition-colors"><ArrowLeft className="h-4 w-4" /><span>All Orders</span></Link></div>
       </div>
     );
   }

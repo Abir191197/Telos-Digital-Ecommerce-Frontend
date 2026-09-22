@@ -28,6 +28,12 @@ export interface OrderItem {
   subtotal: number;
 }
 
+export interface OrderListItem extends Omit<Order, "items"> {
+  /** Always empty for list responses. Full items load on detail query. */
+  items: never[];
+  itemCount: number;
+}
+
 export interface Order {
   id: string;
   orderNumber: string; // e.g. "TC-84920"

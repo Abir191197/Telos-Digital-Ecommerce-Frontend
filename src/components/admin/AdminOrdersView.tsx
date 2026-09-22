@@ -7,7 +7,6 @@ import {
   OrderCardItem,
   OrderDesktopTable,
   OrderFilterDock,
-  OrderQuickInspectModal,
   OrderMobileFilterModal,
   OrderFloatingFilterFab,
   AdminOrdersSkeleton,
@@ -28,10 +27,9 @@ export function AdminOrdersView() {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
-    selectedOrder,
-    setSelectedOrder,
     invoiceModalOrder,
     setInvoiceModalOrder,
+    handlePrintInvoice,
     currentPage,
     setCurrentPage,
     pageSize,
@@ -46,12 +44,6 @@ export function AdminOrdersView() {
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
-    courierNameInput,
-    setCourierNameInput,
-    trackingNumberInput,
-    setTrackingNumberInput,
-    handleAssignTracking,
-    updateOrderStatus,
   } = useAdminOrdersManager();
 
   if (isLoading && orders.length === 0) {
@@ -127,8 +119,7 @@ export function AdminOrdersView() {
               key={order.id}
               order={order}
               getStatusBadge={getOrderStatusBadge}
-              onPrintInvoice={setInvoiceModalOrder}
-              onQuickInspect={setSelectedOrder}
+              onPrintInvoice={handlePrintInvoice}
             />
           ))
         )}
@@ -149,7 +140,7 @@ export function AdminOrdersView() {
         <OrderDesktopTable
           orders={paginatedOrders}
           getStatusBadge={getOrderStatusBadge}
-          onPrintInvoice={setInvoiceModalOrder}
+          onPrintInvoice={handlePrintInvoice}
         />
       )}
 
@@ -164,22 +155,6 @@ export function AdminOrdersView() {
           className="hidden sm:flex mt-auto border border-border/20"
         />
       )}
-
-      {/* ── Order Detail Quick Drawer Modal ── */}
-      <OrderQuickInspectModal
-        order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
-        onUpdateStatus={(id, status) => {
-          updateOrderStatus(id, status);
-          setSelectedOrder((prev) => (prev ? { ...prev, status } : null));
-        }}
-        onAssignTracking={handleAssignTracking}
-        courierNameInput={courierNameInput}
-        setCourierNameInput={setCourierNameInput}
-        trackingNumberInput={trackingNumberInput}
-        setTrackingNumberInput={setTrackingNumberInput}
-        getStatusBadge={getOrderStatusBadge}
-      />
 
       {/* ── Mobile Floating Filter Button ── */}
       <OrderFloatingFilterFab

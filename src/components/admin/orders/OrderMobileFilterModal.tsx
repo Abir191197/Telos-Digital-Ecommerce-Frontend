@@ -1,14 +1,14 @@
 import React from "react";
 import { Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Order } from "@/types/order.types";
+import { OrderListItem } from "@/types/order.types";
 
 interface OrderMobileFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
-  orders: Order[];
+  orders: OrderListItem[];
   onResetPage: () => void;
 }
 
