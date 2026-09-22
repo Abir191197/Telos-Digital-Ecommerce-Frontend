@@ -7,6 +7,7 @@ import type {
   BackendAuthResponse,
   BackendAuthUser,
   ChangePasswordRequest,
+  GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
   UpdateProfileRequest,
@@ -60,6 +61,17 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+        googleLogin: builder.mutation<
+      ApiResponse<BackendAuthResponse>,
+      GoogleLoginRequest
+    >({
+      query: (body) => ({
+        url: "/google",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth", "User"],
+    }),
     changePassword: builder.mutation<ApiResponse<null>, ChangePasswordRequest>({
       query: (body) => ({
         url: "/auth/change-password",
@@ -75,6 +87,7 @@ export const {
   useLoginMutation,
   useAdminLoginMutation,
   useRegisterMutation,
+  useGoogleLoginMutation,
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,

@@ -11,6 +11,7 @@ import {
 } from "@/services/api/auth/authApi";
 import Image from "next/image";
 import { Logo } from "@/components/common";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 import {
   Eye,
   EyeOff,
@@ -303,6 +304,17 @@ export function RegisterForm() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
+
+              <div className="relative flex items-center justify-center py-0.5">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border/60" />
+                </div>
+                <span className="relative bg-background px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                  Or sign up with
+                </span>
+              </div>
+
+              <GoogleAuthButton text="signup_with" onError={setErrorMessage} />
             </form>
 
             <div className="pt-4 border-t border-border/50 text-center">
