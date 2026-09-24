@@ -9,7 +9,7 @@ import { ROUTES } from "@/constants";
 import { useGetBrandsQuery } from "@/services/api/brands/brandApi";
 import { useGetProductsQuery } from "@/services/api/products/productApi";
 import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
-import { Loader2, Search, BadgeCheck, Check, X } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Check, X, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { BrandsPageSkeleton } from "./BrandsPageSkeleton";
@@ -172,7 +172,7 @@ export function BrandsPageView() {
 
       <LazyMotion features={domAnimation}>
         <div className="space-y-12 sm:space-y-16 lg:space-y-20">
-          {/* ── Page Header Bar (Title, Count & Search) ── */}
+                  {/* Page Header Bar (Title, Count & Search) */}
           <section className="container px-3 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
               <div>
@@ -180,7 +180,7 @@ export function BrandsPageView() {
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                     Official Brands
                   </h1>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 shadow-2xs backdrop-blur-md">
                     {brands.length}
                   </span>
                 </div>
@@ -253,8 +253,8 @@ export function BrandsPageView() {
                   <m.div key={brand.id} variants={cardVariants}>
                     <Link
                       href={ROUTES.BRAND_DETAIL(brand.slug)}
-                      className="group relative flex flex-col items-center justify-between p-4 sm:p-5 h-[190px] sm:h-[210px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_30px_-8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_32px_-8px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 overflow-hidden text-center select-none">
-                      {/* Ambient glow on hover */}
+                      className="group relative flex flex-col items-center justify-between p-4 sm:p-5 h-[190px] sm:h-[210px] rounded-3xl bg-card text-card-foreground shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.5),0_6px_10px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_35px_-8px_rgba(0,0,0,0.12),0_10px_15px_-6px_rgba(245,158,11,0.12)] dark:hover:shadow-[0_22px_40px_-8px_rgba(0,0,0,0.7),0_10px_20px_-6px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all duration-300 overflow-hidden text-center select-none">
+                      {/* Ambient glow on hover - borderless liquid shadow */}
                       <div
                         aria-hidden="true"
                         className="absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100 bg-amber-500/20 pointer-events-none"
@@ -264,7 +264,15 @@ export function BrandsPageView() {
                         className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                       />
 
-                      {/* Brand Logo Display - Perfectly Centered in upper card body */}
+                      {/* Featured Badge */}
+                      {brand.isFeaturedMarquee && (
+                        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-500/10 border border-amber-500/25 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 backdrop-blur-md whitespace-nowrap shadow-2xs">
+                          <BadgeCheck className="h-2.5 w-2.5 shrink-0" />
+                          <span>Featured</span>
+                        </div>
+                      )}
+
+                      {/* Brand Logo Container */}
                       <div className="relative z-10 flex-1 w-full flex items-center justify-center text-foreground/85 group-hover:text-foreground transition-colors duration-200 py-1">
                         <BrandLogoDisplay
                           name={brand.name}
@@ -274,23 +282,24 @@ export function BrandsPageView() {
                         />
                       </div>
 
-                      {/* Brand Details */}
-                      <div className="relative z-10 w-full flex flex-col items-center gap-1 shrink-0 pb-0.5">
-                        <span className="text-sm sm:text-[15px] font-bold text-foreground group-hover:text-foreground line-clamp-1 w-full tracking-tight">
-                          {brand.name}
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-medium text-muted-foreground/80 line-clamp-1">
-                          {brand.tagline || "Official Store"}
-                        </span>
-                      </div>
-
-                      {/* Featured Badge */}
-                      {brand.isFeaturedMarquee && (
-                        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 backdrop-blur-xs whitespace-nowrap shadow-2xs">
-                          <BadgeCheck className="h-2.5 w-2.5 shrink-0" />
-                          <span>Featured</span>
+                      {/* Brand Details & Action Row */}
+                      <div className="relative z-10 w-full flex items-center justify-between gap-2 shrink-0 pt-2 border-t border-border/40 text-left">
+                        <div className="min-w-0 flex-1 flex flex-col">
+                          <span className="text-sm sm:text-[15px] font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 line-clamp-1 tracking-tight transition-colors">
+                            {brand.name}
+                          </span>
+                          <span className="text-[11px] sm:text-xs font-medium text-muted-foreground/80 line-clamp-1">
+                            {brand.tagline || "Official Store"}
+                          </span>
                         </div>
-                      )}
+
+                        {/* Integrated Thematic Diagonal Arrow Button */}
+                        <div
+                          aria-label={`Explore ${brand.name}`}
+                          className="flex h-7 w-7 sm:h-7.5 sm:w-7.5 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-amber-500 group-hover:text-zinc-950 transition-all duration-300 shadow-2xs group-hover:shadow-[0_4px_12px_-2px_rgba(245,158,11,0.4)] group-hover:scale-105 active:scale-95">
+                          <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </div>
+                      </div>
                     </Link>
                   </m.div>
                 ))}

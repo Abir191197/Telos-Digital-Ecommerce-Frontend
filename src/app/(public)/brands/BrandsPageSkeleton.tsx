@@ -35,16 +35,19 @@ export function BrandsPageSkeleton() {
             {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center justify-between p-5 h-[185px] sm:h-[205px] rounded-3xl bg-card border border-border/50 shadow-xs">
+                className="flex flex-col items-center justify-between p-4 sm:p-5 h-[185px] sm:h-[205px] rounded-3xl bg-card border border-border/50 shadow-xs">
                 {/* Logo Capsule Skeleton */}
                 <div className="flex h-16 w-full items-center justify-center">
                   <div className="h-9 w-24 rounded-xl bg-muted/60" />
                 </div>
 
-                {/* Brand Info Skeleton */}
-                <div className="w-full flex flex-col items-center gap-1.5 mt-auto">
-                  <div className="h-4 w-20 rounded bg-muted/80" />
-                  <div className="h-2.5 w-16 rounded bg-muted/50" />
+                {/* Brand Info & Button Row Skeleton */}
+                <div className="w-full flex items-center justify-between gap-2 pt-2 border-t border-border/40 mt-auto">
+                  <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+                    <div className="h-4 w-20 rounded bg-muted/80" />
+                    <div className="h-2.5 w-16 rounded bg-muted/50" />
+                  </div>
+                  <div className="h-7 w-7 rounded-full bg-muted/50 shrink-0" />
                 </div>
               </div>
             ))}

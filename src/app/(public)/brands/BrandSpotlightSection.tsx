@@ -30,7 +30,7 @@ export function BrandSpotlightSection({
           <div>
             <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-foreground flex items-center gap-2">
               Featured Brand: {brand.name}
-              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-gradient-to-r from-amber-500/20 to-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/25 shadow-2xs backdrop-blur-md">
                 Official Partner
               </span>
             </h2>
@@ -58,7 +58,7 @@ export function BrandSpotlightSection({
           />
 
           <div className="relative z-10 flex flex-col items-center">
-            <div className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/20 px-2.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 mb-4">
+            <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 backdrop-blur-md shadow-2xs mb-4">
               <ShieldCheck className="h-3 w-3" />
               <span>Authorized Flagship</span>
             </div>
