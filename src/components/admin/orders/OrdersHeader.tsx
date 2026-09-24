@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Box, Clock, ShoppingCart } from "lucide-react";
+import { Box, Clock, Plus, ShoppingCart } from "lucide-react";
+import { ROUTES } from "@/constants";
 
 interface OrdersHeaderProps {
   statusFilter: string;
@@ -36,7 +37,16 @@ export function OrdersHeader({ statusFilter, totalFiltered }: OrdersHeaderProps)
         </p>
       </div>
 
-      <div className="flex items-center gap-2 self-start sm:self-auto">
+      {/* Right: Manual Order CTA + Nav tabs */}
+      <div className="flex items-center gap-2 shrink-0">
+        <Link
+          href={ROUTES.ADMIN_ORDER_CREATE}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-zinc-950 shadow-sm transition hover:bg-amber-400 active:scale-95"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Manual Order
+        </Link>
+
         <div className="flex rounded-xl bg-muted/50 p-1 border border-border/60 text-xs">
           <Link
             href="/dashboard/orders"

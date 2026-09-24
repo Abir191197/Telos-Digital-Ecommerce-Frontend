@@ -9,3 +9,5 @@ export * from "./OrderStatusDropdown";
 export * from "./OrderItemsSection";
 export * from "./OrderSidebarSection";
 export * from "./AdminOrderDetailSkeleton";
+
+export * from "./OrderSourceBadge";

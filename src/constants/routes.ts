@@ -43,6 +43,7 @@ export const ROUTES = {
   PROFILE: "/account",
   ADMIN_PROFILE: "/dashboard/profile",
   ADMIN_CARTS: "/dashboard/carts",
+  ADMIN_ORDER_CREATE: "/dashboard/orders/create",
   ADMIN_WISHLISTS: "/dashboard/wishlists",
   ACCOUNT_HUB: "/account",
   SETTINGS: "/settings",

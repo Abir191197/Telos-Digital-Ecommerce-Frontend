@@ -1,5 +1,6 @@
 import React from "react";
-import { User, Phone, MapPin, CreditCard, Truck, Send } from "lucide-react";
+import { User, Phone, MapPin, CreditCard, Truck, Send, Globe, Mail, FileText } from "lucide-react";
+import { OrderSourceBadge } from "./OrderSourceBadge";
 import { cn } from "@/lib/utils";
 import { Order } from "@/types/order.types";
 

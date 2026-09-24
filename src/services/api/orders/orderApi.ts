@@ -1,6 +1,8 @@
 import { baseApi } from "@/lib/rtk-query/baseApi";
 import type { ApiResponse } from "@/types/api.types";
-import type { Address, Order, OrderItem, OrderListItem, OrderStatus } from "@/types/order.types";
+import type { Address, Order, OrderItem, OrderListItem, OrderSource, OrderStatus } from "@/types/order.types";
+
+export type AdminOrderSource = Exclude<OrderSource, "WEBSITE">;
 
 export interface CreateOrderPayload {
   items: {
@@ -37,6 +39,10 @@ export interface CreateOrderPayload {
   couponCode?: string | null;
 }
 
+export interface CreateAdminOrderPayload extends CreateOrderPayload {
+  source: AdminOrderSource;
+  customerId?: string;
+}
 export interface ValidateCheckoutStockItem {
   productId: string;
   variantId?: string | null;
@@ -134,6 +140,8 @@ export function normalizeBackendOrder(raw: any): Order {
     postalCode: customerDetails.postalCode || "",
     isDefault: Boolean(customerDetails.isDefault),
     label: (customerDetails.label || "Home") as "Home" | "Office" | "Other",
+    deliveryNote: customerDetails.deliveryNote || undefined,
+    email: customerDetails.email || raw.customer?.email || undefined,
   };
 
   const items: OrderItem[] = Array.isArray(raw.items)
@@ -166,6 +174,7 @@ export function normalizeBackendOrder(raw: any): Order {
     orderNumber: raw.orderNumber || raw.id,
     createdAt: raw.createdAt,
     status,
+    source: (raw.source || "WEBSITE") as OrderSource,
     items,
     shippingAddress,
     paymentMethod,
@@ -177,6 +186,9 @@ export function normalizeBackendOrder(raw: any): Order {
     trackingNumber: raw.trackingNumber || undefined,
     courierName: raw.courierName || undefined,
     estimatedDelivery: raw.estimatedDelivery || undefined,
+    deliveryNote: raw.customerDetails?.deliveryNote || raw.deliveryNote || undefined,
+    createdByAdminId: raw.createdByAdminId || null,
+    createdByAdmin: raw.createdByAdmin || null,
   };
 }
 
@@ -189,6 +201,7 @@ export function normalizeOrderListItem(raw: any): OrderListItem {
     orderNumber: raw.orderNumber || raw.id,
     createdAt: raw.createdAt,
     status,
+    source: (raw.source || "WEBSITE") as OrderSource,
     itemCount: Math.max(0, Number(raw.itemCount ?? raw._count?.items) || 0),
     items: [],
     shippingAddress: normalizeShippingAddress(raw),
@@ -275,6 +288,20 @@ export const orderApi = baseApi.injectEndpoints({
     }),
 
     // Admin lists all orders with filters
+    createAdminOrder: builder.mutation<ApiResponse<Order>, CreateAdminOrderPayload>({
+      query: (body) => ({
+        url: "/orders/admin",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: normalizeBackendOrder(response.data),
+      }),
+      invalidatesTags: ["Order", "Product", "Customer", "Dashboard"],
+    }),
+
+    // Admin lists all orders with filters
     getAllOrders: builder.query<
       AdminOrderListResponse,
       {
@@ -282,6 +309,7 @@ export const orderApi = baseApi.injectEndpoints({
         status?: string;
         paymentStatus?: string;
         customerId?: string;
+        source?: OrderSource;
         startDate?: string;
         endDate?: string;
         page?: number;
@@ -379,12 +407,14 @@ export const orderApi = baseApi.injectEndpoints({
 export const {
   useValidateCheckoutStockMutation,
   useCreateOrderMutation,
+  useCreateAdminOrderMutation,
   useGetMyOrdersQuery,
   useGetMyOrderByIdQuery,
   useCancelMyOrderMutation,
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
-  useLazyGetOrderByIdQuery,  useGetOrderStatsQuery,
+  useLazyGetOrderByIdQuery,
+  useGetOrderStatsQuery,
   useUpdateOrderStatusMutation,
   useAssignCourierTrackingMutation,
   useUpdateOrderPaymentMutation,

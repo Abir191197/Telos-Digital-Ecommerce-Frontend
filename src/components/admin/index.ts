@@ -34,3 +34,4 @@ export * from "./customers";
 
 export * from "./reports";
 export * from "./AdminComingSoonView";
+export { ManualOrderView } from "./ManualOrderView";

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Search, X, List, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,6 +9,8 @@ interface OrderFilterDockProps {
   setSearchQuery: (query: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  sourceFilter?: string;
+  setSourceFilter?: (source: string) => void;
   orderCounts: {
     all: number;
     pending: number;
@@ -25,6 +29,8 @@ export function OrderFilterDock({
   setSearchQuery,
   statusFilter,
   setStatusFilter,
+  sourceFilter = "all",
+  setSourceFilter,
   orderCounts,
   viewMode,
   setViewMode,
@@ -89,6 +95,36 @@ export function OrderFilterDock({
             );
           })}
         </div>
+
+        {/* Channel Source Filter */}
+        {setSourceFilter && (
+          <div className="hidden lg:flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/50 text-xs shrink-0">
+            {[
+              { id: "all", label: "All Channels" },
+              { id: "WEBSITE", label: "Web" },
+              { id: "FACEBOOK", label: "FB" },
+              { id: "PHONE", label: "Phone" },
+              { id: "ADMIN", label: "Admin" },
+            ].map((src) => (
+              <button
+                key={src.id}
+                type="button"
+                onClick={() => {
+                  setSourceFilter(src.id);
+                  onResetPage();
+                }}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer",
+                  sourceFilter === src.id
+                    ? "bg-card text-foreground shadow-2xs font-extrabold"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {src.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Desktop Only View Mode Switcher */}
         <div className="hidden md:flex items-center p-1 rounded-xl bg-muted/70 text-xs font-semibold shrink-0">

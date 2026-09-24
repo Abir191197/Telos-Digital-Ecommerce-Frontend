@@ -53,6 +53,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         icon: ShoppingBag,
         children: [
           { title: "All Orders", href: "/dashboard/orders" },
+          { title: "Create Order", href: ROUTES.ADMIN_ORDER_CREATE },
           {
             title: "Pending Dispatch",
             href: "/dashboard/orders?status=pending",

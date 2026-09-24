@@ -14,11 +14,13 @@ export function useAdminOrdersManager() {
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [invoiceModalOrder, setInvoiceModalOrder] = useState<Order | null>(null);
   const [isPreparingInvoice, setIsPreparingInvoice] = useState(false);
   const { data: backendOrdersData, isLoading } = useGetAllOrdersQuery({
     searchTerm: searchQuery || undefined,
     status: statusFilter !== "all" ? statusFilter.toUpperCase() : undefined,
+    source: sourceFilter !== "all" ? (sourceFilter as any) : undefined,
   });
   const orders = backendOrdersData?.data ?? [];
   const [getOrderById] = useLazyGetOrderByIdQuery();
@@ -77,13 +79,14 @@ export function useAdminOrdersManager() {
   }), [orders, metrics]);
   const filteredOrders = useMemo(() => orders.filter((order) => {
     const query = searchQuery.toLowerCase().trim();
-    return (statusFilter === "all" || order.status === statusFilter) && (!query ||
+    const matchesSource = sourceFilter === "all" || order.source === sourceFilter;
+    return (statusFilter === "all" || order.status === statusFilter) && matchesSource && (!query ||
       order.orderNumber.toLowerCase().includes(query) ||
       order.shippingAddress.name.toLowerCase().includes(query) ||
       order.shippingAddress.phone.includes(query) ||
       order.shippingAddress.city.toLowerCase().includes(query) ||
       order.trackingNumber?.toLowerCase().includes(query));
-  }), [orders, statusFilter, searchQuery]);
+  }), [orders, statusFilter, sourceFilter, searchQuery]);
   const totalPages = Math.ceil(filteredOrders.length / pageSize) || 1;
   const paginatedOrders = useMemo(() => filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filteredOrders, currentPage]);
 

@@ -1,22 +1,36 @@
+"use client";
+
 import React from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Share2, Phone, User, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OrderListItem } from "@/types/order.types";
+import { OrderListItem, OrderSource } from "@/types/order.types";
 
 interface OrderMobileFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  sourceFilter?: string;
+  setSourceFilter?: (source: string) => void;
   orders: OrderListItem[];
   onResetPage: () => void;
 }
+
+const CHANNELS: { id: string; label: string; icon: React.ElementType }[] = [
+  { id: "all", label: "All Channels", icon: Globe },
+  { id: "WEBSITE", label: "Website", icon: Globe },
+  { id: "FACEBOOK", label: "Facebook", icon: Share2 },
+  { id: "PHONE", label: "Phone", icon: Phone },
+  { id: "ADMIN", label: "Admin Entry", icon: User },
+];
 
 export function OrderMobileFilterModal({
   isOpen,
   onClose,
   statusFilter,
   setStatusFilter,
+  sourceFilter = "all",
+  setSourceFilter,
   orders,
   onResetPage,
 }: OrderMobileFilterModalProps) {
@@ -33,7 +47,7 @@ export function OrderMobileFilterModal({
             </div>
             <div>
               <h3 className="text-base font-black text-foreground tracking-tight">Filter Orders</h3>
-              <p className="text-[11px] text-muted-foreground">Select order status pipeline</p>
+              <p className="text-[11px] text-muted-foreground">Select order pipeline & channel</p>
             </div>
           </div>
           <button
@@ -44,6 +58,38 @@ export function OrderMobileFilterModal({
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Channel Source Filter */}
+        {setSourceFilter && (
+          <div className="space-y-2 text-xs">
+            <span className="font-bold text-foreground block">Order Source Channel</span>
+            <div className="grid grid-cols-2 gap-2">
+              {CHANNELS.map((ch) => {
+                const Icon = ch.icon;
+                const isSelected = sourceFilter === ch.id;
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => {
+                      setSourceFilter(ch.id);
+                      onResetPage();
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer",
+                      isSelected
+                        ? "border-amber-500 bg-amber-500/15 text-foreground ring-1 ring-amber-500"
+                        : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                    )}
+                  >
+                    <Icon className={cn("h-3.5 w-3.5", isSelected ? "text-amber-500" : "text-muted-foreground")} />
+                    <span>{ch.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Status Segmented Cards */}
         <div className="space-y-2 text-xs">
@@ -96,6 +142,7 @@ export function OrderMobileFilterModal({
             type="button"
             onClick={() => {
               setStatusFilter("all");
+              if (setSourceFilter) setSourceFilter("all");
               onResetPage();
               onClose();
             }}

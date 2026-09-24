@@ -11,11 +11,28 @@ import {
   Printer,
   ChevronRight,
 } from "lucide-react";
-import { Order, OrderStatus } from "@/types/order.types";
+import { Order, OrderStatus, OrderSource } from "@/types/order.types";
+import { cn } from "@/lib/utils";
 
 interface OrderDetailHeaderProps {
   order: Order;
   onOpenInvoice: () => void;
+}
+
+function SourceBadge({ source }: { source?: OrderSource }) {
+  if (!source) return null;
+  const config = {
+    WEBSITE: { label: "Website Storefront", className: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/30" },
+    FACEBOOK: { label: "Facebook Order", className: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+    PHONE: { label: "Phone Call Order", className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+    ADMIN: { label: "Direct Admin Entry", className: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  } as const;
+  const c = config[source] || config.WEBSITE;
+  return (
+    <span className={cn("inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black border uppercase tracking-wider", c.className)}>
+      {c.label}
+    </span>
+  );
 }
 
 export function OrderDetailHeader({ order, onOpenInvoice }: OrderDetailHeaderProps) {

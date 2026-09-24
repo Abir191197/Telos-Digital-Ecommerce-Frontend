@@ -9,6 +9,9 @@ export interface CustomerAddress {
   type: "HOME" | "OFFICE" | "BILLING" | "SHIPPING" | "OTHER";
   street: string;
   city: string;
+  area?: string | null;
+  union?: string | null;
+  zone?: "inside-dhaka" | "outside-dhaka" | null;
   state?: string | null;
   postalCode?: string | null;
   country: string;
@@ -72,6 +75,15 @@ export const customerApi = baseApi.injectEndpoints({
       providesTags: ["Customer"],
     }),
 
+    searchCustomersForAdmin: builder.query<BackendCustomer[], string>({
+      query: (q) => ({
+        url: "/customers/admin/search",
+        method: "GET",
+        params: { q },
+      }),
+      transformResponse: (response: ApiResponse<BackendCustomer[]>) => response.data || [],
+      providesTags: ["Customer"],
+    }),
     getAdminCustomersSummary: builder.query<AdminCustomersSummary, void>({
       query: () => "/customers/admin/summary",
       transformResponse: (response: ApiResponse<AdminCustomersSummary>) => response.data,
@@ -105,6 +117,8 @@ export const customerApi = baseApi.injectEndpoints({
 
 export const {
   useGetAdminCustomersQuery,
+  useSearchCustomersForAdminQuery,
+  useLazySearchCustomersForAdminQuery,
   useGetAdminCustomersSummaryQuery,
   useUpdateCustomerStatusMutation,
   useDeleteCustomerMutation,

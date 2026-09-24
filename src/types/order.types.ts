@@ -1,4 +1,3 @@
-// ── User, Address & Order Types ────────────────────────────
 import type { Product } from "./ecommerce.types";
 
 export interface Address {
@@ -13,9 +12,12 @@ export interface Address {
   postalCode: string;
   isDefault: boolean;
   label: "Home" | "Office" | "Other";
+  deliveryNote?: string;
+  email?: string;
 }
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderSource = "WEBSITE" | "FACEBOOK" | "PHONE" | "ADMIN";
 
 export interface OrderItem {
   id: string;
@@ -39,6 +41,7 @@ export interface Order {
   orderNumber: string; // e.g. "TC-84920"
   createdAt: string;
   status: OrderStatus;
+  source: OrderSource;
   items: OrderItem[];
   shippingAddress: Address;
   paymentMethod: "cod" | "bkash" | "nagad" | "upay" | "card";
@@ -50,4 +53,11 @@ export interface Order {
   trackingNumber?: string;
   courierName?: string;
   estimatedDelivery?: string;
+  deliveryNote?: string;
+  createdByAdminId?: string | null;
+  createdByAdmin?: {
+    id: string;
+    name?: string;
+    email?: string;
+  } | null;
 }
