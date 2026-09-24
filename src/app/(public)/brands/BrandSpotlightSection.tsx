@@ -51,7 +51,7 @@ export function BrandSpotlightSection({
       {/* Brand Showcase Card (1 Col) + 3 Product Columns (3 stacked compact cards each = 9 slots) */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3.5 sm:gap-5 items-stretch">
         {/* Brand Showcase Card (1 Col - No border, Default Liquid Shadow) */}
-        <div className="lg:col-span-1 flex flex-col justify-between p-6 rounded-2xl bg-gradient-to-b from-muted/60 via-card to-card text-center relative overflow-hidden group shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_28px_-6px_rgba(245,158,11,0.15),0_4px_16px_-2px_rgba(0,0,0,0.7)] transition-all duration-300 hover:-translate-y-1">
+        <div className="lg:col-span-1 flex flex-col justify-between p-6 rounded-2xl bg-gradient-to-b from-muted/60 via-card to-card text-center relative overflow-hidden group shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.75)] transition-all duration-300 hover:-translate-y-1">
           <div
             aria-hidden="true"
             className="absolute -top-12 -left-12 w-36 h-36 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"
@@ -117,7 +117,7 @@ export function BrandSpotlightSection({
                     <Link
                       key={`empty-slot-${slotIdx}`}
                       href={ROUTES.BRAND_DETAIL(brand.slug)}
-                      className="group flex-1 flex items-center justify-between p-4 rounded-2xl bg-card shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_28px_-6px_rgba(245,158,11,0.15),0_4px_16px_-2px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_32px_-6px_rgba(245,158,11,0.28),0_8px_20px_-4px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1">
+                      className="group flex-1 flex items-center justify-between p-4 rounded-2xl bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.75)] transition-all duration-300 hover:-translate-y-1">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-colors">
                           <Store className="h-5 w-5" />

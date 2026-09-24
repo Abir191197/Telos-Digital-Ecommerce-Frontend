@@ -253,7 +253,7 @@ export function BrandsPageView() {
                   <m.div key={brand.id} variants={cardVariants}>
                     <Link
                       href={ROUTES.BRAND_DETAIL(brand.slug)}
-                      className="group relative flex flex-col items-center justify-between p-4 sm:p-5 h-[190px] sm:h-[210px] rounded-3xl bg-card text-card-foreground shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.03)] dark:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.5),0_6px_10px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_35px_-8px_rgba(0,0,0,0.12),0_10px_15px_-6px_rgba(245,158,11,0.12)] dark:hover:shadow-[0_22px_40px_-8px_rgba(0,0,0,0.7),0_10px_20px_-6px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all duration-300 overflow-hidden text-center select-none">
+                      className="group relative flex flex-col items-center justify-between p-4 sm:p-5 h-[190px] sm:h-[210px] rounded-3xl bg-card text-card-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.75)] hover:-translate-y-1.5 transition-all duration-300 overflow-hidden text-center select-none">
                       {/* Ambient glow on hover - borderless liquid shadow */}
                       <div
                         aria-hidden="true"

@@ -72,7 +72,7 @@ export function BrandsPageSkeleton() {
                 {/* Skeleton: 1 Brand Card (1 Col) + 3 Product Columns (3 stacked mini cards each) */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3.5 sm:gap-5 items-stretch">
                   {/* Brand Showcase Card Skeleton */}
-                  <div className="lg:col-span-1 flex flex-col justify-between p-6 rounded-2xl bg-muted/30 shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+                  <div className="lg:col-span-1 flex flex-col justify-between p-6 rounded-2xl bg-muted/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)]">
                     <div className="flex flex-col items-center">
                       <div className="h-4 w-24 rounded-full bg-amber-500/15 mb-4" />
                       <div className="h-14 w-32 rounded-xl bg-muted/60 my-3" />
@@ -91,7 +91,7 @@ export function BrandsPageSkeleton() {
                         {[0, 1, 2].map((cardIndex) => (
                           <div
                             key={cardIndex}
-                            className="rounded-2xl bg-card p-3 flex items-center gap-3.5 shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+                            className="rounded-2xl bg-card p-3 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)]">
                             <div className="h-20 w-20 shrink-0 rounded-xl bg-muted/50" />
                             <div className="flex-1 space-y-2">
                               <div className="h-3.5 w-full rounded bg-muted/80" />

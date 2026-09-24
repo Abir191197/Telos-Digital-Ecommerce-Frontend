@@ -81,7 +81,7 @@ export function BrandCompactProductCard({
     <div
       className={cn(
         "group relative flex items-center gap-3.5 rounded-2xl bg-card p-3 transition-all duration-300 hover:-translate-y-1 select-none",
-        "shadow-[0_8px_20px_-6px_rgba(245,158,11,0.18),0_4px_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_28px_-6px_rgba(245,158,11,0.15),0_4px_16px_-2px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_32px_-6px_rgba(245,158,11,0.28),0_8px_20px_-4px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_18px_36px_-6px_rgba(245,158,11,0.25),0_8px_24px_-4px_rgba(0,0,0,0.85)]",
+        "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.4)] hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_18px_38px_-8px_rgba(0,0,0,0.75)]",
         className
       )}
     >
