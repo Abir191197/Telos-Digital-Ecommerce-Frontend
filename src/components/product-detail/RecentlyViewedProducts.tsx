@@ -26,7 +26,7 @@ export function RecentlyViewedProducts({
       viewport={{ once: true, margin: "-60px" }}
       className="mt-14 pt-10 border-t border-border/70 space-y-6"
     >
-      <div className="rounded-2xl sm:rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-card p-3 sm:p-7 shadow-xl shadow-amber-500/5 dark:shadow-2xl dark:shadow-black/60">
+      <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-card/90 p-3 sm:p-7">
         <div className="flex flex-row items-center justify-between gap-3 mb-4 sm:mb-5 border-b border-border/60 pb-3">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs">
