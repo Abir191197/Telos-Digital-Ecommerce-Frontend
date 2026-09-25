@@ -179,15 +179,15 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-background lg:bg-gradient-to-r lg:from-amber-500/10 lg:via-amber-500/[0.03] lg:to-background dark:lg:from-amber-950/25 dark:lg:via-zinc-950 dark:lg:to-background">
-      {/* Directional Hero Ambient Lighting: intense at left, fading softly to the right */}
+    <div className="relative w-full overflow-hidden bg-background lg:bg-gradient-to-r lg:from-amber-500/[0.04] lg:via-amber-500/[0.01] lg:to-background dark:lg:from-amber-950/15 dark:lg:via-zinc-950 dark:lg:to-background">
+      {/* Directional Hero Ambient Lighting: subtle ambient at left, fading softly to the right */}
       <div className="pointer-events-none absolute inset-0 select-none overflow-hidden hidden lg:block" aria-hidden="true">
-        {/* Intense primary radial burst at top-left */}
-        <div className="absolute -top-40 -left-40 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent blur-[130px] dark:from-amber-500/15 dark:via-orange-600/8" />
+        {/* Soft primary radial burst at top-left */}
+        <div className="absolute -top-40 -left-40 w-[680px] h-[680px] rounded-full bg-gradient-to-br from-amber-500/8 via-orange-500/4 to-transparent blur-[130px] dark:from-amber-500/6 dark:via-orange-600/3" />
         {/* Secondary mid-left glow bridging across */}
-        <div className="absolute top-1/3 -left-20 w-[520px] h-[520px] rounded-full bg-gradient-to-r from-amber-400/15 via-orange-400/5 to-transparent blur-[120px] dark:from-amber-600/10" />
+        <div className="absolute top-1/3 -left-20 w-[520px] h-[520px] rounded-full bg-gradient-to-r from-amber-400/6 via-orange-400/2 to-transparent blur-[120px] dark:from-amber-600/4" />
         {/* Soft bottom-left grounding pool */}
-        <div className="absolute -bottom-32 -left-20 w-[500px] h-[500px] rounded-full bg-amber-500/10 dark:bg-amber-500/5 blur-[120px]" />
+        <div className="absolute -bottom-32 -left-20 w-[500px] h-[500px] rounded-full bg-amber-500/3 dark:bg-amber-500/[0.02] blur-[120px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-16 min-h-[calc(100vh-8rem)] flex items-center">
