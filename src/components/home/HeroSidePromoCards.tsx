@@ -23,6 +23,17 @@ const sideCardVariants: Variants = {
 };
 
 export function HeroSidePromoCards() {
+  const [isDesktop, setIsDesktop] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    checkIsDesktop();
+    window.addEventListener("resize", checkIsDesktop);
+    return () => window.removeEventListener("resize", checkIsDesktop);
+  }, []);
+
   return (
     <div className="w-full lg:w-auto grid grid-cols-2 lg:flex lg:flex-col gap-3 sm:gap-4 shrink-0">
       {/* Top Pink/Rose Soft Tinted Card: 100% Cash on Delivery */}
@@ -34,9 +45,13 @@ export function HeroSidePromoCards() {
         className="lg:w-[235px] lg:aspect-square"
       >
         <m.div
-          animate={{
-            y: [0, -5, 0],
-          }}
+          animate={
+            isDesktop
+              ? {
+                  y: [0, -5, 0],
+                }
+              : undefined
+          }
           transition={{
             duration: 5.5,
             repeat: Infinity,
@@ -64,10 +79,14 @@ export function HeroSidePromoCards() {
             </div>
 
             <m.div
-              animate={{
-                y: [0, -3, 0],
-                rotate: [0, 2, -1, 0],
-              }}
+              animate={
+                isDesktop
+                  ? {
+                      y: [0, -3, 0],
+                      rotate: [0, 2, -1, 0],
+                    }
+                  : undefined
+              }
               transition={{
                 duration: 4,
                 repeat: Infinity,
@@ -100,9 +119,13 @@ export function HeroSidePromoCards() {
         className="lg:w-[235px] lg:aspect-square"
       >
         <m.div
-          animate={{
-            y: [0, 5, 0],
-          }}
+          animate={
+            isDesktop
+              ? {
+                  y: [0, 5, 0],
+                }
+              : undefined
+          }
           transition={{
             duration: 6,
             repeat: Infinity,
@@ -131,10 +154,14 @@ export function HeroSidePromoCards() {
             </div>
 
             <m.div
-              animate={{
-                y: [0, -3, 0],
-                rotate: [0, -2, 1, 0],
-              }}
+              animate={
+                isDesktop
+                  ? {
+                      y: [0, -3, 0],
+                      rotate: [0, -2, 1, 0],
+                    }
+                  : undefined
+              }
               transition={{
                 duration: 4.5,
                 repeat: Infinity,

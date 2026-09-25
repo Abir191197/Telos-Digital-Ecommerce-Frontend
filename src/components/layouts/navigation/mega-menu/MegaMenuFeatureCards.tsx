@@ -15,7 +15,7 @@ export function MegaMenuFeatureCards({
   return (
     <div className="md:col-span-3 lg:col-span-3 p-3.5 flex flex-col justify-between gap-3 bg-card">
       {/* Card 1: Explore All Products */}
-      <div className="flex-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-amber-500/16 via-orange-500/10 to-amber-500/5 p-4 shadow-xs transition-all hover:shadow-md hover:from-amber-500/20 hover:via-orange-500/12">
+      <div className="flex-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-amber-500/16 via-orange-500/10 to-amber-500/5 p-4 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45),0_2px_8px_-2px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_14px_30px_-6px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 hover:from-amber-500/20 hover:via-orange-500/12">
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card/90 backdrop-blur-xs shadow-xs text-amber-500">
@@ -45,7 +45,7 @@ export function MegaMenuFeatureCards({
       </div>
 
       {/* Card 2: Full Category Directory */}
-      <div className="flex-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-500/12 via-slate-500/8 to-muted/50 dark:from-indigo-500/15 dark:via-zinc-800/60 dark:to-muted/30 p-4 shadow-xs transition-all hover:shadow-md hover:from-indigo-500/16 hover:via-slate-500/12">
+      <div className="flex-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-500/12 via-slate-500/8 to-muted/50 dark:from-indigo-500/15 dark:via-zinc-800/60 dark:to-muted/30 p-4 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45),0_2px_8px_-2px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_14px_30px_-6px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 hover:from-indigo-500/16 hover:via-slate-500/12">
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card/90 backdrop-blur-xs shadow-xs text-indigo-500 dark:text-indigo-400">

@@ -56,7 +56,7 @@ export function MegaMenuCategoryDetails({
                 key={sub.id}
                 href={ROUTES.CATEGORY_DETAIL(activeCategory?.slug || "")}
                 onClick={onClose}
-                className="rounded-lg bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                className="rounded-lg bg-card border border-border/70 shadow-2xs px-2.5 py-1 text-xs font-semibold text-foreground/90 hover:bg-amber-500/15 hover:border-amber-500/35 hover:text-amber-600 dark:hover:text-amber-400 transition-all duration-150 active:scale-95"
               >
                 {sub.name}
               </Link>
@@ -75,7 +75,7 @@ export function MegaMenuCategoryDetails({
                 key={prod.id}
                 href={ROUTES.PRODUCT_DETAIL(prod.slug)}
                 onClick={onClose}
-                className="group flex flex-col rounded-2xl bg-card p-2 shadow-xs transition-all hover:shadow-md hover:-translate-y-0.5"
+                className="group flex flex-col rounded-2xl bg-card p-2 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45),0_2px_8px_-2px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_26px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_14px_30px_-6px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
                   <AppImage
