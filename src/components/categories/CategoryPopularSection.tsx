@@ -27,7 +27,7 @@ export function CategoryPopularSection({
       aria-label="Most Popular in Categories"
       className="container px-3 sm:px-6 pt-6"
     >
-      <div className="rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-card/90 p-5 sm:p-7 shadow-xl shadow-amber-500/5 dark:shadow-2xl dark:shadow-black/60">
+      <div className="rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-card/90 p-5 sm:p-7">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">

@@ -12,7 +12,7 @@ export function CategoriesPageView() {
   const { data: productsResponse } = useGetProductsQuery({
     sortBy: "createdAt",
     sortOrder: "desc",
-    limit: 4,
+    limit: 5,
   });
 
   const popularProducts = productsResponse?.data || [];
